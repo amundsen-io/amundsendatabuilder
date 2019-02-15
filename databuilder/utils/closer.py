@@ -1,4 +1,9 @@
+import atexit
+import logging
+
 from typing import Callable, List  # noqa: F401
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Closer(object):
@@ -13,6 +18,7 @@ class Closer(object):
     def __init__(self):
         # type: () -> None
         self._stack = []  # type: List
+        atexit.register(self.close)
 
     def register(self, close_callable):
         # type: (Callable) -> None
@@ -35,6 +41,7 @@ class Closer(object):
         are multiple failures, only the last one will be propagated.
         :return:
         """
+
         if not self._stack:
             return
 
