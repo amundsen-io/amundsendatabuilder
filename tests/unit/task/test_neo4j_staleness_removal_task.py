@@ -19,7 +19,7 @@ class TestRemoveStaleData(unittest.TestCase):
     def test_validation_failure(self):
         # type: () -> None
 
-        with patch.object(GraphDatabase, 'driver') as mock_driver:
+        with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()
             job_config = ConfigFactory.from_dict({
                 'job.identifier': 'remove_stale_data_job',
@@ -43,7 +43,7 @@ class TestRemoveStaleData(unittest.TestCase):
     def test_validation(self):
         # type: () -> None
 
-        with patch.object(GraphDatabase, 'driver') as mock_driver:
+        with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()
             job_config = ConfigFactory.from_dict({
                 'job.identifier': 'remove_stale_data_job',
@@ -59,15 +59,15 @@ class TestRemoveStaleData(unittest.TestCase):
             })
 
             task.init(job_config)
-            total_records = [{'type' : 'foo', 'count': 100}]
-            stale_records = [{'type' : 'foo', 'count': 50}]
+            total_records = [{'type': 'foo', 'count': 100}]
+            stale_records = [{'type': 'foo', 'count': 50}]
             targets = {'foo'}
             self.assertRaises(Exception, task._validate_staleness_pct, total_records, stale_records, targets)
 
     def test_validation_threshold_override(self):
         # type: () -> None
 
-        with patch.object(GraphDatabase, 'driver') as mock_driver:
+        with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()
             job_config = ConfigFactory.from_dict({
                 'job.identifier': 'remove_stale_data_job',
@@ -85,9 +85,9 @@ class TestRemoveStaleData(unittest.TestCase):
             })
 
             task.init(job_config)
-            total_records = [{'type' : 'foo', 'count': 100},
+            total_records = [{'type': 'foo', 'count': 100},
                              {'type': 'bar', 'count': 100}]
-            stale_records = [{'type' : 'foo', 'count': 50},
+            stale_records = [{'type': 'foo', 'count': 50},
                              {'type': 'bar', 'count': 3}]
             targets = {'foo', 'bar'}
             task._validate_staleness_pct(total_records=total_records, stale_records=stale_records, types=targets)

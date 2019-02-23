@@ -94,7 +94,7 @@ class Neo4jStalenessRemovalTask(Task):
         statement = """
         MATCH (n:{type})
         WHERE n.published_tag <> $published_tag
-        OR NOT EXISTS(n.published_tag)      
+        OR NOT EXISTS(n.published_tag)
         WITH n LIMIT $batch_size
         DETACH DELETE (n)
         RETURN COUNT(*) as count;
@@ -139,7 +139,7 @@ class Neo4jStalenessRemovalTask(Task):
 
         for record in stale_records:
             type_str = record['type']
-            if not type_str in types:
+            if type_str not in types:
                 continue
 
             stale_count = record['count']
