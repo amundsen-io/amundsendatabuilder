@@ -64,6 +64,10 @@ class SqlToTblColUsageTransformer(Transformer):
         except TimeoutError:
             SqlToTblColUsageTransformer.failure_counts += 1
             LOGGER.exception('Timed out while getting column usage from query: {}'.format(stmt))
+            LOGGER.info('Killing the thread.')
+            self._worker_pool.terminate()
+            self._worker_pool = ThreadPool(processes=1)
+            LOGGER.info('Killed the thread.')
             return None
         except Exception:
             SqlToTblColUsageTransformer.failure_counts += 1
