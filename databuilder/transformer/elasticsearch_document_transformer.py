@@ -14,6 +14,10 @@ class ElasticsearchDocumentTransformer(Transformer):
     ELASTICSEARCH_INDEX_CONFIG_KEY = 'index'
     ELASTICSEARCH_DOC_CONFIG_KEY = 'doc_type'
     ELASTICSEARCH_RESOURCE_CONFIG_KEY = 'resource_type'
+    RESOURCE_TYPE_MAPPING = {
+        'table',
+        'user'
+    }
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -33,6 +37,10 @@ class ElasticsearchDocumentTransformer(Transformer):
 
         if not isinstance(record, Neo4jDataResult):
             raise Exception("ElasticsearchDocumentTransformer expects record of type 'Neo4jDataResult'!")
+
+        if self.elasticsearch_resource_type.lower() not in \
+                ElasticsearchDocumentTransformer.RESOURCE_TYPE_MAPPING:
+            raise Exception('resource type needs to define in RESOURCE_TYPE_MAPPING')
 
         if self.elasticsearch_resource_type == 'table':
             elasticsearch_obj = TableESDocument(elasticsearch_index=self.elasticsearch_index,
@@ -67,7 +75,7 @@ class ElasticsearchDocumentTransformer(Transformer):
                                                total_follow=record.total_follow,
                                                )
         else:
-            elasticsearch_obj = None
+            raise NotImplementedError()
 
         return elasticsearch_obj
 

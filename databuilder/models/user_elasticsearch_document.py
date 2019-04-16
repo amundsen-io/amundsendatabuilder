@@ -12,18 +12,18 @@ class UserESDocument(ElasticsearchDocument):
                  elasticsearch_index,  # type: str
                  elasticsearch_type,   # type: str
                  email,  # type: str
-                 first_name='',  # type: str
-                 last_name='',  # type: str
-                 name='',  # type: str
-                 github_username='',  # type: str
-                 team_name='',  # type: str
-                 employee_type='',  # type: str
-                 manager_email='',  # type: str
-                 slack_id='',  # type: str
-                 is_active=True,  # type: bool
-                 total_read=0,  # type: int
-                 total_own=0,  # type: int
-                 total_follow=0,  # type: int
+                 first_name,  # type: str
+                 last_name,  # type: str
+                 name,  # type: str
+                 github_username,  # type: str
+                 team_name,  # type: str
+                 employee_type,  # type: str
+                 manager_email,  # type: str
+                 slack_id,  # type: str
+                 is_active,  # type: bool
+                 total_read,  # type: int
+                 total_own,  # type: int
+                 total_follow,  # type: int
                  ):
         # type: (...) -> None
         self.elasticsearch_index = elasticsearch_index

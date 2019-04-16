@@ -17,10 +17,12 @@ class TestUserElasticsearchDocument(unittest.TestCase):
                                   first_name='test_firstname',
                                   last_name='test_lastname',
                                   name='full_name',
+                                  github_username='github_user',
                                   team_name='team',
                                   employee_type='fte',
                                   manager_email='test_manager',
                                   slack_id='test_slack',
+                                  is_active=True,
                                   total_read=2,
                                   total_own=3,
                                   total_follow=1)
@@ -36,7 +38,7 @@ class TestUserElasticsearchDocument(unittest.TestCase):
                                   "total_own": 3,
                                   "slack_id": 'test_slack',
                                   "manager_email": "test_manager",
-                                  'github_username': "",
+                                  'github_username': "github_user",
                                   "employee_type": 'fte',
                                   "email": "test@email.com",
                                   }
@@ -48,5 +50,4 @@ class TestUserElasticsearchDocument(unittest.TestCase):
         self.assertEqual(len(results), 3, "Result from to_json() function doesn't have 2 newlines!")
 
         self.assertDictEqual(json.loads(results[0]), expected_index_dict)
-        print(results[1])
         self.assertDictEqual(json.loads(results[1]), expected_document_dict)
