@@ -64,19 +64,19 @@ class TestPrestoViewMetadataExtractor(unittest.TestCase):
             extractor.init(self.conf)
             actual_first_view = extractor.extract()
             expected_first_view = TableMetadata('presto', 'gold', 'test_schema2', 'test_view2', None,
-                                                [ColumnMetadata('aaa', None, 'int', 0),
-                                                 ColumnMetadata('ab', None, 'varchar', 1),
-                                                 ColumnMetadata('xyy', None, 'double', 2),
-                                                 ColumnMetadata('xyz', None, 'varchar', 3)],
+                                                [ColumnMetadata(u'aaa', None, u'int', 0),
+                                                 ColumnMetadata(u'ab', None, u'varchar', 1),
+                                                 ColumnMetadata(u'xyy', None, u'double', 2),
+                                                 ColumnMetadata(u'xyz', None, u'varchar', 3)],
                                                 True)
             self.assertEqual(expected_first_view.__repr__(), actual_first_view.__repr__())
 
             actual_second_view = extractor.extract()
             expected_second_view = TableMetadata('presto', 'gold', 'test_schema1', 'test_view1', None,
-                                                 [ColumnMetadata('aaa', None, 'int', 0),
-                                                  ColumnMetadata('ab', None, 'varchar', 1),
-                                                  ColumnMetadata('xyy', None, 'double', 2),
-                                                  ColumnMetadata('xyz', None, 'varchar', 3)],
+                                                 [ColumnMetadata(u'aaa', None, u'int', 0),
+                                                  ColumnMetadata(u'ab', None, u'varchar', 1),
+                                                  ColumnMetadata(u'xyy', None, u'double', 2),
+                                                  ColumnMetadata(u'xyz', None, u'varchar', 3)],
                                                  True)
             self.assertEqual(expected_second_view.__repr__(), actual_second_view.__repr__())
 
