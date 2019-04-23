@@ -93,8 +93,8 @@ class PrestoViewMetadataExtractor(Extractor):
     def _get_column_metadata(self, view_original_text):
         # type: (str) -> List[ColumnMetadata]
         """
-        Get Column Metadata from VIEW_ORIGINAL_TEXT from TBLS table for Presto Views
-        Columns are sorted alphabetically
+        Get Column Metadata from VIEW_ORIGINAL_TEXT from TBLS table for Presto Views.
+        Columns are sorted the same way as they appear in Presto Create View SQL.
         :param view_original_text:
         :return:
         """
@@ -108,20 +108,9 @@ class PrestoViewMetadataExtractor(Extractor):
         # view_original_text is b64 encoded:
         # https://github.com/prestodb/presto/blob/43bd519052ba4c56ff1f4fc807075637ab5f4f10/presto-hive/src/main/java/com/facebook/presto/hive/HiveUtil.java#L602-L605
         decoded_view_info = base64.b64decode(encoded_view_info)
-        sorted_view_column_info = self._sort_columns_alphabetically(json.loads(decoded_view_info).get('columns'))
+        columns = json.loads(decoded_view_info).get('columns')
 
-        columns = [ColumnMetadata(name=column['name'],
-                                  description=None,
-                                  col_type=column['type'],
-                                  sort_order=i) for i, column in enumerate(sorted_view_column_info)]
-        return columns
-
-    def _sort_columns_alphabetically(self, columns):
-        # type: (List[Dict[str, str]]) -> List[Dict[str, str]]
-        """
-        The function takes a list of columns and sort it alphabetically by column name
-        Example:
-            columns = [{"name":"event_id","type":"varchar"},{"name":"accuracy","type":"double"}]
-            return [{"name":"accuracy","type":"double"}, {"name":"event_id","type":"varchar"}]
-        """
-        return sorted(columns, key=lambda k: k['name'])
+        return [ColumnMetadata(name=column['name'],
+                               description=None,
+                               col_type=column['type'],
+                               sort_order=i) for i, column in enumerate(columns)]

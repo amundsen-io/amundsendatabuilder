@@ -42,41 +42,46 @@ class TestPrestoViewMetadataExtractor(unittest.TestCase):
             sql_execute = MagicMock()
             connection.execute = sql_execute
 
-            columns = {'columns': [{'name': 'xyz', 'type': 'varchar'},
-                                   {'name': 'xyy', 'type': 'double'},
-                                   {'name': 'aaa', 'type': 'int'},
-                                   {'name': 'ab', 'type': 'varchar'}]}
-            view_original_text = base64.b64encode(json.dumps(columns).encode()).decode("utf-8")
+            columns1 = {'columns': [{'name': 'xyz', 'type': 'varchar'},
+                                    {'name': 'xyy', 'type': 'double'},
+                                    {'name': 'aaa', 'type': 'int'},
+                                    {'name': 'ab', 'type': 'varchar'}]}
+
+            columns2 = {'columns': [{'name': 'xyy', 'type': 'varchar'},
+                                    {'name': 'ab', 'type': 'double'},
+                                    {'name': 'aaa', 'type': 'int'},
+                                    {'name': 'xyz', 'type': 'varchar'}]}
+
             sql_execute.return_value = [
                 {'tbl_id': 2,
                  'schema_name': 'test_schema2',
                  'name': 'test_view2',
                  'tbl_type': 'virtual_view',
-                 'view_original_text': view_original_text},
+                 'view_original_text': base64.b64encode(json.dumps(columns2).encode()).decode("utf-8")},
                 {'tbl_id': 1,
                  'schema_name': 'test_schema1',
                  'name': 'test_view1',
                  'tbl_type': 'virtual_view',
-                 'view_original_text': view_original_text},
+                 'view_original_text': base64.b64encode(json.dumps(columns1).encode()).decode("utf-8")},
             ]
 
             extractor = PrestoViewMetadataExtractor()
             extractor.init(self.conf)
             actual_first_view = extractor.extract()
             expected_first_view = TableMetadata('presto', 'gold', 'test_schema2', 'test_view2', None,
-                                                [ColumnMetadata(u'aaa', None, u'int', 0),
-                                                 ColumnMetadata(u'ab', None, u'varchar', 1),
-                                                 ColumnMetadata(u'xyy', None, u'double', 2),
+                                                [ColumnMetadata(u'xyy', None, u'varchar', 0),
+                                                 ColumnMetadata(u'ab', None, u'double', 1),
+                                                 ColumnMetadata(u'aaa', None, u'int', 2),
                                                  ColumnMetadata(u'xyz', None, u'varchar', 3)],
                                                 True)
             self.assertEqual(expected_first_view.__repr__(), actual_first_view.__repr__())
 
             actual_second_view = extractor.extract()
             expected_second_view = TableMetadata('presto', 'gold', 'test_schema1', 'test_view1', None,
-                                                 [ColumnMetadata(u'aaa', None, u'int', 0),
-                                                  ColumnMetadata(u'ab', None, u'varchar', 1),
-                                                  ColumnMetadata(u'xyy', None, u'double', 2),
-                                                  ColumnMetadata(u'xyz', None, u'varchar', 3)],
+                                                 [ColumnMetadata(u'xyz', None, u'varchar', 0),
+                                                  ColumnMetadata(u'xyy', None, u'double', 1),
+                                                  ColumnMetadata(u'aaa', None, u'int', 2),
+                                                  ColumnMetadata(u'ab', None, u'varchar', 3)],
                                                  True)
             self.assertEqual(expected_second_view.__repr__(), actual_second_view.__repr__())
 
