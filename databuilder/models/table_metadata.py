@@ -62,6 +62,8 @@ class TableMetadata(Neo4jCsvSerializable):
     These are being created here as it does not make much sense to have different extraction to produce this. As
     database, cluster, schema would be very repititive with low cardinality, it will perform de-dupe so that publisher
     won't need to publish same nodes, relationships.
+
+    This class can be used for both table and view metadata. If it is a View, is_view=True should be passed in.
     """
     TABLE_NODE_LABEL = 'Table'
     TABLE_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}'

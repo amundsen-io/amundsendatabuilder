@@ -17,8 +17,10 @@ LOGGER = logging.getLogger(__name__)
 class PrestoViewMetadataExtractor(Extractor):
     """
     Extracts Presto View and column metadata from underlying meta store database using SQLAlchemyExtractor
+    PrestoViewMetadataExtractor does not require a separate table model but just reuse the existing TableMetadata
     """
     # SQL statement to extract View metadata
+    # {where_clause_suffix} could be used to filter schemas
     SQL_STATEMENT = """
     SELECT t.TBL_ID, d.NAME as schema_name, t.TBL_NAME name, t.TBL_TYPE, t.VIEW_ORIGINAL_TEXT as view_original_text
     FROM TBLS t
@@ -28,6 +30,7 @@ class PrestoViewMetadataExtractor(Extractor):
     ORDER BY t.TBL_ID desc;
     """
 
+    # Presto View data prefix and suffix definition:
     # https://github.com/prestodb/presto/blob/43bd519052ba4c56ff1f4fc807075637ab5f4f10/presto-hive/src/main/java/com/facebook/presto/hive/HiveUtil.java#L153-L154
     PRESTO_VIEW_PREFIX = '/* Presto View: '
     PRESTO_VIEW_SUFFIX = ' */'
@@ -95,20 +98,22 @@ class PrestoViewMetadataExtractor(Extractor):
         :param view_original_text:
         :return:
         """
+        # remove encoded Presto View data prefix and suffix
         encoded_view_info = (
             view_original_text.
             split(PrestoViewMetadataExtractor.PRESTO_VIEW_PREFIX, 1)[-1].
             rsplit(PrestoViewMetadataExtractor.PRESTO_VIEW_SUFFIX, 1)[0]
         )
-        decoded_view_info = self._decode_base64(encoded_view_info)
+
+        # view_original_text is b64 encoded:
+        # https://github.com/prestodb/presto/blob/43bd519052ba4c56ff1f4fc807075637ab5f4f10/presto-hive/src/main/java/com/facebook/presto/hive/HiveUtil.java#L602-L605
+        decoded_view_info = base64.b64decode(encoded_view_info)
         sorted_view_column_info = self._sort_columns_alphabetically(json.loads(decoded_view_info).get('columns'))
-        columns = []
-        for i in range(len(sorted_view_column_info)):
-            column = sorted_view_column_info[i]
-            columns.append(ColumnMetadata(name=column['name'],
-                                          description=None,
-                                          col_type=column['type'],
-                                          sort_order=i))
+
+        columns = [ColumnMetadata(name=column['name'],
+                                  description=None,
+                                  col_type=column['type'],
+                                  sort_order=i) for i, column in enumerate(sorted_view_column_info)]
         return columns
 
     def _sort_columns_alphabetically(self, columns):
@@ -120,13 +125,3 @@ class PrestoViewMetadataExtractor(Extractor):
             return [{"name":"accuracy","type":"double"}, {"name":"event_id","type":"varchar"}]
         """
         return sorted(columns, key=lambda k: k['name'])
-
-    def _decode_base64(self, encoded_str):
-        # type: (str) -> str
-        """
-        The function is to decode base64 encoded str:
-        https://github.com/prestodb/presto/blob/43bd519052ba4c56ff1f4fc807075637ab5f4f10/presto-hive/src/main/java/com/facebook/presto/hive/HiveUtil.java#L602-L605
-        :param encoded_str: base64 encoded str
-        :return: decoded str
-        """
-        return base64.b64decode(encoded_str)
