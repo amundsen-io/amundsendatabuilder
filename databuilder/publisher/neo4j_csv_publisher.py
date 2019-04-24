@@ -197,7 +197,7 @@ class Neo4jCsvPublisher(Publisher):
         :return:
         """
         tx = self._session.begin_transaction()
-        with open(node_file, 'r') as node_csv:
+        with open(node_file, 'r', encoding='utf-8') as node_csv:
             for count, node_record in enumerate(csv.DictReader(node_csv)):
                 label = node_record[NODE_LABEL_KEY]
                 # If label is seen for the first time, try creating unique index

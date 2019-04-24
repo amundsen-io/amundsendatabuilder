@@ -160,7 +160,7 @@ class FsNeo4jCSVLoader(Loader):
             return writer
 
         LOGGER.info('Creating file for {}'.format(key))
-        file_out = open('{}/{}.csv'.format(dir_path, file_suffix), 'w')
+        file_out = open('{}/{}.csv'.format(dir_path, file_suffix), 'w', encoding='utf-8')
 
         def file_out_close():
             # type: () -> None
