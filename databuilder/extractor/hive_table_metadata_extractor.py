@@ -92,7 +92,7 @@ class HiveTableMetadataExtractor(Extractor):
         Using itertools.groupby and raw level iterator, it groups to table and yields TableMetadata
         :return:
         """
-        for key, group in groupby(self._get_raw_extract_iter(), self._get_table_key):
+        for _, group in groupby(self._get_raw_extract_iter(), self._get_table_key):
             columns = []
 
             for row in group:

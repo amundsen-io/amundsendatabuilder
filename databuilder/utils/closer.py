@@ -42,7 +42,7 @@ class Closer(object):
             return
 
         last_exception = None
-        while len(self._stack):
+        while self._stack:
             try:
                 close_callable = self._stack.pop()
                 close_callable()

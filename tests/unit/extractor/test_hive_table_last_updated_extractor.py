@@ -5,7 +5,6 @@ from pytz import UTC
 
 from mock import patch, MagicMock
 from pyhocon import ConfigFactory
-from typing import Any, Dict  # noqa: F401
 
 from databuilder.extractor.hive_table_last_updated_extractor import HiveTableLastUpdatedExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor

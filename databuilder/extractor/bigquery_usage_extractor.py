@@ -68,7 +68,7 @@ class BigQueryTableUsageExtractor(Extractor):
             if job['jobStatus']['state'] != 'DONE':
                 # This job seems not to have finished yet, so we ignore it.
                 continue
-            if len(job['jobStatus'].get('error', {})) > 0:
+            if job['jobStatus'].get('error', {}):
                 # This job has errors, so we ignore it
                 continue
 

@@ -2,8 +2,8 @@ import shutil
 import tempfile
 import unittest
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from typing import Any, List  # noqa: F401
+from pyhocon import ConfigFactory  # noqa: F401
+from typing import List  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.loader.file_system_csv_loader import FileSystemCSVLoader

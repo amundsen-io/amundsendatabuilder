@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from pyhocon import ConfigFactory  # noqa: F401
-from typing import Any, List  # noqa: F401
+from typing import List  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader

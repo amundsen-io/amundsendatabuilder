@@ -1,5 +1,4 @@
 import json
-from typing import List, Optional  # noqa: F401
 
 from databuilder.models.elasticsearch_document import ElasticsearchDocument
 

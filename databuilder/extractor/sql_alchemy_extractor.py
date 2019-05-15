@@ -2,7 +2,7 @@ import importlib
 from sqlalchemy import create_engine
 
 from pyhocon import ConfigTree  # noqa: F401
-from typing import Any, Iterator  # noqa: F401
+from typing import Any  # noqa: F401
 
 from databuilder.extractor.base_extractor import Extractor
 

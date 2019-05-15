@@ -141,14 +141,18 @@ class User(Neo4jCsvSerializable):
 
     def __repr__(self):
         # type: () -> str
-        return 'User({!r}, {!r}, {!r}, {!r}, {!r}, ' \
-               '{!r}, {!r}, {!r}, {!r}, {!r}, {!r},)'.format(self.first_name,
-                                                             self.last_name,
-                                                             self.name,
-                                                             self.email,
-                                                             self.github_username,
-                                                             self.team_name,
-                                                             self.slack_id,
-                                                             self.manager_email,
-                                                             self.employee_type,
-                                                             self.is_active)
+        return (
+            "User({!r}, {!r}, {!r}, {!r}, {!r}, "
+            "{!r}, {!r}, {!r}, {!r}, {!r},)".format(
+                self.first_name,
+                self.last_name,
+                self.name,
+                self.email,
+                self.github_username,
+                self.team_name,
+                self.slack_id,
+                self.manager_email,
+                self.employee_type,
+                self.is_active,
+            )
+        )

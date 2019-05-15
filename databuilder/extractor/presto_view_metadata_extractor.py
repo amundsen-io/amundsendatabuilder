@@ -3,7 +3,7 @@ import json
 import logging
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Iterator, Union, Dict, Any  # noqa: F401
+from typing import Iterator, Union  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor

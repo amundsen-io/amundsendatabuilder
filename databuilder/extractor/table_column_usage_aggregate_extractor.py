@@ -78,12 +78,12 @@ class TblColUsgAggExtractor(Extractor):
                 new_count = count_map.get(key, 0) + col_rdr.read_count
                 count_map[key] = new_count
 
-        if not len(count_map):
+        if not count_map:
             return None
 
         col_readers = []  # type: List[ColumnReader]
 
-        while len(count_map):
+        while count_map:
             tbl_col_rdr_tuple, count = count_map.popitem()
             col_readers.append(ColumnReader(database=tbl_col_rdr_tuple.database, cluster=tbl_col_rdr_tuple.cluster,
                                             schema=tbl_col_rdr_tuple.schema, table=tbl_col_rdr_tuple.table,

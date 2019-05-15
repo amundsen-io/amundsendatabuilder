@@ -1,7 +1,7 @@
 import unittest
 
 from mock import patch
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
 
 from databuilder import Scoped

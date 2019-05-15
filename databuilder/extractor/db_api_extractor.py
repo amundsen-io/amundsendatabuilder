@@ -77,8 +77,8 @@ class DBAPIExtractor(Extractor):
         try:
             self.cursor.close()
             self.connection.close()
-        except Exception as e:
-            LOGGER.warning("Exception encountered while closing up connection handler!", e)
+        except Exception:
+            LOGGER.exception("Exception encountered while closing up connection handler!")
 
     def get_scope(self):
         # type: () -> str

@@ -236,7 +236,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
             extractor.init(Scoped.get_scoped_conf(conf=conf,
                                                   scope=extractor.get_scope()))
 
-            args, kwargs = mock_build.call_args
+            _, kwargs = mock_build.call_args
             creds = kwargs['http'].credentials
             self.assertEqual(creds.project_id, 'your-project-here')
             self.assertEqual(creds.service_account_email, 'test-162@your-project-here.iam.gserviceaccount.com')
@@ -265,7 +265,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         extractor.init(Scoped.get_scoped_conf(conf=conf,
                                               scope=extractor.get_scope()))
 
-        args, kwargs = client.b.list.call_args
+        _, kwargs = client.b.list.call_args
         body = kwargs['body']
 
         self.assertEqual(body['pageSize'], PAGESIZE)

@@ -127,7 +127,7 @@ class Neo4jCsvSerializable(object):
             elif header_col in TYPES:
                 if not val_col == val_col.upper():
                     raise RuntimeError(
-                        'TYPE needs to be upper case: '.format(val_col))
+                        'TYPE needs to be upper case: {}'.format(val_col))
 
         if required_count != len(required_set):
             raise RuntimeError(

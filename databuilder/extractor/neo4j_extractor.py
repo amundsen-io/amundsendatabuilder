@@ -46,8 +46,8 @@ class Neo4jExtractor(Extractor):
         """
         try:
             self.driver.close()
-        except Exception as e:
-            LOGGER.error("Exception encountered while closing the graph driver", e)
+        except Exception:
+            LOGGER.exception("Exception encountered while closing the graph driver")
 
     def _get_driver(self):
         # type: () -> Any
