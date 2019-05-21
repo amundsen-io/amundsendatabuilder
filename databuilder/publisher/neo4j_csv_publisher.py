@@ -68,7 +68,6 @@ RELATION_REQUIRED_KEYS = {RELATION_START_LABEL, RELATION_START_KEY,
                           RELATION_END_LABEL, RELATION_END_KEY,
                           RELATION_TYPE, RELATION_REVERSE_TYPE}
 
-
 DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_TRANSCATION_SIZE: 500,
                                           NEO4J_RELATIONSHIP_CREATION_CONFIRM: False,
                                           NEO4J_MAX_CONN_LIFE_TIME_SEC: 50})
@@ -99,6 +98,7 @@ class Neo4jCsvPublisher(Publisher):
 
     #TODO User UNWIND batch operation for better performance
     """
+
     def __init__(self):
         # type: () -> None
         pass
@@ -156,12 +156,8 @@ class Neo4jCsvPublisher(Publisher):
         start = time.time()
 
         LOGGER.info('Creating indices using Node files: {}'.format(self._node_files))
-        while True:
-            try:
-                node_file = next(self._node_files_iter)
-                self._create_indices(node_file=node_file)
-            except StopIteration:
-                break
+        for node_file in self._node_files:
+            self._create_indices(node_file=node_file)
 
         LOGGER.info('Publishing Node files: {}'.format(self._node_files))
         while True:
@@ -374,7 +370,7 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
                 LOGGER.debug('Executing statement: {}'.format(stmt))
 
             if six.PY2:
-                result = tx.run(unicode(stmt, errors='ignore')) # noqa
+                result = tx.run(unicode(stmt, errors='ignore'))  # noqa
             else:
                 result = tx.run(str(stmt).encode('utf-8', 'ignore'))
             if expect_result and not result.single():
