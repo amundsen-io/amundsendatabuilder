@@ -136,7 +136,7 @@ class ElasticsearchPublisher(Publisher):
             return indices
         except NotFoundError:
             LOGGER.warn('Received index not found error from Elasticsearch. ' +\
-                        'The index doesn't exist for a newly created ES.')
+                        'The index doesnt exist for a newly created ES.')
             # return empty list on exception
             return []
 
