@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta
+import importlib
 import logging
 
 from confluent_kafka import Consumer, KafkaException, KafkaError
 
+from databuilder import Scoped
 from databuilder.callback.call_back import Callback
 from databuilder.extractor.base_extractor import Extractor
+from databuilder.transformer.base_transformer import Transformer
 
 
 LOGGER = logging.getLogger(__name__)
@@ -30,42 +33,58 @@ class KafkaSourceExtractor(Extractor, Callback):
     TOPIC_NAME_LIST = 'topic_name_list'
 
     # Time out config. It will abort from reading the Kafka topic after timeout is reached. Unit is seconds
-    CONSUMER_TOTAL_TIMEOUT = 'consumer_total_timeout'
+    CONSUMER_TOTAL_TIMEOUT_SEC = 'consumer_total_timeout_sec'
 
     # The timeout for consumer polling messages. Default to 1 sec
-    CONSUMER_POLL_TIMEOUT = 'consumer_poll_timeout'
+    CONSUMER_POLL_TIMEOUT_SEC = 'consumer_poll_timeout_sec'
 
+    # Config on whether we throw exception if transformation fails
+    TRANSFORMER_THROWN_EXCEPTION = 'transformer_thrown_exception'
+
+    # The value transformer to deserde the Kafka message
     RAW_VALUE_TRANSFORMER = 'raw_value_transformer'
 
     def init(self, conf):
         # type: (ConfigTree) -> None
         self.conf = conf
-        # pyhocon doesn't allow dot to be in value dict,group.id -> group_id
         self.consumer_config = conf.get_config(KafkaSourceExtractor.CONSUMER_CONFIG).\
             as_plain_ordered_dict()
-
-        # convert group_id back to group.id
-        # noted: underscore is never used in Kafka consumer config
-        self.consumer_config = {k.replace('_', '.'): v for k, v in self.consumer_config.items()}
 
         self.topic_names = conf.get_list(KafkaSourceExtractor.TOPIC_NAME_LIST)  # type: list
 
         if not self.topic_names:
             raise Exception('Kafka topic needs to be provided by the user.')
 
-        self.consumer_total_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_TOTAL_TIMEOUT,
+        self.consumer_total_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_TOTAL_TIMEOUT_SEC,
                                                    default=10)
 
-        self.consumer_poll_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_POLL_TIMEOUT,
+        self.consumer_poll_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_POLL_TIMEOUT_SEC,
                                                   default=1)
 
+        self.transformer_thrown_exception = conf.get_bool(KafkaSourceExtractor.TRANSFORMER_THROWN_EXCEPTION,
+                                                          default=False)
+
         # Transform the protoBuf message with a transformer
-        self.val_transformer = conf.get(KafkaSourceExtractor.RAW_VALUE_TRANSFORMER)
-        if self.val_transformer is None:
+        val_transformer = conf.get(KafkaSourceExtractor.RAW_VALUE_TRANSFORMER)
+        if val_transformer is None:
             raise Exception('A message transformer should be provided.')
+        else:
+            try:
+                module_name, class_name = val_transformer.rsplit(".", 1)
+                mod = importlib.import_module(module_name)
+                self.transformer = getattr(mod, class_name)()
+            except Exception:
+                raise RuntimeError('The Kafka message value deserde class cant instantiated!')
+
+            if not isinstance(self.transformer, Transformer):
+                raise Exception('The transformer needs to be subclass of the base transformer')
+            self.transformer.init(Scoped.get_scoped_conf(conf, self.transformer.get_scope()))
 
         # Consumer init
         try:
+            # Disable enable.auto.commit
+            self.consumer_config['enable.auto.commit'] = False
+
             self.consumer = Consumer(self.consumer_config)
             # TODO: to support only consume a subset of partitions.
             self.consumer.subscribe(self.topic_names)
@@ -80,23 +99,32 @@ class KafkaSourceExtractor(Extractor, Callback):
         records = self.consume()
         for record in records:
             try:
-                transform_record = self.val_transformer(record)
+                transform_record = self.transformer.transform(record=record)
                 yield transform_record
             except Exception as e:
-                # Has issues tranform / deserde the record. drop the record
+                # Has issues tranform / deserde the record. drop the record in default
                 LOGGER.exception(e)
+                if self.transformer_thrown_exception:
+                    # if config enabled, it will throw exception.
+                    # Users need to figure out how to rewind the consumer offset
+                    raise Exception('Encounter exception when transform the record')
 
     def on_success(self):
         # Type: () -> None
         """
-        Commit the offset once get the success callback and close the consumer.
+        Commit the offset
+        once:
+            1. get the success callback from publisher in
+            https://github.com/lyft/amundsendatabuilder/blob/
+            master/databuilder/publisher/base_publisher.py#L50
+            2. close the consumer.
 
         :return:
         """
         # set enable.auto.commit to False to avoid auto commit offset
         if self.consumer:
             self.consumer.commit(asynchronous=False)
-            self.consume.close()
+            self.consumer.close()
 
     def on_failure(self):
         # Type: () -> None
