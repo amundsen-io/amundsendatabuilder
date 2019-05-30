@@ -173,7 +173,7 @@ class Neo4jCsvPublisher(Publisher):
             while True:
                 try:
                     node_file = next(self._node_files_iter)
-                    self._publish_node(node_file, tx=tx)
+                    tx = self._publish_node(node_file, tx=tx)
                 except StopIteration:
                     break
 
@@ -181,7 +181,7 @@ class Neo4jCsvPublisher(Publisher):
             while True:
                 try:
                     relation_file = next(self._relation_files_iter)
-                    self._publish_relation(relation_file, tx=tx)
+                    tx = self._publish_relation(relation_file, tx=tx)
                 except StopIteration:
                     break
 
@@ -274,7 +274,7 @@ class Neo4jCsvPublisher(Publisher):
         return NODE_MERGE_TEMPLATE.substitute(params)
 
     def _publish_relation(self, relation_file, tx):
-        # type: (str, Transaction) -> None
+        # type: (str, Transaction) -> Transaction
         """
         Creates relation between two nodes.
         (In Amundsen, all relation is bi-directional)
