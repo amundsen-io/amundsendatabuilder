@@ -67,7 +67,7 @@ class TestPublish(unittest.TestCase):
 
             mock_preprocessor = MagicMock()
             mock_preprocessor.is_perform_preprocess.return_value = MagicMock(return_value=True)
-            mock_preprocessor.preprocess_cypher.return_value = 'MATCH (f:Foo) RETURN f'
+            mock_preprocessor.preprocess_cypher.return_value = ('MATCH (f:Foo) RETURN f', {})
 
             publisher = Neo4jCsvPublisher()
 
