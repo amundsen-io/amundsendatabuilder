@@ -25,6 +25,8 @@ RELATION_FILES_DIR = 'relation_files_directory'
 NEO4J_END_POINT_KEY = 'neo4j_endpoint'
 # A transaction size that determines how often it commits.
 NEO4J_TRANSCATION_SIZE = 'neo4j_transaction_size'
+# A progress report frequency that determines how often it report the progress.
+NEO4J_PROGRESS_REPORT_FREQUENCY = 'neo4j_progress_report_frequency'
 # A boolean flag to make it fail if relationship is not created
 NEO4J_RELATIONSHIP_CREATION_CONFIRM = 'neo4j_relationship_creation_confirm'
 
@@ -73,6 +75,7 @@ RELATION_REQUIRED_KEYS = {RELATION_START_LABEL, RELATION_START_KEY,
                           RELATION_TYPE, RELATION_REVERSE_TYPE}
 
 DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_TRANSCATION_SIZE: 500,
+                                          NEO4J_PROGRESS_REPORT_FREQUENCY: 500,
                                           NEO4J_RELATIONSHIP_CREATION_CONFIRM: False,
                                           NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
                                           RELATION_PREPROCESSOR: NoopRelationPreprocessor()})
@@ -113,6 +116,7 @@ class Neo4jCsvPublisher(Publisher):
         conf = conf.with_fallback(DEFAULT_CONFIG)
 
         self._count = 0  # type: int
+        self._progress_report_frequency = conf.get_int(NEO4J_PROGRESS_REPORT_FREQUENCY)
         self._node_files = self._list_files(conf, NODE_FILES_DIR)
         self._node_files_iter = iter(self._node_files)
 
@@ -290,16 +294,24 @@ class Neo4jCsvPublisher(Publisher):
         """
 
         if self._relation_preprocessor.is_perform_preprocess():
+            LOGGER.info('Pre-processing relation with {}'.format(self._relation_preprocessor))
+
+            count = 0
             with open(relation_file, 'r') as relation_csv:
                 for rel_record in csv.DictReader(relation_csv):
-                    stmt = self._relation_preprocessor.preprocess_cypher(
+                    stmt, params = self._relation_preprocessor.preprocess_cypher(
                         start_label=rel_record[RELATION_START_LABEL],
                         end_label=rel_record[RELATION_END_LABEL],
+                        start_key=rel_record[RELATION_START_KEY],
+                        end_key=rel_record[RELATION_END_KEY],
                         relation=rel_record[RELATION_TYPE],
                         reverse_relation=rel_record[RELATION_REVERSE_TYPE])
 
                     if stmt:
-                        tx = self._execute_statement(stmt, tx)
+                        tx = self._execute_statement(stmt, tx=tx, params=params)
+                        count += 1
+
+            LOGGER.info('Executed pre-processing Cypher statement {} times'.format(count))
 
         with open(relation_file, 'r') as relation_csv:
             for count, rel_record in enumerate(csv.DictReader(relation_csv)):
@@ -378,6 +390,7 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
     def _execute_statement(self,
                            stmt,
                            tx,
+                           params={},
                            expect_result=False):
         # type: (str, Transaction, bool) -> Transaction
 
@@ -392,12 +405,12 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
         """
         try:
             if LOGGER.isEnabledFor(logging.DEBUG):
-                LOGGER.debug('Executing statement: {}'.format(stmt))
+                LOGGER.debug('Executing statement: {} with params {}'.format(stmt, params))
 
             if six.PY2:
-                result = tx.run(unicode(stmt, errors='ignore'))  # noqa
+                result = tx.run(unicode(stmt, errors='ignore'), parameters=params)  # noqa
             else:
-                result = tx.run(str(stmt).encode('utf-8', 'ignore'))
+                result = tx.run(str(stmt).encode('utf-8', 'ignore'), parameters=params)
             if expect_result and not result.single():
                 raise RuntimeError('Failed to executed statement: {}'.format(stmt))
 
@@ -406,6 +419,9 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
                 tx.commit()
                 LOGGER.info('Committed {} statements so far'.format(self._count))
                 return self._session.begin_transaction()
+
+            if self._count > 1 and self._count % self._progress_report_frequency == 0:
+                LOGGER.info('Processed {} statements so far'.format(self._count))
 
             return tx
         except Exception as e:

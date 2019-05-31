@@ -12,6 +12,11 @@ from databuilder.transformer.base_transformer \
 from databuilder.utils.closer import Closer
 
 
+PROGRESS_REPORT_FREQUENCY = 'progress_report_frequency'
+
+LOGGER = logging.getLogger(__name__)
+
+
 class DefaultTask(Task):
     """
     A default task expecting to extract, transform and load.
@@ -33,6 +38,9 @@ class DefaultTask(Task):
 
     def init(self, conf):
         # type: (ConfigTree) -> None
+        self._progress_report_frequency = \
+            conf.get_int('{}.{}'.format(self.get_scope(), PROGRESS_REPORT_FREQUENCY), 500)
+
         self.extractor.init(Scoped.get_scoped_conf(conf, self.extractor.get_scope()))
         self.transformer.init(Scoped.get_scoped_conf(conf, self.transformer.get_scope()))
         self.loader.init(Scoped.get_scoped_conf(conf, self.loader.get_scope()))
@@ -43,15 +51,19 @@ class DefaultTask(Task):
         Runs a task
         :return:
         """
-        logging.info('Running a task')
+        LOGGER.info('Running a task')
         try:
             record = self.extractor.extract()
-
+            count = 1
             while record:
                 record = self.transformer.transform(record)
                 if not record:
                     continue
                 self.loader.load(record)
                 record = self.extractor.extract()
+                count += 1
+                if count > 0 and count % self._progress_report_frequency == 0:
+                    LOGGER.info('Extracted {} records so far'.format(count))
+
         finally:
             self._closer.close()
