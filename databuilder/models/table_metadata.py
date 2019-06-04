@@ -48,9 +48,9 @@ class ColumnMetadata:
 
     def __init__(self,
                  name,  # type: str
-                 description,  # type: Union[str, None]
                  col_type,  # type: str
-                 sort_order,  # type: int
+                 description='',  # type: Union[str, None]
+                 sort_order=0,  # type: int
                  tags=None,  # Union[List[str], None]
                  ):
         # type: (...) -> None
@@ -60,6 +60,7 @@ class ColumnMetadata:
         :param description:
         :param col_type:
         :param sort_order:
+        :param tags: optional field, includes a list of column tags
         """
         self.name = name
         self.description = description
@@ -131,7 +132,7 @@ class TableMetadata(Neo4jCsvSerializable):
                  cluster,  # type: str
                  schema_name,  # type: str
                  name,  # type: str
-                 description,  # type: Union[str, None]
+                 description='',  # type: Union[str, None]
                  columns=None,  # type: Iterable[ColumnMetadata]
                  is_view=False,  # type: bool
                  tags=None,  # type: List
@@ -147,6 +148,7 @@ class TableMetadata(Neo4jCsvSerializable):
         :param description:
         :param columns:
         :param is_view: Indicate whether the table is a view or not
+        :param tags: A list of table tags if provided
         :param kwargs: Put additional attributes to the table model if there is any.
         """
         self.database = database
