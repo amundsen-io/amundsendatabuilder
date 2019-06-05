@@ -22,9 +22,9 @@ class ElasticsearchDocumentTransformer(Transformer):
         self.elasticsearch_index = self.conf.get_string(ElasticsearchDocumentTransformer.ELASTICSEARCH_INDEX_CONFIG_KEY)
         self.elasticsearch_type = self.conf.get_string(ElasticsearchDocumentTransformer.ELASTICSEARCH_DOC_CONFIG_KEY)
 
-        try:
-            model_class = self.conf.get_string(ElasticsearchDocumentTransformer.ELASTICSEARCH_DOC_MODEL_CLASS_KEY)
-        except:
+        model_class = self.conf.get_string(ElasticsearchDocumentTransformer.ELASTICSEARCH_DOC_MODEL_CLASS_KEY, '')
+
+        if not model_class:
             raise Exception('User needs to provide the ElasticsearchDocument model class')
 
         module_name, class_name = model_class.rsplit(".", 1)
