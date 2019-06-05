@@ -149,7 +149,7 @@ class DeleteRelationPreprocessor(RelationPreprocessor):
         super(DeleteRelationPreprocessor, self).__init__()
         self._label_tuples = set(label_tuples) if label_tuples else set()
 
-        reversed_label_tuples = [(t2, t1) for t1, t2 in label_tuples]
+        reversed_label_tuples = [(t2, t1) for t1, t2 in self._label_tuples]
         self._label_tuples.update(reversed_label_tuples)
         self._where_clause = where_clause
 
