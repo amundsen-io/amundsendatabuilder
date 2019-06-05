@@ -390,7 +390,7 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
     def _execute_statement(self,
                            stmt,
                            tx,
-                           params={},
+                           params=None,
                            expect_result=False):
         # type: (str, Transaction, bool) -> Transaction
 

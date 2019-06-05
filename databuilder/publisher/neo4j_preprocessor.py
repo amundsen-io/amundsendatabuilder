@@ -52,8 +52,6 @@ class RelationPreprocessor(object):
                                                relation=relation,
                                                reverse_relation=reverse_relation)
 
-        return None
-
     @abc.abstractmethod
     def preprocess_cypher_impl(self,
                                start_label,
@@ -93,6 +91,7 @@ class RelationPreprocessor(object):
         """
         True
 
+    @abc.abstractmethod
     def is_perform_preprocess(self):
         # type: () -> bool
         """
@@ -100,7 +99,7 @@ class RelationPreprocessor(object):
         global filter.
         :return: True if you want to enable the pre-processing.
         """
-        return False
+        pass
 
 
 class NoopRelationPreprocessor(RelationPreprocessor):
@@ -114,6 +113,10 @@ class NoopRelationPreprocessor(RelationPreprocessor):
                                reverse_relation):
         # type: (str, str, str, str, str, str) -> Tuple[str, Dict[str, str]]
         pass
+
+    def is_perform_preprocess(self):
+        # type: () -> bool
+        return False
 
 
 class DeleteRelationPreprocessor(RelationPreprocessor):
@@ -141,10 +144,10 @@ class DeleteRelationPreprocessor(RelationPreprocessor):
     RETURN count(*) as count;
     """)
 
-    def __init__(self, label_tuples=[], where_clause=''):
+    def __init__(self, label_tuples=None, where_clause=''):
         # type: (List[Tuple[str, str]], str) -> None
         super(DeleteRelationPreprocessor, self).__init__()
-        self._label_tuples = set(label_tuples)
+        self._label_tuples = set(label_tuples) if label_tuples else set()
 
         reversed_label_tuples = [(t2, t1) for t1, t2 in label_tuples]
         self._label_tuples.update(reversed_label_tuples)
