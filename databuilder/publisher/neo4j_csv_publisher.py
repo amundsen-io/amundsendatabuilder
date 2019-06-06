@@ -45,7 +45,7 @@ JOB_PUBLISH_TAG = 'job_publish_tag'
 PUBLISHED_TAG_PROPERTY_NAME = 'published_tag'
 
 # Neo4j property name for last updated timestamp
-LAST_UPDATED_EPOCH_MS = 'last_updated_epoch_ms'
+LAST_UPDATED_EPOCH_MS = 'publisher_last_updated_epoch_ms'
 
 RELATION_PREPROCESSOR = 'relation_preprocessor'
 
