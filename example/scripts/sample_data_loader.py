@@ -22,7 +22,6 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
-from databuilder.transformer.elasticsearch_document_transformer import ElasticsearchDocumentTransformer
 
 # change to the address of Elasticsearh service
 es = Elasticsearch([
@@ -201,7 +200,7 @@ def create_es_publisher_sample_job():
 
     task = DefaultTask(loader=FSElasticsearchJSONLoader(),
                        extractor=Neo4jSearchDataExtractor(),
-                       transformer=ElasticsearchDocumentTransformer())
+                       transformer=NoopTransformer())
 
     # elastic search client instance
     elasticsearch_client = es
