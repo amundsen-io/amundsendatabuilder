@@ -1,6 +1,8 @@
 from collections import namedtuple
 from datetime import date, timedelta
 import logging
+import re
+from time import sleep
 
 import google.oauth2.service_account
 import google_auth_httplib2
@@ -29,7 +31,9 @@ class BigQueryTableUsageExtractor(Extractor):
     PAGE_SIZE_KEY = 'page_size'
     KEY_PATH_KEY = 'key_path'
     _DEFAULT_SCOPES = ('https://www.googleapis.com/auth/cloud-platform',)
+    EMAIL_PATTERN = 'email_pattern'
     NUM_RETRIES = 3
+    DELAY_TIME = 10
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -52,11 +56,14 @@ class BigQueryTableUsageExtractor(Extractor):
         self.pagesize = conf.get_int(
             BigQueryTableUsageExtractor.PAGE_SIZE_KEY,
             BigQueryTableUsageExtractor.DEFAULT_PAGE_SIZE)
+
+        self.email_pattern = conf.get_string(BigQueryTableUsageExtractor.EMAIL_PATTERN, None)
+
         self.table_usage_counts = {}
         self._count_usage()
         self.iter = iter(self.table_usage_counts)
 
-    def _count_usage(self):
+    def _count_usage(self):  # noqa: C901
         # type: () -> None
         count = 0
         for entry in self._retrieve_records():
@@ -64,7 +71,11 @@ class BigQueryTableUsageExtractor(Extractor):
             if count % self.pagesize == 0:
                 LOGGER.info('Aggregated {} records'.format(count))
 
-            job = entry['protoPayload']['serviceData']['jobCompletedEvent']['job']
+            try:
+                job = entry['protoPayload']['serviceData']['jobCompletedEvent']['job']
+            except Exception:
+                # Skip the record if the record missing certain fields
+                continue
             if job['jobStatus']['state'] != 'DONE':
                 # This job seems not to have finished yet, so we ignore it.
                 continue
@@ -81,6 +92,12 @@ class BigQueryTableUsageExtractor(Extractor):
                 # case, referencedTables has been observed to be empty:
                 # https://cloud.google.com/logging/docs/reference/audit/bigquery/rest/Shared.Types/AuditData#JobStatistics
                 continue
+
+            # if email filter is provided, only the email matched with filter will be recorded.
+            if self.email_pattern:
+                if not re.match(self.email_pattern, email):
+                    # the usage account not match email pattern
+                    continue
 
             numTablesProcessed = job['jobStatistics']['totalTablesProcessed']
             if len(refTables) != numTablesProcessed:
@@ -134,12 +151,16 @@ class BigQueryTableUsageExtractor(Extractor):
         while response:
             yield response
 
-            if 'nextPageToken' in response:
-                body['pageToken'] = response['nextPageToken']
-                response = self.logging_service.entries().list(body=body).execute(
-                    num_retries=BigQueryTableUsageExtractor.NUM_RETRIES)
-            else:
-                response = None
+            try:
+                if 'nextPageToken' in response:
+                    body['pageToken'] = response['nextPageToken']
+                    response = self.logging_service.entries().list(body=body).execute(
+                        num_retries=BigQueryTableUsageExtractor.NUM_RETRIES)
+                else:
+                    response = None
+            except Exception:
+                # Add a delay when BQ quota exceeds limitation
+                sleep(BigQueryTableUsageExtractor.DELAY_TIME)
 
     def get_scope(self):
         # type: () -> str

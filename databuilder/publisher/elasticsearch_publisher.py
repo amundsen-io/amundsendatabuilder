@@ -24,6 +24,7 @@ class ElasticsearchPublisher(Publisher):
     FILE_MODE_CONFIG_KEY = 'mode'
 
     ELASTICSEARCH_CLIENT_CONFIG_KEY = 'client'
+    ELASTICSEARCH_DOC_TYPE_CONFIG_KEY = 'doc_type'
     ELASTICSEARCH_NEW_INDEX_CONFIG_KEY = 'new_index'
     ELASTICSEARCH_ALIAS_CONFIG_KEY = 'alias'
     ELASTICSEARCH_MAPPING_CONFIG_KEY = 'mapping'
@@ -41,7 +42,7 @@ class ElasticsearchPublisher(Publisher):
         "mappings":{
             "table":{
               "properties": {
-                "table_name": {
+                "name": {
                   "type":"text",
                   "analyzer": "simple",
                   "fields": {
@@ -59,11 +60,11 @@ class ElasticsearchPublisher(Publisher):
                     }
                   }
                 },
-                "table_last_updated_epoch": {
+                "last_updated_epoch": {
                   "type": "date",
                   "format": "epoch_second"
                 },
-                "table_description": {
+                "description": {
                   "type": "text",
                   "analyzer": "simple"
                 },
@@ -80,7 +81,7 @@ class ElasticsearchPublisher(Publisher):
                   "type": "text",
                   "analyzer": "simple"
                 },
-                "tag_names": {
+                "tags": {
                   "type": "keyword"
                 },
                 "cluster": {
@@ -89,7 +90,7 @@ class ElasticsearchPublisher(Publisher):
                 "database": {
                   "type": "text"
                 },
-                "table_key": {
+                "key": {
                   "type": "keyword"
                 },
                 "total_usage":{
@@ -107,7 +108,7 @@ class ElasticsearchPublisher(Publisher):
 
     def __init__(self):
         # type: () -> None
-        pass
+        super(ElasticsearchPublisher, self).__init__()
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -116,6 +117,7 @@ class ElasticsearchPublisher(Publisher):
         self.file_path = self.conf.get_string(ElasticsearchPublisher.FILE_PATH_CONFIG_KEY)
         self.file_mode = self.conf.get_string(ElasticsearchPublisher.FILE_MODE_CONFIG_KEY, 'w')
 
+        self.elasticsearch_type = self.conf.get_string(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY)
         self.elasticsearch_client = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_CLIENT_CONFIG_KEY)
         self.elasticsearch_new_index = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY)
         self.elasticsearch_alias = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY)
@@ -135,11 +137,12 @@ class ElasticsearchPublisher(Publisher):
             indices = self.elasticsearch_client.indices.get_alias(self.elasticsearch_alias).keys()
             return indices
         except NotFoundError:
-            LOGGER.warn("Received index not found error from Elasticsearch", exc_info=True)
+            LOGGER.warn('Received index not found error from Elasticsearch. ' +
+                        'The index doesnt exist for a newly created ES.')
             # return empty list on exception
             return []
 
-    def publish(self):
+    def publish_impl(self):
         # type: () -> None
         """
         Use Elasticsearch Bulk API to load data from file to a {new_index}.
@@ -152,11 +155,21 @@ class ElasticsearchPublisher(Publisher):
             LOGGER.warning("received no data to upload to Elasticsearch!")
             return
 
+        # Convert object to json for elasticsearch bulk upload
+        # Bulk load JSON format is defined here:
+        # https://www.elastic.co/guide/en/elasticsearch/reference/6.2/docs-bulk.html
+        bulk_actions = []
+        for action in actions:
+            index_row = dict(index=dict(_index=self.elasticsearch_new_index,
+                                        _type=self.elasticsearch_type))
+            bulk_actions.append(index_row)
+            bulk_actions.append(action)
+
         # create new index with mapping
         self.elasticsearch_client.indices.create(index=self.elasticsearch_new_index, body=self.elasticsearch_mapping)
 
         # bulk upload data
-        self.elasticsearch_client.bulk(actions)
+        self.elasticsearch_client.bulk(bulk_actions)
 
         # fetch indices that have {elasticsearch_alias} as alias
         elasticsearch_old_indices = self._fetch_old_index()

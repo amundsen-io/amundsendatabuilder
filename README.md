@@ -106,6 +106,29 @@ job = DefaultJob(
 job.launch()
 ```
 
+#### [PostgresMetadataExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/postgres_metadata_extractor.py "PostgresMetadataExtractor")
+An extractor that extracts table and column metadata including database, schema, table name, table description, column name and column description from a Postgres or Redshift database.
+
+By default, the Postgres/Redshift database name is used as the cluter name. To override this, set `USE_CATALOG_AS_CLUSTER_NAME`
+to `False`, and `CLUSTER_KEY` to what you wish to use as the cluster name.
+
+The `where_clause_suffix` below should define which schemas you'd like to query (see [the sample dag](https://github.com/lyft/amundsendatabuilder/blob/master/example/dags/postgres_sample_dag.py) for an example).
+
+The SQL query driving the extraction is defined [here](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/postgres_metadata_extractor.py)
+
+```python
+job_config = ConfigFactory.from_dict({
+	'extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause_suffix,
+    'extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME): True,
+	'extractor.postgres_metadata.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): connection_string()})
+job = DefaultJob(
+	conf=job_config,
+	task=DefaultTask(
+		extractor=PostgresMetadataExtractor(),
+		loader=AnyLoader()))
+job.launch()
+```
+
 #### [Neo4jEsLastUpdatedExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/neo4j_es_last_updated_extractor.py "Neo4jEsLastUpdatedExtractor")
 An extractor that basically get current timestamp and passes it GenericExtractor. This extractor is basically being used to create timestamp for "Amundsen was last indexed on ..." in Amundsen web page's footer.
 
@@ -163,9 +186,6 @@ An extractor that extracts table usage from SQL statements. It accept any extrac
 ## List of transformers
 #### [ChainedTransformer](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/transformer/base_transformer.py#L41 "ChainedTransformer")
 A chanined transformer that can take multiple transformer.
-
-#### [ElasticsearchDocumentTransformer](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/transformer/elasticsearch_document_transformer.py "ElasticsearchDocumentTransformer")
-A transformer that transform [Neo4j record](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/models/neo4j_data.py "Neo4j record") to [Elasticserach document](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/models/elasticsearch_document.py "Elasticserach document").
 
 #### [RegexStrReplaceTransformer](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/transformer/regex_str_replace_transformer.py "RegexStrReplaceTransformer")
 Generic string replacement transformer using REGEX. User can pass list of tuples where tuple contains regex and replacement pair.
@@ -264,6 +284,7 @@ job_config = ConfigFactory.from_dict({
 	'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.FILE_MODE_CONFIG_KEY): 'r',
 	'publisher.elasticsearch{}'.format(ElasticsearchPublisher.ELASTICSEARCH_CLIENT_CONFIG_KEY): elasticsearch_client,
 	'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY): elasticsearch_new_index,
+	'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY): elasticsearch_doc_type,
 	'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY): elasticsearch_index_alias,)
 
 job = DefaultJob(
@@ -274,3 +295,10 @@ job = DefaultJob(
 	publisher=ElasticsearchPublisher())
 job.launch()
 ```
+
+#### [Callback](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/callback/call_back.py "Callback")
+Callback interface is built upon a [Observer pattern](https://en.wikipedia.org/wiki/Observer_pattern "Observer pattern") where the participant want to take any action when target's state changes.
+
+Publisher is the first one adopting Callback where registered Callback will be called either when publish succeeded or when publish failed. In order to register callback, Publisher provides [register_call_back](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/publisher/base_publisher.py#L50 "register_call_back") method.
+
+One use case is for Extractor that needs to commit when job is finished (e.g: Kafka). Having Extractor register a callback to Publisher to commit when publish is successful, extractor can safely commit by implementing commit logic into [on_success](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/callback/call_back.py#L18 "on_success") method.

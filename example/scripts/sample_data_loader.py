@@ -1,5 +1,6 @@
 """
-This is a example script which demo how to load data into neo4j without using Airflow DAG.
+This is a example script which demo how to load data
+into Neo4j and Elasticsearch without using an Airflow DAG.
 """
 
 import csv
@@ -11,6 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import textwrap
 import uuid
 
+from databuilder.extractor.neo4j_es_last_updated_extractor import Neo4jEsLastUpdatedExtractor
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
@@ -22,11 +24,10 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
-from databuilder.transformer.elasticsearch_document_transformer import ElasticsearchDocumentTransformer
 
-# change to the address of Elasticsearh service
+# change to the address of Elasticsearch service
 es = Elasticsearch([
-    {'host': '0.0.0.0'},
+    {'host': 'localhost'},
 ])
 
 DB_FILE = '/tmp/test.db'
@@ -148,8 +149,31 @@ def load_user_data_from_csv(file_name):
         conn.commit()
 
 
+def load_application_data_from_csv(file_name):
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_application_metadata')
+        cur.execute('create table if not exists test_application_metadata '
+                    '(task_id VARCHAR(64) NOT NULL , '
+                    'dag_id VARCHAR(64) NOT NULL , '
+                    'exec_date VARCHAR(64) NOT NULL, '
+                    'application_url_template VARCHAR(128) NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['task_id'],
+                      i['dag_id'],
+                      i['exec_date'],
+                      i['application_url_template']) for i in dr]
+
+        cur.executemany("INSERT INTO test_application_metadata (task_id, dag_id, "
+                        "exec_date, application_url_template) VALUES (?, ?, ?, ?);", to_db)
+        conn.commit()
+
+
 # todo: Add a second model
-def create_sample_job(table_name, model_name):
+def create_sample_job(table_name, model_name, transformer=NoopTransformer()):
     sql = textwrap.dedent("""
     select * from {table_name};
     """).format(table_name=table_name)
@@ -163,7 +187,7 @@ def create_sample_job(table_name, model_name):
 
     task = DefaultTask(extractor=sql_extractor,
                        loader=csv_loader,
-                       transformer=NoopTransformer())
+                       transformer=transformer)
 
     job_config = ConfigFactory.from_dict({
         'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): SQLITE_CONN_STRING,
@@ -194,14 +218,51 @@ def create_sample_job(table_name, model_name):
     return job
 
 
-def create_es_publisher_sample_job():
+def create_last_updated_job():
+    # loader saves data to these folders and publisher reads it from here
+    tmp_folder = '/var/tmp/amundsen/last_updated_data'
+    node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+    relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
-    # loader save data to this location and publisher read if from here
+    task = DefaultTask(extractor=Neo4jEsLastUpdatedExtractor(),
+                       loader=FsNeo4jCSVLoader())
+
+    job_config = ConfigFactory.from_dict({
+        'extractor.neo4j_es_last_updated.model_class':
+            'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
+
+        'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH):
+            node_files_folder,
+        'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH):
+            relationship_files_folder,
+
+        'publisher.neo4j.{}'.format(neo4j_csv_publisher.NODE_FILES_DIR):
+            node_files_folder,
+        'publisher.neo4j.{}'.format(neo4j_csv_publisher.RELATION_FILES_DIR):
+            relationship_files_folder,
+        'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_END_POINT_KEY):
+            neo4j_endpoint,
+        'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_USER):
+            neo4j_user,
+        'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD):
+            neo4j_password,
+        'publisher.neo4j.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG):
+            'unique_lastupdated_tag',  # should use unique tag here like {ds}
+    })
+
+    job = DefaultJob(conf=job_config,
+                     task=task,
+                     publisher=Neo4jCsvPublisher())
+    return job
+
+
+def create_es_publisher_sample_job():
+    # loader saves data to this location and publisher reads it from here
     extracted_search_data_path = '/var/tmp/amundsen/search_data.json'
 
     task = DefaultTask(loader=FSElasticsearchJSONLoader(),
                        extractor=Neo4jSearchDataExtractor(),
-                       transformer=ElasticsearchDocumentTransformer())
+                       transformer=NoopTransformer())
 
     # elastic search client instance
     elasticsearch_client = es
@@ -215,16 +276,12 @@ def create_es_publisher_sample_job():
     job_config = ConfigFactory.from_dict({
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): neo4j_endpoint,
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY):
-            'databuilder.models.neo4j_data.Neo4jDataResult',
+            'databuilder.models.table_elasticsearch_document.TableESDocument',
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER): neo4j_user,
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW): neo4j_password,
         'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY):
             extracted_search_data_path,
         'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_MODE_CONFIG_KEY): 'w',
-        'transformer.elasticsearch.{}'.format(ElasticsearchDocumentTransformer.ELASTICSEARCH_INDEX_CONFIG_KEY):
-            elasticsearch_new_index_key,
-        'transformer.elasticsearch.{}'.format(ElasticsearchDocumentTransformer.ELASTICSEARCH_DOC_CONFIG_KEY):
-            elasticsearch_new_index_key_type,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.FILE_PATH_CONFIG_KEY):
             extracted_search_data_path,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.FILE_MODE_CONFIG_KEY): 'r',
@@ -232,6 +289,8 @@ def create_es_publisher_sample_job():
             elasticsearch_client,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY):
             elasticsearch_new_index_key,
+        'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY):
+            elasticsearch_new_index_key_type,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY):
             elasticsearch_index_alias
     })
@@ -243,9 +302,13 @@ def create_es_publisher_sample_job():
 
 
 if __name__ == "__main__":
+    # Uncomment next line to get INFO level logging
+    # logging.basicConfig(level=logging.INFO)
+
     load_table_data_from_csv('sample_table.csv')
     load_col_data_from_csv('sample_col.csv')
     load_user_data_from_csv('sample_user.csv')
+    load_application_data_from_csv('sample_application.csv')
     if create_connection(DB_FILE):
         # start table job
         job1 = create_sample_job('test_table_metadata',
@@ -261,6 +324,15 @@ if __name__ == "__main__":
         job_user = create_sample_job('test_user_metadata',
                                      'databuilder.models.user.User')
         job_user.launch()
+
+        # start application job
+        job_app = create_sample_job('test_application_metadata',
+                                    'databuilder.models.application.Application')
+        job_app.launch()
+
+        # start last updated job
+        job_lastupdated = create_last_updated_job()
+        job_lastupdated.launch()
 
         # start Elasticsearch publish job
         job_es = create_es_publisher_sample_job()
