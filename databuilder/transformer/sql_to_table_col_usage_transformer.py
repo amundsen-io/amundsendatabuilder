@@ -1,4 +1,6 @@
+import copy_reg
 import logging
+import types
 from multiprocessing.pool import Pool, TimeoutError
 
 from pyhocon import ConfigTree  # noqa: F401
@@ -11,7 +13,18 @@ from databuilder.sql_parser.usage.column import OrTable, Table  # noqa: F401
 from databuilder.sql_parser.usage.presto.column_usage_provider import ColumnUsageProvider
 from databuilder.transformer.base_transformer import Transformer
 
+
 LOGGER = logging.getLogger(__name__)
+
+
+def _pickle_method(m):
+    if m.im_self is None:
+        return getattr, (m.im_class, m.im_func.func_name)
+    else:
+        return getattr, (m.im_self, m.im_func.func_name)
+
+
+copy_reg.pickle(types.MethodType, _pickle_method)
 
 
 class SqlToTblColUsageTransformer(Transformer):
@@ -66,7 +79,7 @@ class SqlToTblColUsageTransformer(Transformer):
             LOGGER.exception('Timed out while getting column usage from query: {}'.format(stmt))
             LOGGER.info('Killing the thread.')
             self._worker_pool.terminate()
-            self._worker_pool = ThreadPool(processes=1)
+            self._worker_pool = Pool(processes=1)
             LOGGER.info('Killed the thread.')
             return None
         except Exception:
