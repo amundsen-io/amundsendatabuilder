@@ -1,5 +1,5 @@
 import logging
-from multiprocessing.pool import ThreadPool, TimeoutError
+from multiprocessing.pool import Pool, TimeoutError
 
 from pyhocon import ConfigTree  # noqa: F401
 from typing import Any, Optional, List, Iterable  # noqa: F401
@@ -44,7 +44,7 @@ class SqlToTblColUsageTransformer(Transformer):
         self._sql_stmt_attr = conf.get_string(SqlToTblColUsageTransformer.SQL_STATEMENT_ATTRIBUTE_NAME)
         self._user_email_attr = conf.get_string(SqlToTblColUsageTransformer.USER_EMAIL_ATTRIBUTE_NAME)
         self._tbl_to_schema_mapping = self._create_schema_by_table_mapping()
-        self._worker_pool = ThreadPool(processes=1)
+        self._worker_pool = Pool(processes=1)
         self._time_out_sec = conf.get_int(SqlToTblColUsageTransformer.COLUMN_EXTRACTION_TIMEOUT_SEC, 10)
         LOGGER.info('Column extraction timeout: {} seconds'.format(self._time_out_sec))
         self._log_all_extraction_failures = conf.get_bool(SqlToTblColUsageTransformer.LOG_ALL_EXTRACTION_FAILURES,
