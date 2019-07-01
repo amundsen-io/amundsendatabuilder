@@ -217,6 +217,35 @@ def create_sample_job(table_name, model_name, transformer=NoopTransformer()):
                      publisher=Neo4jCsvPublisher())
     return job
 
+def load_usage_data_from_csv(file_name):
+
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_usage_metadata')
+        cur.execute('create table if not exists test_usage_metadata '
+                    '(database VARCHAR(64) NOT NULL , '
+                    'cluster VARCHAR(64) NOT NULL, '
+                    'schema_name VARCHAR(64) NOT NULL, '
+                    'table_name VARCHAR(64) NOT NULL, '
+                    'column_name VARCHAR(64) NOT NULL, '
+                    'user_email VARCHAR(64) NOT NULL, '
+                    'read_count INTEGER NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['database'],
+                      i['cluster'],
+                      i['schema_name'],
+                      i['table_name'],
+                      i['column_name'],
+                      i['user_email'],
+                      i['read_count'] \
+                      ) for i in dr]
+
+        cur.executemany("INSERT INTO test_usage_metadata (database, cluster, "
+                        "schema_name, table_name, column_name, user_email, read_count) VALUES (?, ?, ?, ?, ?, ?, ?);", to_db)
+        conn.commit()
 
 def create_last_updated_job():
     # loader saves data to these folders and publisher reads it from here
@@ -307,6 +336,7 @@ if __name__ == "__main__":
 
     load_table_data_from_csv('sample_table.csv')
     load_col_data_from_csv('sample_col.csv')
+    load_usage_data_from_csv('sample_column_usage.csv')
     load_user_data_from_csv('sample_user.csv')
     load_application_data_from_csv('sample_application.csv')
     if create_connection(DB_FILE):
@@ -319,6 +349,11 @@ if __name__ == "__main__":
         job2 = create_sample_job('test_col_metadata',
                                  'example.models.test_column_model.TestColumnMetadata')
         job2.launch()
+
+        # start usage job
+        job_col_usage = create_sample_job('test_usage_metadata',
+                                 'example.models.test_column_usage_model.TestColumnUsageModel')
+        job_col_usage.launch()
 
         # start user job
         job_user = create_sample_job('test_user_metadata',
