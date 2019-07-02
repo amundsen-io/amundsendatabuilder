@@ -219,6 +219,7 @@ def create_sample_job(table_name, model_name, transformer=NoopTransformer()):
 
 def load_usage_data_from_csv(file_name):
 
+
     conn = create_connection(DB_FILE)
     if conn:
         cur = conn.cursor()
@@ -240,12 +241,14 @@ def load_usage_data_from_csv(file_name):
                       i['table_name'],
                       i['column_name'],
                       i['user_email'],
-                      i['read_count'] \
+                      i['read_count']
                       ) for i in dr]
 
         cur.executemany("INSERT INTO test_usage_metadata (database, cluster, "
-                        "schema_name, table_name, column_name, user_email, read_count) VALUES (?, ?, ?, ?, ?, ?, ?);", to_db)
+                        "schema_name, table_name, column_name, user_email, read_count) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?);", to_db)
         conn.commit()
+
 
 def create_last_updated_job():
     # loader saves data to these folders and publisher reads it from here
@@ -352,7 +355,7 @@ if __name__ == "__main__":
 
         # start usage job
         job_col_usage = create_sample_job('test_usage_metadata',
-                                 'example.models.test_column_usage_model.TestColumnUsageModel')
+                                          'example.models.test_column_usage_model.TestColumnUsageModel')
         job_col_usage.launch()
 
         # start user job

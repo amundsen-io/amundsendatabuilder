@@ -9,6 +9,7 @@ from databuilder.models.user import User
 from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 
 class TestColumnUsageModel(Neo4jCsvSerializable):
+
     """
     A model represents user <--> column graph model
     Currently it only support to serialize to table level
@@ -23,13 +24,13 @@ class TestColumnUsageModel(Neo4jCsvSerializable):
     READ_RELATION_COUNT = 'read_count{}'.format(UNQUOTED_SUFFIX)
 
     def __init__(self,
-                 database,  # type: str
-                 cluster,  # type: str
+                 database,     # type: str
+                 cluster,      # type: str
                  schema_name,  # type: str
-                 table_name,  # type: str
+                 table_name,   # type: str
                  column_name,  # type: str
-                 user_email, # type: str
-                 read_count, #type: int
+                 user_email,   # type: str
+                 read_count,   # type: int
                  ):
         # type: (...) -> None
         self.database = database
