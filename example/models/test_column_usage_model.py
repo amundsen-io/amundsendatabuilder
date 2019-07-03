@@ -8,6 +8,7 @@ from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
 from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 
+
 class TestColumnUsageModel(Neo4jCsvSerializable):
 
     """
