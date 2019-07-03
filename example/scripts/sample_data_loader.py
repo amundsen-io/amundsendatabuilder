@@ -217,9 +217,9 @@ def create_sample_job(table_name, model_name, transformer=NoopTransformer()):
                      publisher=Neo4jCsvPublisher())
     return job
 
+
 def load_usage_data_from_csv(file_name):
-
-
+    # Load usage data
     conn = create_connection(DB_FILE)
     if conn:
         cur = conn.cursor()
