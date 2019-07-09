@@ -10,8 +10,6 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
-
-
 TableKey = namedtuple('TableKey', ['schema_name', 'table_name'])
 
 LOGGER = logging.getLogger(__name__)
@@ -24,7 +22,8 @@ class AthenaMetadataExtractor(Extractor):
 
     SQL_STATEMENT = """
     SELECT
-        {catalog_source} as cluster, table_schema as schema_name, table_name as name, column_name as col_name, data_type as col_type,ordinal_position as col_sort_order, 
+        {catalog_source} as cluster, table_schema as schema_name, table_name as name, column_name as col_name,
+        data_type as col_type,ordinal_position as col_sort_order,
         comment as col_description, extra_info as extras from information_schema.columns
         {where_clause_suffix}
         ORDER by cluster, schema_name, name, col_sort_order ;
@@ -33,7 +32,6 @@ class AthenaMetadataExtractor(Extractor):
     # CONFIG KEYS
     WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
     CATALOG_KEY = 'catalog_source'
-
 
     # Default values
     DEFAULT_CLUSTER_NAME = 'master'
@@ -46,7 +44,6 @@ class AthenaMetadataExtractor(Extractor):
         # type: (ConfigTree) -> None
         conf = conf.with_fallback(AthenaMetadataExtractor.DEFAULT_CONFIG)
         self._cluster = '{}'.format(conf.get_string(AthenaMetadataExtractor.CATALOG_KEY))
-
 
         self.sql_stmt = AthenaMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(AthenaMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
@@ -87,9 +84,9 @@ class AthenaMetadataExtractor(Extractor):
 
             for row in group:
                 last_row = row
-                columns.append(ColumnMetadata(row['col_name'], row['extras'] if row['extras'] is not None else row['col_description'],
+                columns.append(ColumnMetadata(row['col_name'],
+                                              row['extras'] if row['extras'] is not None else row['col_description'],
                                               row['col_type'], row['col_sort_order']))
-
 
             yield TableMetadata('athena', last_row['cluster'],
                                 last_row['schema_name'],

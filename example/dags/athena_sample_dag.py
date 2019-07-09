@@ -65,6 +65,7 @@ OPTIONAL_TABLE_NAMES = ''
 AWS_ACCESS = 'YOUR_ACCESS_KEY'
 AWS_SECRET = 'YOUR_SECRET_KEY'
 
+
 def connection_string():
     access_key = AWS_ACCESS
     secret = AWS_SECRET
@@ -78,7 +79,6 @@ def create_table_extract_job(**kwargs):
         where table_schema in {schemas}
     """).format(schemas=SUPPORTED_SCHEMA_SQL_IN_CLAUSE)
 
-
     tmp_folder = '/var/tmp/amundsen/table_metadata'
     node_files_folder = '{tmp_folder}/nodes/'.format(tmp_folder=tmp_folder)
     relationship_files_folder = '{tmp_folder}/relationships/'.format(tmp_folder=tmp_folder)
@@ -88,7 +88,7 @@ def create_table_extract_job(**kwargs):
             where_clause_suffix,
         'extractor.athena_metadata.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
             connection_string(),
-        'extractor.athena_metadata.{}'.format(AthenaMetadataExtractor.CATALOG_KEY):"'AwsDataCatalog'",
+        'extractor.athena_metadata.{}'.format(AthenaMetadataExtractor.CATALOG_KEY): "'AwsDataCatalog'",
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH):
             node_files_folder,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH):
@@ -107,9 +107,11 @@ def create_table_extract_job(**kwargs):
             'unique_tag',  # should use unique tag here like {ds}
     })
     job = DefaultJob(conf=job_config,
-                     task=DefaultTask(extractor=AthenaMetadataExtractor(), loader=FsNeo4jCSVLoader(),transformer=NoopTransformer()),
+                     task=DefaultTask(extractor=AthenaMetadataExtractor(), loader=FsNeo4jCSVLoader(),
+                                      transformer=NoopTransformer()),
                      publisher=Neo4jCsvPublisher())
     job.launch()
+
 
 def create_es_publisher_sample_job():
     # loader saves data to this location and publisher reads it from here
@@ -154,9 +156,6 @@ def create_es_publisher_sample_job():
                      task=task,
                      publisher=ElasticsearchPublisher())
     job.launch()
-
-
-
 
 
 with DAG('amundsen_databuilder', default_args=default_args, **dag_args) as dag:
