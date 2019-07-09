@@ -94,6 +94,10 @@ class HiveTableLastUpdatedExtractor(Extractor):
     FS_WORKER_TIMEOUT_SEC = 'fs_worker_timeout_sec'
     # If number of files that it needs to fetch metadata is larger than this threshold, it will skip the table.
     FILE_CHECK_THRESHOLD = 'file_check_threshold'
+    # Enabled for partitioned table
+    FS_ENABLED_PARTITIONED = 'fs_enabled_partitioned'
+    # Enabled for non-partitioned table
+    FS_ENABLED_NON_PARTITIONED = 'fs_enabled_non_partitioned'
 
     DEFAULT_CONFIG = ConfigFactory.from_dict({PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY: ' ',
                                               NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY: ' ',
@@ -110,6 +114,12 @@ class HiveTableLastUpdatedExtractor(Extractor):
         LOGGER.info('Using thread pool size: {}'.format(pool_size))
         self._fs_worker_pool = ThreadPool(processes=pool_size)
         self._fs_worker_timeout = self._conf.get_int(HiveTableLastUpdatedExtractor.FS_WORKER_TIMEOUT_SEC)
+
+        self._fs_enabled_partitioned = \
+            self._conf.get_bool(HiveTableLastUpdatedExtractor.FS_ENABLED_PARTITIONED, default=True)
+        self._fs_enabled_non_partitioned = \
+            self._conf.get_bool(HiveTableLastUpdatedExtractor.FS_ENABLED_NON_PARTITIONED, default=True)
+
         LOGGER.info('Using thread timeout: {} seconds'.format(self._fs_worker_timeout))
 
         self._cluster = '{}'.format(self._conf.get_string(HiveTableLastUpdatedExtractor.CLUSTER_KEY))
@@ -200,7 +210,10 @@ class HiveTableLastUpdatedExtractor(Extractor):
         :return:
         """
 
-        partitioned_tbl_row = self._partitioned_table_extractor.extract()
+        partitioned_tbl_row = None
+        non_partitioned_tbl_row = None
+        if self._fs_enabled_partitioned:
+            partitioned_tbl_row = self._partitioned_table_extractor.extract()
         while partitioned_tbl_row:
             yield TableLastUpdated(table_name=partitioned_tbl_row['table_name'],
                                    last_updated_time_epoch=partitioned_tbl_row['last_updated_time'],
@@ -211,7 +224,8 @@ class HiveTableLastUpdatedExtractor(Extractor):
 
         LOGGER.info('Extracting non-partitioned table')
         count = 0
-        non_partitioned_tbl_row = self._non_partitioned_table_extractor.extract()
+        if self._fs_enabled_non_partitioned:
+            non_partitioned_tbl_row = self._non_partitioned_table_extractor.extract()
         while non_partitioned_tbl_row:
             count += 1
             if count % 10 == 0:
