@@ -46,8 +46,7 @@ class TestAthenaMetadataExtractor(unittest.TestCase):
             table = {'schema_name': 'test_schema',
                      'name': 'test_table',
                      'description': '',
-                     'cluster':self.conf['extractor.athena_metadata.{}'.format(
-                                         AthenaMetadataExtractor.CATALOG_KEY)],
+                     'cluster': self.conf['extractor.athena_metadata.{}'.format(AthenaMetadataExtractor.CATALOG_KEY)],
                      }
 
             sql_execute.return_value = [
@@ -56,44 +55,44 @@ class TestAthenaMetadataExtractor(unittest.TestCase):
                      'col_type': 'bigint',
                      'col_description': 'description of id1',
                      'col_sort_order': 0,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'col_id2',
                      'col_type': 'bigint',
                      'col_description': 'description of id2',
                      'col_sort_order': 1,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'is_active',
                      'col_type': 'boolean',
                      'col_description': None,
                      'col_sort_order': 2,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'source',
                      'col_type': 'varchar',
                      'col_description': 'description of source',
                      'col_sort_order': 3,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'etl_created_at',
                      'col_type': 'timestamp',
                      'col_description': None,
                      'col_sort_order': 4,
-                     'extras':'partition key'}, table),
+                     'extras': 'partition key'}, table),
                 self._union(
                     {'col_name': 'ds',
                      'col_type': 'varchar',
                      'col_description': None,
                      'col_sort_order': 5,
-                     'extras':None}, table)
+                     'extras': None}, table)
             ]
 
             extractor = AthenaMetadataExtractor()
             extractor.init(self.conf)
             actual = extractor.extract()
-            expected = TableMetadata('athena', self.conf['extractor.athena_metadata.{}'.format(
-                                         AthenaMetadataExtractor.CATALOG_KEY)], 'test_schema', 'test_table', '',
+            expected = TableMetadata('athena', self.conf['extractor.athena_metadata.{}'.
+                                     format(AthenaMetadataExtractor.CATALOG_KEY)], 'test_schema', 'test_table', '',
                                      [ColumnMetadata('col_id1', 'description of id1', 'bigint', 0),
                                       ColumnMetadata('col_id2', 'description of id2', 'bigint', 1),
                                       ColumnMetadata('is_active', None, 'boolean', 2),
@@ -113,22 +112,19 @@ class TestAthenaMetadataExtractor(unittest.TestCase):
             table = {'schema_name': 'test_schema1',
                      'name': 'test_table1',
                      'description': '',
-                     'cluster':self.conf['extractor.athena_metadata.{}'.format(
-                                         AthenaMetadataExtractor.CATALOG_KEY)],
+                     'cluster': self.conf['extractor.athena_metadata.{}'.format(AthenaMetadataExtractor.CATALOG_KEY)],
                      }
 
             table1 = {'schema_name': 'test_schema1',
                       'name': 'test_table2',
                       'description': '',
-                      'cluster':self.conf['extractor.athena_metadata.{}'.format(
-                                         AthenaMetadataExtractor.CATALOG_KEY)],
+                      'cluster': self.conf['extractor.athena_metadata.{}'.format(AthenaMetadataExtractor.CATALOG_KEY)],
                       }
 
             table2 = {'schema_name': 'test_schema2',
                       'name': 'test_table3',
                       'description': '',
-                      'cluster':self.conf['extractor.athena_metadata.{}'.format(
-                                         AthenaMetadataExtractor.CATALOG_KEY)],
+                      'cluster': self.conf['extractor.athena_metadata.{}'.format(AthenaMetadataExtractor.CATALOG_KEY)],
                       }
 
             sql_execute.return_value = [
@@ -137,61 +133,61 @@ class TestAthenaMetadataExtractor(unittest.TestCase):
                      'col_type': 'bigint',
                      'col_description': 'description of col_id1',
                      'col_sort_order': 0,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'col_id2',
                      'col_type': 'bigint',
                      'col_description': 'description of col_id2',
                      'col_sort_order': 1,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'is_active',
                      'col_type': 'boolean',
                      'col_description': None,
                      'col_sort_order': 2,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'source',
                      'col_type': 'varchar',
                      'col_description': 'description of source',
                      'col_sort_order': 3,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'etl_created_at',
                      'col_type': 'timestamp',
                      'col_description': '',
                      'col_sort_order': 4,
-                     'extras':'partition key'}, table),
+                     'extras': 'partition key'}, table),
                 self._union(
                     {'col_name': 'ds',
                      'col_type': 'varchar',
                      'col_description': None,
                      'col_sort_order': 5,
-                     'extras':None}, table),
+                     'extras': None}, table),
                 self._union(
                     {'col_name': 'col_name',
                      'col_type': 'varchar',
                      'col_description': 'description of col_name',
                      'col_sort_order': 0,
-                     'extras':None}, table1),
+                     'extras': None}, table1),
                 self._union(
                     {'col_name': 'col_name2',
                      'col_type': 'varchar',
                      'col_description': 'description of col_name2',
                      'col_sort_order': 1,
-                     'extras':None}, table1),
+                     'extras': None}, table1),
                 self._union(
                     {'col_name': 'col_id3',
                      'col_type': 'varchar',
                      'col_description': 'description of col_id3',
                      'col_sort_order': 0,
-                     'extras':None}, table2),
+                     'extras': None}, table2),
                 self._union(
                     {'col_name': 'col_name3',
                      'col_type': 'varchar',
                      'col_description': 'description of col_name3',
                      'col_sort_order': 1,
-                     'extras':None}, table2)
+                     'extras': None}, table2)
             ]
 
             extractor = AthenaMetadataExtractor()
@@ -242,7 +238,6 @@ class TestAthenaMetadataExtractorWithWhereClause(unittest.TestCase):
         self.where_clause_suffix = """
         where table_schema in ('public') and table_name = 'movies'
         """
-
         config_dict = {
             AthenaMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY: self.where_clause_suffix,
             'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
@@ -259,7 +254,6 @@ class TestAthenaMetadataExtractorWithWhereClause(unittest.TestCase):
             extractor = AthenaMetadataExtractor()
             extractor.init(self.conf)
             self.assertTrue(self.where_clause_suffix in extractor.sql_stmt)
-
 
 
 if __name__ == '__main__':
