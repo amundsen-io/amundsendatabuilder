@@ -17,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 
 class AthenaMetadataExtractor(Extractor):
     """
-    Extracts Postgres table and column metadata from underlying meta store database using SQLAlchemyExtractor
+    Extracts Athena table and column metadata from underlying meta store database using SQLAlchemyExtractor
     """
 
     SQL_STATEMENT = """
