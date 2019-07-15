@@ -61,7 +61,7 @@ class PostgresMetadataExtractor(Extractor):
             cluster_source = "'{}'".format(self._cluster)
 
         self._database = conf.get_string(PostgresMetadataExtractor.DATABASE_KEY,
-                                         default='postgres').encode('utf-8', 'ignore')
+                                         default='postgres')
 
         self.sql_stmt = PostgresMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(PostgresMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
