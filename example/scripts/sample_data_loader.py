@@ -6,6 +6,7 @@ into Neo4j and Elasticsearch without using an Airflow DAG.
 import csv
 from elasticsearch import Elasticsearch
 import logging
+import os
 from pyhocon import ConfigFactory
 import sqlite3
 from sqlalchemy.ext.declarative import declarative_base
@@ -27,16 +28,15 @@ from databuilder.transformer.base_transformer import NoopTransformer
 
 # change to the address of Elasticsearch service
 es = Elasticsearch([
-    {'host': 'localhost'},
+    {'host': os.getenv('ES_HOST', 'localhost')},
 ])
 
 DB_FILE = '/tmp/test.db'
 SQLITE_CONN_STRING = 'sqlite:////tmp/test.db'
 Base = declarative_base()
 
-# replace localhost with docker host ip
-# todo: get the ip from input argument
-NEO4J_ENDPOINT = 'bolt://localhost:7687'
+# set env NEO4J_HOST to override localhost
+NEO4J_ENDPOINT = 'bolt://{}:7687'.format(os.getenv('NEO4J_HOST', 'localhost'))
 neo4j_endpoint = NEO4J_ENDPOINT
 
 neo4j_user = 'neo4j'
