@@ -56,7 +56,10 @@ class SnowflakeMetadataExtractor(Extractor):
     DEFAULT_CLUSTER_NAME = 'master'
 
     DEFAULT_CONFIG = ConfigFactory.from_dict(
-        {WHERE_CLAUSE_SUFFIX_KEY: ' ', CLUSTER_KEY: DEFAULT_CLUSTER_NAME, USE_CATALOG_AS_CLUSTER_NAME: True}
+        {WHERE_CLAUSE_SUFFIX_KEY: ' ',
+         CLUSTER_KEY: DEFAULT_CLUSTER_NAME,
+         USE_CATALOG_AS_CLUSTER_NAME: True,
+         DATABASE_KEY: 'prod'}
     )
 
     def init(self, conf):
@@ -69,8 +72,7 @@ class SnowflakeMetadataExtractor(Extractor):
         else:
             cluster_source = "'{}'".format(self._cluster)
 
-        self._database = conf.get_string(SnowflakeMetadataExtractor.DATABASE_KEY,
-                                         default='prod').encode('utf-8', 'ignore')
+        self._database = conf.get_string(SnowflakeMetadataExtractor.DATABASE_KEY).encode('utf-8', 'ignore')
 
         self.sql_stmt = SnowflakeMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),

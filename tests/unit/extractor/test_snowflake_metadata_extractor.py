@@ -277,7 +277,7 @@ class TestSnowflakeMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
 
 
 class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
-    # test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is specified
+    # test when DATABASE_KEY is specified
     def setUp(self):
         # type: () -> None
         logging.basicConfig(level=logging.INFO)
