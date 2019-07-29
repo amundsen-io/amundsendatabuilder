@@ -67,13 +67,7 @@ DASHBOARD_ES_MAP = textwrap.dedent(
               "analyzer": "simple"
             },
             "tags": {
-              "type":"text",
-              "analyzer": "simple",
-              "fields": {
-                "raw": {
-                  "type": "keyword"
-                }
-              }
+              "type": "keyword"
             }
           }
         }
@@ -94,7 +88,7 @@ def create_neo4j_es_job():
     elasticsearch_client = es
     elasticsearch_new_index_key = 'dashboards'
     elasticsearch_new_index_key_type = 'dashboard'
-    elasticsearch_index_alias = 'dashboards_alias'
+    elasticsearch_index_alias = 'dashboard_search_index'
 
     rand = str(random.randint(0, 1000))
 
