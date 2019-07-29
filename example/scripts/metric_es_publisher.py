@@ -59,13 +59,7 @@ METRIC_ES_MAP = textwrap.dedent(
               }
             },
             "tags": {
-              "type":"text",
-              "analyzer": "simple",
-              "fields": {
-                "raw": {
-                  "type": "keyword"
-                }
-              }
+              "type": "keyword"
             },
             "dashboards": {
               "type":"text",
@@ -95,7 +89,7 @@ def create_neo4j_es_job():
     elasticsearch_client = es
     elasticsearch_new_index_key = 'metrics'
     elasticsearch_new_index_key_type = 'metric'
-    elasticsearch_index_alias = 'metrics_alias'
+    elasticsearch_index_alias = 'metric_search_index'
 
     rand = str(random.randint(0, 1000))
 
