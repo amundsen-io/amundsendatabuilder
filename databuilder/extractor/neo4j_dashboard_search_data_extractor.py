@@ -27,7 +27,7 @@ class Neo4jDashboardSearchDataExtractor(Extractor):
         RETURN dgroup.name as dashboard_group, d.name AS dashboard_name,
         ddesc.description AS description, owner.full_name AS user_name,
         owner.key AS user_id, left(lrt.value,16) as last_reload_time,
-        COLLECT(DISTINCT tags.key) as tags
+        COLLECT(DISTINCT lower(tags.key)) as tags
         ORDER BY d.name;
         """
     )

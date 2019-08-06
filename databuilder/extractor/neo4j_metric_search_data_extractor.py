@@ -23,10 +23,10 @@ class Neo4jMetricSearchDataExtractor(Extractor):
         OPTIONAL MATCH (m)-[:DESCRIPTION]->(mdesc:Description)
         OPTIONAL MATCH (m)-[:METRIC_TYPE]->(mtype:Metrictype)
         OPTIONAL MATCH (d)-[:DASHBOARD_OF]->(dg:Dashboardgroup)
-        OPTIONAL MATCH (d)-[:TAG]->(tags:Tag)
+        OPTIONAL MATCH (m)-[:TAG]->(tags:Tag)
         RETURN m.name as name, mtype.name as type,
         mdesc.description as description,
-        COLLECT(DISTINCT tags.key) as tags,
+        COLLECT(DISTINCT lower(tags.key)) as tags,
         COLLECT(DISTINCT dg.name+"://" +d.name) as dashboards
         """
     )
