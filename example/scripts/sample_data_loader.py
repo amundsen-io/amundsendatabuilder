@@ -288,7 +288,21 @@ def create_last_updated_job():
     return job
 
 
-def create_es_publisher_sample_job():
+def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index',
+                                   elasticsearch_doc_type_key='table',
+                                   model_name='databuilder.models.table_elasticsearch_document.TableESDocument',
+                                   cypher_query=None,
+                                   elasticsearch_mapping=None):
+    """
+    :param elasticsearch_index_alias:  alias for Elasticsearch used in
+                                       amundsensearchlibrary/search_service/config.py as an index
+    :param elasticsearch_doc_type_key: name the ElasticSearch index is prepended with. Defaults to `table` resulting in `table_search_index`
+    :param model_name:                 the Databuilder model class used in transporting between Extractor and Loader
+    :param cypher_query:               Query handed to the `Neo4jSearchDataExtractor` class, if None is given (default) 
+                                       it uses the `Table` query baked into the Extractor
+    :param elasticsearch_mapping:      Elasticsearch field mapping "DDL" handed to the `ElasticsearchPublisher` class, if None is given (default) 
+                                       it uses the `Table` query baked into the Publisher
+    """
     # loader saves data to this location and publisher reads it from here
     extracted_search_data_path = '/var/tmp/amundsen/search_data.json'
 
@@ -300,15 +314,10 @@ def create_es_publisher_sample_job():
     elasticsearch_client = es
     # unique name of new index in Elasticsearch
     elasticsearch_new_index_key = 'tables' + str(uuid.uuid4())
-    # related to mapping type from /databuilder/publisher/elasticsearch_publisher.py#L38
-    elasticsearch_new_index_key_type = 'table'
-    # alias for Elasticsearch used in amundsensearchlibrary/search_service/config.py as an index
-    elasticsearch_index_alias = 'table_search_index'
 
     job_config = ConfigFactory.from_dict({
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): neo4j_endpoint,
-        'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY):
-            'databuilder.models.table_elasticsearch_document.TableESDocument',
+        'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY): model_name,
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER): neo4j_user,
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW): neo4j_password,
         'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY):
@@ -322,10 +331,18 @@ def create_es_publisher_sample_job():
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY):
             elasticsearch_new_index_key,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY):
-            elasticsearch_new_index_key_type,
+            elasticsearch_doc_type_key,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY):
-            elasticsearch_index_alias
+            elasticsearch_index_alias,
     })
+
+    # only optionally add these keys, so need to dynamically `put` them
+    if cypher_query:
+        job_config.put('extractor.search_data.{}'.format(Neo4jSearchDataExtractor.CYPHER_QUERY_CONFIG_KEY),
+                       cypher_query)
+    if elasticsearch_mapping:
+        job_config.put('publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY),
+                       elasticsearch_mapping)
 
     job = DefaultJob(conf=job_config,
                      task=task,
@@ -342,6 +359,7 @@ if __name__ == "__main__":
     load_usage_data_from_csv('sample_column_usage.csv')
     load_user_data_from_csv('sample_user.csv')
     load_application_data_from_csv('sample_application.csv')
+
     if create_connection(DB_FILE):
         # start table job
         job1 = create_sample_job('test_table_metadata',
@@ -372,6 +390,110 @@ if __name__ == "__main__":
         job_lastupdated = create_last_updated_job()
         job_lastupdated.launch()
 
-        # start Elasticsearch publish job
-        job_es = create_es_publisher_sample_job()
-        job_es.launch()
+        # start Elasticsearch publish jobs
+        job_es_table = create_es_publisher_sample_job(
+            elasticsearch_index_alias='table_search_index',
+            elasticsearch_doc_type_key='table',
+            model_name='databuilder.models.table_elasticsearch_document.TableESDocument')
+        job_es_table.launch()
+
+        user_cypher_query = textwrap.dedent(
+            """
+            MATCH (user:User)
+            OPTIONAL MATCH (table)-[:DESCRIPTION]->(table_description:Description)
+            OPTIONAL MATCH (table)-[read:READ_BY]->(user:User)
+            OPTIONAL MATCH (table)-[:COLUMN]->(cols:Column)
+            OPTIONAL MATCH (cols)-[:DESCRIPTION]->(col_description:Description)
+            OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag)
+            OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
+            RETURN user.email AS email, user.first_name as first_name, user.last_name AS last_name,
+            user.name AS name, user.github_username AS github_username, user.team_name AS team_name,
+            user.employee_type AS employee_type, user.manager_email AS manager_email, user.slack_id AS slack_id,
+            COUNT(DISTINCT user.email) AS is_active, COUNT(DISTINCT user.email) AS total_read,
+            COUNT(DISTINCT user.email) AS total_own, COUNT(DISTINCT user.email) AS total_follow
+            ORDER BY user.name;
+            """
+        )
+        # TODO make sure we add is_active, total_read, total_own & total_follow to model, csv etc...
+
+        user_elasticsearch_mapping = """
+        {
+          "mappings":{
+                "user":{
+                  "properties": {
+                    "first_name": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "last_name": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "last_updated_epoch": {
+                      "type": "date",
+                      "format": "epoch_second"
+                    },
+                    "description": {
+                      "type": "text",
+                      "analyzer": "simple"
+                    },
+                    "email": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "column_descriptions": {
+                      "type": "text",
+                      "analyzer": "simple"
+                    },
+                    "tags": {
+                      "type": "keyword"
+                    },
+                    "cluster": {
+                      "type": "text"
+                    },
+                    "database": {
+                      "type": "text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "key": {
+                      "type": "keyword"
+                    },
+                    "total_usage":{
+                      "type": "long"
+                    },
+                    "unique_usage": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+        """
+
+        job_es_user = create_es_publisher_sample_job(
+            elasticsearch_index_alias='user_search_index',
+            elasticsearch_doc_type_key='user',
+            model_name='databuilder.models.user_elasticsearch_document.UserESDocument',
+            cypher_query=user_cypher_query,
+            elasticsearch_mapping=user_elasticsearch_mapping)
+        job_es_user.launch()
