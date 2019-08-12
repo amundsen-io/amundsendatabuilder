@@ -296,12 +296,13 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
     """
     :param elasticsearch_index_alias:  alias for Elasticsearch used in
                                        amundsensearchlibrary/search_service/config.py as an index
-    :param elasticsearch_doc_type_key: name the ElasticSearch index is prepended with. Defaults to `table` resulting in `table_search_index`
+    :param elasticsearch_doc_type_key: name the ElasticSearch index is prepended with. Defaults to `table` resulting in
+                                       `table_search_index`
     :param model_name:                 the Databuilder model class used in transporting between Extractor and Loader
-    :param cypher_query:               Query handed to the `Neo4jSearchDataExtractor` class, if None is given (default) 
+    :param cypher_query:               Query handed to the `Neo4jSearchDataExtractor` class, if None is given (default)
                                        it uses the `Table` query baked into the Extractor
-    :param elasticsearch_mapping:      Elasticsearch field mapping "DDL" handed to the `ElasticsearchPublisher` class, if None is given (default) 
-                                       it uses the `Table` query baked into the Publisher
+    :param elasticsearch_mapping:      Elasticsearch field mapping "DDL" handed to the `ElasticsearchPublisher` class,
+                                       if None is given (default) it uses the `Table` query baked into the Publisher
     """
     # loader saves data to this location and publisher reads it from here
     extracted_search_data_path = '/var/tmp/amundsen/search_data.json'
