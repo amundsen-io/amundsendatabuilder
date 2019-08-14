@@ -35,6 +35,7 @@ class HiveTableMetadataExtractor(Extractor):
     JOIN PARTITION_KEYS p ON t.TBL_ID = p.TBL_ID
     LEFT JOIN TABLE_PARAMS tp ON (t.TBL_ID = tp.TBL_ID AND tp.PARAM_KEY='comment')
     {where_clause_suffix}
+    {additional_partition_where_clause}
     UNION
     SELECT t.TBL_ID, d.NAME as schema_name, t.TBL_NAME name, t.TBL_TYPE, tp.PARAM_VALUE as description,
            c.COLUMN_NAME as col_name, c.INTEGER_IDX as col_sort_order,
@@ -45,15 +46,20 @@ class HiveTableMetadataExtractor(Extractor):
     JOIN COLUMNS_V2 c ON s.CD_ID = c.CD_ID
     LEFT JOIN TABLE_PARAMS tp ON (t.TBL_ID = tp.TBL_ID AND tp.PARAM_KEY='comment')
     {where_clause_suffix}
+    {additional_column_where_clause}
     ) source
     ORDER by tbl_id, is_partition_col desc;
     """
 
     # CONFIG KEYS
     WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
+    ADDITIONAL_PARTITION_WHERE_CLAUSE_KEY = 'additional_partition_where_clause'
+    ADDITIONAL_COLUMN_WHERE_CLAUSE_KEY = 'additional_column_where_clause'
     CLUSTER_KEY = 'cluster'
 
     DEFAULT_CONFIG = ConfigFactory.from_dict({WHERE_CLAUSE_SUFFIX_KEY: ' ',
+                                              ADDITIONAL_PARTITION_WHERE_CLAUSE_KEY: ' ',
+                                              ADDITIONAL_COLUMN_WHERE_CLAUSE_KEY: ' ',
                                               CLUSTER_KEY: 'gold'})
 
     def init(self, conf):
@@ -62,7 +68,11 @@ class HiveTableMetadataExtractor(Extractor):
         self._cluster = '{}'.format(conf.get_string(HiveTableMetadataExtractor.CLUSTER_KEY))
 
         self.sql_stmt = HiveTableMetadataExtractor.SQL_STATEMENT.format(
-            where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY))
+            where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
+            additional_partition_where_clause=
+            conf.get_string(HiveTableMetadataExtractor.ADDITIONAL_PARTITION_WHERE_CLAUSE_KEY),
+            additional_column_where_clause=
+            conf.get_string(HiveTableMetadataExtractor.ADDITIONAL_COLUMN_WHERE_CLAUSE_KEY))
 
         LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
 
