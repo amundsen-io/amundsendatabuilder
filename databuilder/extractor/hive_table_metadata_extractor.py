@@ -10,7 +10,6 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
-
 TableKey = namedtuple('TableKey', ['schema_name', 'table_name'])
 
 LOGGER = logging.getLogger(__name__)
@@ -69,15 +68,15 @@ class HiveTableMetadataExtractor(Extractor):
 
         self.sql_stmt = HiveTableMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
-            additional_partition_where_clause=
-            conf.get_string(HiveTableMetadataExtractor.ADDITIONAL_PARTITION_WHERE_CLAUSE_KEY),
-            additional_column_where_clause=
-            conf.get_string(HiveTableMetadataExtractor.ADDITIONAL_COLUMN_WHERE_CLAUSE_KEY))
+            additional_partition_where_clause=conf.get_string(
+                HiveTableMetadataExtractor.ADDITIONAL_PARTITION_WHERE_CLAUSE_KEY),
+            additional_column_where_clause=conf.get_string(
+                HiveTableMetadataExtractor.ADDITIONAL_COLUMN_WHERE_CLAUSE_KEY))
 
         LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
 
         self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()) \
             .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
 
         self._alchemy_extractor.init(sql_alch_conf)
