@@ -401,27 +401,37 @@ if __name__ == "__main__":
         user_cypher_query = textwrap.dedent(
             """
             MATCH (user:User)
-            OPTIONAL MATCH (table)-[:DESCRIPTION]->(table_description:Description)
-            OPTIONAL MATCH (table)-[read:READ_BY]->(user:User)
-            OPTIONAL MATCH (table)-[:COLUMN]->(cols:Column)
-            OPTIONAL MATCH (cols)-[:DESCRIPTION]->(col_description:Description)
-            OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag)
-            OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
-            RETURN user.email AS email, user.first_name as first_name, user.last_name AS last_name,
-            user.name AS name, user.github_username AS github_username, user.team_name AS team_name,
-            user.employee_type AS employee_type, user.manager_email AS manager_email, user.slack_id AS slack_id,
-            COUNT(DISTINCT user.email) AS is_active, COUNT(DISTINCT user.email) AS total_read,
-            COUNT(DISTINCT user.email) AS total_own, COUNT(DISTINCT user.email) AS total_follow
-            ORDER BY user.name;
+            OPTIONAL MATCH (user)-[read:READ]->(a)
+            OPTIONAL MATCH (user)-[own:OWNER_OF]->(b)
+            OPTIONAL MATCH (user)-[follow:FOLLOWED_BY]->(c)
+            OPTIONAL MATCH (user)-[manage_by:MANAGE_BY]->(manager)
+            with user, a, b, c, read, own, follow, manager
+            where user.full_name is not null
+            return user.email as email, user.first_name as first_name, user.last_name as last_name,
+            user.full_name as name, user.github_username as github_username, user.team_name as team_name,
+            user.employee_type as employee_type, manager.email as manager_email, user.slack_id as slack_id,
+            user.is_active as is_active, 
+            REDUCE(sum_r = 0, r in COLLECT(DISTINCT read)| sum_r + r.read_count) AS total_read,
+            count(distinct b) as total_own,
+            count(distinct c) AS total_follow
+            order by user.email
             """
         )
-        # TODO make sure we add is_active, total_read, total_own & total_follow to model, csv etc...
 
         user_elasticsearch_mapping = """
-        {
-          "mappings":{
+            {
+              "mappings":{
                 "user":{
                   "properties": {
+                    "email": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
                     "first_name": {
                       "type":"text",
                       "analyzer": "simple",
@@ -440,15 +450,7 @@ if __name__ == "__main__":
                         }
                       }
                     },
-                    "last_updated_epoch": {
-                      "type": "date",
-                      "format": "epoch_second"
-                    },
-                    "description": {
-                      "type": "text",
-                      "analyzer": "simple"
-                    },
-                    "email": {
+                    "name": {
                       "type":"text",
                       "analyzer": "simple",
                       "fields": {
@@ -457,32 +459,13 @@ if __name__ == "__main__":
                         }
                       }
                     },
-                    "column_descriptions": {
-                      "type": "text",
-                      "analyzer": "simple"
-                    },
-                    "tags": {
-                      "type": "keyword"
-                    },
-                    "cluster": {
-                      "type": "text"
-                    },
-                    "database": {
-                      "type": "text",
-                      "analyzer": "simple",
-                      "fields": {
-                        "raw": {
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "key": {
-                      "type": "keyword"
-                    },
-                    "total_usage":{
+                    "total_read":{
                       "type": "long"
                     },
-                    "unique_usage": {
+                    "total_own": {
+                      "type": "long"
+                    },
+                    "total_follow": {
                       "type": "long"
                     }
                   }
