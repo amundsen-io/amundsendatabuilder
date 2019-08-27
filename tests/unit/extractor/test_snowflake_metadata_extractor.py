@@ -89,7 +89,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
             extractor = SnowflakeMetadataExtractor()
             extractor.init(self.conf)
             actual = extractor.extract()
-            expected = TableMetadata('prod', 'MY_CLUSTER', 'test_schema', 'test_table', 'a table for testing',
+            expected = TableMetadata(u'prod', 'MY_CLUSTER', 'test_schema', 'test_table', 'a table for testing',
                                      [ColumnMetadata('col_id1', 'description of id1', 'number', 0),
                                       ColumnMetadata('col_id2', 'description of id2', 'number', 1),
                                       ColumnMetadata('is_active', None, 'boolean', 2),
@@ -185,7 +185,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
             extractor = SnowflakeMetadataExtractor()
             extractor.init(self.conf)
 
-            expected = TableMetadata('prod',
+            expected = TableMetadata(u'prod',
                                      self.conf['extractor.snowflake_metadata.{}'.format(
                                          SnowflakeMetadataExtractor.CLUSTER_KEY)],
                                      'test_schema1', 'test_table1', 'test table 1',
@@ -198,7 +198,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
                                       ColumnMetadata('ds', None, 'varchar', 5)])
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
-            expected = TableMetadata('prod',
+            expected = TableMetadata(u'prod',
                                      self.conf['extractor.snowflake_metadata.{}'.format(
                                          SnowflakeMetadataExtractor.CLUSTER_KEY)],
                                      'test_schema1', 'test_table2', 'test table 2',
@@ -206,7 +206,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
                                       ColumnMetadata('col_name2', 'description of col_name2', 'varchar', 1)])
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
-            expected = TableMetadata('prod',
+            expected = TableMetadata(u'prod',
                                      self.conf['extractor.snowflake_metadata.{}'.format(
                                          SnowflakeMetadataExtractor.CLUSTER_KEY)],
                                      'test_schema2', 'test_table3', 'test table 3',
