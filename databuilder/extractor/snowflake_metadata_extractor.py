@@ -73,6 +73,7 @@ class SnowflakeMetadataExtractor(Extractor):
             cluster_source = "'{}'".format(self._cluster)
 
         self._database = conf.get_string(SnowflakeMetadataExtractor.DATABASE_KEY)
+        
         self.sql_stmt = SnowflakeMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
             cluster_source=cluster_source,
