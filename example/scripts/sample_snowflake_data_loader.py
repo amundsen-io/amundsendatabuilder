@@ -4,7 +4,7 @@ This is a example script which demo how to load data into neo4j without using Ai
 
 import logging
 from pyhocon import ConfigFactory
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
 
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
