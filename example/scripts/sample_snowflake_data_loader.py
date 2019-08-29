@@ -2,6 +2,10 @@
 This is a example script which demo how to load data into neo4j without using Airflow DAG.
 """
 
+from future.standard_library import install_aliases
+install_aliases()
+from urllib.parse import unquote_plus
+
 import logging
 from pyhocon import ConfigFactory
 
@@ -13,9 +17,6 @@ from databuilder.publisher import neo4j_csv_publisher
 from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 
-from future.standard_library import install_aliases
-install_aliases()
-from urllib.parse import unquote_plus
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
