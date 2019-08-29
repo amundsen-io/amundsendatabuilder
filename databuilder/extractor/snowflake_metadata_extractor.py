@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__)
 class SnowflakeMetadataExtractor(Extractor):
     """
     Extracts Snowflake table and column metadata from underlying meta store database using SQLAlchemyExtractor.
-    Requirements:
+    Uncomment necessary libraries in requirements.txt:
         snowflake-connector-python
         snowflake-sqlalchemy
     """
