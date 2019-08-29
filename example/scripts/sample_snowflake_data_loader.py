@@ -4,7 +4,6 @@ This is a example script which demo how to load data into neo4j without using Ai
 
 import logging
 from pyhocon import ConfigFactory
-from urllib.parse import unquote_plus
 
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
@@ -13,6 +12,10 @@ from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
 from databuilder.publisher import neo4j_csv_publisher
 from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
+
+from future.standard_library import install_aliases
+install_aliases()
+from urllib.parse import unquote_plus
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
