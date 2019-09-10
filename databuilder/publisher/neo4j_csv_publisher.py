@@ -25,7 +25,7 @@ while True:
         csv.field_size_limit(maxInt)
         break
     except OverflowError:
-        maxInt = int(maxInt/10)
+        maxInt = int(maxInt / 10)
 
 # Config keys
 # A directory that contains CSV files for nodes
