@@ -1,6 +1,7 @@
 import copy
 import csv
 import logging
+import sys
 import time
 from os import listdir
 from os.path import isfile, join
@@ -15,6 +16,16 @@ from typing import Set, List  # noqa: F401
 from databuilder.publisher.base_publisher import Publisher
 from databuilder.publisher.neo4j_preprocessor import NoopRelationPreprocessor
 
+
+# Setting field_size_limit to solve the error below
+# _csv.Error: field larger than field limit (131072)
+maxInt = sys.maxsize
+while True:
+    try:
+        csv.field_size_limit(maxInt)
+        break
+    except OverflowError:
+        maxInt = int(maxInt/10)
 
 # Config keys
 # A directory that contains CSV files for nodes
