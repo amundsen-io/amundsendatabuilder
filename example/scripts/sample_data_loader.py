@@ -304,7 +304,6 @@ def load_table_owner_data_from_csv(file_name):
                       i['owners'],
                       i['cluster']
                       ) for i in dr]
-            print(to_db)
 
         cur.executemany("INSERT INTO test_table_owner_metadata "
                         "(db_name, schema_name, table_name, owners, cluster) "
@@ -441,7 +440,7 @@ if __name__ == "__main__":
                                  'databuilder.models.watermark.Watermark')
         job3.launch()
 
-        # start usage job
+        # start owner job
         job_table_owner = create_sample_job('test_table_owner_metadata',
                                             'databuilder.models.table_owner.TableOwner')
         job_table_owner.launch()
