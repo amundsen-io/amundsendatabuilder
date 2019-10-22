@@ -173,14 +173,15 @@ class TableMetadata(Neo4jCsvSerializable):
 
     def __repr__(self):
         # type: () -> str
-        return 'TableMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                                                self.cluster,
-                                                                                self.schema_name,
-                                                                                self.name,
-                                                                                self.description,
-                                                                                self.columns,
-                                                                                self.is_view,
-                                                                                self.tags)
+        return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
+            '{!r}, {!r}, {!r}, {!r})'.format(self.database,
+                                             self.cluster,
+                                             self.schema_name,
+                                             self.name,
+                                             self.description,
+                                             self.columns,
+                                             self.is_view,
+                                             self.tags)
 
     def _get_table_key(self):
         # type: () -> str
