@@ -38,6 +38,12 @@ class TestTableMetadata(unittest.TestCase):
         self.table_metadata5 = TableMetadata('hive', 'gold', 'test_schema5', 'test_table5', 'test_table5', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0)], tags="tag3, tag4")
 
+        self.table_metadata6 = TableMetadata('hive', 'gold', 'test_schema6', 'test_table6', 'test_table6', [
+            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0)], tags=[])
+
+        self.table_metadata7 = TableMetadata('hive', 'gold', 'test_schema7', 'test_table7', 'test_table7', [
+            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0)], tags="")
+
         self.expected_nodes_deduped = [
             {'name': 'test_table1', 'KEY': 'hive://gold.test_schema1/test_table1', 'LABEL': 'Table',
              'is_view:UNQUOTED': False},
@@ -225,6 +231,18 @@ class TestTableMetadata(unittest.TestCase):
                                  'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
         self.assertEqual(actual[2], expected_tab_tag_rel3)
         self.assertEqual(actual[3], expected_tab_tag_rel4)
+
+        # Test table tag fields are not populated from empty List
+        node_row = self.table_metadata6.next_node()
+        while node_row:
+            self.assertNotEqual(node_row.get('LABEL'), 'Tag')
+            node_row = self.table_metadata6.next_node()
+
+        # Test table tag fields are not populated from empty str
+        node_row = self.table_metadata7.next_node()
+        while node_row:
+            self.assertNotEqual(node_row.get('LABEL'), 'Tag')
+            node_row = self.table_metadata7.next_node()
 
 
 if __name__ == '__main__':
