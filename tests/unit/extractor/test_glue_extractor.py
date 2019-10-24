@@ -9,6 +9,8 @@ from databuilder.extractor.glue_extractor import GlueExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 
+# patch whole class to avoid actually calling for boto3.client during tests
+@patch('databuilder.extractor.glue_extractor.boto3.client', lambda x: None)
 class TestGlueExtractor(unittest.TestCase):
     def setUp(self):
         # type: () -> None
