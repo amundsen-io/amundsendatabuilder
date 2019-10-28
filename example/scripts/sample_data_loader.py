@@ -260,6 +260,37 @@ def load_test_last_updated_data_from_csv(file_name):
         conn.commit()
 
 
+def load_stats_data_from_csv(file_name):
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_stats_metadata')
+        cur.execute('create table if not exists test_stats_metadata '
+                    '(table_name VARCHAR(64) NOT NULL , '
+                    'col_name VARCHAR(64) NOT NULL , '
+                    'stat_name VARCHAR(64) NOT NULL, '
+                    'stat_val VARCHAR(64) NOT NULL, '
+                    'start_epoch VARCHAR(64) NOT NULL , '
+                    'end_epoch VARCHAR(32) NOT NULL , '
+                    'db VARCHAR(32) NOT NULL , '
+                    'cluster VARCHAR(32) NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['table_name'],
+                      i['col_name'],
+                      i['stat_name'],
+                      i['stat_val'],
+                      i['start_epoch'],
+                      i['end_epoch'],
+                      i['db'],
+                      i['cluster']) for i in dr]
+
+        cur.executemany("INSERT INTO test_stats_metadata (table_name, col_name, "
+                        "stat_name, stat_val, start_epoch, end_epoch, db, cluster) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", to_db)
+        conn.commit()
+
+
 # todo: Add a second model
 def create_sample_job(table_name, model_name, transformer=NoopTransformer()):
     sql = textwrap.dedent("""
@@ -480,6 +511,7 @@ if __name__ == "__main__":
     load_application_data_from_csv('sample_application.csv')
     load_source_data_from_csv('sample_source.csv')
     load_test_last_updated_data_from_csv('sample_table_last_updated.csv')
+    load_stats_data_from_csv('sample_stats.csv')
 
     if create_connection(DB_FILE):
         # start table job
@@ -530,6 +562,11 @@ if __name__ == "__main__":
         # start last updated job
         job_lastupdated = create_last_updated_job()
         job_lastupdated.launch()
+
+        # start column stats job
+        job_stats = create_sample_job('test_stats_metadata',
+                                       'databuilder.models.table_stats.TableColumnStats')
+        job_stats.launch()
 
         # start Elasticsearch publish jobs
         job_es_table = create_es_publisher_sample_job(
