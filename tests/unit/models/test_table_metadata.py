@@ -42,16 +42,16 @@ class TestTableMetadata(unittest.TestCase):
              'KEY': 'hive://gold.test_schema1/test_table1/test_id2/_description', 'LABEL': 'Description'},
             {'sort_order:UNQUOTED': 2, 'type': 'boolean', 'name': 'is_active',
              'KEY': 'hive://gold.test_schema1/test_table1/is_active', 'LABEL': 'Column'},
-            {'sort_order:UNQUOTED': 3, 'type': 'varchar', 'name': 'source', 'KEY': 'hive://gold.test_schema1/test_table1/source',
-             'LABEL': 'Column'},
+            {'sort_order:UNQUOTED': 3, 'type': 'varchar', 'name': 'source',
+             'KEY': 'hive://gold.test_schema1/test_table1/source', 'LABEL': 'Column'},
             {'description': 'description of source', 'KEY': 'hive://gold.test_schema1/test_table1/source/_description',
              'LABEL': 'Description'},
             {'sort_order:UNQUOTED': 4, 'type': 'timestamp', 'name': 'etl_created_at',
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at', 'LABEL': 'Column'},
             {'description': 'description of etl_created_at',
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at/_description', 'LABEL': 'Description'},
-            {'sort_order:UNQUOTED': 5, 'type': 'varchar', 'name': 'ds', 'KEY': 'hive://gold.test_schema1/test_table1/ds',
-             'LABEL': 'Column'}
+            {'sort_order:UNQUOTED': 5, 'type': 'varchar', 'name': 'ds',
+             'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'}
         ]
 
         self.expected_nodes = copy.deepcopy(self.expected_nodes_deduped)
