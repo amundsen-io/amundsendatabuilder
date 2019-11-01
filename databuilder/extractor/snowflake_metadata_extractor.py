@@ -128,7 +128,7 @@ class SnowflakeMetadataExtractor(Extractor):
                                 last_row['name'],
                                 unidecode(last_row['description']) if last_row['description'] else None,
                                 columns,
-                                last_row['is_view']=='true')
+                                last_row['is_view'] == 'true')
 
     def _get_raw_extract_iter(self):
         # type: () -> Iterator[Dict[str, Any]]
