@@ -62,7 +62,8 @@ def load_table_data_from_csv(file_name):
                     'cluster VARCHAR(64) NOT NULL, '
                     'schema_name VARCHAR(64) NOT NULL,'
                     'name VARCHAR(64) NOT NULL,'
-                    'description VARCHAR(64) NOT NULL)')
+                    'description VARCHAR(64) NOT NULL, '
+                    'tags VARCHAR(128) NOT NULL)')
         file_loc = 'example/sample_data/' + file_name
         with open(file_loc, 'r') as fin:
             dr = csv.DictReader(fin)
@@ -70,10 +71,11 @@ def load_table_data_from_csv(file_name):
                       i['cluster'],
                       i['schema_name'],
                       i['table_name'],
-                      i['table_desc']) for i in dr]
+                      i['table_desc'],
+                      i['tags']) for i in dr]
 
         cur.executemany("INSERT INTO test_table_metadata (database, cluster, "
-                        "schema_name, name, description) VALUES (?, ?, ?, ?, ?);", to_db)
+                        "schema_name, name, description, tags) VALUES (?, ?, ?, ?, ?, ?);", to_db)
         conn.commit()
 
 
@@ -110,6 +112,75 @@ def load_col_data_from_csv(file_name):
                         "database, cluster, "
                         "schema_name, table_name, table_description) VALUES "
                         "(?, ?, ?, ?, ?, ?, ?, ?, ?);", to_db)
+        conn.commit()
+
+
+def load_table_column_stats_from_csv(file_name):
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_table_column_stats')
+        cur.execute('create table if not exists test_table_column_stats '
+                    '(cluster VARCHAR(64) NOT NULL , '
+                    'db VARCHAR(64) NOT NULL , '
+                    'schema_name VARCHAR(64) NOT NULL , '
+                    'table_name INTEGER NOT NULL , '
+                    'col_name VARCHAR(64) NOT NULL , '
+                    'stat_name VARCHAR(64) NOT NULL, '
+                    'stat_val VARCHAR(64) NOT NULL,'
+                    'start_epoch VARCHAR(64) NOT NULL,'
+                    'end_epoch VARCHAR(64) NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['cluster'],
+                      i['db'],
+                      i['schema_name'],
+                      i['table_name'],
+                      i['col_name'],
+                      i['stat_name'],
+                      '"' + i['stat_val'] + '"',
+                      i['start_epoch'],
+                      i['end_epoch']) for i in dr]
+
+        cur.executemany("INSERT INTO test_table_column_stats ("
+                        "cluster, db, schema_name, table_name,"
+                        "col_name, stat_name, "
+                        "stat_val, start_epoch, end_epoch) VALUES "
+                        "(?, ?, ?, ?, ?, ?, ?, ?, ?);", to_db)
+        conn.commit()
+
+
+def load_watermark_data_from_csv(file_name):
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_watermark_metadata')
+        cur.execute('create table if not exists test_watermark_metadata '
+                    '(create_time VARCHAR(64) NOT NULL , '
+                    'database VARCHAR(64) NOT NULL , '
+                    'schema_name VARCHAR(64) NOT NULL , '
+                    'table_name VARCHAR(64) NOT NULL , '
+                    'part_name VARCHAR(64) NOT NULL , '
+                    'part_type VARCHAR(64) NOT NULL , '
+                    'cluster VARCHAR(64) NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = []
+            for i in dr:
+                to_db.append((i['create_time'],
+                              i['database'],
+                              i['schema_name'],
+                              i['table_name'],
+                              i['part_name'],
+                              i['part_type'],
+                              i['cluster']))
+
+        cur.executemany("INSERT INTO test_watermark_metadata ("
+                        "create_time, database, schema_name, table_name,"
+                        "part_name, part_type, cluster) VALUES "
+                        "(?, ?, ?, ?, ?, ?, ?);", to_db)
         conn.commit()
 
 
@@ -172,6 +243,59 @@ def load_application_data_from_csv(file_name):
         conn.commit()
 
 
+def load_source_data_from_csv(file_name):
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_source_metadata')
+        cur.execute('create table if not exists test_source_metadata '
+                    '(db_name VARCHAR(64) NOT NULL , '
+                    'cluster VARCHAR(64) NOT NULL , '
+                    'schema_name VARCHAR(64) NOT NULL, '
+                    'table_name VARCHAR(64) NOT NULL, '
+                    'source VARCHAR(64) NOT NULL , '
+                    'source_type VARCHAR(32) NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['db_name'],
+                      i['cluster'],
+                      i['schema_name'],
+                      i['table_name'],
+                      i['source'],
+                      i['source_type']) for i in dr]
+
+        cur.executemany("INSERT INTO test_source_metadata (db_name, cluster, "
+                        "schema_name, table_name, source, source_type) VALUES (?, ?, ?, ?, ?, ?);", to_db)
+        conn.commit()
+
+
+def load_test_last_updated_data_from_csv(file_name):
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_table_last_updated_metadata')
+        cur.execute('create table if not exists test_table_last_updated_metadata '
+                    '(cluster VARCHAR(64) NOT NULL , '
+                    'db VARCHAR(64) NOT NULL , '
+                    'schema_name VARCHAR(64) NOT NULL, '
+                    'table_name VARCHAR(64) NOT NULL, '
+                    'last_updated_time_epoch LONG NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['cluster'],
+                      i['db'],
+                      i['schema_name'],
+                      i['table_name'],
+                      i['last_updated_time_epoch']) for i in dr]
+
+        cur.executemany("INSERT INTO test_table_last_updated_metadata (cluster, db, "
+                        "schema_name, table_name, last_updated_time_epoch) VALUES (?, ?, ?, ?, ?);", to_db)
+
+        conn.commit()
+
+
 # todo: Add a second model
 def create_sample_job(table_name, model_name, transformer=NoopTransformer()):
     sql = textwrap.dedent("""
@@ -225,7 +349,7 @@ def load_usage_data_from_csv(file_name):
         cur = conn.cursor()
         cur.execute('drop table if exists test_usage_metadata')
         cur.execute('create table if not exists test_usage_metadata '
-                    '(database VARCHAR(64) NOT NULL , '
+                    '(database VARCHAR(64) NOT NULL, '
                     'cluster VARCHAR(64) NOT NULL, '
                     'schema_name VARCHAR(64) NOT NULL, '
                     'table_name VARCHAR(64) NOT NULL, '
@@ -247,6 +371,34 @@ def load_usage_data_from_csv(file_name):
         cur.executemany("INSERT INTO test_usage_metadata (database, cluster, "
                         "schema_name, table_name, column_name, user_email, read_count) "
                         "VALUES (?, ?, ?, ?, ?, ?, ?);", to_db)
+        conn.commit()
+
+
+def load_table_owner_data_from_csv(file_name):
+    # Load usage data
+    conn = create_connection(DB_FILE)
+    if conn:
+        cur = conn.cursor()
+        cur.execute('drop table if exists test_table_owner_metadata')
+        cur.execute('create table if not exists test_table_owner_metadata '
+                    '(db_name VARCHAR(64) NOT NULL, '
+                    'schema_name VARCHAR(64) NOT NULL, '
+                    'table_name VARCHAR(64) NOT NULL, '
+                    'owners VARCHAR(128) NOT NULL, '
+                    'cluster VARCHAR(64) NOT NULL)')
+        file_loc = 'example/sample_data/' + file_name
+        with open(file_loc, 'r') as fin:
+            dr = csv.DictReader(fin)
+            to_db = [(i['database'],
+                      i['schema_name'],
+                      i['table_name'],
+                      i['owners'],
+                      i['cluster']
+                      ) for i in dr]
+
+        cur.executemany("INSERT INTO test_table_owner_metadata "
+                        "(db_name, schema_name, table_name, owners, cluster) "
+                        "VALUES (?, ?, ?, ?, ?);", to_db)
         conn.commit()
 
 
@@ -288,7 +440,22 @@ def create_last_updated_job():
     return job
 
 
-def create_es_publisher_sample_job():
+def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index',
+                                   elasticsearch_doc_type_key='table',
+                                   model_name='databuilder.models.table_elasticsearch_document.TableESDocument',
+                                   cypher_query=None,
+                                   elasticsearch_mapping=None):
+    """
+    :param elasticsearch_index_alias:  alias for Elasticsearch used in
+                                       amundsensearchlibrary/search_service/config.py as an index
+    :param elasticsearch_doc_type_key: name the ElasticSearch index is prepended with. Defaults to `table` resulting in
+                                       `table_search_index`
+    :param model_name:                 the Databuilder model class used in transporting between Extractor and Loader
+    :param cypher_query:               Query handed to the `Neo4jSearchDataExtractor` class, if None is given (default)
+                                       it uses the `Table` query baked into the Extractor
+    :param elasticsearch_mapping:      Elasticsearch field mapping "DDL" handed to the `ElasticsearchPublisher` class,
+                                       if None is given (default) it uses the `Table` query baked into the Publisher
+    """
     # loader saves data to this location and publisher reads it from here
     extracted_search_data_path = '/var/tmp/amundsen/search_data.json'
 
@@ -300,15 +467,10 @@ def create_es_publisher_sample_job():
     elasticsearch_client = es
     # unique name of new index in Elasticsearch
     elasticsearch_new_index_key = 'tables' + str(uuid.uuid4())
-    # related to mapping type from /databuilder/publisher/elasticsearch_publisher.py#L38
-    elasticsearch_new_index_key_type = 'table'
-    # alias for Elasticsearch used in amundsensearchlibrary/search_service/config.py as an index
-    elasticsearch_index_alias = 'table_search_index'
 
     job_config = ConfigFactory.from_dict({
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): neo4j_endpoint,
-        'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY):
-            'databuilder.models.table_elasticsearch_document.TableESDocument',
+        'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY): model_name,
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER): neo4j_user,
         'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW): neo4j_password,
         'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY):
@@ -322,10 +484,18 @@ def create_es_publisher_sample_job():
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY):
             elasticsearch_new_index_key,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY):
-            elasticsearch_new_index_key_type,
+            elasticsearch_doc_type_key,
         'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY):
-            elasticsearch_index_alias
+            elasticsearch_index_alias,
     })
+
+    # only optionally add these keys, so need to dynamically `put` them
+    if cypher_query:
+        job_config.put('extractor.search_data.{}'.format(Neo4jSearchDataExtractor.CYPHER_QUERY_CONFIG_KEY),
+                       cypher_query)
+    if elasticsearch_mapping:
+        job_config.put('publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY),
+                       elasticsearch_mapping)
 
     job = DefaultJob(conf=job_config,
                      task=task,
@@ -339,9 +509,15 @@ if __name__ == "__main__":
 
     load_table_data_from_csv('sample_table.csv')
     load_col_data_from_csv('sample_col.csv')
+    load_table_column_stats_from_csv('sample_table_column_stats.csv')
+    load_watermark_data_from_csv('sample_watermark.csv')
+    load_table_owner_data_from_csv('sample_table_owner.csv')
     load_usage_data_from_csv('sample_column_usage.csv')
     load_user_data_from_csv('sample_user.csv')
     load_application_data_from_csv('sample_application.csv')
+    load_source_data_from_csv('sample_source.csv')
+    load_test_last_updated_data_from_csv('sample_table_last_updated.csv')
+
     if create_connection(DB_FILE):
         # start table job
         job1 = create_sample_job('test_table_metadata',
@@ -352,6 +528,21 @@ if __name__ == "__main__":
         job2 = create_sample_job('test_col_metadata',
                                  'example.models.test_column_model.TestColumnMetadata')
         job2.launch()
+
+        # start table stats job
+        job_table_stats = create_sample_job('test_table_column_stats',
+                                            'databuilder.models.table_stats.TableColumnStats')
+        job_table_stats.launch()
+
+        # # start watermark job
+        job3 = create_sample_job('test_watermark_metadata',
+                                 'databuilder.models.watermark.Watermark')
+        job3.launch()
+
+        # start owner job
+        job_table_owner = create_sample_job('test_table_owner_metadata',
+                                            'databuilder.models.table_owner.TableOwner')
+        job_table_owner.launch()
 
         # start usage job
         job_col_usage = create_sample_job('test_usage_metadata',
@@ -368,10 +559,107 @@ if __name__ == "__main__":
                                     'databuilder.models.application.Application')
         job_app.launch()
 
+        # start job_source job
+        job_source = create_sample_job('test_source_metadata',
+                                       'databuilder.models.table_source.TableSource')
+        job_source.launch()
+
+        # start job_source job
+        job_table_last_updated = create_sample_job('test_table_last_updated_metadata',
+                                                   'databuilder.models.table_last_updated.TableLastUpdated')
+        job_table_last_updated.launch()
+
         # start last updated job
         job_lastupdated = create_last_updated_job()
         job_lastupdated.launch()
 
-        # start Elasticsearch publish job
-        job_es = create_es_publisher_sample_job()
-        job_es.launch()
+        # start Elasticsearch publish jobs
+        job_es_table = create_es_publisher_sample_job(
+            elasticsearch_index_alias='table_search_index',
+            elasticsearch_doc_type_key='table',
+            model_name='databuilder.models.table_elasticsearch_document.TableESDocument')
+        job_es_table.launch()
+
+        user_cypher_query = textwrap.dedent(
+            """
+            MATCH (user:User)
+            OPTIONAL MATCH (user)-[read:READ]->(a)
+            OPTIONAL MATCH (user)-[own:OWNER_OF]->(b)
+            OPTIONAL MATCH (user)-[follow:FOLLOWED_BY]->(c)
+            OPTIONAL MATCH (user)-[manage_by:MANAGE_BY]->(manager)
+            with user, a, b, c, read, own, follow, manager
+            where user.full_name is not null
+            return user.email as email, user.first_name as first_name, user.last_name as last_name,
+            user.full_name as name, user.github_username as github_username, user.team_name as team_name,
+            user.employee_type as employee_type, manager.email as manager_email, user.slack_id as slack_id,
+            user.is_active as is_active,
+            REDUCE(sum_r = 0, r in COLLECT(DISTINCT read)| sum_r + r.read_count) AS total_read,
+            count(distinct b) as total_own,
+            count(distinct c) AS total_follow
+            order by user.email
+            """
+        )
+
+        user_elasticsearch_mapping = """
+            {
+              "mappings":{
+                "user":{
+                  "properties": {
+                    "email": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "first_name": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "last_name": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type":"text",
+                      "analyzer": "simple",
+                      "fields": {
+                        "raw": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "total_read":{
+                      "type": "long"
+                    },
+                    "total_own": {
+                      "type": "long"
+                    },
+                    "total_follow": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+        """
+
+        job_es_user = create_es_publisher_sample_job(
+            elasticsearch_index_alias='user_search_index',
+            elasticsearch_doc_type_key='user',
+            model_name='databuilder.models.user_elasticsearch_document.UserESDocument',
+            cypher_query=user_cypher_query,
+            elasticsearch_mapping=user_elasticsearch_mapping)
+        job_es_user.launch()
