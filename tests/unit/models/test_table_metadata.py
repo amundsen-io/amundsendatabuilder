@@ -134,6 +134,7 @@ class TestTableMetadata(unittest.TestCase):
 
         self.assertEqual(self.expected_rels_deduped, actual)
 
+    
     def test_table_attributes(self):
         # type: () -> None
         self.table_metadata3 = TableMetadata('hive', 'gold', 'test_schema3', 'test_table3', 'test_table3', [
@@ -252,6 +253,25 @@ class TestTableMetadata(unittest.TestCase):
             self.assertNotEqual(node_row.get('LABEL'), 'Tag')
             node_row = self.table_metadata7.next_node()
 
+
+    def test_column_tags_arent_dependant_on_column_description(self):
+        # type: () -> None
+        self.table_metadata8 = TableMetadata('hive', 'gold', 'test_schema8', 'test_table8', 'test_table8', [
+            ColumnMetadata('test_id1', None, 'bigint', 0, ['column_tag1', 'column_tag2'])], tags=[])
+
+        tag_nodes = []
+        expected_tag_nodes = [{'LABEL': 'Tag', 'KEY': 'column_tag1', 'tag_type': 
+                               'default'},
+                              {'LABEL': 'Tag', 'KEY': 'column_tag2', 'tag_type':
+                               'default'}]
+
+        node_row = self.table_metadata8.next_node()
+        while node_row:
+            if node_row['LABEL'] == 'Tag':
+                tag_nodes.append(node_row)
+            node_row = self.table_metadata8.next_node()
+            
+        self.assertEqual(tag_nodes, expected_tag_nodes)
 
 if __name__ == '__main__':
     unittest.main()
