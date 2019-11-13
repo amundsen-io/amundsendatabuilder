@@ -90,7 +90,6 @@ class TableMetadata(Neo4jCsvSerializable):
     These are being created here as it does not make much sense to have different extraction to produce this. As
     database, cluster, schema would be very repititive with low cardinality, it will perform de-dupe so that publisher
     won't need to publish same nodes, relationships.
-
     This class can be used for both table and view metadata. If it is a View, is_view=True should be passed in.
     """
     TABLE_NODE_LABEL = 'Table'
@@ -268,21 +267,18 @@ class TableMetadata(Neo4jCsvSerializable):
                 ColumnMetadata.COLUMN_TYPE: col.type,
                 ColumnMetadata.COLUMN_ORDER: col.sort_order}
 
-            if not col.description:
-                continue
+            if col.description:
+                yield {
+                    NODE_LABEL: DESCRIPTION_NODE_LABEL,
+                    NODE_KEY: self._get_col_description_key(col),
+                    ColumnMetadata.COLUMN_DESCRIPTION: col.description}
 
-            yield {
-                NODE_LABEL: DESCRIPTION_NODE_LABEL,
-                NODE_KEY: self._get_col_description_key(col),
-                ColumnMetadata.COLUMN_DESCRIPTION: col.description}
-
-            if not col.tags:
-                continue
-
-            for tag in col.tags:
-                yield {NODE_LABEL: TagMetadata.TAG_NODE_LABEL,
-                       NODE_KEY: TagMetadata.get_tag_key(tag),
-                       TagMetadata.TAG_TYPE: 'default'}
+            if col.tags:     
+                for tag in col.tags:
+                    yield {
+                        NODE_LABEL: TagMetadata.TAG_NODE_LABEL,
+                        NODE_KEY: TagMetadata.get_tag_key(tag),
+                        TagMetadata.TAG_TYPE: 'default'}
 
         # Database, cluster, schema
         others = [NodeTuple(key=self._get_database_key(),
@@ -355,30 +351,26 @@ class TableMetadata(Neo4jCsvSerializable):
                 RELATION_REVERSE_TYPE: TableMetadata.COL_TABLE_RELATION_TYPE
             }
 
-            if not col.description:
-                continue
-
-            yield {
-                RELATION_START_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
-                RELATION_END_LABEL: DESCRIPTION_NODE_LABEL,
-                RELATION_START_KEY: self._get_col_key(col),
-                RELATION_END_KEY: self._get_col_description_key(col),
-                RELATION_TYPE: ColumnMetadata.COL_DESCRIPTION_RELATION_TYPE,
-                RELATION_REVERSE_TYPE: ColumnMetadata.DESCRIPTION_COL_RELATION_TYPE
-            }
-
-            if not col.tags:
-                continue
-
-            for tag in col.tags:
+            if col.description:
                 yield {
-                    RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-                    RELATION_END_LABEL: TagMetadata.TAG_NODE_LABEL,
-                    RELATION_START_KEY: self._get_table_key(),
-                    RELATION_END_KEY: TagMetadata.get_tag_key(tag),
-                    RELATION_TYPE: ColumnMetadata.COL_TAG_RELATION_TYPE,
-                    RELATION_REVERSE_TYPE: ColumnMetadata.TAG_COL_RELATION_TYPE,
+                    RELATION_START_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
+                    RELATION_END_LABEL: DESCRIPTION_NODE_LABEL,
+                    RELATION_START_KEY: self._get_col_key(col),
+                    RELATION_END_KEY: self._get_col_description_key(col),
+                    RELATION_TYPE: ColumnMetadata.COL_DESCRIPTION_RELATION_TYPE,
+                    RELATION_REVERSE_TYPE: ColumnMetadata.DESCRIPTION_COL_RELATION_TYPE
                 }
+
+            if col.tags:
+                for tag in col.tags:
+                    yield {
+                        RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
+                        RELATION_END_LABEL: TagMetadata.TAG_NODE_LABEL,
+                        RELATION_START_KEY: self._get_table_key(),
+                        RELATION_END_KEY: TagMetadata.get_tag_key(tag),
+                        RELATION_TYPE: ColumnMetadata.COL_TAG_RELATION_TYPE,
+                        RELATION_REVERSE_TYPE: ColumnMetadata.TAG_COL_RELATION_TYPE,
+                    }
 
         others = [
             RelTuple(start_label=TableMetadata.DATABASE_NODE_LABEL,
@@ -406,3 +398,4 @@ class TableMetadata(Neo4jCsvSerializable):
                     RELATION_TYPE: rel_tuple.type,
                     RELATION_REVERSE_TYPE: rel_tuple.reverse_type
                 }
+
