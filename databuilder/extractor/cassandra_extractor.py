@@ -13,12 +13,23 @@ class CassandraExtractor(Extractor):
     """
 
     CLUSTER_KEY = 'cluster'
+    # Key to define clusters ips, it should be List[str]
     IPS_KEY = 'ips'
+    # Key to define extra kwargs to pass on cluster constructor,
+    # it should be Dict[Any]
     KWARGS_KEY = 'kwargs'
+    # Key to define custom filter function based on keyspace and table
+    # since the cluster metadata doesn't support native filters,
+    # it should be like def filter(keyspace, table) and return False if
+    # going to skip that table and True if not
     FILTER_FUNCTION_KEY = 'filter'
 
+    # Default values
     DEFAULT_CONFIG = ConfigFactory.from_dict({
-        CLUSTER_KEY:'gold',IPS_KEY:[],KWARGS_KEY:{},FILTER_FUNCTION_KEY:None
+        CLUSTER_KEY: 'gold',
+        IPS_KEY: [],
+        KWARGS_KEY: {},
+        FILTER_FUNCTION_KEY: None
     })
 
     def init(self, conf):
@@ -58,19 +69,17 @@ class CassandraExtractor(Extractor):
             for table in self._get_tables(keyspace):
                 if self._filter and not self._filter(keyspace, table):
                     continue
-                
+
                 columns = []
 
-                i = 0
                 columns_dict = self._get_columns(keyspace, table)
-                for column_name, column in columns_dict.items():
+                for idx, (column_name, column) in enumerate(columns_dict.items()):
                     columns.append(ColumnMetadata(
                         column_name,
                         None,
                         column.cql_type,
-                        i
+                        idx
                     ))
-                    i += 1
 
                 yield TableMetadata(
                     'cassandra',

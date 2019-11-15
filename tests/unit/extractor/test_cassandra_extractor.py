@@ -30,7 +30,7 @@ class TestCassandraExtractor(unittest.TestCase):
 
         results = extractor.extract()
         self.assertEqual(results, None)
-    
+
     @patch('databuilder.extractor.cassandra_extractor.CassandraExtractor._get_keyspaces')
     @patch('databuilder.extractor.cassandra_extractor.CassandraExtractor._get_tables')
     @patch('databuilder.extractor.cassandra_extractor.CassandraExtractor._get_columns')
@@ -64,14 +64,15 @@ class TestCassandraExtractor(unittest.TestCase):
         columns_dict['txt'] = CassandraColumnMetadata(None, 'txt', 'text')
         mock_columns.return_value = columns_dict
 
-        filter_function = lambda k, t: False if 'test' in k or 'test' in t else False
+        def filter_function(k, t):
+            return False if 'test' in k or 'test' in t else False
+
         conf = ConfigFactory.from_dict({
             CassandraExtractor.FILTER_FUNCTION_KEY: filter_function
         })
 
         extractor = CassandraExtractor()
         extractor.init(conf)
-        actual = extractor.extract()
         self.assertIsNone(extractor.extract())
 
 
