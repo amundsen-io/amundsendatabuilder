@@ -1,7 +1,7 @@
 import logging
 import unittest
+from datetime import datetime
 
-import pytest
 from mock import patch, Mock
 from pyhocon import ConfigFactory
 
@@ -29,8 +29,8 @@ TIME_PARTITIONED = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkj
 TIME_PARTITIONED_WITH_FIELD = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkjw==',
     'tables': [{'kind': 'bigquery#table', 'id': 'your-project-here:fdgdfgh.other', 'tableReference':
             {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'other'},
-            'type': 'TABLE', 'timePartitioning': {'type': 'DAY', 'field': 'processed_date', 'requirePartitionFilter': False},
-            'creationTime': '1557577779306'}], 'totalItems': 1}  # noqa
+            'type': 'TABLE', 'timePartitioning': {'type': 'DAY', 'field': 'processed_date',
+            'requirePartitionFilter': False}, 'creationTime': '1557577779306'}], 'totalItems': 1}  # noqa
 TABLE_DATE_RANGE = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkjw==',
     'tables': [{'kind': 'bigquery#table', 'id': 'your-project-here:fdgdfgh.other_20190101', 'tableReference':
             {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'date_range_20190101'},
@@ -39,9 +39,9 @@ TABLE_DATE_RANGE = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkj
             {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'date_range_20190102'},
             'type': 'TABLE', 'creationTime': '1557577779306'}], 'totalItems': 2}  # noqa
 PARTITION_DATA = {'kind': 'bigquery#queryResponse',
-     'schema': {'fields': [{'name': 'partition_id','type': 'STRING','mode': 'NULLABLE'},
+     'schema': {'fields': [{'name': 'partition_id', 'type': 'STRING', 'mode': 'NULLABLE'},
                            {'name': 'creation_time', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'}]},
-     'jobReference': {'projectId': 'your-project-here','jobId': 'job_bfTRGj3Lv0tRjcrotXbZSgMCpNhY','location': 'EU'},
+     'jobReference': {'projectId': 'your-project-here', 'jobId': 'job_bfTRGj3Lv0tRjcrotXbZSgMCpNhY', 'location': 'EU'},
      'totalRows': '3',
      'rows': [{'f': [{'v': '20180802'}, {'v': '1.547512241348E9'}]},
               {'f': [{'v': '20180803'}, {'v': '1.547512241348E9'}]},
@@ -88,7 +88,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
                 'your-project-here'}
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_can_handle_no_datasets(self, mock_build):
         mock_build.return_value = MockBigQueryClient(NO_DATASETS, None, None)
         extractor = BigQueryWatermarkExtractor()
@@ -97,7 +97,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_empty_dataset(self, mock_build):
         mock_build.return_value = MockBigQueryClient(ONE_DATASET, NO_TABLES, None)
         extractor = BigQueryWatermarkExtractor()
@@ -106,7 +106,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_table_without_partitions(self, mock_build):
         mock_build.return_value = MockBigQueryClient(ONE_DATASET, ONE_TABLE, None)
         extractor = BigQueryWatermarkExtractor()
@@ -115,7 +115,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_table_with_default_partitions(self, mock_build):
         mock_build.return_value = MockBigQueryClient(ONE_DATASET, TIME_PARTITIONED, PARTITION_DATA)
         extractor = BigQueryWatermarkExtractor()
@@ -127,8 +127,8 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.schema, 'fdgdfgh')
         self.assertEquals(result.table, 'other')
         self.assertEquals(result.cluster, 'your-project-here')
-        self.assertEquals(result.create_time, '2019-01-15 11:30:41')
-        self.assertEquals(result.parts, [('_partitiontime','20180802')])
+        self.assertEquals(result.create_time, datetime.fromtimestamp(1547512241).strftime('%Y-%m-%d %H:%M:%S'))
+        self.assertEquals(result.parts, [('_partitiontime', '20180802')])
 
         result = extractor.extract()
         self.assertEquals(result.part_type, 'high_watermark')
@@ -136,10 +136,10 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.schema, 'fdgdfgh')
         self.assertEquals(result.table, 'other')
         self.assertEquals(result.cluster, 'your-project-here')
-        self.assertEquals(result.create_time, '2019-01-15 11:30:41')
-        self.assertEquals(result.parts, [('_partitiontime','20180804')])
+        self.assertEquals(result.create_time, datetime.fromtimestamp(1547512241).strftime('%Y-%m-%d %H:%M:%S'))
+        self.assertEquals(result.parts, [('_partitiontime', '20180804')])
 
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_table_with_field_partitions(self, mock_build):
         mock_build.return_value = MockBigQueryClient(ONE_DATASET, TIME_PARTITIONED_WITH_FIELD, PARTITION_DATA)
         extractor = BigQueryWatermarkExtractor()
@@ -151,8 +151,8 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.schema, 'fdgdfgh')
         self.assertEquals(result.table, 'other')
         self.assertEquals(result.cluster, 'your-project-here')
-        self.assertEquals(result.create_time, '2019-01-15 11:30:41')
-        self.assertEquals(result.parts, [('processed_date','20180802')])
+        self.assertEquals(result.create_time, datetime.fromtimestamp(1547512241).strftime('%Y-%m-%d %H:%M:%S'))
+        self.assertEquals(result.parts, [('processed_date', '20180802')])
 
         result = extractor.extract()
         self.assertEquals(result.part_type, 'high_watermark')
@@ -160,11 +160,10 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.schema, 'fdgdfgh')
         self.assertEquals(result.table, 'other')
         self.assertEquals(result.cluster, 'your-project-here')
-        self.assertEquals(result.create_time, '2019-01-15 11:30:41')
-        self.assertEquals(result.parts, [('processed_date','20180804')])
+        self.assertEquals(result.create_time, datetime.fromtimestamp(1547512241).strftime('%Y-%m-%d %H:%M:%S'))
+        self.assertEquals(result.parts, [('processed_date', '20180804')])
 
-
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_keypath_can_be_set(self, mock_build):
         config_dict = {
             'extractor.bigquery_watermarks.{}'.format(BigQueryWatermarkExtractor.PROJECT_ID_KEY):
@@ -181,7 +180,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
             extractor.init(Scoped.get_scoped_conf(conf=conf,
                                                   scope=extractor.get_scope()))
 
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_table_part_of_table_date_range(self, mock_build):
         mock_build.return_value = MockBigQueryClient(ONE_DATASET, TABLE_DATE_RANGE, None)
         extractor = BigQueryWatermarkExtractor()
@@ -194,8 +193,8 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.schema, 'fdgdfgh')
         self.assertEquals(result.table, 'date_range_')
         self.assertEquals(result.cluster, 'your-project-here')
-        self.assertEquals(result.create_time, '2019-05-11 22:29:39')
-        self.assertEquals(result.parts, [('__table__','20190101')])
+        self.assertEquals(result.create_time, datetime.fromtimestamp(1557577779).strftime('%Y-%m-%d %H:%M:%S'))
+        self.assertEquals(result.parts, [('__table__', '20190101')])
 
         result = extractor.extract()
         self.assertEquals(result.part_type, 'high_watermark')
@@ -203,5 +202,5 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.schema, 'fdgdfgh')
         self.assertEquals(result.table, 'date_range_')
         self.assertEquals(result.cluster, 'your-project-here')
-        self.assertEquals(result.create_time, '2019-05-11 22:29:39')
-        self.assertEquals(result.parts, [('__table__','20190102')])
+        self.assertEquals(result.create_time, datetime.fromtimestamp(1557577779).strftime('%Y-%m-%d %H:%M:%S'))
+        self.assertEquals(result.parts, [('__table__', '20190102')])
