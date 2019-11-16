@@ -7,7 +7,6 @@ from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.bigquery_watermark_extractor import BigQueryWatermarkExtractor
-from databuilder.models.table_metadata import TableMetadata
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,11 +21,6 @@ ONE_TABLE = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkjw==',
         {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'nested_recs'},
         'type': 'TABLE', 'creationTime': '1557578974009'}],
     'totalItems': 1}  # noqa
-ONE_VIEW = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkjw==',
-    'tables': [{'kind': 'bigquery#table', 'id': 'your-project-here:fdgdfgh.abab', 'tableReference':
-        {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'abab'},
-        'type': 'VIEW', 'view': {'useLegacySql': False}, 'creationTime': '1557577874991'}],
-        'totalItems': 1}  # noqa
 TIME_PARTITIONED = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkjw==',
     'tables': [{'kind': 'bigquery#table', 'id': 'your-project-here:fdgdfgh.other', 'tableReference':
             {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'other'},
@@ -45,14 +39,14 @@ TABLE_DATE_RANGE = {'kind': 'bigquery#tableList', 'etag': 'Iaqrz2TCDIANAOD/Xerkj
             {'projectId': 'your-project-here', 'datasetId': 'fdgdfgh', 'tableId': 'date_range_20190102'},
             'type': 'TABLE', 'creationTime': '1557577779306'}], 'totalItems': 2}  # noqa
 PARTITION_DATA = {'kind': 'bigquery#queryResponse',
- 'schema': {'fields': [{'name': 'partition_id','type': 'STRING','mode': 'NULLABLE'},
-                       {'name': 'creation_time', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'}]},
- 'jobReference': {'projectId': 'your-project-here','jobId': 'job_bfTRGj3Lv0tRjcrotXbZSgMCpNhY','location': 'EU'},
- 'totalRows': '3',
- 'rows': [{'f': [{'v': '20180802'}, {'v': '1.547512241348E9'}]},
-          {'f': [{'v': '20180803'}, {'v': '1.547512241348E9'}]},
-          {'f': [{'v': '20180804'}, {'v': '1.547512241348E9'}]}],
- 'totalBytesProcessed': '0','jobComplete': True,'cacheHit': False} # noqa
+     'schema': {'fields': [{'name': 'partition_id','type': 'STRING','mode': 'NULLABLE'},
+                           {'name': 'creation_time', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'}]},
+     'jobReference': {'projectId': 'your-project-here','jobId': 'job_bfTRGj3Lv0tRjcrotXbZSgMCpNhY','location': 'EU'},
+     'totalRows': '3',
+     'rows': [{'f': [{'v': '20180802'}, {'v': '1.547512241348E9'}]},
+              {'f': [{'v': '20180803'}, {'v': '1.547512241348E9'}]},
+              {'f': [{'v': '20180804'}, {'v': '1.547512241348E9'}]}],
+     'totalBytesProcessed': '0','jobComplete': True,'cacheHit': False} # noqa
 
 
 try:
@@ -112,24 +106,6 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @pytest.mark.skip()
-    @patch('databuilder.extractor.bigquery_watermark_extractor.build')
-    def test_accepts_dataset_filter_by_label(self, mock_build):
-        config_dict = {
-            'extractor.bigquery_table_metadata.{}'.format(BigQueryWatermarkExtractor.PROJECT_ID_KEY):
-                'your-project-here',
-            'extractor.bigquery_table_metadata.{}'.format(BigQueryWatermarkExtractor.FILTER_KEY):
-                'label.key:value'
-        }
-        conf = ConfigFactory.from_dict(config_dict)
-
-        mock_build.return_value = MockBigQueryClient(ONE_DATASET, ONE_TABLE, TABLE_DATA)
-        extractor = BigQueryWatermarkExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
-        result = extractor.extract()
-        self.assertIsInstance(result, TableMetadata)
-
     @patch('databuilder.extractor.bigquery_watermark_extractor.build')
     def test_table_without_partitions(self, mock_build):
         mock_build.return_value = MockBigQueryClient(ONE_DATASET, ONE_TABLE, None)
@@ -188,40 +164,44 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.parts, [('processed_date','20180804')])
 
 
-    @pytest.mark.skip()
     @patch('databuilder.extractor.bigquery_watermark_extractor.build')
-    def test_keypath_and_pagesize_can_be_set(self, mock_build):
+    def test_keypath_can_be_set(self, mock_build):
         config_dict = {
-            'extractor.bigquery_table_metadata.{}'.format(BigQueryWatermarkExtractor.PROJECT_ID_KEY):
+            'extractor.bigquery_watermarks.{}'.format(BigQueryWatermarkExtractor.PROJECT_ID_KEY):
                 'your-project-here',
-            'extractor.bigquery_table_metadata.{}'.format(BigQueryWatermarkExtractor.PAGE_SIZE_KEY):
-                200,
-            'extractor.bigquery_table_metadata.{}'.format(BigQueryWatermarkExtractor.KEY_PATH_KEY):
+            'extractor.bigquery_watermarks.{}'.format(BigQueryWatermarkExtractor.KEY_PATH_KEY):
                 '/tmp/doesnotexist',
         }
         conf = ConfigFactory.from_dict(config_dict)
 
-        mock_build.return_value = MockBigQueryClient(ONE_DATASET, ONE_TABLE, TABLE_DATA)
+        mock_build.return_value = MockBigQueryClient(ONE_DATASET, ONE_TABLE, None)
         extractor = BigQueryWatermarkExtractor()
 
         with self.assertRaises(FileNotFoundError):
             extractor.init(Scoped.get_scoped_conf(conf=conf,
                                                   scope=extractor.get_scope()))
 
-    @pytest.mark.skip()
     @patch('databuilder.extractor.bigquery_watermark_extractor.build')
     def test_table_part_of_table_date_range(self, mock_build):
-        mock_build.return_value = MockBigQueryClient(ONE_DATASET, TABLE_DATE_RANGE, TABLE_DATA)
+        mock_build.return_value = MockBigQueryClient(ONE_DATASET, TABLE_DATE_RANGE, None)
         extractor = BigQueryWatermarkExtractor()
         extractor.init(Scoped.get_scoped_conf(conf=self.conf,
                                               scope=extractor.get_scope()))
 
-        count = 0
         result = extractor.extract()
-        table_name = result.name
-        while result:
-            count += 1
-            result = extractor.extract()
+        self.assertEquals(result.part_type, 'low_watermark')
+        self.assertEquals(result.database, 'bigquery')
+        self.assertEquals(result.schema, 'fdgdfgh')
+        self.assertEquals(result.table, 'date_range_')
+        self.assertEquals(result.cluster, 'your-project-here')
+        self.assertEquals(result.create_time, '2019-05-11 22:29:39')
+        self.assertEquals(result.parts, [('__table__','20190101')])
 
-        self.assertEquals(count, 1)
-        self.assertEquals(table_name, 'date_range_')
+        result = extractor.extract()
+        self.assertEquals(result.part_type, 'high_watermark')
+        self.assertEquals(result.database, 'bigquery')
+        self.assertEquals(result.schema, 'fdgdfgh')
+        self.assertEquals(result.table, 'date_range_')
+        self.assertEquals(result.cluster, 'your-project-here')
+        self.assertEquals(result.create_time, '2019-05-11 22:29:39')
+        self.assertEquals(result.parts, [('__table__','20190102')])
