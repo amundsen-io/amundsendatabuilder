@@ -6,6 +6,7 @@ from databuilder.models.neo4j_csv_serde import (
 
 from databuilder.models.table_metadata import TableMetadata, DESCRIPTION_NODE_LABEL
 
+
 # This class is needed to handle csv based column loading, since the main column model
 # table_metadata.ColumnMetadata requires table_metadata.TableMetadata as well, and this cannot
 # be represented in csv form

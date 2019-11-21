@@ -76,6 +76,7 @@ def run_csv_job(file_loc, table_name, model):
                task=task,
                publisher=Neo4jCsvPublisher()).launch()
 
+
 def create_last_updated_job():
     # loader saves data to these folders and publisher reads it from here
     tmp_folder = '/var/tmp/amundsen/last_updated_data'
@@ -111,6 +112,7 @@ def create_last_updated_job():
     return DefaultJob(conf=job_config,
                       task=task,
                       publisher=Neo4jCsvPublisher())
+
 
 def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index',
                                    elasticsearch_doc_type_key='table',
@@ -174,25 +176,20 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
                      publisher=ElasticsearchPublisher())
     return job
 
+
 if __name__ == "__main__":
-    ## rename a few columns
     run_csv_job('example/sample_data/sample_table.csv', 'test_table_metadata',
                 'databuilder.models.table_metadata.TableMetadata')
     run_csv_job('example/sample_data/sample_col.csv', 'test_col_metadata',
                 'databuilder.models.standalone_column_model.StandaloneColumnMetadata')
-
     run_csv_job('example/sample_data/sample_watermark.csv', 'test_watermark_metadata',
                 'databuilder.models.watermark.Watermark')
-
-    ## move cluster to last col
     run_csv_job('example/sample_data/sample_table_owner.csv', 'test_table_owner_metadata',
                 'databuilder.models.table_owner.TableOwner')
     run_csv_job('example/sample_data/sample_user.csv', 'test_user_metadata',
                 'databuilder.models.user.User')
     run_csv_job('example/sample_data/sample_source.csv', 'test_source_metadata',
                 'databuilder.models.table_source.TableSource')
-
-    ## empty values at the end
     run_csv_job('example/sample_data/sample_table_last_updated.csv', 'test_table_last_updated_metadata',
                 'databuilder.models.table_last_updated.TableLastUpdated')
 
@@ -287,4 +284,3 @@ if __name__ == "__main__":
         cypher_query=user_cypher_query,
         elasticsearch_mapping=user_elasticsearch_mapping)
     job_es_user.launch()
-
