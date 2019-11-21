@@ -70,8 +70,8 @@ def load_table_data_from_csv(file_name):
             to_db = [(i['database'],
                       i['cluster'],
                       i['schema_name'],
-                      i['table_name'],
-                      i['table_desc'],
+                      i['name'],
+                      i['description'],
                       i['tags']) for i in dr]
 
         cur.executemany("INSERT INTO test_table_metadata (database, cluster, "
@@ -105,7 +105,7 @@ def load_col_data_from_csv(file_name):
                       i['cluster'],
                       i['schema_name'],
                       i['table_name'],
-                      i['table_desc']) for i in dr]
+                      i['table_description']) for i in dr]
 
         cur.executemany("INSERT INTO test_col_metadata ("
                         "name, description, col_type, sort_order,"
@@ -533,7 +533,7 @@ if __name__ == "__main__":
 
         # start col job
         job2 = create_sample_job('test_col_metadata',
-                                 'databuilder.models.test_column_model.ColumnMetadata')
+                                 'databuilder.models.standalone_column_model.StandaloneColumnMetadata')
         job2.launch()
 
         # start table stats job
@@ -553,7 +553,7 @@ if __name__ == "__main__":
 
         # start usage job
         job_col_usage = create_sample_job('test_usage_metadata',
-                                          'databuilder.models.test_column_usage_model.ColumnUsageModel')
+                                          'databuilder.models.column_usage_model.ColumnUsageModel')
         job_col_usage.launch()
 
         # start user job

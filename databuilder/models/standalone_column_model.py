@@ -6,8 +6,10 @@ from databuilder.models.neo4j_csv_serde import (
 
 from databuilder.models.table_metadata import TableMetadata, DESCRIPTION_NODE_LABEL
 
-
-class ColumnMetadata(Neo4jCsvSerializable):
+# This class is needed to handle csv based column loading, since the main column model
+# table_metadata.ColumnMetadata requires table_metadata.TableMetadata as well, and this cannot
+# be represented in csv form
+class StandaloneColumnMetadata(Neo4jCsvSerializable):
     COLUMN_NODE_LABEL = 'Column'
     COLUMN_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}'
     COLUMN_NAME = 'name'
@@ -69,20 +71,20 @@ class ColumnMetadata(Neo4jCsvSerializable):
             return None
 
     def _get_col_key(self):
-        # type: (ColumnMetadata) -> str
-        return ColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
-                                                       cluster=self.cluster,
-                                                       schema=self.schema_name,
-                                                       tbl=self.table_name,
-                                                       col=self.name)
+        # type: (StandaloneColumnMetadata) -> str
+        return StandaloneColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
+                                                                 cluster=self.cluster,
+                                                                 schema=self.schema_name,
+                                                                 tbl=self.table_name,
+                                                                 col=self.name)
 
     def _get_col_description_key(self):
-        # type: (ColumnMetadata) -> str
-        return ColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
-                                                               cluster=self.cluster,
-                                                               schema=self.schema_name,
-                                                               tbl=self.table_name,
-                                                               col=self.name)
+        # type: (StandaloneColumnMetadata) -> str
+        return StandaloneColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
+                                                                         cluster=self.cluster,
+                                                                         schema=self.schema_name,
+                                                                         tbl=self.table_name,
+                                                                         col=self.name)
 
     def _get_table_key(self):
         # type: () -> str
@@ -98,18 +100,18 @@ class ColumnMetadata(Neo4jCsvSerializable):
         :return:
         """
         results = [{
-            NODE_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
+            NODE_LABEL: StandaloneColumnMetadata.COLUMN_NODE_LABEL,
             NODE_KEY: self._get_col_key(),
-            ColumnMetadata.COLUMN_NAME: self.name,
-            ColumnMetadata.COLUMN_TYPE: self.type,
-            ColumnMetadata.COLUMN_ORDER: self.sort_order
+            StandaloneColumnMetadata.COLUMN_NAME: self.name,
+            StandaloneColumnMetadata.COLUMN_TYPE: self.type,
+            StandaloneColumnMetadata.COLUMN_ORDER: self.sort_order
         }]
 
         if self.description:
             results.append({
                 NODE_LABEL: DESCRIPTION_NODE_LABEL,
                 NODE_KEY: self._get_col_description_key(),
-                ColumnMetadata.COLUMN_DESCRIPTION: self.description
+                StandaloneColumnMetadata.COLUMN_DESCRIPTION: self.description
             })
 
         return results
@@ -123,7 +125,7 @@ class ColumnMetadata(Neo4jCsvSerializable):
 
         results = [{
             RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-            RELATION_END_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
+            RELATION_END_LABEL: StandaloneColumnMetadata.COLUMN_NODE_LABEL,
             RELATION_START_KEY: self._get_table_key(),
             RELATION_END_KEY: self._get_col_key(),
             RELATION_TYPE: TableMetadata.TABLE_COL_RELATION_TYPE,
