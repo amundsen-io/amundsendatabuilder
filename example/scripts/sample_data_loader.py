@@ -533,7 +533,7 @@ if __name__ == "__main__":
 
         # start col job
         job2 = create_sample_job('test_col_metadata',
-                                 'example.models.test_column_model.TestColumnMetadata')
+                                 'databuilder.models.test_column_model.TestColumnMetadata')
         job2.launch()
 
         # start table stats job
@@ -553,7 +553,7 @@ if __name__ == "__main__":
 
         # start usage job
         job_col_usage = create_sample_job('test_usage_metadata',
-                                          'example.models.test_column_usage_model.TestColumnUsageModel')
+                                          'databuilder.models.test_column_usage_model.TestColumnUsageModel')
         job_col_usage.launch()
 
         # start user job

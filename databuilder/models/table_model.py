@@ -4,7 +4,7 @@ from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
     NODE_LABEL
 
 
-class TestTableModel(Neo4jCsvSerializable):
+class TableModel(Neo4jCsvSerializable):
     # type: (...) -> None
     """
     Hive table watermark result model.
@@ -59,7 +59,7 @@ class TestTableModel(Neo4jCsvSerializable):
                                                                cluster=self.cluster,
                                                                schema=self.schema_name,
                                                                tbl=self.table_name),
-            NODE_LABEL: TestTableModel.LABEL,
+            NODE_LABEL: TableModel.LABEL,
             'table_desc': self.table_desc,
             'tbl_key': '{db}://{cluster}.{schema}/{tbl}'.format(db=self.database,
                                                                 cluster=self.cluster,

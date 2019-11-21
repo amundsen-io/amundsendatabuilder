@@ -7,7 +7,7 @@ from databuilder.models.neo4j_csv_serde import (
 from databuilder.models.table_metadata import TableMetadata, DESCRIPTION_NODE_LABEL
 
 
-class TestColumnMetadata(Neo4jCsvSerializable):
+class ColumnMetadata(Neo4jCsvSerializable):
     COLUMN_NODE_LABEL = 'Column'
     COLUMN_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}'
     COLUMN_NAME = 'name'
@@ -69,20 +69,20 @@ class TestColumnMetadata(Neo4jCsvSerializable):
             return None
 
     def _get_col_key(self):
-        # type: (TestColumnMetadata) -> str
-        return TestColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
-                                                           cluster=self.cluster,
-                                                           schema=self.schema_name,
-                                                           tbl=self.table_name,
-                                                           col=self.name)
+        # type: (ColumnMetadata) -> str
+        return ColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
+                                                       cluster=self.cluster,
+                                                       schema=self.schema_name,
+                                                       tbl=self.table_name,
+                                                       col=self.name)
 
     def _get_col_description_key(self):
-        # type: (TestColumnMetadata) -> str
-        return TestColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
-                                                                   cluster=self.cluster,
-                                                                   schema=self.schema_name,
-                                                                   tbl=self.table_name,
-                                                                   col=self.name)
+        # type: (ColumnMetadata) -> str
+        return ColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
+                                                               cluster=self.cluster,
+                                                               schema=self.schema_name,
+                                                               tbl=self.table_name,
+                                                               col=self.name)
 
     def _get_table_key(self):
         # type: () -> str
@@ -98,18 +98,18 @@ class TestColumnMetadata(Neo4jCsvSerializable):
         :return:
         """
         results = [{
-            NODE_LABEL: TestColumnMetadata.COLUMN_NODE_LABEL,
+            NODE_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
             NODE_KEY: self._get_col_key(),
-            TestColumnMetadata.COLUMN_NAME: self.name,
-            TestColumnMetadata.COLUMN_TYPE: self.type,
-            TestColumnMetadata.COLUMN_ORDER: self.sort_order
+            ColumnMetadata.COLUMN_NAME: self.name,
+            ColumnMetadata.COLUMN_TYPE: self.type,
+            ColumnMetadata.COLUMN_ORDER: self.sort_order
         }]
 
         if self.description:
             results.append({
                 NODE_LABEL: DESCRIPTION_NODE_LABEL,
                 NODE_KEY: self._get_col_description_key(),
-                TestColumnMetadata.COLUMN_DESCRIPTION: self.description
+                ColumnMetadata.COLUMN_DESCRIPTION: self.description
             })
 
         return results
@@ -123,7 +123,7 @@ class TestColumnMetadata(Neo4jCsvSerializable):
 
         results = [{
             RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-            RELATION_END_LABEL: TestColumnMetadata.COLUMN_NODE_LABEL,
+            RELATION_END_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
             RELATION_START_KEY: self._get_table_key(),
             RELATION_END_KEY: self._get_col_key(),
             RELATION_TYPE: TableMetadata.TABLE_COL_RELATION_TYPE,
