@@ -1,6 +1,7 @@
 import textwrap
 import uuid
 
+import sys
 from elasticsearch import Elasticsearch
 
 from databuilder.extractor.csv_extractor import CsvExtractor
@@ -18,15 +19,22 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
-NEO4J_ENDPOINT = 'bolt://amundsen-neo4j-dev.data-warehouse-dev.accounts.edmunds.com:7687'
+es_host = None
+neo_host = None
+if len(sys.argv) > 1:
+    es_host = sys.argv[1]
+if len(sys.argv) > 2:
+    neo_host = sys.argv[2]
+
+es = Elasticsearch([
+    {'host': es_host if es_host else 'localhost'},
+])
+
+NEO4J_ENDPOINT = 'bolt://{}:7687'.format(neo_host if neo_host else 'localhost')
 neo4j_endpoint = NEO4J_ENDPOINT
 
 neo4j_user = 'neo4j'
 neo4j_password = 'test'
-
-es = Elasticsearch([
-    {'host': 'amundsen-elasticsearch-dev.data-warehouse-dev.accounts.edmunds.com'},
-])
 
 
 def run_csv_job(file_loc, table_name, model):
