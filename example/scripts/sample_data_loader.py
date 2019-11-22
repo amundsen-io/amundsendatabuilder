@@ -145,7 +145,7 @@ def load_table_column_stats_from_csv(file_name):
                       i['table_name'],
                       i['col_name'],
                       i['stat_name'],
-                      '"' + i['stat_val'] + '"',
+                      i['stat_val'],
                       i['start_epoch'],
                       i['end_epoch']) for i in dr]
 

@@ -182,12 +182,18 @@ if __name__ == "__main__":
                 'databuilder.models.table_metadata.TableMetadata')
     run_csv_job('example/sample_data/sample_col.csv', 'test_col_metadata',
                 'databuilder.models.standalone_column_model.StandaloneColumnMetadata')
+    run_csv_job('example/sample_data/sample_table_column_stats.csv', 'test_table_column_stats',
+                'databuilder.models.table_stats.TableColumnStats')
     run_csv_job('example/sample_data/sample_watermark.csv', 'test_watermark_metadata',
                 'databuilder.models.watermark.Watermark')
     run_csv_job('example/sample_data/sample_table_owner.csv', 'test_table_owner_metadata',
                 'databuilder.models.table_owner.TableOwner')
+    run_csv_job('example/sample_data/sample_column_usage.csv', 'test_usage_metadata',
+                'databuilder.models.column_usage_model.ColumnUsageModel')
     run_csv_job('example/sample_data/sample_user.csv', 'test_user_metadata',
                 'databuilder.models.user.User')
+    run_csv_job('example/sample_data/sample_application.csv', 'test_application_metadata',
+                'databuilder.models.application.Application')
     run_csv_job('example/sample_data/sample_source.csv', 'test_source_metadata',
                 'databuilder.models.table_source.TableSource')
     run_csv_job('example/sample_data/sample_table_last_updated.csv', 'test_table_last_updated_metadata',
