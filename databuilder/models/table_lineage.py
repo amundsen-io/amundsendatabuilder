@@ -13,7 +13,7 @@ class TableLineage(Neo4jCsvSerializable):
     """
     Table Lineage Model. It won't create nodes but create upstream/downstream rels.
     """
-    LABEL = 'Lineage'
+    LABEL = 'TableLineage'
     KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/'
     ORIGIN_DEPENDENCY_RELATION_TYPE = 'UPSTREAM'
     DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'

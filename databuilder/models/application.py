@@ -114,3 +114,103 @@ class Application(Neo4jCsvSerializable):
         }]
 
         return results
+
+
+class ApplicationLineage(Neo4jCsvSerializable):
+    # type: (...) -> None
+    """
+    Application Lineage Model. It won't create nodes but create upstream/downstream rels.
+    """
+    LABEL = 'AppLineage'
+    KEY_FORMAT = 'application://{cluster}.airflow/{dag}/{task}'
+    ORIGIN_DEPENDENCY_RELATION_TYPE = 'UPSTREAM'
+    DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'
+
+    def __init__(self,
+                 task_id,  # type: str
+                 dag_id,  # type: str,
+                 upstream_deps=None,  # type: List
+                 downstream_deps=None,  # type: List
+                 ):
+        # type: (...) -> None
+        self.task_id = task_id
+        self.dag_id = dag_id
+        # a list of (dag_id, task_id)'s downstream dependencies
+        self.downstream_deps = downstream_deps
+        # a list of (dag_id, task_id)'s upstream dependencies
+        self.upstream_deps = upstream_deps
+        self._node_iter = iter(self.create_nodes())
+        self._relation_iter = iter(self.create_relation())
+
+    def create_next_node(self):
+        # type: (...) -> Union[Dict[str, Any], None]
+        # return the string representation of the data
+        try:
+            return next(self._node_iter)
+        except StopIteration:
+            return None
+
+    def create_next_relation(self):
+        # type: (...) -> Union[Dict[str, Any], None]
+        try:
+            return next(self._relation_iter)
+        except StopIteration:
+            return None
+
+
+    def get_application_model_key(self, dag_id, task_id):
+        # type: (...) -> str
+        # returns formatting string for application of type dag
+        return Application.APPLICATION_KEY_FORMAT.format(cluster='gold',
+                                                         dag=dag_id,
+                                                         task=task_id)
+
+    def create_nodes(self):
+        # type: () -> List[Union[Dict[str, Any], None]]
+        """
+        It won't create any node for this model
+        :return:
+        """
+        return []
+
+    def create_relation(self):
+        # type: () -> List[Dict[str, Any]]
+        """
+        Create a list of relation between source table and all the downstream tables
+        :return:
+        """
+        results = []
+        for downstream_app in self.downstream_deps:
+            # every entity will have (dag_id, task_id) format which is the origin's downstream
+            downstream_dag_id, downstream_task_id = downstream_app
+            results.append({
+                RELATION_START_KEY: self.get_application_model_key(dag_id=self.dag_id,
+                                                                   task_id=self.task_id),
+                RELATION_START_LABEL: Application.APPLICATION_LABEL,
+                RELATION_END_KEY: self.get_application_model_key(dag_id=downstream_dag_id,
+                                                                 task_id=downstream_task_id),
+                RELATION_END_LABEL: Application.APPLICATION_LABEL,
+                RELATION_TYPE: ApplicationLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
+                RELATION_REVERSE_TYPE: ApplicationLineage.DEPENDENCY_ORIGIN_RELATION_TYPE
+            })
+        for upstream_app in self.downstream_deps:
+            # every entity will have (dag_id, task_id) format which is the origin's upstream
+            upstream_dag_id, upstream_task_id = upstream_app
+            results.append({
+                RELATION_START_KEY: self.get_application_model_key(dag_id=self.dag_id,
+                                                                   task_id=self.task_id),
+                RELATION_START_LABEL: Application.APPLICATION_LABEL,
+                RELATION_END_KEY: self.get_application_model_key(dag_id=upstream_dag_id,
+                                                                 task_id=upstream_task_id),
+                RELATION_END_LABEL: Application.APPLICATION_LABEL,
+                RELATION_TYPE: ApplicationLineage.DEPENDENCY_ORIGIN_RELATION_TYPE,
+                RELATION_REVERSE_TYPE: ApplicationLineage.ORIGIN_DEPENDENCY_RELATION_TYPE
+            })
+
+        return results
+
+    def __repr__(self):
+        # type: () -> str
+        return 'ApplicationLineage({!r}, {!r})'.format(self.dag_id,
+                                                       self.task_id)
+
