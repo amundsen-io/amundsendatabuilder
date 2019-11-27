@@ -272,6 +272,28 @@ job = DefaultJob(
 job.launch()
 ```
 
+#### [RedshiftSpectrumMetadataExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/redshift_spectrum_metadata_extractor.py "RedshiftSpectrumMetadataExtractor")
+An extractor that extracts table and column metadata including database, schema, table name and column name from a Redshift database for Redshift Spectrum (external) tables.
+Please note that the table and column descriptions are empty by default.
+
+By default, `spectrum` is used as the cluster name and database name.
+Use `CLUSTER_KEY`/`DATABASE_KEY` to what you wish to use as the cluster and database names respectively.
+
+The `where_clause_suffix` below should define which schemas you'd like to query (see [the sample script](https://github.com/lyft/amundsendatabuilder/blob/master/example/scripts/sample_redshift_spectrum_loader.py) for an example).
+
+```python
+job_config = ConfigFactory.from_dict({
+	'extractor.redshift_spectrum_metadata.{}'.format(RedshiftSpectrumMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause_suffix,
+    'extractor.redshift_spectrum_metadata.{}'.format(RedshiftSpectrumMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME): True,
+	'extractor.redshift_spectrum_metadata.extractor.sqlalchemy.{}'.format(RedshiftSpectrumMetadataExtractor.CONN_STRING): connection_string()})
+job = DefaultJob(
+	conf=job_config,
+	task=DefaultTask(
+		extractor=RedshiftSpectrumMetadataExtractor(),
+		loader=AnyLoader()))
+job.launch()
+```
+
 #### [TblColUsgAggExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/table_column_usage_aggregate_extractor.py "TblColUsgAggExtractor")
 An extractor that extracts table usage from SQL statements. It accept any extractor  that extracts row from source that has SQL audit log. Once SQL statement is extracted, it uses [ANTLR](https://www.antlr.org/ "ANTLR") to parse and get tables and columns that it reads from. Also, it aggregates usage based on table and user. (Column level aggregation is not there yet.)
 
