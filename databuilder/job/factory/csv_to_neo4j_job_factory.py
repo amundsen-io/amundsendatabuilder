@@ -12,7 +12,7 @@ from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
 
-class CsvToNeo4jJobFactory():
+class CsvToNeo4jJobFactory:
     """
     This is a convenience class, used to populate neo4j from csv files.
     """
@@ -69,7 +69,7 @@ class CsvToNeo4jJobFactory():
                           publisher=Neo4jCsvPublisher())
 
     def create_last_updated_job(self):
-        # type: (None) -> DefaultJob
+        # type: () -> DefaultJob
 
         # loader saves data to these folders and publisher reads it from here
         tmp_folder = '/tmp/amundsen/last_updated_data'

@@ -13,12 +13,10 @@ from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
 
-class Neo4jToEsJobFactory():
+class Neo4jToEsJobFactory:
     """
     This is a convenience class, used to populate elasticsearch from neo4j.
     """
-
-    # TODO - update unique tags
 
     def __init__(self,
                  es_host,
@@ -44,13 +42,15 @@ class Neo4jToEsJobFactory():
         """
         :param elasticsearch_index_alias:  alias for Elasticsearch used in
                                            amundsensearchlibrary/search_service/config.py as an index
-        :param elasticsearch_doc_type_key: name the ElasticSearch index is prepended with. Defaults to `table` resulting in
-                                           `table_search_index`
+        :param elasticsearch_doc_type_key: name the ElasticSearch index is prepended with.
+                                            Defaults to `table` resulting in `table_search_index`
         :param model_name:                 the Databuilder model class used in transporting between Extractor and Loader
-        :param cypher_query:               Query handed to the `Neo4jSearchDataExtractor` class, if None is given (default)
-                                           it uses the `Table` query baked into the Extractor
-        :param elasticsearch_mapping:      Elasticsearch field mapping "DDL" handed to the `ElasticsearchPublisher` class,
-                                           if None is given (default) it uses the `Table` query baked into the Publisher
+        :param cypher_query:               Query handed to the `Neo4jSearchDataExtractor` class,
+                                            if None is given (default) it uses the `Table` query baked into the
+                                            Extractor
+        :param elasticsearch_mapping:      Elasticsearch field mapping "DDL" handed to the `ElasticsearchPublisher`
+                                           class, if None is given (default) it uses the `Table` query baked into
+                                           the Publisher
         """
         # loader saves data to this location and publisher reads it from here
         extracted_search_data_path = '/tmp/amundsen/search_data.json'
@@ -101,7 +101,7 @@ class Neo4jToEsJobFactory():
         return job
 
     def create_user_es_publisher_job(self):
-        # type: (None) -> DefaultJob
+        # type: () -> DefaultJob
 
         user_cypher_query = textwrap.dedent(
             """
