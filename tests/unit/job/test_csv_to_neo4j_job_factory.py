@@ -1,7 +1,5 @@
 import unittest
 
-from pyhocon import ConfigTree
-
 from databuilder.job.factory.csv_to_neo4j_job_factory import CsvToNeo4jJobFactory
 
 
@@ -11,46 +9,37 @@ class TestCsvToNeo4jJobFactory(unittest.TestCase):
         factory = CsvToNeo4jJobFactory("neo4j-endpoint", "neo4j-user", "neo4j-password", False)
         job = factory.create_model_job("file-location", "metadata-name", "model")
 
-        print(job.conf)
+        conf = job.conf
 
-        expected = ConfigTree(
-            [('extractor',
-              ConfigTree([('csv', ConfigTree([('file_location', 'file-location'), ('model_class', 'model')]))])),
-             ('loader', ConfigTree([('filesystem_csv_neo4j', ConfigTree(
-                 [('node_dir_path', '/tmp/amundsen/metadata-name/nodes'),
-                  ('relationship_dir_path', '/tmp/amundsen/metadata-name/relationships'),
-                  ('delete_created_directories', True)
-                  ]))])),
-             ('publisher', ConfigTree([('neo4j', ConfigTree(
-                 [('node_files_directory', '/tmp/amundsen/metadata-name/nodes'),
-                  ('relation_files_directory', '/tmp/amundsen/metadata-name/relationships'),
-                  ('neo4j_endpoint', 'neo4j-endpoint'),
-                  ('neo4j_user', 'neo4j-user'),
-                  ('neo4j_password', 'neo4j-password'),
-                  ('job_publish_tag', 'unique_tag')
-                  ]))]))])
-
-        self.assertDictEqual(job.conf, expected)
+        self.assertEqual(conf['extractor']['csv']['file_location'], 'file-location')
+        self.assertEqual(conf['extractor']['csv']['model_class'], 'model')
+        self.assertEqual(conf['loader']['filesystem_csv_neo4j']['node_dir_path'], '/tmp/amundsen/metadata-name/nodes')
+        self.assertEqual(conf['loader']['filesystem_csv_neo4j']['relationship_dir_path'],
+                         '/tmp/amundsen/metadata-name/relationships')
+        self.assertEqual(conf['loader']['filesystem_csv_neo4j']['delete_created_directories'], True)
+        self.assertEqual(conf['publisher']['neo4j']['node_files_directory'], '/tmp/amundsen/metadata-name/nodes')
+        self.assertEqual(conf['publisher']['neo4j']['relation_files_directory'],
+                         '/tmp/amundsen/metadata-name/relationships')
+        self.assertEqual(conf['publisher']['neo4j']['neo4j_endpoint'], 'neo4j-endpoint')
+        self.assertEqual(conf['publisher']['neo4j']['neo4j_user'], 'neo4j-user')
+        self.assertEqual(conf['publisher']['neo4j']['neo4j_password'], 'neo4j-password')
+        self.assertEqual(conf['publisher']['neo4j']['job_publish_tag'], 'unique_tag')
 
     def test_create_last_updated_job(self):
         factory = CsvToNeo4jJobFactory("neo4j-endpoint", "neo4j-user", "neo4j-password", False)
         job = factory.create_last_updated_job()
 
-        print(job.conf)
-
-        expected = ConfigTree(
-            [('extractor',
-              ConfigTree([('neo4j_es_last_updated', ConfigTree(
-                  [('model_class', 'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated')]))])),
-             ('loader', ConfigTree([('filesystem_csv_neo4j', ConfigTree(
-                 [('node_dir_path', '/tmp/amundsen/last_updated_data/nodes'),
-                  ('relationship_dir_path', '/tmp/amundsen/last_updated_data/relationships')]
-             ))])),
-             ('publisher', ConfigTree([('neo4j', ConfigTree(
-                 [('node_files_directory', '/tmp/amundsen/last_updated_data/nodes'),
-                  ('relation_files_directory', '/tmp/amundsen/last_updated_data/relationships'),
-                  ('neo4j_endpoint', 'neo4j-endpoint'), ('neo4j_user', 'neo4j-user'),
-                  ('neo4j_password', 'neo4j-password'),
-                  ('job_publish_tag', 'unique_lastupdated_tag')]))]))])
-
-        self.assertDictEqual(job.conf, expected)
+        conf = job.conf
+        self.assertEqual(conf['extractor']['neo4j_es_last_updated']['model_class'],
+                         'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated')
+        self.assertEqual(conf['loader']['filesystem_csv_neo4j']['node_dir_path'],
+                         '/tmp/amundsen/last_updated_data/nodes')
+        self.assertEqual(conf['loader']['filesystem_csv_neo4j']['relationship_dir_path'],
+                         '/tmp/amundsen/last_updated_data/relationships')
+        self.assertEqual(conf['publisher']['neo4j']['node_files_directory'], '/tmp/amundsen/last_updated_data/nodes')
+        self.assertEqual(conf['publisher']['neo4j']['relation_files_directory'],
+                         '/tmp/amundsen/last_updated_data/relationships')
+        self.assertEqual(conf['publisher']['neo4j']['neo4j_endpoint'], 'neo4j-endpoint')
+        self.assertEqual(conf['publisher']['neo4j']['neo4j_user'], 'neo4j-user')
+        self.assertEqual(conf['publisher']['neo4j']['neo4j_password'], 'neo4j-password')
+        self.assertEqual(conf['publisher']['neo4j']['job_publish_tag'], 'unique_lastupdated_tag')
