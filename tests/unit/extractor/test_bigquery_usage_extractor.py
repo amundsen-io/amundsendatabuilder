@@ -125,6 +125,12 @@ FAILURE = {"entries": [
         },
     },
 }]}   # noqa
+
+# An empty dict will be ignored, but putting in nextPageToken causes the test
+# to loop infinitely, so we need a bogus key/value to ensure that we will try
+# to read entries
+NO_ENTRIES = { 'key': 'value' }   # noqa
+
 KEYFILE_DATA = """
 ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAieW91ci1wcm9q
 ZWN0LWhlcmUiLAogICJwcml2YXRlX2tleV9pZCI6ICJiMDQ0N2U1ODEyYTg5ZTAyOTgxYjRkMWE1
@@ -188,7 +194,7 @@ class MockLoggingClient():
 )
 class TestBigqueryUsageExtractor(unittest.TestCase):
 
-    @patch('databuilder.extractor.bigquery_usage_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_basic_extraction(self, mock_build):
         """
         Test Extraction using mock class
@@ -217,7 +223,22 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertEqual(key.email, 'your-user-here@test.com')
         self.assertEqual(value, 1)
 
-    @patch('databuilder.extractor.bigquery_usage_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    def test_no_entries(self, mock_build):
+        config_dict = {
+            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
+                'your-project-here',
+        }
+        conf = ConfigFactory.from_dict(config_dict)
+
+        mock_build.return_value = MockLoggingClient(NO_ENTRIES)
+        extractor = BigQueryTableUsageExtractor()
+        extractor.init(Scoped.get_scoped_conf(conf=conf,
+                                              scope=extractor.get_scope()))
+        result = extractor.extract()
+        self.assertIsNone(result)
+
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_key_path(self, mock_build):
         """
         Test key_path can be used
@@ -247,7 +268,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
             self.assertEqual(creds.project_id, 'your-project-here')
             self.assertEqual(creds.service_account_email, 'test-162@your-project-here.iam.gserviceaccount.com')
 
-    @patch('databuilder.extractor.bigquery_usage_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_timestamp_pagesize_settings(self, mock_build):
         """
         Test timestamp and pagesize can be set
@@ -277,7 +298,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertEqual(body['pageSize'], PAGESIZE)
         self.assertEqual(TIMESTAMP in body['filter'], True)
 
-    @patch('databuilder.extractor.bigquery_usage_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_failed_jobs_should_not_be_counted(self, mock_build):
 
         config_dict = {
@@ -295,7 +316,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.bigquery_usage_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_email_filter_not_counted(self, mock_build):
         config_dict = {
             'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
@@ -312,7 +333,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.bigquery_usage_extractor.build')
+    @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_email_filter_counted(self, mock_build):
         config_dict = {
             'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
