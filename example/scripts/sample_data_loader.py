@@ -8,7 +8,6 @@ import csv
 import sys
 from elasticsearch import Elasticsearch
 import logging
-import os
 from pyhocon import ConfigFactory
 import sqlite3
 from sqlalchemy.ext.declarative import declarative_base
