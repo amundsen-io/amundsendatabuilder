@@ -31,7 +31,7 @@ bigquery = [
     'google-auth>=1.0.0, <2.0.0dev'
 ]
 
-all = requirements + kafka + cassandra + glue + snowflake + athena + bigquery
+all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery
 
 setup(
     name='amundsen-databuilder',
@@ -45,7 +45,7 @@ setup(
     install_requires=requirements,
     extras_require={
         ':python_version=="2.7"': ['typing>=3.6'],  # allow typehinting PY2
-        'all': all,
+        'all': all_deps,
         'kafka': kafka,  # To use with Kafka source extractor
         'cassandra': cassandra,
         'glue': glue,
