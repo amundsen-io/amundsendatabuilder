@@ -167,4 +167,3 @@ with DAG('amundsen_databuilder', default_args=default_args, **dag_args) as dag:
         task_id='create_es_publisher_sample_job',
         python_callable=create_es_publisher_sample_job
     )
-    
