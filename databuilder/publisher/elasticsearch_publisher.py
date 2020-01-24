@@ -60,6 +60,9 @@ class ElasticsearchPublisher(Publisher):
                     }
                   }
                 },
+                "schema_table": {
+                  "type": "keyword"
+                },
                 "last_updated_epoch": {
                   "type": "date",
                   "format": "epoch_second"
