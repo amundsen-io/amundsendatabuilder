@@ -60,7 +60,7 @@ class ElasticsearchPublisher(Publisher):
                     }
                   }
                 },
-                "schema_table": {
+                "display_name": {
                   "type": "keyword"
                 },
                 "last_updated_epoch": {
