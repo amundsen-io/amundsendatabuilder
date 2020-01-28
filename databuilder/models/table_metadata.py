@@ -243,6 +243,7 @@ class TableMetadata(Neo4jCsvSerializable):
     serialized_nodes = set()  # type: Set[Any]
     serialized_rels = set()  # type: Set[Any]
 
+    #TODO I would prefer to have description be either of type string or of type DescriptionMetadata to eliminate constructor bloat
     def __init__(self,
                  database,  # type: str
                  cluster,  # type: str
