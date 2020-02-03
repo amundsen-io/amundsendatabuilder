@@ -61,7 +61,6 @@ class DescriptionMetadata:
     PROGRAMMATIC_DESCRIPTION_NODE_LABEL = 'Programmatic_Description'
     DESCRIPTION_KEY_FORMAT = '{description}'
     DESCRIPTION_TEXT = 'description'
-    DESCRIPTION_ORDER = 'description_order{}'.format(UNQUOTED_SUFFIX)
     DESCRIPTION_EDITABLE = 'description_editable{}'.format(UNQUOTED_SUFFIX)
     DESCRIPTION_SOURCE = 'description_source'
 
@@ -72,23 +71,17 @@ class DescriptionMetadata:
     DEFAULT_SOURCE = "description"
 
     def __init__(self,
-                 source, # type: str
+                 source,  # type: str
                  text,  # type: Union[None, str]
-                 order, # type: int
-                 is_editable=False # type: Union[bool, str]
+                 is_editable=False  # type: Union[bool, str]
                  ):
         """
         :param source: The unique source of what is populating this description
         :param text: the description text. Markdown supported.
-        :param order: the display order. Lower numbers mean it will be displayed first. Ties are handled alphabetically by source.
         :param is_editable: whether this description is editable.
         """
         self._source = source
         self._text = text
-        if not order:
-            self._order = 0
-        else:
-            self._order = order
         if isinstance(is_editable, str):
             self._is_editable = is_editable.lower() == 'true'
         else:
@@ -100,14 +93,14 @@ class DescriptionMetadata:
             self._label = self.PROGRAMMATIC_DESCRIPTION_NODE_LABEL
 
     @staticmethod
-    def create_description_metadata(source, text, order, is_editable=False):
+    def create_description_metadata(source, text, is_editable=False):
         # We do not want to create a node if there is no description text!
         if text is None:
             return None
         if source is None or source == '':
-            description_node = DescriptionMetadata(DescriptionMetadata.DEFAULT_SOURCE, text, order, True)
+            description_node = DescriptionMetadata(DescriptionMetadata.DEFAULT_SOURCE, text, True)
         else:
-            description_node = DescriptionMetadata(source, text, order, is_editable)
+            description_node = DescriptionMetadata(source, text, is_editable)
         return description_node
 
     def get_description_id(self):
@@ -119,11 +112,9 @@ class DescriptionMetadata:
 
     def __repr__(self):
         # type: () -> str
-        return 'DescriptionMetadata({!r}, {!r}, {!r}, {!r})'.format(
-                                                               self._source,
-                                                               self._text,
-                                                               self._order,
-                                                               self._is_editable)
+        return 'DescriptionMetadata({!r}, {!r}, {!r})'.format(self._source,
+                                                              self._text,
+                                                              self._is_editable)
 
     def get_node_dict(self, node_key):
         # (str) -> Dict
@@ -132,14 +123,13 @@ class DescriptionMetadata:
             NODE_KEY: node_key,
             DescriptionMetadata.DESCRIPTION_SOURCE: self._source,
             DescriptionMetadata.DESCRIPTION_TEXT: self._text,
-            DescriptionMetadata.DESCRIPTION_ORDER: self._order,
             DescriptionMetadata.DESCRIPTION_EDITABLE: self._is_editable
         }
 
-    def get_relation(self, start_key, end_key):
+    def get_relation(self, start_node, start_key, end_key):
         # (str, str) => Dict
         return {
-            RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
+            RELATION_START_LABEL: start_node,
             RELATION_END_LABEL: self._label,
             RELATION_START_KEY: start_key,
             RELATION_END_KEY: end_key,
@@ -166,10 +156,7 @@ class ColumnMetadata:
                  description,  # type: Union[str, None]
                  col_type,  # type: str
                  sort_order,  # type: int
-                 tags=None,  # type: Union[List[str], None]
-                 description_source=None, # type: Union[str, None]
-                 description_editable=False, # type: bool
-                 description_order=0
+                 tags=None  # type: Union[List[str], None]
                  ):
         # type: (...) -> None
         """
@@ -180,9 +167,9 @@ class ColumnMetadata:
         :param sort_order:
         """
         self.name = name
-        #TODO figureo out order
-        self.description = DescriptionMetadata.create_description_metadata(description_source,
-                                                                           description, description_order, description_editable)
+        self.description = DescriptionMetadata.create_description_metadata(source=None,
+                                                                           text=description,
+                                                                           is_editable=True)
         self.type = col_type
         self.sort_order = sort_order
         self.tags = tags
@@ -243,7 +230,6 @@ class TableMetadata(Neo4jCsvSerializable):
     serialized_nodes = set()  # type: Set[Any]
     serialized_rels = set()  # type: Set[Any]
 
-    #TODO I would prefer to have description be either of type string or of type DescriptionMetadata to eliminate constructor bloat
     def __init__(self,
                  database,  # type: str
                  cluster,  # type: str
@@ -253,9 +239,8 @@ class TableMetadata(Neo4jCsvSerializable):
                  columns=None,  # type: Iterable[ColumnMetadata]
                  is_view=False,  # type: bool
                  tags=None,  # type: Union[List, str]
-                 description_source=None, # type: Union[str, None]
-                 description_editable=False, # type: bool
-                 description_order=0,
+                 description_source=None,  # type: Union[str, None]
+                 description_editable=False,  # type: bool
                  **kwargs  # type: Dict
                  ):
         # type: (...) -> None
@@ -268,16 +253,16 @@ class TableMetadata(Neo4jCsvSerializable):
         :param columns:
         :param is_view: Indicate whether the table is a view or not
         :param tags:
-        :param description_source: Optional. Where the description is coming from.
+        :param description_source: Optional. Where the description is coming from. Used as a unique id.
+        :param description_editable: Optional. Whether the description is editable or not.
         :param kwargs: Put additional attributes to the table model if there is any.
         """
         self.database = database
         self.cluster = cluster
         self.schema_name = schema_name
         self.name = name
-        #TODO figure out order
         self.description = DescriptionMetadata.create_description_metadata(description_source,
-                                                                           description, description_order, description_editable)
+                                                                           description, description_editable)
         self.columns = columns if columns else []
         self.is_view = is_view
         self.attrs = None
@@ -440,7 +425,9 @@ class TableMetadata(Neo4jCsvSerializable):
         }
 
         if self.description:
-            yield self.description.get_relation(self._get_table_key(), self._get_table_description_key(self.description))
+            yield self.description.get_relation(TableMetadata.TABLE_NODE_LABEL,
+                                                self._get_table_key(),
+                                                self._get_table_description_key(self.description))
 
         if self.tags:
             for tag in self.tags:
@@ -464,7 +451,9 @@ class TableMetadata(Neo4jCsvSerializable):
             }
 
             if col.description:
-                yield col.description.get_relation(self._get_col_key(col), self._get_col_description_key(col, col.description))
+                yield col.description.get_relation(ColumnMetadata.COLUMN_NODE_LABEL,
+                                                   self._get_col_key(col),
+                                                   self._get_col_description_key(col, col.description))
 
             if col.tags:
                 for tag in col.tags:
