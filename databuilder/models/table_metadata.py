@@ -8,6 +8,7 @@ from databuilder.models.neo4j_csv_serde import (
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
 from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 
+
 class TagMetadata(Neo4jCsvSerializable):
     TAG_NODE_LABEL = 'Tag'
     TAG_KEY_FORMAT = '{tag}'
@@ -61,7 +62,6 @@ class DescriptionMetadata:
     PROGRAMMATIC_DESCRIPTION_NODE_LABEL = 'Programmatic_Description'
     DESCRIPTION_KEY_FORMAT = '{description}'
     DESCRIPTION_TEXT = 'description'
-    DESCRIPTION_EDITABLE = 'description_editable{}'.format(UNQUOTED_SUFFIX)
     DESCRIPTION_SOURCE = 'description_source'
 
     DESCRIPTION_RELATION_TYPE = 'DESCRIPTION'
@@ -71,36 +71,32 @@ class DescriptionMetadata:
     DEFAULT_SOURCE = "description"
 
     def __init__(self,
-                 source,  # type: str
                  text,  # type: Union[None, str]
-                 is_editable=False  # type: Union[bool, str]
+                 source=DEFAULT_SOURCE  # type: str
                  ):
         """
-        :param source: The unique source of what is populating this description
+        :param source: The unique source of what is populating this description.
         :param text: the description text. Markdown supported.
-        :param is_editable: whether this description is editable.
         """
         self._source = source
         self._text = text
-        if isinstance(is_editable, str):
-            self._is_editable = is_editable.lower() == 'true'
-        else:
-            self._is_editable = is_editable
-        # There are so many dependencies on Description node, that it is probably easier to just separate the rest out.
+        #  There are so many dependencies on Description node, that it is probably easier to just separate the rest out.
         if (self._source == self.DEFAULT_SOURCE):
             self._label = self.DESCRIPTION_NODE_LABEL
         else:
             self._label = self.PROGRAMMATIC_DESCRIPTION_NODE_LABEL
 
     @staticmethod
-    def create_description_metadata(source, text, is_editable=False):
+    def create_description_metadata(text, source=DEFAULT_SOURCE):
+        # type: (Union[None,str], str) -> ProgrammaticDescription
+
         # We do not want to create a node if there is no description text!
         if text is None:
             return None
-        if source is None or source == '':
-            description_node = DescriptionMetadata(DescriptionMetadata.DEFAULT_SOURCE, text, True)
+        if not source:
+            description_node = DescriptionMetadata(text=text, source=DescriptionMetadata.DEFAULT_SOURCE)
         else:
-            description_node = DescriptionMetadata(source, text, is_editable)
+            description_node = DescriptionMetadata(text=text, source=source)
         return description_node
 
     def get_description_id(self):
@@ -108,13 +104,11 @@ class DescriptionMetadata:
         if self._source == self.DEFAULT_SOURCE:
             return "_description"
         else:
-            return "_description/" + self._source
+            return "_" + self._source + "_description"
 
     def __repr__(self):
         # type: () -> str
-        return 'DescriptionMetadata({!r}, {!r}, {!r})'.format(self._source,
-                                                              self._text,
-                                                              self._is_editable)
+        return 'DescriptionMetadata({!r}, {!r})'.format(self._source, self._text)
 
     def get_node_dict(self, node_key):
         # (str) -> Dict
@@ -123,7 +117,6 @@ class DescriptionMetadata:
             NODE_KEY: node_key,
             DescriptionMetadata.DESCRIPTION_SOURCE: self._source,
             DescriptionMetadata.DESCRIPTION_TEXT: self._text,
-            DescriptionMetadata.DESCRIPTION_EDITABLE: self._is_editable
         }
 
     def get_relation(self, start_node, start_key, end_key):
@@ -168,8 +161,7 @@ class ColumnMetadata:
         """
         self.name = name
         self.description = DescriptionMetadata.create_description_metadata(source=None,
-                                                                           text=description,
-                                                                           is_editable=True)
+                                                                           text=description)
         self.type = col_type
         self.sort_order = sort_order
         self.tags = tags
@@ -240,7 +232,6 @@ class TableMetadata(Neo4jCsvSerializable):
                  is_view=False,  # type: bool
                  tags=None,  # type: Union[List, str]
                  description_source=None,  # type: Union[str, None]
-                 description_editable=False,  # type: bool
                  **kwargs  # type: Dict
                  ):
         # type: (...) -> None
@@ -253,16 +244,14 @@ class TableMetadata(Neo4jCsvSerializable):
         :param columns:
         :param is_view: Indicate whether the table is a view or not
         :param tags:
-        :param description_source: Optional. Where the description is coming from. Used as a unique id.
-        :param description_editable: Optional. Whether the description is editable or not.
+        :param description_source: Optional. Where the description is coming from. Used to compose unique id.
         :param kwargs: Put additional attributes to the table model if there is any.
         """
         self.database = database
         self.cluster = cluster
         self.schema_name = schema_name
         self.name = name
-        self.description = DescriptionMetadata.create_description_metadata(description_source,
-                                                                           description, description_editable)
+        self.description = DescriptionMetadata.create_description_metadata(text=description, source=description_source)
         self.columns = columns if columns else []
         self.is_view = is_view
         self.attrs = None

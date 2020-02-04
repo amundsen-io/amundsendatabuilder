@@ -75,8 +75,7 @@ def load_table_data_from_csv(file_name, table_name):
                     'name VARCHAR(64) NOT NULL,'
                     'description VARCHAR(64) NOT NULL, '
                     'tags VARCHAR(128) NOT NULL,'
-                    'description_source VARCHAR(32),'
-                    'description_editable boolean)'.format(table_name))
+                    'description_source VARCHAR(32))'.format(table_name))
         file_loc = 'example/sample_data/' + file_name
         with open(file_loc, 'r') as fin:
             dr = csv.DictReader(fin)
@@ -86,13 +85,12 @@ def load_table_data_from_csv(file_name, table_name):
                       i['name'],
                       i['description'],
                       i['tags'],
-                      i['description_source'],
-                      i['description_editable']) for i in dr]
+                      i['description_source']) for i in dr]
 
         cur.executemany("INSERT INTO {} (database, cluster, "
                         "schema_name, name, description, tags, "
-                        "description_source, description_editable) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?);".format(table_name), to_db)
+                        "description_source) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?);".format(table_name), to_db)
         conn.commit()
 
 

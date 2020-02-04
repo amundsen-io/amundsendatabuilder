@@ -189,7 +189,7 @@ class TestBigQueryMetadataExtractor(unittest.TestCase):
         self.assertEquals(result.cluster, 'your-project-here')
         self.assertEquals(result.schema_name, 'fdgdfgh')
         self.assertEquals(result.name, 'nested_recs')
-        self.assertEquals(result.description, '')
+        self.assertEquals(result.description._text, '')
         self.assertEquals(result.columns, [])
         self.assertEquals(result.is_view, False)
 

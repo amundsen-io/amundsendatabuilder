@@ -31,28 +31,28 @@ class TestTableMetadata(unittest.TestCase):
             {'name': 'test_table1', 'KEY': 'hive://gold.test_schema1/test_table1', 'LABEL': 'Table',
              'is_view:UNQUOTED': False},
             {'description': 'test_table1', 'KEY': 'hive://gold.test_schema1/test_table1/_description',
-             'LABEL': 'Description', 'description_editable:UNQUOTED': True, 'description_source': 'description'},
+             'LABEL': 'Description', 'description_source': 'description'},
             {'sort_order:UNQUOTED': 0, 'type': 'bigint', 'name': 'test_id1',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id1', 'LABEL': 'Column'},
             {'description': 'description of test_table1',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id1/_description', 'LABEL': 'Description',
-             'description_editable:UNQUOTED': True, 'description_source': 'description'},
+             'description_source': 'description'},
             {'sort_order:UNQUOTED': 1, 'type': 'bigint', 'name': 'test_id2',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id2', 'LABEL': 'Column'},
             {'description': 'description of test_id2',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id2/_description',
-             'LABEL': 'Description', 'description_editable:UNQUOTED': True, 'description_source': 'description'},
+             'LABEL': 'Description', 'description_source': 'description'},
             {'sort_order:UNQUOTED': 2, 'type': 'boolean', 'name': 'is_active',
              'KEY': 'hive://gold.test_schema1/test_table1/is_active', 'LABEL': 'Column'},
             {'sort_order:UNQUOTED': 3, 'type': 'varchar', 'name': 'source',
              'KEY': 'hive://gold.test_schema1/test_table1/source', 'LABEL': 'Column'},
             {'description': 'description of source', 'KEY': 'hive://gold.test_schema1/test_table1/source/_description',
-             'LABEL': 'Description', 'description_editable:UNQUOTED': True, 'description_source': 'description'},
+             'LABEL': 'Description', 'description_source': 'description'},
             {'sort_order:UNQUOTED': 4, 'type': 'timestamp', 'name': 'etl_created_at',
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at', 'LABEL': 'Column'},
             {'description': 'description of etl_created_at',
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at/_description', 'LABEL': 'Description',
-             'description_editable:UNQUOTED': True, 'description_source': 'description'},
+             'description_source': 'description'},
             {'sort_order:UNQUOTED': 5, 'type': 'varchar', 'name': 'ds',
              'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'}
         ]
@@ -167,8 +167,7 @@ class TestTableMetadata(unittest.TestCase):
             ColumnMetadata('is_active', None, 'boolean', 2),
             ColumnMetadata('source', 'description of source', 'varchar', 3),
             ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
-            ColumnMetadata('ds', None, 'varchar', 5)], is_view=False,
-            description_editable=False, description_source="custom")
+            ColumnMetadata('ds', None, 'varchar', 5)], is_view=False, description_source="custom")
 
         node_row = self.custom_source.next_node()
         actual = []
@@ -176,9 +175,8 @@ class TestTableMetadata(unittest.TestCase):
             actual.append(node_row)
             node_row = self.custom_source.next_node()
         expected = {'LABEL': 'Programmatic_Description',
-                    'KEY': 'hive://gold.test_schema3/test_table4/_description/custom',
-                    'description_source': 'custom', 'description': 'test_table4',
-                    'description_editable:UNQUOTED': False}
+                    'KEY': 'hive://gold.test_schema3/test_table4/_custom_description',
+                    'description_source': 'custom', 'description': 'test_table4'}
         self.assertEqual(actual[1], expected)
 
     def test_tags_field(self):
