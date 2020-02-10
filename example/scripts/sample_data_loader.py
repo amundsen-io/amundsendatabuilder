@@ -112,42 +112,6 @@ def load_tag_data_from_csv(file_name):
         conn.commit()
 
 
-def load_col_data_from_csv(file_name):
-    conn = create_connection(DB_FILE)
-    if conn:
-        cur = conn.cursor()
-        cur.execute('drop table if exists test_col_metadata')
-        cur.execute('create table if not exists test_col_metadata '
-                    '(name VARCHAR(64) NOT NULL , '
-                    'description VARCHAR(64) NOT NULL , '
-                    'col_type VARCHAR(64) NOT NULL , '
-                    'sort_order INTEGER NOT NULL , '
-                    'database VARCHAR(64) NOT NULL , '
-                    'cluster VARCHAR(64) NOT NULL, '
-                    'schema_name VARCHAR(64) NOT NULL,'
-                    'table_name VARCHAR(64) NOT NULL,'
-                    'table_description VARCHAR(64) NOT NULL)')
-        file_loc = 'example/sample_data/' + file_name
-        with open(file_loc, 'r') as fin:
-            dr = csv.DictReader(fin)
-            to_db = [(i['name'],
-                      i['description'],
-                      i['col_type'],
-                      i['sort_order'],
-                      i['database'],
-                      i['cluster'],
-                      i['schema_name'],
-                      i['table_name'],
-                      i['table_description']) for i in dr]
-
-        cur.executemany("INSERT INTO test_col_metadata ("
-                        "name, description, col_type, sort_order,"
-                        "database, cluster, "
-                        "schema_name, table_name, table_description) VALUES "
-                        "(?, ?, ?, ?, ?, ?, ?, ?, ?);", to_db)
-        conn.commit()
-
-
 def load_table_column_stats_from_csv(file_name):
     conn = create_connection(DB_FILE)
     if conn:
@@ -676,7 +640,6 @@ if __name__ == "__main__":
     # logging.basicConfig(level=logging.INFO)
 
     load_table_data_from_csv('sample_table_programmatic_source.csv', 'programmatic')
-    load_col_data_from_csv('sample_col.csv')
     load_table_column_stats_from_csv('sample_table_column_stats.csv')
     load_watermark_data_from_csv('sample_watermark.csv')
     load_table_owner_data_from_csv('sample_table_owner.csv')
