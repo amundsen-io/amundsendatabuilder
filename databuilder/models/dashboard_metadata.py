@@ -15,7 +15,10 @@ RelTuple = namedtuple('RelKeys', ['start_label', 'end_label', 'start_key', 'end_
 
 class DashboardMetadata(Neo4jCsvSerializable):
     """
-    Dashboard metadata that contains dashboardgroup, tags, description, userid and lastreloadtime.
+    Dashboard metadata that contains dashboard group name, dashboardgroup description, dashboard description,
+    along with tags, owner userid and lastreloadtime.
+    (Owner ID and last reload time will be supported by separate Extractor later on with more information)
+
     It implements Neo4jCsvSerializable so that it can be serialized to produce
     Dashboard, Tag, Description, Lastreloadtime and relation of those. Additionally, it will create
     Dashboardgroup with relationships to Dashboard. If users exist in neo4j, it will create

@@ -17,12 +17,16 @@ class BaseRestApiQuery(object):
 
 
 class RestApiQuerySeed(BaseRestApiQuery):
+    """
+    A seed RestApiQuery.
+
+    RestApiQuery is developed using decorator pattern. RestApiQuerySeed is for RestApiQuery to start with.
+    """
 
     def __init__(self,
                  seed_record  # type: Iterable[Dict[str, Any]]
                  ):
         self._seed_record = seed_record
-        LOGGER.info('self._seed_record: {}'.format(self._seed_record))
 
     def execute(self):
         return iter(self._seed_record)
