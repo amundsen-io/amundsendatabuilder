@@ -4,7 +4,7 @@ import logging
 import requests
 from jsonpath_rw import parse
 from retrying import retry
-from typing import List, Dict, Any  # noqa: F401
+from typing import List, Dict, Any, Union  # noqa: F401
 
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
 
@@ -12,6 +12,37 @@ LOGGER = logging.getLogger(__name__)
 
 
 class RestApiQuery(BaseRestApiQuery):
+    """
+    A generic REST API Query that can be joined with other REST API query.
+    Major feature of RestApiQuery is the fact that it is joinable with other RestApiQuery.
+
+    Two main problems RestAPIQuery is trying to solve is:
+      1. How to retrieve values that I want from the REST API's result. (value extraction)
+      2. Most of the cases, one call is not enough. How to join the queries together to get the result that I want?
+
+    On "1" value extraction: RestApiQuery uses JSONPath which is similar product as XPATH of XML.
+    https://goessner.net/articles/JsonPath/
+
+    On "2" join: The idea on joining REST API is the fact that previous query's result is used to query subsequent
+    query.
+
+    To bring this into implementation:
+      1. It accepts prior RestApiQuery as a constructor -- Decorator pattern
+      2. When URL is formed, it uses previous query's result to compute the URL
+        e.g: Previous record: {"dashboard_id": "foo"},
+             URL before: http://foo.bar/dashboard/{dashboard_id}
+             URL after compute: http://foo.bar/dashboard/foo
+
+    With this pattern RestApiQuery supports 1:1 and 1:N JOIN relationship.
+    (GROUP BY or any other aggregation, sub-query join is not supported)
+
+
+    Supports basic HTTP authentication.
+    Extension point is available for other authentication scheme such as Oauth.
+    Extension point is available for pagination.
+
+    All extension point is designed for subclass because there's no exact standard on Oauth and pagination.
+    """
 
     def __init__(self,
                  query_to_join,  # type: BaseRestApiQuery
@@ -19,20 +50,54 @@ class RestApiQuery(BaseRestApiQuery):
                  params,  # type: Dict[str, Any]
                  json_path,  # type: str
                  field_names,  # type: List[str]
-                 coalesce=False  # type: bool
+                 fail_no_result=False,  # type: bool
+                 skip_no_result=False,  # type: bool
                  ):
+        """
+
+        :param query_to_join: Previous query to JOIN. RestApiQuerySeed can be used for the first query
+        :param url: URL string. It will use <str>.format operation using record that comes from previous query to
+        substitute any variable that URL has.
+        e.g: Previous record: {"dashboard_id": "foo"},
+             URL before: http://foo.bar/dashboard/{dashboard_id}
+             URL after compute: http://foo.bar/dashboard/foo
+
+        :param params: A keyword arguments that pass into requests.get function.
+            https://requests.readthedocs.io/en/master/user/quickstart/#make-a-request
+        :param json_path: A JSONPath expression. https://github.com/kennknowles/python-jsonpath-rw
+        Example:
+            JSON result:
+            [{"report_id": "1", "report_name": "first report", "foo": "bar"},
+             {"report_id": "2", "report_name": "second report"}]
+
+            JSON PATH:
+            [*].[report_id,report_name]
+
+            ["1", "first report", "2", "second report"]
+        :param field_names: Field names to be used on the result. Result is dictionary where field_name will be the key
+         and the values extracted via JSON PATH will be the value.
+
+            JSON Path result:
+                ["1", "first report", "2", "second report"]
+
+            field_names:
+                ["dashboard_id", "dashboard_description"]
+
+            {"dashboard_id": "1", "dashboard_description": "first report"}
+            {"dashboard_id": "2", "dashboard_description": "second report"}
+
+        :param fail_no_result: If there's no result from the query it will make it fail.
+        :param skip_no_result: If there's no result from the query, it will skip this record.
+        """
         self._inner_rest_api_query = query_to_join
         self._url = url
         self._params = params
         self._json_path = json_path
         self._jsonpath_expr = parse(self._json_path)
-
-        self._coalesce = coalesce
+        self._fail_no_result = fail_no_result
+        self._skip_no_result = skip_no_result
         self._field_names = field_names
         self._more_pages = False
-
-        if self._coalesce and len(self._field_names) > 1:
-            raise Exception('Cannot have multiple fields performing coalesce')
 
     def execute(self):
         self._authenticate()
@@ -46,19 +111,23 @@ class RestApiQuery(BaseRestApiQuery):
                 url = self._preprocess_url(record=record_dict)
                 response = self._send_request(url=url)
 
-                response_json = response.json()  # type: Dict[str, Any]
+                response_json = response.json()  # type: Union[List[Any], Dict[str, Any]]
+
+                # value extraction via JSON Path
                 result_list = [match.value for match in self._jsonpath_expr.find(response_json)]  # type: List[Any]
 
                 if not result_list:
-                    LOGGER.warning('No result from URL: {url}  , JSONPATH: {json_path} , response payload: {response}' \
-                                   .format(url=self._url, json_path=self._json_path, response=response_json))
-                    # TODO: configure if we want to fail or skip
-                    yield copy.deepcopy(record_dict)
+                    log_msg = 'No result from URL: {url}  , JSONPATH: {json_path} , response payload: {response}' \
+                        .format(url=self._url, json_path=self._json_path, response=response_json)
+                    LOGGER.info(log_msg)
 
-                if self._coalesce:
-                    record_dict = copy.deepcopy(record_dict)
-                    record_dict[self._field_name] = result_list
-                    yield record_dict
+                    if self._fail_no_result:
+                        raise Exception(log_msg)
+
+                    if self._skip_no_result:
+                        continue
+
+                    yield copy.deepcopy(record_dict)
 
                 while result_list:
                     record_dict = copy.deepcopy(record_dict)
@@ -71,6 +140,12 @@ class RestApiQuery(BaseRestApiQuery):
     def _preprocess_url(self,
                         record,  # type: Dict[str, Any]
                         ):
+        # type: (...) -> str
+        """
+        Performs variable substitution using a dict comes as a record from previous query.
+        :param record:
+        :return: a URL that is ready to be called.
+        """
         return self._url.format(**record)
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=1000, wait_exponential_max=10000)
@@ -78,6 +153,11 @@ class RestApiQuery(BaseRestApiQuery):
                       url  # type: str
                       ):
         # type: (...) -> requests.Response
+        """
+        Performs HTTP GET operation with retry on failure.
+        :param url:
+        :return:
+        """
         LOGGER.info('Calling URL {}'.format(url))
         response = requests.get(url, **self._params)
         response.raise_for_status()
@@ -86,6 +166,7 @@ class RestApiQuery(BaseRestApiQuery):
     def _post_process(self,
                       response,  # type: requests.Response
                       ):
+        # type: (...) -> None
         """
         Extension point for post-processing such thing as pagination
         :return:
@@ -93,6 +174,7 @@ class RestApiQuery(BaseRestApiQuery):
         pass
 
     def _authenticate(self):
+        # type: (...) -> None
         """
         Extension point to support other authentication mechanism such as Oauth.
         Subclass this class and implement authentication process.

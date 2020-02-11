@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from typing import Iterable, Any, Union, Iterator, Dict, Set  # noqa: F401
+from typing import Any, Union, Iterator, Dict, Set, Optional  # noqa: F401
 
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
@@ -38,6 +38,8 @@ class DashboardMetadata(Neo4jCsvSerializable):
     DASHBOARD_GROUP_DASHBOARD_RELATION_TYPE = 'DASHBOARD'
     DASHBOARD_DASHBOARD_GROUP_RELATION_TYPE = 'DASHBOARD_OF'
 
+    DASHBOARD_GROUP_DESCRIPTION_KEY_FORMAT = '{dashboard_group}://_description'
+
     DASHBOARD_LAST_RELOAD_TIME_NODE_LABEL = 'Lastreloadtime'
     DASHBOARD_LAST_RELOAD_TIME = 'value'
     DASHBOARD_LAST_RELOAD_TIME_FORMAT = '{dashboard_group}://{dashboard_name}/_lastreloadtime'
@@ -60,50 +62,64 @@ class DashboardMetadata(Neo4jCsvSerializable):
                  dashboard_group,  # type: str
                  dashboard_name,  # type: str
                  description,  # type: Union[str, None]
-                 last_reload_time,  # type: str
-                 user_id,  # type: str
-                 tags  # type: List
+                 last_reload_time=None,  # type: Optional[str]
+                 user_id=None,  # type: Optional[str]
+                 tags=None,  # type: List
+                 dashboard_group_id=None,  # type: Optional[str]
+                 dashboard_id=None,  # type: Optional[str]
+                 dashboard_group_description=None,  # type: Optional[str]
+                 **kwargs
                  ):
         # type: (...) -> None
 
         self.dashboard_group = dashboard_group
         self.dashboard_name = dashboard_name
+        self.dashboard_group_id = dashboard_group_id if dashboard_group_id else dashboard_group
+        self.dashboard_id = dashboard_id if dashboard_name else dashboard_id
         self.description = description
         self.last_reload_time = last_reload_time
         self.user_id = user_id
         self.tags = tags
+        self.dashboard_group_description = dashboard_group_description
         self._node_iterator = self._create_next_node()
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self):
         # type: () -> str
-        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}' \
+        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
             .format(self.dashboard_group,
                     self.dashboard_name,
                     self.description,
                     self.last_reload_time,
                     self.user_id,
-                    self.tags
+                    self.tags,
+                    self.dashboard_group_id,
+                    self.dashboard_id,
+                    self.dashboard_group_description
                     )
 
     def _get_dashboard_key(self):
         # type: () -> str
-        return DashboardMetadata.DASHBOARD_KEY_FORMAT.format(dashboard_group=self.dashboard_group,
-                                                             dashboard_name=self.dashboard_name)
+        return DashboardMetadata.DASHBOARD_KEY_FORMAT.format(dashboard_group=self.dashboard_group_id,
+                                                             dashboard_name=self.dashboard_id)
 
     def _get_dashboard_description_key(self):
         # type: () -> str
-        return DashboardMetadata.DASHBOARD_DESCRIPTION_FORMAT.format(dashboard_group=self.dashboard_group,
-                                                                     dashboard_name=self.dashboard_name)
+        return DashboardMetadata.DASHBOARD_DESCRIPTION_FORMAT.format(dashboard_group=self.dashboard_group_id,
+                                                                     dashboard_name=self.dashboard_id)
+
+    def _get_dashboard_group_description_key(self):
+        # type: () -> str
+        return DashboardMetadata.DASHBOARD_GROUP_DESCRIPTION_FORMAT.format(dashboard_group=self.dashboard_group_id)
 
     def _get_dashboard_group_key(self):
         # type: () -> str
-        return DashboardMetadata.DASHBOARD_GROUP_KEY_FORMAT.format(dashboard_group=self.dashboard_group)
+        return DashboardMetadata.DASHBOARD_GROUP_KEY_FORMAT.format(dashboard_group=self.dashboard_group_id)
 
     def _get_dashboard_last_reload_time_key(self):
         # type: () -> str
         return DashboardMetadata.DASHBOARD_LAST_RELOAD_TIME_FORMAT.format(dashboard_group=self.dashboard_group,
-                                                                          dashboard_name=self.dashboard_name)
+                                                                          dashboard_name=self.dashboard_id)
 
     def _get_owner_key(self):
         # type: () -> str
@@ -205,14 +221,17 @@ class DashboardMetadata(Neo4jCsvSerializable):
                 }
 
         # Dashboard > Dashboard owner relation
-        others = [
-            RelTuple(start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
-                     end_label=DashboardMetadata.OWNER_NODE_LABEL,
-                     start_key=self._get_dashboard_key(),
-                     end_key=self._get_owner_key(),
-                     type=DashboardMetadata.DASHBOARD_OWNER_RELATION_TYPE,
-                     reverse_type=DashboardMetadata.OWNER_DASHBOARD_RELATION_TYPE)
-        ]
+        others = []
+
+        if self.user_id:
+            others.append(
+                RelTuple(start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
+                         end_label=DashboardMetadata.OWNER_NODE_LABEL,
+                         start_key=self._get_dashboard_key(),
+                         end_key=self._get_owner_key(),
+                         type=DashboardMetadata.DASHBOARD_OWNER_RELATION_TYPE,
+                         reverse_type=DashboardMetadata.OWNER_DASHBOARD_RELATION_TYPE)
+            )
 
         for rel_tuple in others:
             if rel_tuple not in DashboardMetadata.serialized_rels:
