@@ -81,8 +81,7 @@ class ModeDashboardExtractor(Extractor):
         # Reports
         url = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
         json_path = '_embedded.reports[*].[token,name,description,created_at,updated_at]'
-        field_names = ['dashboard_id', 'dashboard_name', 'description', 'report_created_at',
-                       'report_updated_at']
+        field_names = ['dashboard_id', 'dashboard_name', 'description']
         reports_query = RestApiQuery(query_to_join=spaces_query, url=url, params=params, json_path=json_path,
                                      field_names=field_names, skip_no_result=True)
 
