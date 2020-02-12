@@ -4,6 +4,7 @@ from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from requests.auth import HTTPBasicAuth
 from typing import Any  # noqa: F401
 
+from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, MODEL_CLASS
 from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
@@ -36,13 +37,15 @@ class ModeDashboardExtractor(Extractor):
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
-        self._conf = self._conf.with_fallback(ConfigFactory.from_dict(
-            {REST_API_QUERY: restapi_query,
-             MODEL_CLASS: 'databuilder.models.dashboard_metadata.DashboardMetadata'}
-        ))
-
         self._extractor = RestAPIExtractor()
-        self._extractor.init(conf=self._conf)
+        rest_api_extractor_conf = Scoped.get_scoped_conf(conf, self._extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict(
+                {REST_API_QUERY: restapi_query,
+                 MODEL_CLASS: 'databuilder.models.dashboard_metadata.DashboardMetadata'}
+            )
+        )
+
+        self._extractor.init(conf=rest_api_extractor_conf)
 
     def extract(self):
         # type: () -> Any
