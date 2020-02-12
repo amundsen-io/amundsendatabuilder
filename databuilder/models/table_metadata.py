@@ -12,6 +12,7 @@ from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 DESCRIPTION_NODE_LABEL_VAL = 'Description'
 DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
 
+
 class TagMetadata(Neo4jCsvSerializable):
     TAG_NODE_LABEL = 'Tag'
     TAG_KEY_FORMAT = '{tag}'
