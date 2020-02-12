@@ -38,10 +38,13 @@ class RestApiQuery(BaseRestApiQuery):
 
 
     Supports basic HTTP authentication.
+
     Extension point is available for other authentication scheme such as Oauth.
     Extension point is available for pagination.
 
     All extension point is designed for subclass because there's no exact standard on Oauth and pagination.
+
+    (How it would work with Tableau/Looker is described in docstring of _authenticate method)
     """
 
     def __init__(self,
@@ -180,6 +183,16 @@ class RestApiQuery(BaseRestApiQuery):
         Subclass this class and implement authentication process.
 
         This assumes that most of authentication process can work with updating member variable such as url and params
+
+        For example, Tableau's authentication pattern is that of Oauth where you need to call end point with JSON
+        payload via POST method. This call will return one-time token along with LUID. On following calls,
+        one time token needs to be added on header, and LUID needs to be used to form URL to fetch information.
+
+        This is why url and params is part of RestApiQuery's member variable and above operation can be done by
+        mutating these two values.
+
+        Another Dashboard product Looker uses Oauth for authentication, and it can be done in similar way as Tableau.
+
         :return: None
         """
         pass
