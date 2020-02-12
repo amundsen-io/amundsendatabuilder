@@ -71,7 +71,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
                  user_id=None,  # type: Optional[str]
                  tags=None,  # type: List
                  cluster='gold',  # type: str
-                 product=None,  # type: Optional[str]
+                 product='',  # type: Optional[str]
                  dashboard_group_id=None,  # type: Optional[str]
                  dashboard_id=None,  # type: Optional[str]
                  dashboard_group_description=None,  # type: Optional[str]

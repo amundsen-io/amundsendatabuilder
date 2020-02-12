@@ -36,7 +36,6 @@ class RestAPIExtractor(Extractor):
             mod = importlib.import_module(module_name)
             self.model_class = getattr(mod, class_name)
 
-
     def extract(self):
         # type: () -> Any
         """
