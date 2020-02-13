@@ -6,7 +6,8 @@ from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, MODEL_CLASS
+from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, MODEL_CLASS, \
+    STATIC_RECORD_DICT
 from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
@@ -20,11 +21,11 @@ LOGGER = logging.getLogger(__name__)
 
 class ModeDashboardExtractor(Extractor):
     """
-    A Extractor that extracts core metadata on Mode dashboard.
+    A Extractor that extracts core metadata on Mode dashboard. https://app.mode.com/
     It extracts list of reports that consists of:
         Dashboard group name (Space name)
         Dashboard group id (Space token)
-        Dashboard description (Space description)
+        Dashboard group description (Space description)
         Dashboard name (Report name)
         Dashboard id (Report token)
         Dashboard description (Report description)
@@ -34,14 +35,18 @@ class ModeDashboardExtractor(Extractor):
 
     def init(self, conf):
         # type: (ConfigTree) -> None
+
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
         self._extractor = RestAPIExtractor()
         rest_api_extractor_conf = Scoped.get_scoped_conf(conf, self._extractor.get_scope()).with_fallback(
             ConfigFactory.from_dict(
-                {REST_API_QUERY: restapi_query,
-                 MODEL_CLASS: 'databuilder.models.dashboard_metadata.DashboardMetadata'}
+                {
+                    REST_API_QUERY: restapi_query,
+                    MODEL_CLASS: 'databuilder.models.dashboard_metadata.DashboardMetadata',
+                    STATIC_RECORD_DICT: {'product': 'mode'}
+                }
             )
         )
 
@@ -54,6 +59,7 @@ class ModeDashboardExtractor(Extractor):
 
     def get_scope(self):
         # type: () -> str
+
         return 'extractor.mode_dashboard'
 
     def _build_restapi_query(self):
@@ -64,25 +70,25 @@ class ModeDashboardExtractor(Extractor):
         """
         # type: () -> RestApiQuery
 
+        spaces_url_template = 'https://app.mode.com/api/{organization}/spaces?filter=all'
+        reports_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
+
         # Seed query record for next query api to join with
         seed_record = [{'organization': self._conf.get_string(ORGANIZATION)}]
         seed_query = RestApiQuerySeed(seed_record=seed_record)
 
         # Spaces
-        url = 'https://app.mode.com/api/{organization}/spaces?filter=all'
         params = {'auth': HTTPBasicAuth(self._conf.get_string(MODE_ACCESS_TOKEN),
                                         self._conf.get_string(MODE_PASSWORD_TOKEN))}
 
         json_path = '_embedded.spaces[*].[token,name,description]'
         field_names = ['dashboard_group_id', 'dashboard_group', 'dashboard_group_description']
-        spaces_query = RestApiQuery(query_to_join=seed_query, url=url, params=params, json_path=json_path,
-                                    field_names=field_names)
+        spaces_query = RestApiQuery(query_to_join=seed_query, url=spaces_url_template, params=params,
+                                    json_path=json_path, field_names=field_names)
 
         # Reports
-        url = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
-        json_path = '_embedded.reports[*].[token,name,description,created_at,updated_at]'
+        json_path = '_embedded.reports[*].[token,name,description]'
         field_names = ['dashboard_id', 'dashboard_name', 'description']
-        reports_query = RestApiQuery(query_to_join=spaces_query, url=url, params=params, json_path=json_path,
-                                     field_names=field_names, skip_no_result=True)
-
+        reports_query = RestApiQuery(query_to_join=spaces_query, url=reports_url_template, params=params,
+                                     json_path=json_path, field_names=field_names, skip_no_result=True)
         return reports_query

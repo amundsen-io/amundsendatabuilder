@@ -12,6 +12,8 @@ REST_API_QUERY = 'restapi_query'
 MODEL_CLASS = 'model_class'
 
 # Static record that will be added into extracted record
+# For example, DashboardMetadata requires product name (static name) of Dashboard and REST api does not provide
+#  it. and you can add {'product': 'mode'} so that it will be included in the record.
 STATIC_RECORD_DICT = 'static_record_dict'
 
 LOGGER = logging.getLogger(__name__)
@@ -25,6 +27,7 @@ class RestAPIExtractor(Extractor):
 
     def init(self, conf):
         # type: (ConfigTree) -> None
+
         self._restapi_query = conf.get(REST_API_QUERY)  # type: BaseRestApiQuery
         self._iterator = None  # type: Iterator[Dict[str, Any]]
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
@@ -38,6 +41,7 @@ class RestAPIExtractor(Extractor):
 
     def extract(self):
         # type: () -> Any
+
         """
         Fetch one result row from RestApiQuery, convert to {model_class} if specified before
         returning.
@@ -62,4 +66,5 @@ class RestAPIExtractor(Extractor):
 
     def get_scope(self):
         # type: () -> str
+
         return 'extractor.restapi'

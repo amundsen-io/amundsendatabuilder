@@ -56,6 +56,7 @@ class RestApiQuery(BaseRestApiQuery):
                  fail_no_result=False,  # type: bool
                  skip_no_result=False,  # type: bool
                  ):
+        # type: (...) -> None
         """
 
         :param query_to_join: Previous query to JOIN. RestApiQuerySeed can be used for the first query
@@ -103,6 +104,8 @@ class RestApiQuery(BaseRestApiQuery):
         self._more_pages = False
 
     def execute(self):
+        # type: () -> Iterator[Dict[str, Any]]
+
         self._authenticate()
 
         for record_dict in self._inner_rest_api_query.execute():
@@ -149,6 +152,7 @@ class RestApiQuery(BaseRestApiQuery):
         :param record:
         :return: a URL that is ready to be called.
         """
+
         return self._url.format(**record)
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=1000, wait_exponential_max=10000)
@@ -161,6 +165,7 @@ class RestApiQuery(BaseRestApiQuery):
         :param url:
         :return:
         """
+
         LOGGER.info('Calling URL {}'.format(url))
         response = requests.get(url, **self._params)
         response.raise_for_status()
