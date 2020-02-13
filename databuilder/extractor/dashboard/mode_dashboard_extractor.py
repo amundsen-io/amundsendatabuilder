@@ -77,16 +77,21 @@ class ModeDashboardExtractor(Extractor):
         seed_record = [{'organization': self._conf.get_string(ORGANIZATION)}]
         seed_query = RestApiQuerySeed(seed_record=seed_record)
 
-        # Spaces
+
         params = {'auth': HTTPBasicAuth(self._conf.get_string(MODE_ACCESS_TOKEN),
                                         self._conf.get_string(MODE_PASSWORD_TOKEN))}
 
+        # Spaces
+        # JSONPATH expression. it goes into array which is located in _embedded.spaces and then extracts token, name,
+        # and description
         json_path = '_embedded.spaces[*].[token,name,description]'
         field_names = ['dashboard_group_id', 'dashboard_group', 'dashboard_group_description']
         spaces_query = RestApiQuery(query_to_join=seed_query, url=spaces_url_template, params=params,
                                     json_path=json_path, field_names=field_names)
 
         # Reports
+        # JSONPATH expression. it goes into array which is located in _embedded.reports and then extracts token, name,
+        # and description
         json_path = '_embedded.reports[*].[token,name,description]'
         field_names = ['dashboard_id', 'dashboard_name', 'description']
         reports_query = RestApiQuery(query_to_join=spaces_query, url=reports_url_template, params=params,
