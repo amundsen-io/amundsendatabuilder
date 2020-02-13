@@ -77,7 +77,6 @@ class ModeDashboardExtractor(Extractor):
         seed_record = [{'organization': self._conf.get_string(ORGANIZATION)}]
         seed_query = RestApiQuerySeed(seed_record=seed_record)
 
-
         params = {'auth': HTTPBasicAuth(self._conf.get_string(MODE_ACCESS_TOKEN),
                                         self._conf.get_string(MODE_PASSWORD_TOKEN))}
 

@@ -13,7 +13,8 @@ class TestDashboardMetadata(unittest.TestCase):
                                                     'Agent dashboard description',
                                                     '2019-05-30T07:03:35.580Z',
                                                     'roald.amundsen@example.org',
-                                                    ['test_tag', 'tag2']
+                                                    ['test_tag', 'tag2'],
+                                                    dashboard_group_description='foo dashboard group description'
                                                     )
         # Without tags
         self.dashboard_metadata2 = DashboardMetadata('Product - Atmoskop',
@@ -45,6 +46,8 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_nodes_deduped = [
             {'name': 'Agent', 'KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'LABEL': 'Dashboard'},
             {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup'},
+            {'KEY': '_dashboard://gold.Product - Jobs.cz/_description', 'LABEL': 'Description',
+             'description': 'foo dashboard group description'},
             {'description': 'Agent dashboard description',
              'KEY': '_dashboard://gold.Product - Jobs.cz/Agent/_description', 'LABEL': 'Description'},
             {'value': '2019-05-30T07:03:35.580Z',
@@ -56,6 +59,9 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_nodes = copy.deepcopy(self.expected_nodes_deduped)
 
         self.expected_rels_deduped = [
+            {'END_KEY': '_dashboard://gold.Product - Jobs.cz/_description', 'END_LABEL': 'Description',
+             'REVERSE_TYPE': 'DESCRIPTION_OF', 'START_KEY': '_dashboard://gold.Product - Jobs.cz',
+             'START_LABEL': 'Dashboardgroup', 'TYPE': 'DESCRIPTION'},
             {'END_KEY': '_dashboard://gold.Product - Jobs.cz', 'START_LABEL': 'Dashboard',
              'END_LABEL': 'Dashboardgroup',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'TYPE': 'DASHBOARD_OF',
