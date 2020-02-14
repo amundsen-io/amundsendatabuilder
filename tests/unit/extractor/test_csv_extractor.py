@@ -32,6 +32,6 @@ class TestCsvExtractor(unittest.TestCase):
         self.assertEquals(result.sort_order, '1')
         self.assertEquals(result.database, 'hive')
         self.assertEquals(result.cluster, 'gold')
-        self.assertEquals(result.schema_name, 'test_schema')
+        self.assertEquals(result.schema, 'test_schema')
         self.assertEquals(result.table_name, 'test_table1')
         self.assertEquals(result.table_desc, '1st test table')

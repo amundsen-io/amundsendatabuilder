@@ -51,7 +51,7 @@ class ElasticsearchPublisher(Publisher):
                     }
                   }
                 },
-                "schema_name": {
+                "schema": {
                   "type":"text",
                   "analyzer": "simple",
                   "fields": {

@@ -30,7 +30,7 @@ class StandaloneColumnMetadata(Neo4jCsvSerializable):
                  sort_order,  # type: int
                  database,  # type: str
                  cluster,  # type: str
-                 schema_name,  # type: str
+                 schema,  # type: str
                  table_name,  # type: str
                  table_description,  # type: str
                  ):
@@ -48,7 +48,7 @@ class StandaloneColumnMetadata(Neo4jCsvSerializable):
         self.sort_order = sort_order
         self.database = database
         self.cluster = cluster
-        self.schema_name = schema_name
+        self.schema = schema
         self.table_name = table_name
         self.table_desc = table_description
 
@@ -75,7 +75,7 @@ class StandaloneColumnMetadata(Neo4jCsvSerializable):
         # type: (StandaloneColumnMetadata) -> str
         return StandaloneColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
                                                                  cluster=self.cluster,
-                                                                 schema=self.schema_name,
+                                                                 schema=self.schema,
                                                                  tbl=self.table_name,
                                                                  col=self.name)
 
@@ -83,7 +83,7 @@ class StandaloneColumnMetadata(Neo4jCsvSerializable):
         # type: (StandaloneColumnMetadata) -> str
         return StandaloneColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
                                                                          cluster=self.cluster,
-                                                                         schema=self.schema_name,
+                                                                         schema=self.schema,
                                                                          tbl=self.table_name,
                                                                          col=self.name)
 
@@ -91,7 +91,7 @@ class StandaloneColumnMetadata(Neo4jCsvSerializable):
         # type: () -> str
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
                                                      cluster=self.cluster,
-                                                     schema=self.schema_name,
+                                                     schema=self.schema,
                                                      tbl=self.table_name)
 
     def create_nodes(self):
