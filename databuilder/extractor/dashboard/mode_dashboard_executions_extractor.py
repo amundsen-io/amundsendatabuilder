@@ -47,11 +47,11 @@ class ModeDashboardExecutionsExtractor(Extractor):
 
     def extract(self):
         # type: () -> Any
-        return self._timestamp_str_to_epoch_transformer.transform(record= self._extractor.extract())
+        return self._timestamp_str_to_epoch_transformer.transform(record=self._extractor.extract())
 
     def get_scope(self):
         # type: () -> str
-        return 'extractor.mode_dashboard'
+        return 'extractor.mode_dashboard_execution'
 
     def _build_restapi_query(self):
         """
@@ -87,6 +87,6 @@ class ModeDashboardExecutionsExtractor(Extractor):
         json_path = '[state,completed_at]'
         field_names = ['execution_state', 'execution_timestamp']
         last_run_state_query = RestApiQuery(query_to_join=last_run_resource_path_query, url=url, params=params,
-                                            json_path=json_path, field_names=field_names)
+                                            json_path=json_path, field_names=field_names, skip_no_result=True)
 
         return last_run_state_query
