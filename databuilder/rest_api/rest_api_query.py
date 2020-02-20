@@ -231,7 +231,7 @@ class RestApiQuery(BaseRestApiQuery):
                 if not json_path_contains_or:
                     sub_result.append(result_list[i * len(field_names) + j])
                 else:
-                    sub_result.append(result_list[len(result_list) / len(field_names) * j + i])
+                    sub_result.append(result_list[int(len(result_list) / len(field_names)) * j + i])
 
             result.append(sub_result)
         return result
