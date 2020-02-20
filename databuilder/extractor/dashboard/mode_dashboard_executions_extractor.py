@@ -47,18 +47,16 @@ class ModeDashboardExecutionsExtractor(Extractor):
         transformers = []
         timestamp_str_to_epoch_transformer = TimestampStringToEpoch()
         timestamp_str_to_epoch_transformer.init(
-            conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope())
-                .with_fallback(ConfigFactory.from_dict({FIELD_NAME: 'execution_timestamp', }))
-        )
+            conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope()).with_fallback(
+                ConfigFactory.from_dict({FIELD_NAME: 'execution_timestamp', })))
 
         transformers.append(timestamp_str_to_epoch_transformer)
 
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
-            conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope())
-                .with_fallback(ConfigFactory.from_dict(
-                {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_execution.DashboardExecution'}))
-        )
+            conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
+                ConfigFactory.from_dict(
+                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_execution.DashboardExecution'})))
         transformers.append(dict_to_model_transformer)
 
         self._transformer = ChainedTransformer(transformers=transformers)
