@@ -55,6 +55,7 @@ class RestApiQuery(BaseRestApiQuery):
                  field_names,  # type: List[str]
                  fail_no_result=False,  # type: bool
                  skip_no_result=False,  # type: bool
+                 json_path_contains_or=False,  # type: bool
                  ):
         # type: (...) -> None
         """
@@ -92,20 +93,38 @@ class RestApiQuery(BaseRestApiQuery):
 
         :param fail_no_result: If there's no result from the query it will make it fail.
         :param skip_no_result: If there's no result from the query, it will skip this record.
+        :param json_path_contains_or: JSON Path expression accepts | ( OR ) operation, mostly to extract values in
+        different level. In this case, JSON Path will extract the value from first expression and then second,
+        and so forth.
+
+        Example:
+            JSON result:
+            [{"report_id": "1", "report_name": "first report", "foo": {"bar": "baz"}},
+             {"report_id": "2", "report_name": "second report", "foo": {"bar": "box"}}]
+
+            JSON PATH:
+            ([*].report_id) | ([*].(foo.bar))
+
+            ["1", "2", "baz", "box"]
+
+
         """
         self._inner_rest_api_query = query_to_join
         self._url = url
         self._params = params
         self._json_path = json_path
+        assert not (',' in json_path and '|' in json_path),\
+            'RestApiQuery does not support "and (,)" and "or (|)" at the same time'
+
         self._jsonpath_expr = parse(self._json_path)
         self._fail_no_result = fail_no_result
         self._skip_no_result = skip_no_result
         self._field_names = field_names
+        self._json_path_contains_or = json_path_contains_or
         self._more_pages = False
 
     def execute(self):
         # type: () -> Iterator[Dict[str, Any]]
-
         self._authenticate()
 
         for record_dict in self._inner_rest_api_query.execute():
@@ -135,11 +154,21 @@ class RestApiQuery(BaseRestApiQuery):
 
                     yield copy.deepcopy(record_dict)
 
-                while result_list:
+                sub_records = RestApiQuery._compute_sub_records(result_list=result_list,
+                                                                field_names=self._field_names,
+                                                                json_path_contains_or=self._json_path_contains_or)
+
+                for sub_record in sub_records:
                     record_dict = copy.deepcopy(record_dict)
                     for field_name in self._field_names:
-                        record_dict[field_name] = result_list.pop(0)
+                        record_dict[field_name] = sub_record.pop(0)
                     yield record_dict
+
+                # while result_list:
+                #     record_dict = copy.deepcopy(record_dict)
+                #     for field_name in self._field_names:
+                #         record_dict[field_name] = result_list.pop(0)
+                #     yield record_dict
 
                 self._post_process(response)
 
@@ -152,7 +181,6 @@ class RestApiQuery(BaseRestApiQuery):
         :param record:
         :return: a URL that is ready to be called.
         """
-
         return self._url.format(**record)
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=1000, wait_exponential_max=10000)
@@ -165,11 +193,30 @@ class RestApiQuery(BaseRestApiQuery):
         :param url:
         :return:
         """
-
         LOGGER.info('Calling URL {}'.format(url))
         response = requests.get(url, **self._params)
         response.raise_for_status()
         return response
+
+    @classmethod
+    def _compute_sub_records(self,
+                             result_list,  # type: List
+                             field_names,  # type: List[str]
+                             json_path_contains_or=False,  # type: bool
+                             ):
+        # type: (...) -> List[List[Any]]
+
+        result = []
+        for i in range(len(result_list) / len(field_names)):
+            sub_result = []
+            for j in range(len(field_names)):
+                if not json_path_contains_or:
+                    sub_result.append(result_list[i * len(field_names) + j])
+                else:
+                    sub_result.append(result_list[len(result_list) / len(field_names) * j + i])
+
+            result.append(sub_result)
+        return result
 
     def _post_process(self,
                       response,  # type: requests.Response
