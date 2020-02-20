@@ -216,7 +216,6 @@ class RestApiQuery(BaseRestApiQuery):
             result.append(sub_result)
         return result
 
-
     def _post_process(self,
                       response,  # type: requests.Response
                       ):

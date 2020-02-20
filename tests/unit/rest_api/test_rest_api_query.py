@@ -1,8 +1,7 @@
-import logging
 import unittest
 
-
 from databuilder.rest_api.rest_api_query import RestApiQuery
+
 
 class TestRestApiQuery(unittest.TestCase):
 
@@ -19,7 +18,6 @@ class TestRestApiQuery(unittest.TestCase):
                                                         json_path_contains_or=True)
 
         assert expected_records == sub_records
-
 
     def test_compute_subresult_multiple_fields_json_path_and_expression(self):
         sub_records = RestApiQuery._compute_sub_records(
@@ -39,7 +37,6 @@ class TestRestApiQuery(unittest.TestCase):
         ]
 
         assert expected_records == sub_records
-
 
     def test_compute_subresult_multiple_fields_json_path_or_expression(self):
         sub_records = RestApiQuery._compute_sub_records(

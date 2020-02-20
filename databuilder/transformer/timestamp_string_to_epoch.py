@@ -16,7 +16,9 @@ DEFAULT_CONFIG = ConfigFactory.from_dict({TIMESTAMP_FORMAT: '%Y-%m-%dT%H:%M:%S.%
 
 
 class TimestampStringToEpoch(Transformer):
-
+    """
+    Transforms string timestamp into epoch
+    """
     def init(self, conf):
         # type: (ConfigTree) -> None
         self._conf = conf.with_fallback(DEFAULT_CONFIG)
@@ -25,9 +27,6 @@ class TimestampStringToEpoch(Transformer):
 
     def transform(self, record):
         # type: (Dict[str, Any]) -> Dict[str, Any]
-        if not record:
-            return record
-
         timestamp_str = record.get(self._field_name, '')
 
         if not timestamp_str:
