@@ -774,7 +774,7 @@ if __name__ == "__main__":
                         }
                       }
                     },
-                    "name": {
+                    "full_name": {
                       "type":"text",
                       "analyzer": "simple",
                       "fields": {
