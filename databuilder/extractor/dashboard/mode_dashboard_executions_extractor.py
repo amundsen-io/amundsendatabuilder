@@ -56,7 +56,7 @@ class ModeDashboardExecutionsExtractor(Extractor):
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
             conf=ConfigFactory.from_dict(
-                {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_last_execution.DashboardLastExecution'}
+                {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_execution.DashboardExecution'}
             ).with_fallback(Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()))
         )
         transformers.append(dict_to_model_transformer)
