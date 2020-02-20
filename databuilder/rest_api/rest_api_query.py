@@ -164,12 +164,6 @@ class RestApiQuery(BaseRestApiQuery):
                         record_dict[field_name] = sub_record.pop(0)
                     yield record_dict
 
-                # while result_list:
-                #     record_dict = copy.deepcopy(record_dict)
-                #     for field_name in self._field_names:
-                #         record_dict[field_name] = result_list.pop(0)
-                #     yield record_dict
-
                 self._post_process(response)
 
     def _preprocess_url(self,
@@ -204,6 +198,30 @@ class RestApiQuery(BaseRestApiQuery):
                              field_names,  # type: List[str]
                              json_path_contains_or=False,  # type: bool
                              ):
+        """
+        The behavior of JSONPATH is different when it's extracting multiple fields using AND(,) vs OR(|)
+        If it uses AND(,), first n records will be first record. If it uses OR(|), it will list first field of all
+        records, and then second field of all records etc.
+
+        For example, when we have 3 fields to extract using "AND(,)" in JSONPATH:
+            Result from JSONPATH:
+            ['1', 'a', 'x', '2', 'b', 'y', '3', 'c', 'z']
+
+            Resulting 3 records (means that original JSON has an array of size 3):
+            ['1', 'a', 'x'], ['2', 'b', 'y'], ['3', 'c', 'z']
+
+        When we have two fields and extracting using "OR(|)" in JSONPATH, the result is follow:
+            Result from JSONPATH:
+            ['1', '2', '3', 'a', 'b', 'c']
+
+            Resulting 3 records (means that original JSON has an array of size 3):
+            ['1', 'a'], ['2', 'b'], ['3', 'c']
+
+        :param result_list:
+        :param field_names:
+        :param json_path_contains_or:
+        :return:
+        """
         # type: (...) -> List[List[Any]]
 
         result = []
