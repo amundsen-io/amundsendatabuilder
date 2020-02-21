@@ -1,8 +1,11 @@
-from pyhocon import ConfigTree  # noqa: F401
+from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from requests.auth import HTTPBasicAuth
 
+from databuilder import Scoped
 from databuilder.extractor.dashboard.mode_dashboard_constants import ORGANIZATION, MODE_ACCESS_TOKEN, \
     MODE_PASSWORD_TOKEN
+from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, STATIC_RECORD_DICT
+from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
 from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
@@ -21,7 +24,7 @@ class ModeDashboardUtils(object):
         :param conf:
         :return:
         """
-        # type: (...) -> RestApiQuery
+        # type: (...) -> BaseRestApiQuery
 
         spaces_url_template = 'https://app.mode.com/api/{organization}/spaces?filter=all'
 
@@ -48,3 +51,25 @@ class ModeDashboardUtils(object):
                                         )
                   }
         return params
+
+    @staticmethod
+    def create_mode_rest_api_extractor(restapi_query,  # type: BaseRestApiQuery
+                                       conf,  # type: ConfigTree
+                                       ):
+        """
+        Creates RestAPIExtractor. Note that RestAPIExtractor is already initialized
+        :param restapi_query:
+        :param conf:
+        :return: RestAPIExtractor. Note that RestAPIExtractor is already initialized
+        """
+        extractor = RestAPIExtractor()
+        rest_api_extractor_conf = Scoped.get_scoped_conf(conf, extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict(
+                {
+                    REST_API_QUERY: restapi_query,
+                    STATIC_RECORD_DICT: {'product': 'mode'}
+                }
+            )
+        )
+        extractor.init(conf=rest_api_extractor_conf)
+        return extractor

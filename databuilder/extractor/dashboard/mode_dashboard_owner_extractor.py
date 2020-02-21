@@ -1,17 +1,13 @@
 import logging
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from requests.auth import HTTPBasicAuth
 from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
+from databuilder.extractor.dashboard.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, STATIC_RECORD_DICT
-from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
 from databuilder.rest_api.rest_api_query import RestApiQuery
-from databuilder.transformer.base_transformer import ChainedTransformer
-from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
 
 # CONFIG KEYS
 ORGANIZATION = 'organization'
@@ -59,32 +55,22 @@ class ModeDashboardExecutionsExtractor(Extractor):
         """
         # type: () -> RestApiQuery
 
-        # Seed query record for next query api to join with
-        seed_record = [{'organization': self._conf.get_string(ORGANIZATION)}]
-        seed_query = RestApiQuerySeed(seed_record=seed_record)
+        report_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
+        creator_url_template = 'https://app.mode.com{creator_resource_path}'
 
-        # Spaces
-        url = 'https://app.mode.com/api/{organization}/spaces?filter=all'
-        params = {'auth': HTTPBasicAuth(self._conf.get_string(MODE_ACCESS_TOKEN),
-                                        self._conf.get_string(MODE_PASSWORD_TOKEN))}
-
-        json_path = '_embedded.spaces[*].[token]'
-        field_names = ['dashboard_group_id']
-        spaces_query = RestApiQuery(query_to_join=seed_query, url=url, params=params, json_path=json_path,
-                                    field_names=field_names)
+        spaces_query = ModeDashboardUtils.get_spaces_query_api(conf=self._conf)
+        params = ModeDashboardUtils.get_auth_params(conf=self._conf)
 
         # Reports
-        url = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
         json_path = '(_embedded.reports[*].token) | (_embedded.reports[*]._links.creator.href)'
         field_names = ['dashboard_id', 'creator_resource_path']
-        creator_resource_path_query = RestApiQuery(query_to_join=spaces_query, url=url, params=params,
+        creator_resource_path_query = RestApiQuery(query_to_join=spaces_query, url=report_url_template, params=params,
                                                    json_path=json_path, field_names=field_names, skip_no_result=True,
                                                    json_path_contains_or=True)
 
-        url = 'https://app.mode.com{creator_resource_path}'
         json_path = 'email'
         field_names = ['user_email']
-        owner_email_query = RestApiQuery(query_to_join=creator_resource_path_query, url=url, params=params,
-                                            json_path=json_path, field_names=field_names, skip_no_result=True)
+        owner_email_query = RestApiQuery(query_to_join=creator_resource_path_query, url=creator_url_template, params=params,
+                                         json_path=json_path, field_names=field_names, skip_no_result=True)
 
         return owner_email_query

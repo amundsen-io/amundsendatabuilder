@@ -26,15 +26,10 @@ class ModeDashboardExecutionsExtractor(Extractor):
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
-        self._extractor = RestAPIExtractor()
-        rest_api_extractor_conf = Scoped.get_scoped_conf(conf, self._extractor.get_scope()).with_fallback(
-            ConfigFactory.from_dict(
-                {REST_API_QUERY: restapi_query,
-                 STATIC_RECORD_DICT: {'product': 'mode'}
-                 }
-            )
+        self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
+            restapi_query=restapi_query,
+            conf=self._conf
         )
-        self._extractor.init(conf=rest_api_extractor_conf)
 
         # Payload from RestApiQuery has timestamp which is ISO8601. Here we are using TimestampStringToEpoch to
         # transform into epoch and then using DictToModel to convert Dictionary to Model
