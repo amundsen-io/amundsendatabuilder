@@ -113,6 +113,7 @@ class TestNeo4jExtractor(unittest.TestCase):
                                total_usage=100,
                                unique_usage=5,
                                tags=['hive'],
+                               programmatic_descriptions=['TEST'],
                                badges=['badge1'])
 
             extractor.results = [result_dict]

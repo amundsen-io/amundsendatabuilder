@@ -23,6 +23,7 @@ class TestTableElasticsearchDocument(unittest.TestCase):
                                    total_usage=100,
                                    unique_usage=10,
                                    tags=['test'],
+                                   programmatic_descriptions=['test'],
                                    badges=['badge1'])
 
         expected_document_dict = {"database": "test_database",
@@ -38,6 +39,7 @@ class TestTableElasticsearchDocument(unittest.TestCase):
                                   "total_usage": 100,
                                   "unique_usage": 10,
                                   "tags": ["test"],
+                                  "programmatic_descriptions": ['test']
                                   "badges": ["badge1"]
                                   }
 

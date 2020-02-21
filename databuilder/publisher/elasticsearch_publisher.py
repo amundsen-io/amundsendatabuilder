@@ -111,6 +111,10 @@ class ElasticsearchPublisher(Publisher):
                 },
                 "unique_usage": {
                   "type": "long"
+                },
+                "programmatic_descriptions": {
+                   "type": "text",
+                   "analyzer": "simple"
                 }
               }
             }

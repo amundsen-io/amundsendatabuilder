@@ -35,6 +35,7 @@ class Neo4jSearchDataExtractor(Extractor):
         WITH db, cluster, schema, table, table_description, tags, badges, total_usage, unique_usage,
         COLLECT(col.name) AS column_names, COLLECT(col_description.description) AS column_descriptions
         OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
+        OPTIONAL MATCH (table)-[:DESCRIPTION]->(programmatic_description:Programmatic_Description)
         RETURN db.name as database, cluster.name AS cluster, schema.name AS schema,
         table.name AS name, table.key AS key, table_description.description AS description,
         time_stamp.last_updated_timestamp AS last_updated_timestamp,
