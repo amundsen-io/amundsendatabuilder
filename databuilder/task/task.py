@@ -68,5 +68,8 @@ class DefaultTask(Task):
                 if count > 0 and count % self._progress_report_frequency == 0:
                     LOGGER.info('Extracted {} records so far'.format(count))
 
+                if count == 20:
+                    record = None
+
         finally:
             self._closer.close()
