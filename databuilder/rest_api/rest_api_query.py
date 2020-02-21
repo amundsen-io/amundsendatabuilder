@@ -225,7 +225,7 @@ class RestApiQuery(BaseRestApiQuery):
         # type: (...) -> List[List[Any]]
 
         result = []
-        for i in range(len(result_list) / len(field_names)):
+        for i in range(int(len(result_list) / len(field_names))):
             sub_result = []
             for j in range(len(field_names)):
                 if not json_path_contains_or:
