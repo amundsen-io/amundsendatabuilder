@@ -1,23 +1,17 @@
 import logging
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
+from pyhocon import ConfigTree  # noqa: F401
 from typing import Any  # noqa: F401
 
-from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.mode_dashboard_utils import ModeDashboardUtils
-from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, STATIC_RECORD_DICT
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
-# CONFIG KEYS
-ORGANIZATION = 'organization'
-MODE_ACCESS_TOKEN = 'mode_user_token'
-MODE_PASSWORD_TOKEN = 'mode_password_token'
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ModeDashboardExecutionsExtractor(Extractor):
+class ModeDashboardOwnerExtractor(Extractor):
     """
     A Extractor that extracts run (execution) status and timestamp.
 
@@ -28,15 +22,10 @@ class ModeDashboardExecutionsExtractor(Extractor):
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
-        self._extractor = RestAPIExtractor()
-        rest_api_extractor_conf = Scoped.get_scoped_conf(conf, self._extractor.get_scope()).with_fallback(
-            ConfigFactory.from_dict(
-                {REST_API_QUERY: restapi_query,
-                 STATIC_RECORD_DICT: {'product': 'mode'}
-                 }
-            )
+        self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
+            restapi_query=restapi_query,
+            conf=self._conf
         )
-        self._extractor.init(conf=rest_api_extractor_conf)
 
     def extract(self):
         # type: () -> Any
@@ -70,7 +59,8 @@ class ModeDashboardExecutionsExtractor(Extractor):
 
         json_path = 'email'
         field_names = ['user_email']
-        owner_email_query = RestApiQuery(query_to_join=creator_resource_path_query, url=creator_url_template, params=params,
+        owner_email_query = RestApiQuery(query_to_join=creator_resource_path_query, url=creator_url_template,
+                                         params=params,
                                          json_path=json_path, field_names=field_names, skip_no_result=True)
 
         return owner_email_query
