@@ -1,10 +1,11 @@
 import logging
 
-from pyhocon import ConfigTree  # noqa: F401
+from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.mode_dashboard_utils import ModeDashboardUtils
+from databuilder.extractor.restapi.rest_api_extractor import MODEL_CLASS
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
 # CONFIG KEYS
@@ -37,7 +38,11 @@ class ModeDashboardExtractor(Extractor):
         restapi_query = self._build_restapi_query()
         self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
             restapi_query=restapi_query,
-            conf=self._conf
+            conf=self._conf.with_fallback(
+                ConfigFactory.from_dict(
+                    {MODEL_CLASS: 'databuilder.models.dashboard_metadata.DashboardMetadata', }
+                )
+            )
         )
 
     def extract(self):
