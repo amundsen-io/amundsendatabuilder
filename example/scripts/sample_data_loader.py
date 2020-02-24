@@ -543,7 +543,7 @@ class CSVTableColumnExtractor(Extractor):
         for column_dict in self.columns:
             db = column_dict['database']
             cluster = column_dict['cluster']
-            schema = column_dict['schema_name']
+            schema = column_dict['schema']
             table = column_dict['table_name']
             id = self._get_key(db, cluster, schema, table)
             column = ColumnMetadata(
@@ -562,7 +562,7 @@ class CSVTableColumnExtractor(Extractor):
         for table_dict in tables:
             db = table_dict['database']
             cluster = table_dict['cluster']
-            schema = table_dict['schema_name']
+            schema = table_dict['schema']
             table = table_dict['name']
             id = self._get_key(db, cluster, schema, table)
             columns = parsed_columns[id]
@@ -570,7 +570,7 @@ class CSVTableColumnExtractor(Extractor):
                 columns = []
             table = TableMetadata(database=table_dict['database'],
                                   cluster=table_dict['cluster'],
-                                  schema_name=table_dict['schema_name'],
+                                  schema=table_dict['schema'],
                                   name=table_dict['name'],
                                   description=table_dict['description'],
                                   columns=columns,
