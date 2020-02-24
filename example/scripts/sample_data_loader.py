@@ -190,7 +190,7 @@ def load_user_data_from_csv(file_name):
                     '(email VARCHAR(64) NOT NULL , '
                     'first_name VARCHAR(64) NOT NULL , '
                     'last_name VARCHAR(64) NOT NULL , '
-                    'name VARCHAR(64) NOT NULL , '
+                    'full_name VARCHAR(64) NOT NULL , '
                     'github_username VARCHAR(64) NOT NULL , '
                     'team_name VARCHAR(64) NOT NULL, '
                     'employee_type VARCHAR(64) NOT NULL,'
@@ -202,7 +202,7 @@ def load_user_data_from_csv(file_name):
             to_db = [(i['email'],
                       i['first_name'],
                       i['last_name'],
-                      i['name'],
+                      i['full_name'],
                       i['github_username'],
                       i['team_name'],
                       i['employee_type'],
@@ -210,7 +210,7 @@ def load_user_data_from_csv(file_name):
                       i['slack_id']) for i in dr]
 
         cur.executemany("INSERT INTO test_user_metadata ("
-                        "email, first_name, last_name, name, github_username, "
+                        "email, first_name, last_name, full_name, github_username, "
                         "team_name, employee_type, "
                         "manager_email, slack_id ) VALUES "
                         "(?, ?, ?, ?, ?, ?, ?, ?, ?);", to_db)
@@ -732,7 +732,7 @@ if __name__ == "__main__":
             with user, a, b, c, read, own, follow, manager
             where user.full_name is not null
             return user.email as email, user.first_name as first_name, user.last_name as last_name,
-            user.full_name as name, user.github_username as github_username, user.team_name as team_name,
+            user.full_name as full_name, user.github_username as github_username, user.team_name as team_name,
             user.employee_type as employee_type, manager.email as manager_email, user.slack_id as slack_id,
             user.is_active as is_active,
             REDUCE(sum_r = 0, r in COLLECT(DISTINCT read)| sum_r + r.read_count) AS total_read,
