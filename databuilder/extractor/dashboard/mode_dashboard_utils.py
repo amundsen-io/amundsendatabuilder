@@ -60,15 +60,14 @@ class ModeDashboardUtils(object):
         :return: RestAPIExtractor. Note that RestAPIExtractor is already initialized
         """
         extractor = RestAPIExtractor()
-        rest_api_extractor_conf = Scoped.get_scoped_conf(conf, extractor.get_scope()) \
-            .with_fallback(conf) \
-            .with_fallback(ConfigFactory.from_dict(
-            {
-                REST_API_QUERY: restapi_query,
-                STATIC_RECORD_DICT: {'product': 'mode'}
-            }
-        )
+        rest_api_extractor_conf = \
+            Scoped.get_scoped_conf(conf, extractor.get_scope())\
+                  .with_fallback(conf)\
+                  .with_fallback(ConfigFactory.from_dict({REST_API_QUERY: restapi_query,
+                                                          STATIC_RECORD_DICT: {'product': 'mode'}
+                                                          }
+                                                         )
+                                 )
 
-        )
         extractor.init(conf=rest_api_extractor_conf)
         return extractor
