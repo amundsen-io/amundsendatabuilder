@@ -2,7 +2,7 @@ from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from requests.auth import HTTPBasicAuth
 
 from databuilder import Scoped
-from databuilder.extractor.dashboard.mode_dashboard_constants import ORGANIZATION, MODE_ACCESS_TOKEN, \
+from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_constants import ORGANIZATION, MODE_ACCESS_TOKEN, \
     MODE_PASSWORD_TOKEN
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, STATIC_RECORD_DICT
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
@@ -23,6 +23,7 @@ class ModeDashboardUtils(object):
         """
         # type: (...) -> BaseRestApiQuery
 
+        # https://mode.com/developer/api-reference/management/spaces/#listSpaces
         spaces_url_template = 'https://app.mode.com/api/{organization}/spaces?filter=all'
 
         # Seed query record for next query api to join with

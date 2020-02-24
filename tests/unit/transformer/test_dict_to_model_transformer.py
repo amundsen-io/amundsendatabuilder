@@ -37,7 +37,3 @@ class TestDictToModel(unittest.TestCase):
             product='mode',
             cluster='gold'
         ).__repr__())
-
-
-if __name__ == '__main__':
-    unittest.main()

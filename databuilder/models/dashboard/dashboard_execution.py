@@ -89,7 +89,7 @@ class DashboardExecution(Neo4jCsvSerializable):
         )
 
     def __repr__(self):
-        return 'DashboardLastExecution({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
+        return 'DashboardExecution({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,
             self._execution_timestamp,

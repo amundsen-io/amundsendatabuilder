@@ -113,8 +113,8 @@ class RestApiQuery(BaseRestApiQuery):
         self._url = url
         self._params = params
         self._json_path = json_path
-        assert not (',' in json_path and '|' in json_path),\
-            'RestApiQuery does not support "and (,)" and "or (|)" at the same time'
+        if ',' in json_path and '|' in json_path:
+            raise Exception('RestApiQuery does not support "and (,)" and "or (|)" at the same time')
 
         self._jsonpath_expr = parse(self._json_path)
         self._fail_no_result = fail_no_result
@@ -224,16 +224,18 @@ class RestApiQuery(BaseRestApiQuery):
         """
         # type: (...) -> List[List[Any]]
 
-        result = []
-        for i in range(int(len(result_list) / len(field_names))):
-            sub_result = []
-            for j in range(len(field_names)):
-                if not json_path_contains_or:
-                    sub_result.append(result_list[i * len(field_names) + j])
-                else:
-                    sub_result.append(result_list[int(len(result_list) / len(field_names)) * j + i])
+        if not field_names:
+            raise Exception('Field names should not be empty')
 
+        if not json_path_contains_or:
+            return [result_list[i:i + len(field_names)] for i in range(0, len(result_list), len(field_names))]
+
+        result = []
+        num_subresult = int(len(result_list) / len(field_names))
+        for i in range(num_subresult):
+            sub_result = [result_list[j] for j in range(i, len(result_list), num_subresult)]
             result.append(sub_result)
+
         return result
 
     def _post_process(self,

@@ -4,7 +4,7 @@ from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.mode_dashboard_utils import ModeDashboardUtils
+from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.extractor.restapi.rest_api_extractor import MODEL_CLASS
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
@@ -63,6 +63,7 @@ class ModeDashboardExtractor(Extractor):
         """
         # type: () -> RestApiQuery
 
+        # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
         reports_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
 
         spaces_query = ModeDashboardUtils.get_spaces_query_api(conf=self._conf)

@@ -5,7 +5,7 @@ from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.mode_dashboard_utils import ModeDashboardUtils
+from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -73,6 +73,7 @@ class ModeDashboardExecutionsExtractor(Extractor):
         params = ModeDashboardUtils.get_auth_params(conf=self._conf)
 
         # Reports
+        # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
         url = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
         json_path = '(_embedded.reports[*].token) | (_embedded.reports[*]._links.last_run.href)'
         field_names = ['dashboard_id', 'last_run_resource_path']
@@ -80,6 +81,7 @@ class ModeDashboardExecutionsExtractor(Extractor):
                                                     json_path=json_path, field_names=field_names, skip_no_result=True,
                                                     json_path_contains_or=True)
 
+        # https://mode.com/developer/api-reference/analytics/report-runs/#getReportRun
         url = 'https://app.mode.com{last_run_resource_path}'
         json_path = '[state,completed_at]'
         field_names = ['execution_state', 'execution_timestamp']
