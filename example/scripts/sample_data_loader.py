@@ -434,7 +434,7 @@ def create_last_updated_job():
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD):
             neo4j_password,
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG):
-            'unique_lastupdated_tag',  # should use unique tag here like {ds}
+            'unique_last_updated_tag',  # should use unique tag here like {ds}
     })
 
     job = DefaultJob(conf=job_config,
