@@ -1,8 +1,7 @@
 import unittest
 
 from databuilder.models.dashboard.dashboard_owner import DashboardOwner
-from databuilder.models.neo4j_csv_serde import NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
+from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 
 
@@ -14,12 +13,7 @@ class TestDashboardOwner(unittest.TestCase):
                                          dashboard_id='dashboard_id', dashboard_group_id='dashboard_group_id')
 
         actual = dashboard_owner.create_next_node()
-
-        expected = {'is_active:UNQUOTED': True, 'last_name': '', 'full_name': '', 'employee_type': '', 'first_name': '',
-                    'updated_at': 0, NODE_LABEL: 'User', 'slack_id': '', NODE_KEY: 'foo@bar.com', 'github_username': '',
-                    'team_name': '', 'email': 'foo@bar.com'}
-
-        self.assertDictEqual(actual, expected)
+        self.assertIsNone(actual)
 
     def test_dashboard_owner_relations(self):
         # type: () -> None

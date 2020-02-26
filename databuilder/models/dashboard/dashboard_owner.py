@@ -15,7 +15,9 @@ LOGGER = logging.getLogger(__name__)
 
 class DashboardOwner(Neo4jCsvSerializable):
     """
-    A model that encapsulate Dashboard's owner
+    A model that encapsulate Dashboard's owner.
+    Note that it does not create new user as it has insufficient information about user but it builds relation
+    between User and Dashboard
     """
 
     DASHBOARD_EXECUTION_RELATION_TYPE = 'LAST_EXECUTED'
@@ -32,7 +34,6 @@ class DashboardOwner(Neo4jCsvSerializable):
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._email = email
-        self._user_model = User(email=email)
         self._product = product
         self._cluster = cluster
 
@@ -40,7 +41,7 @@ class DashboardOwner(Neo4jCsvSerializable):
 
     def create_next_node(self):
         # type: () -> Union[Dict[str, Any], None]
-        return self._user_model.create_next_node()
+        return None
 
     def create_next_relation(self):
         # type: () -> Union[Dict[str, Any], None]
