@@ -14,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 class ModeDashboardOwnerExtractor(Extractor):
     """
-    A Extractor that extracts Dashboard owner.
+    An Extractor that extracts Dashboard owner.
 
     """
 
