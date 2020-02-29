@@ -87,6 +87,9 @@ class ElasticsearchPublisher(Publisher):
                 "tags": {
                   "type": "keyword"
                 },
+                "badges": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "text"
                 },
