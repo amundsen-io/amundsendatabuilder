@@ -1,4 +1,4 @@
-import csv
+import unicodecsv as csv
 import logging
 import os
 import shutil
@@ -169,7 +169,7 @@ class FsNeo4jCSVLoader(Loader):
         self._closer.register(file_out_close)
 
         writer = csv.DictWriter(file_out, fieldnames=csv_record_dict.keys(),
-                                quoting=csv.QUOTE_NONNUMERIC)
+                                quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8')
         writer.writeheader()
         file_mapping[key] = writer
 
