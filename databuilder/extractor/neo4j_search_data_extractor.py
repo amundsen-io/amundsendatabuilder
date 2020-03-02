@@ -35,7 +35,7 @@ class Neo4jSearchDataExtractor(Extractor):
         REDUCE(sum_r = 0, r in COLLECT(DISTINCT read)| sum_r + r.read_count) AS total_usage,
         COUNT(DISTINCT user.email) as unique_usage,
         COLLECT(DISTINCT tags.key) as tags,
-        COLLECT(DISTINCT badges.key) as badge_names
+        COLLECT(DISTINCT badges.key) as badges
         ORDER BY table.name;
         """
     )
