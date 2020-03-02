@@ -23,7 +23,7 @@ class TestTableElasticsearchDocument(unittest.TestCase):
                                    total_usage=100,
                                    unique_usage=10,
                                    tags=['test'],
-                                   badges=['5_min_lag'])
+                                   badges=['badge1'])
 
         expected_document_dict = {"database": "test_database",
                                   "cluster": "test_cluster",
@@ -38,7 +38,7 @@ class TestTableElasticsearchDocument(unittest.TestCase):
                                   "total_usage": 100,
                                   "unique_usage": 10,
                                   "tags": ["test"],
-                                  "badges": ["5_min_lag"]
+                                  "badges": ["badge1"]
                                   }
 
         result = test_obj.to_json()
