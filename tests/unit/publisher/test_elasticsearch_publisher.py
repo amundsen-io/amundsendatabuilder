@@ -4,6 +4,7 @@ import six
 import unittest
 
 from pyhocon import ConfigFactory
+from amundsen_common.elastic_search.index_map import TABLE_INDEX_MAP
 
 from databuilder import Scoped
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
@@ -72,7 +73,7 @@ class TestElasticsearchPublisher(unittest.TestCase):
 
             publisher.publish()
             # ensure indices create endpoint was called
-            default_mapping = ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING
+            default_mapping = TABLE_INDEX_MAP
             self.mock_es_client.indices.create.assert_called_once_with(index=self.test_es_new_index,
                                                                        body=default_mapping)
 
@@ -109,7 +110,7 @@ class TestElasticsearchPublisher(unittest.TestCase):
 
             publisher.publish()
             # ensure indices create endpoint was called
-            default_mapping = ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING
+            default_mapping = TABLE_INDEX_MAP
             self.mock_es_client.indices.create.assert_called_once_with(index=self.test_es_new_index,
                                                                        body=default_mapping)
 
