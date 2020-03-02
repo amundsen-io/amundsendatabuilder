@@ -25,7 +25,7 @@ class Neo4jSearchDataExtractor(Extractor):
         OPTIONAL MATCH (table)-[:COLUMN]->(cols:Column)
         OPTIONAL MATCH (cols)-[:DESCRIPTION]->(col_description:Description)
         OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag)
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='badge'
+        OPTIONAL MATCH (table)-[:TAGGED_BY]->(badges:Tag) WHERE tags.tag_type='badge'
         OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
         RETURN db.name as database, cluster.name AS cluster, schema.name AS schema,
         table.name AS name, table.key AS key, table_description.description AS description,
