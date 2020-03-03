@@ -36,7 +36,7 @@ class ElasticsearchPublisher(Publisher):
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-simple-analyzer.html
     # Standard Analyzer is used for all text fields that don't explicitly specify an analyzer
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
-    # TODO use amundsencommon for this when this project is updated to py3 
+    # TODO use amundsencommon for this when this project is updated to py3
     DEFAULT_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
         """
         {
