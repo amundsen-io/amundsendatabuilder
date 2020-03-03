@@ -1,11 +1,10 @@
 import json
 import logging
+import textwrap
 from typing import List  # noqa: F401
 
 from pyhocon import ConfigTree  # noqa: F401
 from elasticsearch.exceptions import NotFoundError
-from amundsen_common.elastic_search.index_map import TABLE_INDEX_MAP
-
 
 from databuilder.publisher.base_publisher import Publisher
 
@@ -30,6 +29,96 @@ class ElasticsearchPublisher(Publisher):
     ELASTICSEARCH_ALIAS_CONFIG_KEY = 'alias'
     ELASTICSEARCH_MAPPING_CONFIG_KEY = 'mapping'
 
+    # Specifying default mapping for elasticsearch index
+    # Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
+    # Setting type to "text" for all fields that would be used in search
+    # Using Simple Analyzer to convert all text into search terms
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-simple-analyzer.html
+    # Standard Analyzer is used for all text fields that don't explicitly specify an analyzer
+    # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
+    # TODO use amundsencommon for this when this project is updated to py3 
+    DEFAULT_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
+        """
+        {
+        "mappings":{
+            "table":{
+              "properties": {
+                "name": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "schema": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "display_name": {
+                  "type": "keyword"
+                },
+                "last_updated_timestamp": {
+                  "type": "date",
+                  "format": "epoch_second"
+                },
+                "description": {
+                  "type": "text",
+                  "analyzer": "simple"
+                },
+                "column_names": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "column_descriptions": {
+                  "type": "text",
+                  "analyzer": "simple"
+                },
+                "tags": {
+                  "type": "keyword"
+                },
+                "badges": {
+                  "type": "keyword"
+                },
+                "cluster": {
+                  "type": "text"
+                },
+                "database": {
+                  "type": "text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "key": {
+                  "type": "keyword"
+                },
+                "total_usage":{
+                  "type": "long"
+                },
+                "unique_usage": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+        """
+    )
+
     def __init__(self):
         # type: () -> None
         super(ElasticsearchPublisher, self).__init__()
@@ -47,7 +136,7 @@ class ElasticsearchPublisher(Publisher):
         self.elasticsearch_alias = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY)
 
         self.elasticsearch_mapping = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY,
-                                                   TABLE_INDEX_MAP)
+                                                   ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING)
 
         self.file_handler = open(self.file_path, self.file_mode)
 
