@@ -20,7 +20,7 @@ class TableESDocument(ElasticsearchDocument):
                  total_usage,  # type: int
                  unique_usage,  # type: int
                  tags,  # type: List[str],
-                 badges,  # type: List[str]
+                 badges=None,  # type: Optional[List[str]]
                  display_name=None,  # type: Optional[str]
                  ):
         # type: (...) -> None
