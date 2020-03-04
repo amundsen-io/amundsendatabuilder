@@ -1,7 +1,7 @@
 import copy
 import unittest
 
-from databuilder.models.dashboard_metadata import DashboardMetadata
+from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 
 
 class TestDashboardMetadata(unittest.TestCase):
