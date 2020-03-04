@@ -56,7 +56,7 @@ class ModeDashboardExtractor(Extractor):
         dict_to_model_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
                 ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard_metadata.DashboardMetadata'})))
+                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_metadata.DashboardMetadata'})))
         transformers.append(dict_to_model_transformer)
 
         self._transformer = ChainedTransformer(transformers=transformers)
