@@ -11,8 +11,6 @@ class TestDashboardMetadata(unittest.TestCase):
         self.dashboard_metadata = DashboardMetadata('Product - Jobs.cz',
                                                     'Agent',
                                                     'Agent dashboard description',
-                                                    '2019-05-30T07:03:35.580Z',
-                                                    'roald.amundsen@example.org',
                                                     ['test_tag', 'tag2'],
                                                     dashboard_group_description='foo dashboard group description',
                                                     created_timestamp=123456789
@@ -21,8 +19,6 @@ class TestDashboardMetadata(unittest.TestCase):
         self.dashboard_metadata2 = DashboardMetadata('Product - Atmoskop',
                                                      'Atmoskop',
                                                      'Atmoskop dashboard description',
-                                                     '2019-05-30T07:07:42.326Z',
-                                                     'buzz@example.org',
                                                      [],
                                                      )
 
@@ -30,16 +26,12 @@ class TestDashboardMetadata(unittest.TestCase):
         self.dashboard_metadata3 = DashboardMetadata('Product - Jobs.cz',
                                                      'Dohazovac',
                                                      '',
-                                                     '2019-05-30T07:07:42.326Z',
-                                                     'buzz@example.org',
                                                      ['test_tag', 'tag3']
                                                      )
 
         # Necessary minimum -- NOT USED
         self.dashboard_metadata4 = DashboardMetadata('',
                                                      'PzR',
-                                                     '',
-                                                     '2019-05-30T07:07:42.326Z',
                                                      '',
                                                      []
                                                      )
@@ -52,8 +44,6 @@ class TestDashboardMetadata(unittest.TestCase):
              'description': 'foo dashboard group description'},
             {'description': 'Agent dashboard description',
              'KEY': '_dashboard://gold.Product - Jobs.cz/Agent/_description', 'LABEL': 'Description'},
-            {'value': '2019-05-30T07:03:35.580Z',
-             'KEY': '_dashboard://gold.Product - Jobs.cz/Agent/_lastreloadtime', 'LABEL': 'Lastreloadtime'},
             {'tag_type': 'dashboard', 'KEY': 'test_tag', 'LABEL': 'Tag'},
             {'tag_type': 'dashboard', 'KEY': 'tag2', 'LABEL': 'Tag'}
         ]
@@ -72,15 +62,10 @@ class TestDashboardMetadata(unittest.TestCase):
              'END_LABEL': 'Description',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'TYPE': 'DESCRIPTION',
              'REVERSE_TYPE': 'DESCRIPTION_OF'},
-            {'END_KEY': '_dashboard://gold.Product - Jobs.cz/Agent/_lastreloadtime', 'START_LABEL': 'Dashboard',
-             'END_LABEL': 'Lastreloadtime', 'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent',
-             'TYPE': 'LAST_RELOAD_TIME', 'REVERSE_TYPE': 'LAST_RELOAD_TIME_OF'},
             {'END_KEY': 'test_tag', 'START_LABEL': 'Dashboard', 'END_LABEL': 'Tag',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'TYPE': 'TAG', 'REVERSE_TYPE': 'TAG_OF'},
             {'END_KEY': 'tag2', 'START_LABEL': 'Dashboard', 'END_LABEL': 'Tag',
-             'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'TYPE': 'TAG', 'REVERSE_TYPE': 'TAG_OF'},
-            {'END_KEY': 'roald.amundsen@example.org', 'START_LABEL': 'Dashboard', 'END_LABEL': 'User',
-             'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'TYPE': 'OWNER', 'REVERSE_TYPE': 'OWNER_OF'}
+             'START_KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'TYPE': 'TAG', 'REVERSE_TYPE': 'TAG_OF'}
         ]
 
         self.expected_rels = copy.deepcopy(self.expected_rels_deduped)
@@ -91,9 +76,6 @@ class TestDashboardMetadata(unittest.TestCase):
             {'description': 'Atmoskop dashboard description',
              'KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop/_description',
              'LABEL': 'Description'},
-            {'value': '2019-05-30T07:07:42.326Z',
-             'KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop/_lastreloadtime',
-             'LABEL': 'Lastreloadtime'}
         ]
 
         self.expected_nodes2 = copy.deepcopy(self.expected_nodes_deduped2)
@@ -107,11 +89,6 @@ class TestDashboardMetadata(unittest.TestCase):
              'END_LABEL': 'Description',
              'START_KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop', 'TYPE': 'DESCRIPTION',
              'REVERSE_TYPE': 'DESCRIPTION_OF'},
-            {'END_KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop/_lastreloadtime', 'START_LABEL': 'Dashboard',
-             'END_LABEL': 'Lastreloadtime', 'START_KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop',
-             'TYPE': 'LAST_RELOAD_TIME', 'REVERSE_TYPE': 'LAST_RELOAD_TIME_OF'},
-            {'END_KEY': 'buzz@example.org', 'START_LABEL': 'Dashboard', 'END_LABEL': 'User',
-             'START_KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop', 'TYPE': 'OWNER', 'REVERSE_TYPE': 'OWNER_OF'}
         ]
 
         self.expected_rels2 = copy.deepcopy(self.expected_rels_deduped2)
@@ -119,8 +96,6 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_nodes_deduped3 = [
             {'name': 'Dohazovac', 'KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'LABEL': 'Dashboard'},
             {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup'},
-            {'value': '2019-05-30T07:07:42.326Z',
-             'KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac/_lastreloadtime', 'LABEL': 'Lastreloadtime'},
             {'tag_type': 'dashboard', 'KEY': 'test_tag', 'LABEL': 'Tag'},
             {'tag_type': 'dashboard', 'KEY': 'tag3', 'LABEL': 'Tag'}
         ]
@@ -132,15 +107,10 @@ class TestDashboardMetadata(unittest.TestCase):
              'END_LABEL': 'Dashboardgroup',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'TYPE': 'DASHBOARD_OF',
              'REVERSE_TYPE': 'DASHBOARD'},
-            {'END_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac/_lastreloadtime', 'START_LABEL': 'Dashboard',
-             'END_LABEL': 'Lastreloadtime', 'START_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac',
-             'TYPE': 'LAST_RELOAD_TIME', 'REVERSE_TYPE': 'LAST_RELOAD_TIME_OF'},
             {'END_KEY': 'test_tag', 'START_LABEL': 'Dashboard', 'END_LABEL': 'Tag',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'TYPE': 'TAG', 'REVERSE_TYPE': 'TAG_OF'},
             {'END_KEY': 'tag3', 'START_LABEL': 'Dashboard', 'END_LABEL': 'Tag',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'TYPE': 'TAG', 'REVERSE_TYPE': 'TAG_OF'},
-            {'END_KEY': 'buzz@example.org', 'START_LABEL': 'Dashboard', 'END_LABEL': 'User',
-             'START_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'TYPE': 'OWNER', 'REVERSE_TYPE': 'OWNER_OF'},
         ]
 
         self.expected_rels3 = copy.deepcopy(self.expected_rels_deduped3)

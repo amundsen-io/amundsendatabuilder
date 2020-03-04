@@ -34,13 +34,15 @@ class TestDashboardLastModifiedTimestamp(unittest.TestCase):
 
         actual = dashboard_last_modified.create_next_relation()
         print(actual)
-        expected = {RELATION_END_KEY:
-                        'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id/_last_modified_timestamp',
-                    RELATION_START_LABEL: 'Dashboard',
-                    RELATION_END_LABEL: 'Timestamp',
-                    RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
-                    RELATION_TYPE: 'LAST_UPDATED_AT',
-                    RELATION_REVERSE_TYPE: 'LAST_UPDATED_TIME_OF'}
+        expected = {
+            RELATION_END_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id'
+                              '/_last_modified_timestamp',
+            RELATION_START_LABEL: 'Dashboard',
+            RELATION_END_LABEL: 'Timestamp',
+            RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+            RELATION_TYPE: 'LAST_UPDATED_AT',
+            RELATION_REVERSE_TYPE: 'LAST_UPDATED_TIME_OF'
+        }
 
         self.assertDictEqual(actual, expected)
         self.assertIsNone(dashboard_last_modified.create_next_relation())

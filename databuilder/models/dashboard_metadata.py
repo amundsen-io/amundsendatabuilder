@@ -44,19 +44,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
 
     DASHBOARD_GROUP_DESCRIPTION_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group}/_description'
 
-    DASHBOARD_LAST_RELOAD_TIME_NODE_LABEL = 'Lastreloadtime'
-    DASHBOARD_LAST_RELOAD_TIME = 'value'
-    DASHBOARD_LAST_RELOAD_TIME_FORMAT = \
-        '{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}/_lastreloadtime'
-    DASHBOARD_LAST_RELOAD_TIME_RELATION_TYPE = 'LAST_RELOAD_TIME'
-    LAST_RELOAD_TIME_DASHBOARD_RELATION_TYPE = 'LAST_RELOAD_TIME_OF'
-
-    OWNER_NODE_LABEL = 'User'
-    OWNER_KEY_FORMAT = '{user_id}'
-    DASHBOARD_OWNER_RELATION_TYPE = 'OWNER'
-    OWNER_DASHBOARD_RELATION_TYPE = 'OWNER_OF'
-    OWNER_ID = 'user_id'
-
     DASHBOARD_TAG_RELATION_TYPE = 'TAG'
     TAG_DASHBOARD_RELATION_TYPE = 'TAG_OF'
 
@@ -67,8 +54,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
                  dashboard_group,  # type: str
                  dashboard_name,  # type: str
                  description,  # type: Union[str, None]
-                 last_reload_time=None,  # type: Optional[str]
-                 user_id=None,  # type: Optional[str]
                  tags=None,  # type: List
                  cluster='gold',  # type: str
                  product='',  # type: Optional[str]
@@ -85,8 +70,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
         self.dashboard_group_id = dashboard_group_id if dashboard_group_id else dashboard_group
         self.dashboard_id = dashboard_id if dashboard_id else dashboard_name
         self.description = description
-        self.last_reload_time = last_reload_time
-        self.user_id = user_id
         self.tags = tags
         self.product = product
         self.cluster = cluster
@@ -97,12 +80,10 @@ class DashboardMetadata(Neo4jCsvSerializable):
 
     def __repr__(self):
         # type: () -> str
-        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
+        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
             .format(self.dashboard_group,
                     self.dashboard_name,
                     self.description,
-                    self.last_reload_time,
-                    self.user_id,
                     self.tags,
                     self.dashboard_group_id,
                     self.dashboard_id,
@@ -143,10 +124,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
                                                                           cluster=self.cluster,
                                                                           product=self.product)
 
-    def _get_owner_key(self):
-        # type: () -> str
-        return DashboardMetadata.OWNER_KEY_FORMAT.format(user_id=self.user_id)
-
     def create_next_node(self):
         # type: () -> Union[Dict[str, Any], None]
         try:
@@ -185,12 +162,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
             yield {NODE_LABEL: DashboardMetadata.DASHBOARD_DESCRIPTION_NODE_LABEL,
                    NODE_KEY: self._get_dashboard_description_key(),
                    DashboardMetadata.DASHBOARD_DESCRIPTION: self.description}
-
-        # Dashboard last reload time node
-        if self.last_reload_time:
-            yield {NODE_LABEL: DashboardMetadata.DASHBOARD_LAST_RELOAD_TIME_NODE_LABEL,
-                   NODE_KEY: self._get_dashboard_last_reload_time_key(),
-                   DashboardMetadata.DASHBOARD_LAST_RELOAD_TIME: self.last_reload_time}
 
         # Dashboard tag node
         if self.tags:
@@ -241,17 +212,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
                 RELATION_REVERSE_TYPE: DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE
             }
 
-        # Dashboard > Dashboard last reload time relation
-        if self.last_reload_time:
-            yield {
-                RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
-                RELATION_END_LABEL: DashboardMetadata.DASHBOARD_LAST_RELOAD_TIME_NODE_LABEL,
-                RELATION_START_KEY: self._get_dashboard_key(),
-                RELATION_END_KEY: self._get_dashboard_last_reload_time_key(),
-                RELATION_TYPE: DashboardMetadata.DASHBOARD_LAST_RELOAD_TIME_RELATION_TYPE,
-                RELATION_REVERSE_TYPE: DashboardMetadata.LAST_RELOAD_TIME_DASHBOARD_RELATION_TYPE
-            }
-
         # Dashboard > Dashboard tag relation
         if self.tags:
             for tag in self.tags:
@@ -262,29 +222,4 @@ class DashboardMetadata(Neo4jCsvSerializable):
                     RELATION_END_KEY: TagMetadata.get_tag_key(tag),
                     RELATION_TYPE: DashboardMetadata.DASHBOARD_TAG_RELATION_TYPE,
                     RELATION_REVERSE_TYPE: DashboardMetadata.TAG_DASHBOARD_RELATION_TYPE
-                }
-
-        # Dashboard > Dashboard owner relation
-        others = []
-
-        if self.user_id:
-            others.append(
-                RelTuple(start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
-                         end_label=DashboardMetadata.OWNER_NODE_LABEL,
-                         start_key=self._get_dashboard_key(),
-                         end_key=self._get_owner_key(),
-                         type=DashboardMetadata.DASHBOARD_OWNER_RELATION_TYPE,
-                         reverse_type=DashboardMetadata.OWNER_DASHBOARD_RELATION_TYPE)
-            )
-
-        for rel_tuple in others:
-            if rel_tuple not in DashboardMetadata.serialized_rels:
-                DashboardMetadata.serialized_rels.add(rel_tuple)
-                yield {
-                    RELATION_START_LABEL: rel_tuple.start_label,
-                    RELATION_END_LABEL: rel_tuple.end_label,
-                    RELATION_START_KEY: rel_tuple.start_key,
-                    RELATION_END_KEY: rel_tuple.end_key,
-                    RELATION_TYPE: rel_tuple.type,
-                    RELATION_REVERSE_TYPE: rel_tuple.reverse_type
                 }
