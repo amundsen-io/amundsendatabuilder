@@ -4,7 +4,9 @@ NODE_LABEL = 'Timestamp'
 
 TIMESTAMP_PROPERTY = 'timestamp'
 TIMESTAMP_NAME_PROPERTY = 'name'
+# This is deprecated property as it's not generic for the Timestamp
 DEPRECATED_TIMESTAMP_PROPERTY = 'last_updated_timestamp'
+
 
 LASTUPDATED_RELATION_TYPE = 'LAST_UPDATED_AT'
 LASTUPDATED_REVERSE_RELATION_TYPE = 'LAST_UPDATED_TIME_OF'

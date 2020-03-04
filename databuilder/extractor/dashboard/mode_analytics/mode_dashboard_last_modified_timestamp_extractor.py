@@ -42,7 +42,7 @@ class ModeDashboardLastModifiedTimestampExtractor(ModeDashboardExecutionsExtract
 
     def _build_restapi_query(self):
         """
-        Build REST API Query. To get Mode Dashboard last successful execution, it needs to call two APIs (spaces API,
+        Build REST API Query. To get Mode Dashboard last modified timestamp, it needs to call two APIs (spaces API,
         and reports API) joining together.
         :return: A RestApiQuery that provides Mode Dashboard last successful execution (run)
         """

@@ -84,6 +84,7 @@ class TableLastUpdated(Neo4jCsvSerializable):
             NODE_KEY: self.get_last_updated_model_key(),
             NODE_LABEL: TableLastUpdated.LAST_UPDATED_NODE_LABEL,
             TableLastUpdated.TIMESTAMP_PROPERTY: self.last_updated_time,
+            timestamp_constants.TIMESTAMP_PROPERTY: self.last_updated_time,
             TableLastUpdated.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name
         })
 
