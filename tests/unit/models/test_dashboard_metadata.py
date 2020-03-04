@@ -14,7 +14,8 @@ class TestDashboardMetadata(unittest.TestCase):
                                                     '2019-05-30T07:03:35.580Z',
                                                     'roald.amundsen@example.org',
                                                     ['test_tag', 'tag2'],
-                                                    dashboard_group_description='foo dashboard group description'
+                                                    dashboard_group_description='foo dashboard group description',
+                                                    created_timestamp=123456789
                                                     )
         # Without tags
         self.dashboard_metadata2 = DashboardMetadata('Product - Atmoskop',
@@ -22,7 +23,7 @@ class TestDashboardMetadata(unittest.TestCase):
                                                      'Atmoskop dashboard description',
                                                      '2019-05-30T07:07:42.326Z',
                                                      'buzz@example.org',
-                                                     []
+                                                     [],
                                                      )
 
         # One common tag with dashboard_metadata, no description
@@ -44,7 +45,8 @@ class TestDashboardMetadata(unittest.TestCase):
                                                      )
 
         self.expected_nodes_deduped = [
-            {'name': 'Agent', 'KEY': '_dashboard://gold.Product - Jobs.cz/Agent', 'LABEL': 'Dashboard'},
+            {'created_timestamp': 123456789, 'name': 'Agent', 'KEY': '_dashboard://gold.Product - Jobs.cz/Agent',
+             'LABEL': 'Dashboard'},
             {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup'},
             {'KEY': '_dashboard://gold.Product - Jobs.cz/_description', 'LABEL': 'Description',
              'description': 'foo dashboard group description'},

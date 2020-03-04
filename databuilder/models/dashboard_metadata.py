@@ -2,12 +2,11 @@ from collections import namedtuple
 
 from typing import Any, Union, Iterator, Dict, Set, Optional  # noqa: F401
 
-# TODO: We could separate TagMetadata from table_metadata to own module
-from databuilder.models.table_metadata import TagMetadata
 from databuilder.models.neo4j_csv_serde import (
     Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
-
+# TODO: We could separate TagMetadata from table_metadata to own module
+from databuilder.models.table_metadata import TagMetadata
 
 NodeTuple = namedtuple('KeyName', ['key', 'name', 'label'])
 RelTuple = namedtuple('RelKeys', ['start_label', 'end_label', 'start_key', 'end_key', 'type', 'reverse_type'])
@@ -29,6 +28,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
     DASHBOARD_NODE_LABEL = 'Dashboard'
     DASHBOARD_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}'
     DASHBOARD_NAME = 'name'
+    DASHBOARD_CREATED_TIME_STAMP = 'created_timestamp'
 
     DASHBOARD_DESCRIPTION_NODE_LABEL = 'Description'
     DASHBOARD_DESCRIPTION = 'description'
@@ -46,7 +46,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
 
     DASHBOARD_LAST_RELOAD_TIME_NODE_LABEL = 'Lastreloadtime'
     DASHBOARD_LAST_RELOAD_TIME = 'value'
-    DASHBOARD_LAST_RELOAD_TIME_FORMAT =\
+    DASHBOARD_LAST_RELOAD_TIME_FORMAT = \
         '{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}/_lastreloadtime'
     DASHBOARD_LAST_RELOAD_TIME_RELATION_TYPE = 'LAST_RELOAD_TIME'
     LAST_RELOAD_TIME_DASHBOARD_RELATION_TYPE = 'LAST_RELOAD_TIME_OF'
@@ -75,6 +75,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
                  dashboard_group_id=None,  # type: Optional[str]
                  dashboard_id=None,  # type: Optional[str]
                  dashboard_group_description=None,  # type: Optional[str]
+                 created_timestamp=None,  # type: Optional[int]
                  **kwargs
                  ):
         # type: (...) -> None
@@ -90,12 +91,13 @@ class DashboardMetadata(Neo4jCsvSerializable):
         self.product = product
         self.cluster = cluster
         self.dashboard_group_description = dashboard_group_description
+        self.created_timestamp = created_timestamp
         self._node_iterator = self._create_next_node()
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self):
         # type: () -> str
-        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
+        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
             .format(self.dashboard_group,
                     self.dashboard_name,
                     self.description,
@@ -104,7 +106,8 @@ class DashboardMetadata(Neo4jCsvSerializable):
                     self.tags,
                     self.dashboard_group_id,
                     self.dashboard_id,
-                    self.dashboard_group_description
+                    self.dashboard_group_description,
+                    self.created_timestamp
                     )
 
     def _get_dashboard_key(self):
@@ -154,10 +157,15 @@ class DashboardMetadata(Neo4jCsvSerializable):
     def _create_next_node(self):
         # type: () -> Iterator[Any]
         # Dashboard node
-        yield {NODE_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
-               NODE_KEY: self._get_dashboard_key(),
-               DashboardMetadata.DASHBOARD_NAME: self.dashboard_name,
-               }
+        dashboard_node = {
+            NODE_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
+            NODE_KEY: self._get_dashboard_key(),
+            DashboardMetadata.DASHBOARD_NAME: self.dashboard_name,
+        }
+        if self.created_timestamp:
+            dashboard_node[DashboardMetadata.DASHBOARD_CREATED_TIME_STAMP] = self.created_timestamp
+
+        yield dashboard_node
 
         # Dashboard group
         if self.dashboard_group:
