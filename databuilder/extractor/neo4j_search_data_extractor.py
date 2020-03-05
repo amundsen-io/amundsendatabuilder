@@ -24,8 +24,12 @@ class Neo4jSearchDataExtractor(Extractor):
         OPTIONAL MATCH (table)-[read:READ_BY]->(user:User)
         OPTIONAL MATCH (table)-[:COLUMN]->(cols:Column)
         OPTIONAL MATCH (cols)-[:DESCRIPTION]->(col_description:Description)
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(badges:Tag) WHERE badges.tag_type='badge'
+        OPTIONAL MATCH (table)-[:TAGGED_BY]->(table_tags:Tag) 
+        WITH table_tags as tags, db, cluster, schema, table, table_description, cols, col_description, user, read
+        WHERE table_tags.tag_type = "default" or table_tags is null
+        OPTIONAL MATCH (table)-[:TAGGED_BY]->(table_tags:Tag) 
+        WITH table_tags as badges, tags, db, cluster, schema, table, table_description, cols, col_description, user, read
+        WHERE table_tags.tag_type = "badge" or table_tags is null
         OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
         RETURN db.name as database, cluster.name AS cluster, schema.name AS schema,
         table.name AS name, table.key AS key, table_description.description AS description,
@@ -34,8 +38,7 @@ class Neo4jSearchDataExtractor(Extractor):
         EXTRACT(cd IN COLLECT(DISTINCT col_description)| cd.description) AS column_descriptions,
         REDUCE(sum_r = 0, r in COLLECT(DISTINCT read)| sum_r + r.read_count) AS total_usage,
         COUNT(DISTINCT user.email) as unique_usage,
-        COLLECT(DISTINCT tags.key) as tags,
-        COLLECT(DISTINCT badges.key) as badges
+        COLLECT(DISTINCT tags.key) as tags
         ORDER BY table.name;
         """
     )
