@@ -1,6 +1,10 @@
 """
 This is a example script which demo how to load data
 into Neo4j and Elasticsearch without using an Airflow DAG.
+
+It uses CSV extractor to extract metadata to load it into Neo4j & ES.
+For other available extractors, please take a look at
+https://github.com/lyft/amundsendatabuilder#list-of-extractors
 """
 
 import logging
