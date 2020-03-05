@@ -13,7 +13,9 @@ class TestDashboardMetadata(unittest.TestCase):
                                                     'Agent dashboard description',
                                                     ['test_tag', 'tag2'],
                                                     dashboard_group_description='foo dashboard group description',
-                                                    created_timestamp=123456789
+                                                    created_timestamp=123456789,
+                                                    dashboard_group_url='https://foo.bar/dashboard_group/foo',
+                                                    dashboard_url='https://foo.bar/dashboard_group/foo/dashboard/bar',
                                                     )
         # Without tags
         self.dashboard_metadata2 = DashboardMetadata('Product - Atmoskop',
@@ -38,7 +40,8 @@ class TestDashboardMetadata(unittest.TestCase):
 
         self.expected_nodes_deduped = [
             {'created_timestamp': 123456789, 'name': 'Agent', 'KEY': '_dashboard://gold.Product - Jobs.cz/Agent',
-             'LABEL': 'Dashboard'},
+             'LABEL': 'Dashboard', 'dashboard_group_url': 'https://foo.bar/dashboard_group/foo',
+             'dashboard_url': 'https://foo.bar/dashboard_group/foo/dashboard/bar'},
             {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup'},
             {'KEY': '_dashboard://gold.Product - Jobs.cz/_description', 'LABEL': 'Description',
              'description': 'foo dashboard group description'},

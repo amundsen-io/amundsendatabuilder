@@ -10,6 +10,8 @@ from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
+from databuilder.transformer.template_variable_substitution_transformer import \
+    TemplateVariableSubstitutionTransformer, TEMPLATE, FIELD_NAME as VAR_FIELD_NAME
 
 # CONFIG KEYS
 ORGANIZATION = 'organization'
@@ -51,6 +53,21 @@ class ModeDashboardExtractor(Extractor):
                 ConfigFactory.from_dict({FIELD_NAME: 'created_timestamp', })))
 
         transformers.append(timestamp_str_to_epoch_transformer)
+
+        dashboard_group_url_transformer = TemplateVariableSubstitutionTransformer()
+        dashboard_group_url_transformer.init(
+            conf=Scoped.get_scoped_conf(self._conf, dashboard_group_url_transformer.get_scope()).with_fallback(
+                ConfigFactory.from_dict({VAR_FIELD_NAME: 'dashboard_group_url',
+                                         TEMPLATE: 'https://app.mode.com/lyft/spaces/{dashboard_group_id}'})))
+
+        transformers.append(dashboard_group_url_transformer)
+
+        dashboard_url_transformer = TemplateVariableSubstitutionTransformer()
+        dashboard_url_transformer.init(
+            conf=Scoped.get_scoped_conf(self._conf, dashboard_url_transformer.get_scope()).with_fallback(
+                ConfigFactory.from_dict({VAR_FIELD_NAME: 'dashboard_url',
+                                         TEMPLATE: 'https://app.mode.com/lyft/reports/{dashboard_id}'})))
+        transformers.append(dashboard_url_transformer)
 
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(

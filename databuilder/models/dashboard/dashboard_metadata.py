@@ -29,6 +29,8 @@ class DashboardMetadata(Neo4jCsvSerializable):
     DASHBOARD_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}'
     DASHBOARD_NAME = 'name'
     DASHBOARD_CREATED_TIME_STAMP = 'created_timestamp'
+    DASHBOARD_GROUP_URL = 'dashboard_group_url'
+    DASHBOARD_URL = 'dashboard_url'
 
     DASHBOARD_DESCRIPTION_NODE_LABEL = 'Description'
     DASHBOARD_DESCRIPTION = 'description'
@@ -61,6 +63,8 @@ class DashboardMetadata(Neo4jCsvSerializable):
                  dashboard_id=None,  # type: Optional[str]
                  dashboard_group_description=None,  # type: Optional[str]
                  created_timestamp=None,  # type: Optional[int]
+                 dashboard_group_url=None,  # type: Optional[str]
+                 dashboard_url=None,  # type: Optional[str]
                  **kwargs
                  ):
         # type: (...) -> None
@@ -75,12 +79,14 @@ class DashboardMetadata(Neo4jCsvSerializable):
         self.cluster = cluster
         self.dashboard_group_description = dashboard_group_description
         self.created_timestamp = created_timestamp
+        self.dashboard_group_url = dashboard_group_url
+        self.dashboard_url = dashboard_url
         self._node_iterator = self._create_next_node()
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self):
         # type: () -> str
-        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
+        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
             .format(self.dashboard_group,
                     self.dashboard_name,
                     self.description,
@@ -88,7 +94,9 @@ class DashboardMetadata(Neo4jCsvSerializable):
                     self.dashboard_group_id,
                     self.dashboard_id,
                     self.dashboard_group_description,
-                    self.created_timestamp
+                    self.created_timestamp,
+                    self.dashboard_group_url,
+                    self.dashboard_url,
                     )
 
     def _get_dashboard_key(self):
@@ -141,6 +149,12 @@ class DashboardMetadata(Neo4jCsvSerializable):
         }
         if self.created_timestamp:
             dashboard_node[DashboardMetadata.DASHBOARD_CREATED_TIME_STAMP] = self.created_timestamp
+
+        if self.dashboard_group_url:
+            dashboard_node[DashboardMetadata.DASHBOARD_GROUP_URL] = self.dashboard_group_url
+
+        if self.dashboard_url:
+            dashboard_node[DashboardMetadata.DASHBOARD_URL] = self.dashboard_url
 
         yield dashboard_node
 

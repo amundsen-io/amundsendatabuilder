@@ -55,7 +55,7 @@ class DashboardExecution(Neo4jCsvSerializable):
         yield {
             NODE_LABEL: DashboardExecution.DASHBOARD_EXECUTION_LABEL,
             NODE_KEY: self._get_last_execution_node_key(),
-            'time_stamp': self._execution_timestamp,
+            'timestamp': self._execution_timestamp,
             'state': self._execution_state
         }
 
