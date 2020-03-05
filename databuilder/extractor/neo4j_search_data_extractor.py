@@ -28,7 +28,8 @@ class Neo4jSearchDataExtractor(Extractor):
         WITH table_tags as tags, db, cluster, schema, table, table_description, cols, col_description, user, read
         WHERE table_tags.tag_type = "default" or table_tags is null
         OPTIONAL MATCH (table)-[:TAGGED_BY]->(table_tags:Tag) 
-        WITH table_tags as badges, tags, db, cluster, schema, table, table_description, cols, col_description, user, read
+        WITH table_tags as badges, tags, db, cluster, schema, table, table_description, cols, col_description, 
+        user, read
         WHERE table_tags.tag_type = "badge" or table_tags is null
         OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
         RETURN db.name as database, cluster.name AS cluster, schema.name AS schema,
