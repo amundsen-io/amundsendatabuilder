@@ -20,8 +20,8 @@ class DashboardTable(Neo4jCsvSerializable):
     between Tables and Dashboard
     """
 
-    DASHBOARD_TABLE_RELATION_TYPE = 'DASHBOARD_OF'
-    TABLE_DASHBOARD_RELATION_TYPE = 'TABLE_OF'
+    DASHBOARD_TABLE_RELATION_TYPE = 'DASHBOARD_WITH_TABLE'
+    TABLE_DASHBOARD_RELATION_TYPE = 'TABLE_OF_DASHBOARD'
 
     def __init__(self,
                  dashboard_group_id,  # type: str
