@@ -39,10 +39,12 @@ class TestDashboardMetadata(unittest.TestCase):
                                                      )
 
         self.expected_nodes_deduped = [
+            {'KEY': '_dashboard://gold', 'LABEL': 'Cluster', 'name': 'gold'},
             {'created_timestamp': 123456789, 'name': 'Agent', 'KEY': '_dashboard://gold.Product - Jobs.cz/Agent',
-             'LABEL': 'Dashboard', 'dashboard_group_url': 'https://foo.bar/dashboard_group/foo',
+             'LABEL': 'Dashboard',
              'dashboard_url': 'https://foo.bar/dashboard_group/foo/dashboard/bar'},
-            {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup'},
+            {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup',
+             'dashboard_group_url': 'https://foo.bar/dashboard_group/foo'},
             {'KEY': '_dashboard://gold.Product - Jobs.cz/_description', 'LABEL': 'Description',
              'description': 'foo dashboard group description'},
             {'description': 'Agent dashboard description',
@@ -54,6 +56,9 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_nodes = copy.deepcopy(self.expected_nodes_deduped)
 
         self.expected_rels_deduped = [
+            {'END_KEY': '_dashboard://gold.Product - Jobs.cz', 'END_LABEL': 'Dashboardgroup',
+             'REVERSE_TYPE': 'DASHBOARD_GROUP_OF', 'START_KEY': '_dashboard://gold',
+             'START_LABEL': 'Cluster', 'TYPE': 'DASHBOARD_GROUP'},
             {'END_KEY': '_dashboard://gold.Product - Jobs.cz/_description', 'END_LABEL': 'Description',
              'REVERSE_TYPE': 'DESCRIPTION_OF', 'START_KEY': '_dashboard://gold.Product - Jobs.cz',
              'START_LABEL': 'Dashboardgroup', 'TYPE': 'DESCRIPTION'},
@@ -74,6 +79,7 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_rels = copy.deepcopy(self.expected_rels_deduped)
 
         self.expected_nodes_deduped2 = [
+            {'KEY': '_dashboard://gold', 'LABEL': 'Cluster', 'name': 'gold'},
             {'name': 'Atmoskop', 'KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop', 'LABEL': 'Dashboard'},
             {'name': 'Product - Atmoskop', 'KEY': '_dashboard://gold.Product - Atmoskop', 'LABEL': 'Dashboardgroup'},
             {'description': 'Atmoskop dashboard description',
@@ -84,6 +90,9 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_nodes2 = copy.deepcopy(self.expected_nodes_deduped2)
 
         self.expected_rels_deduped2 = [
+            {'END_KEY': '_dashboard://gold.Product - Atmoskop', 'END_LABEL': 'Dashboardgroup',
+             'REVERSE_TYPE': 'DASHBOARD_GROUP_OF', 'START_KEY': '_dashboard://gold',
+             'START_LABEL': 'Cluster', 'TYPE': 'DASHBOARD_GROUP'},
             {'END_KEY': '_dashboard://gold.Product - Atmoskop', 'START_LABEL': 'Dashboard',
              'END_LABEL': 'Dashboardgroup',
              'START_KEY': '_dashboard://gold.Product - Atmoskop/Atmoskop', 'TYPE': 'DASHBOARD_OF',
@@ -97,6 +106,7 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_rels2 = copy.deepcopy(self.expected_rels_deduped2)
 
         self.expected_nodes_deduped3 = [
+            {'KEY': '_dashboard://gold', 'LABEL': 'Cluster', 'name': 'gold'},
             {'name': 'Dohazovac', 'KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'LABEL': 'Dashboard'},
             {'name': 'Product - Jobs.cz', 'KEY': '_dashboard://gold.Product - Jobs.cz', 'LABEL': 'Dashboardgroup'},
             {'tag_type': 'dashboard', 'KEY': 'test_tag', 'LABEL': 'Tag'},
@@ -106,6 +116,9 @@ class TestDashboardMetadata(unittest.TestCase):
         self.expected_nodes3 = copy.deepcopy(self.expected_nodes_deduped3)
 
         self.expected_rels_deduped3 = [
+            {'END_KEY': '_dashboard://gold.Product - Jobs.cz', 'END_LABEL': 'Dashboardgroup',
+             'REVERSE_TYPE': 'DASHBOARD_GROUP_OF', 'START_KEY': '_dashboard://gold',
+             'START_LABEL': 'Cluster', 'TYPE': 'DASHBOARD_GROUP'},
             {'END_KEY': '_dashboard://gold.Product - Jobs.cz', 'START_LABEL': 'Dashboard',
              'END_LABEL': 'Dashboardgroup',
              'START_KEY': '_dashboard://gold.Product - Jobs.cz/Dohazovac', 'TYPE': 'DASHBOARD_OF',
