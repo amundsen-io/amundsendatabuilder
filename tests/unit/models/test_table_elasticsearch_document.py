@@ -39,7 +39,7 @@ class TestTableElasticsearchDocument(unittest.TestCase):
                                   "total_usage": 100,
                                   "unique_usage": 10,
                                   "tags": ["test"],
-                                  "programmatic_descriptions": ['test']
+                                  "programmatic_descriptions": ['test'],
                                   "badges": ["badge1"]
                                   }
 

@@ -154,7 +154,7 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
              '"column_names": ["test_col1", "test_col2"], "name": "test_table", '
              '"last_updated_timestamp": 123456789, "display_name": "test_schema.test_table", '
              '"description": "test_description", "unique_usage": 5, "total_usage": 10, '
-             '"tags": ["test_tag1", "test_tag2"], "programmatic_descriptions":["test"],
+             '"tags": ["test_tag1", "test_tag2"], "programmatic_descriptions":["test"], '
              '"badges": ["badge1"]}')
         ] * 5
 
