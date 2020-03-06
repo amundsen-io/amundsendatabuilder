@@ -101,7 +101,9 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
                                total_usage=10,
                                unique_usage=5,
                                tags=['test_tag1', 'test_tag2'],
-                               badges=['badge1'])
+                               tag_data=[['badge1', 'badge'],
+                                         ['test_tag1', 'default'],
+                                         ['test_tag2', 'default']])
         loader.load(data)
         loader.close()
 
@@ -138,7 +140,9 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
                                 total_usage=10,
                                 unique_usage=5,
                                 tags=['test_tag1', 'test_tag2'],
-                                badges=['badge1'])] * 5
+                                tag_data=[['badge1', 'badge'],
+                                          ['test_tag1', 'default'],
+                                          ['test_tag2', 'default']])] * 5
 
         for d in data:
             loader.load(d)

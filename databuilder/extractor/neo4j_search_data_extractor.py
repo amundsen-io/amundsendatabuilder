@@ -24,8 +24,7 @@ class Neo4jSearchDataExtractor(Extractor):
         OPTIONAL MATCH (table)-[read:READ_BY]->(user:User)
         OPTIONAL MATCH (table)-[:COLUMN]->(cols:Column)
         OPTIONAL MATCH (cols)-[:DESCRIPTION]->(col_description:Description)
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(badges:Tag) WHERE badges.tag_type='badge'
+        OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag)
         OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
         RETURN db.name as database, cluster.name AS cluster, schema.name AS schema,
         table.name AS name, table.key AS key, table_description.description AS description,
@@ -35,7 +34,7 @@ class Neo4jSearchDataExtractor(Extractor):
         REDUCE(sum_r = 0, r in COLLECT(DISTINCT read)| sum_r + r.read_count) AS total_usage,
         COUNT(DISTINCT user.email) as unique_usage,
         COLLECT(DISTINCT tags.key) as tags,
-        COLLECT(DISTINCT badges.key) as badges
+        COLLECT(DISTINCT ([tags.key, tags.tag_type])) as tag_data
         ORDER BY table.name;
         """
     )
