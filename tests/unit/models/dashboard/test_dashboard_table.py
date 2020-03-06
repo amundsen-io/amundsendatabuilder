@@ -26,6 +26,6 @@ class TestDashboardTable(unittest.TestCase):
         expected = {RELATION_END_KEY: 'hive://gold.schema/table1', RELATION_START_LABEL: 'Dashboard',
                     RELATION_END_LABEL: 'Table',
                     RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
-                    RELATION_TYPE: 'DASHBOARD_OF',
-                    RELATION_REVERSE_TYPE: 'TABLE_OF'}
+                    RELATION_TYPE: 'DASHBOARD_WITH_TABLE',
+                    RELATION_REVERSE_TYPE: 'TABLE_OF_DASHBOARD'}
         self.assertDictEqual(actual, expected)
