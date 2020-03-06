@@ -20,10 +20,8 @@ class Neo4jExtractor(Extractor):
     NEO4J_AUTH_USER = 'neo4j_auth_user'
     NEO4J_AUTH_PW = 'neo4j_auth_pw'
     NEO4J_MAX_CONN_LIFE_TIME_SEC = 'neo4j_max_conn_life_time_sec'
-    NEO4J_CONNECTION_TIMEOUT_SEC = 'connection_timeout'
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
-                                              NEO4J_CONNECTION_TIMEOUT_SEC: 60})
+    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50})
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -63,9 +61,7 @@ class Neo4jExtractor(Extractor):
                                     max_connection_life_time=self.conf.get_int(
                                         Neo4jExtractor.NEO4J_MAX_CONN_LIFE_TIME_SEC),
                                     auth=(self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_USER),
-                                          self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_PW)),
-                                    connection_timeout=self.conf.get_int(
-                                        Neo4jExtractor.NEO4J_CONNECTION_TIMEOUT_SEC))
+                                          self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_PW)))
 
     def _execute_query(self, tx):
         # type: (Any) -> Any
