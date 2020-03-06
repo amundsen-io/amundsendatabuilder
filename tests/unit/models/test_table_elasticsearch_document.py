@@ -23,7 +23,7 @@ class TestTableElasticsearchDocument(unittest.TestCase):
                                    total_usage=100,
                                    unique_usage=10,
                                    tags=['test'],
-                                   tag_data=[['badge1', 'badge']])
+                                   tag_data=[['badge1', 'badge'], ['test', 'default']])
 
         expected_document_dict = {"database": "test_database",
                                   "cluster": "test_cluster",
