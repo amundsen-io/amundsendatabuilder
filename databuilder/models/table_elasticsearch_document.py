@@ -1,6 +1,7 @@
 from typing import List, Optional  # noqa: F401
 
 from databuilder.models.elasticsearch_document import ElasticsearchDocument
+from databuilder.models.table_badges import TableBadge
 
 
 class TableESDocument(ElasticsearchDocument):
@@ -20,7 +21,7 @@ class TableESDocument(ElasticsearchDocument):
                  total_usage,  # type: int
                  unique_usage,  # type: int
                  tags,  # type: List[str],
-                 badges=None,  # type: Optional[List[str]]
+                 badges=None,  # type: Optional[List[TableBadge]]
                  display_name=None,  # type: Optional[str]
                  ):
         # type: (...) -> None
@@ -39,4 +40,5 @@ class TableESDocument(ElasticsearchDocument):
         self.unique_usage = unique_usage
         # todo: will include tag_type once we have better understanding from UI flow.
         self.tags = tags
-        self.badges = badges
+        if badges:
+            self.badges = [TableBadge(badge_name=badge) for badge in badges]
