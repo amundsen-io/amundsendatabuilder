@@ -1,7 +1,7 @@
 from typing import List, Optional  # noqa: F401
 
 from databuilder.models.elasticsearch_document import ElasticsearchDocument
-from databuilder.models.table_badges import TableBadge
+from databuilder.models.table_badge import TableBadge
 
 
 class TableESDocument(ElasticsearchDocument):

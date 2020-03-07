@@ -115,8 +115,23 @@ class TestNeo4jExtractor(unittest.TestCase):
                                tags=['hive'],
                                badges=['badge1'])
 
+            expected_results = dict(database='test_database',
+                                    cluster='test_cluster',
+                                    schema='test_schema',
+                                    name='test_table_name',
+                                    display_name='test_schema.test_table_name',
+                                    key='test_table_key',
+                                    description='test_table_description',
+                                    last_updated_timestamp=123456789,
+                                    column_names=['test_col1', 'test_col2', 'test_col3'],
+                                    column_descriptions=['test_description1', 'test_description2', ''],
+                                    total_usage=100,
+                                    unique_usage=5,
+                                    tags=['hive'],
+                                    badges=[['badge1', 'badge']])
+
             extractor.results = [result_dict]
             result_obj = extractor.extract()
 
             self.assertIsInstance(result_obj, TableESDocument)
-            self.assertDictEqual(vars(result_obj), result_dict)
+            self.assertDictEqual(vars(result_obj), expected_results)
