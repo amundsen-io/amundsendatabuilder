@@ -10,7 +10,6 @@ from databuilder.models.neo4j_csv_serde import (
 LOGGER = logging.getLogger(__name__)
 
 
-# Beta
 class DashboardChart(Neo4jCsvSerializable):
     """
     A model that encapsulate Dashboard's charts

@@ -68,7 +68,7 @@ class ModeDashboardQueriesExtractor(Extractor):
     def _build_restapi_query(self):
         """
         Build REST API Query. To get Mode Dashboard last execution, it needs to call three APIs (spaces API, reports
-        API, and run API) joining together.
+        API, and queries API) joining together.
         :return: A RestApiQuery that provides Mode Dashboard execution (run)
         """
         # type: () -> RestApiQuery
