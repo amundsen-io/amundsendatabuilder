@@ -224,7 +224,7 @@ job = DefaultJob(
 job.launch()
 ```
 
-#### [BigQueryMetadataExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/snowflake_metadata_extractor.py "SnowflakeMetadataExtractor")
+#### [BigQueryMetadataExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/bigquery_metadata_extractor.py "BigQuery Metdata Extractor")
 An extractor that extracts table and column metadata including database, schema, table name, table description, column name and column description from a Bigquery database.
 
 The API calls driving the extraction is defined [here](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/bigquery_metadata_extractor.py)
