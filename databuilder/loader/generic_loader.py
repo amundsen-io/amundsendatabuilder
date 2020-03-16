@@ -12,7 +12,7 @@ CALLBACK_FUNCTION = 'callback_function'
 
 def log_call_back(record):
     """
-    A Sample callback function. Implement any function to fit your needs instead of just logging.
+    A Sample callback function. Implement any function follows this function's signature to fit your needs.
     :param record:
     :return:
     """

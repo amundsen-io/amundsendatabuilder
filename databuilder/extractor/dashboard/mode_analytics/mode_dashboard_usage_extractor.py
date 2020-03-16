@@ -50,8 +50,8 @@ class ModeDashboardUsageExtractor(Extractor):
         params = ModeDashboardUtils.get_auth_params(conf=self._conf)
 
         # Reports
-        # JSONPATH expression. it goes into array which is located in _embedded.reports and then extracts token, name,
-        # and description
+        # JSONPATH expression. it goes into array which is located in _embedded.reports and then extracts token,
+        # and view_count
         json_path = '_embedded.reports[*].[token,view_count]'
         field_names = ['dashboard_id', 'accumulated_view_count']
         reports_query = RestApiQuery(query_to_join=spaces_query, url=reports_url_template, params=params,
