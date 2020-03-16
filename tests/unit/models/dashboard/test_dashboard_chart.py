@@ -30,10 +30,12 @@ class TestDashboardChart(unittest.TestCase):
                                          dashboard_id='d_id',
                                          query_id='q_id',
                                          chart_id='c_id',
+                                         chart_url='http://gold.foo.bar/'
                                          )
 
         actual2 = dashboard_chart.create_next_node()
-        expected2 = {'id': 'c_id', 'KEY': '_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id', 'LABEL': 'Chart'}
+        expected2 = {'id': 'c_id', 'KEY': '_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id', 'LABEL': 'Chart',
+                     'url': 'http://gold.foo.bar/'}
         self.assertDictEqual(expected2, actual2)
 
     def test_create_relation(self):
