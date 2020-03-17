@@ -4,7 +4,6 @@ from setuptools import setup, find_packages
 
 __version__ = '2.4.0'
 
-
 requirements_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'requirements.txt')
 with open(requirements_path) as requirements_file:
     requirements = requirements_file.readlines()
