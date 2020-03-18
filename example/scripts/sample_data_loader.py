@@ -30,7 +30,9 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
-es_host = None
+es_host = os.getenv("ELASTICSEARCH_SERVICE_HOST", "localhost")
+es_port = os.getenv("ELASTICSEARCH_SERVICE_PORT_ELASTICSEARCH_HTTP", 9200)
+
 neo_host = os.getenv("NEO4J_SERVICE_HOST", "localhost")
 neo_port = os.getenv("NEO4J_SERVICE_PORT_NEO4J_BOLT", 7687)
 if len(sys.argv) > 1:
@@ -38,8 +40,9 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     neo_host = sys.argv[2]
 
+                    
 es = Elasticsearch([
-    {'host': es_host if es_host else 'localhost'},
+    {'host': es_host,'port': es_port},
 ])
 
 DB_FILE = '/tmp/test.db'
