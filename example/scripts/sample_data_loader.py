@@ -30,10 +30,11 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
-es_host = os.getenv("ELASTICSEARCH_SERVICE_HOST", "localhost")
-es_port = os.getenv("ELASTICSEARCH_SERVICE_PORT_ELASTICSEARCH_HTTP", 9200)
+# configured by Kube DNS based on service name
+es_host = "elasticsearch"
+neo_host = "neo4j"
 
-neo_host = os.getenv("NEO4J_SERVICE_HOST", "localhost")
+es_port = os.getenv("ELASTICSEARCH_SERVICE_PORT_ELASTICSEARCH_HTTP", 9200)
 neo_port = os.getenv("NEO4J_SERVICE_PORT_NEO4J_BOLT", 7687)
 if len(sys.argv) > 1:
     es_host = sys.argv[1]
