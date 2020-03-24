@@ -24,11 +24,26 @@ class DashboardUsage(Neo4jCsvSerializable):
                  dashboard_id,  # type: Optional[str]
                  email,  # type: str
                  view_count,  # type: int
-                 should_create_user_node=True,  # type: Optional[bool]
+                 should_create_user_node=False,  # type: Optional[bool]
                  product='',  # type: Optional[str]
                  cluster='gold',  # type: Optional[str]
                  **kwargs
                  ):
+        # type: () -> None
+        """
+
+        :param dashboard_group_id:
+        :param dashboard_id:
+        :param email:
+        :param view_count:
+        :param should_create_user_node: Enable this if it is fine to create/update User node with only with email
+        address. Please be advised that other fields will be emptied. Current use case is to create anonymous user.
+        For example, Mode dashboard does not provide which user viewed the dashboard and anonymous user can be used
+        to show the usage.
+        :param product:
+        :param cluster:
+        :param kwargs:
+        """
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._email = email
