@@ -11,7 +11,7 @@ class TestDashboardOwner(unittest.TestCase):
         # type: () -> None
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123, cluster='cluster_id',
-                                         product='product_id')
+                                         product='product_id', should_create_user_node=True)
 
         actual = dashboard_usage.create_next_node()
         expected = {'is_active:UNQUOTED': True,
