@@ -25,7 +25,8 @@ class TestDashboardOwner(unittest.TestCase):
                     'KEY': 'foo@bar.com',
                     'github_username': '',
                     'team_name': '',
-                    'email': 'foo@bar.com'}
+                    'email': 'foo@bar.com',
+                    'role_name': ''}
 
         self.assertDictEqual(expected, actual)
         self.assertIsNone(dashboard_usage.create_next_node())
