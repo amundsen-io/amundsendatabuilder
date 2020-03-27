@@ -74,7 +74,7 @@ class Neo4jStalenessRemovalTask(Task):
         self.staleness_pct_dict = conf.get(STALENESS_PCT_MAX_DICT)
 
         self.ms_to_expire = None
-        if conf.has_key(MS_TO_EXPIRE):
+        if MS_TO_EXPIRE in conf:
             self.ms_to_expire = conf.get_int(MS_TO_EXPIRE)
             if self.ms_to_expire < conf.get_int(MIN_MS_TO_EXPIRE):
                 raise Exception('{} is too small'.format(MS_TO_EXPIRE))

@@ -1,3 +1,6 @@
+# Validation of Cypher statements causing Flake8 to fail. Disabling it on this file only
+# flake8: noqa
+
 import logging
 import textwrap
 import unittest
