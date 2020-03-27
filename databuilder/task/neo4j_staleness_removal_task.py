@@ -1,15 +1,15 @@
 import logging
+import textwrap
 import time
 
-from neo4j.v1 import GraphDatabase, BoltStatementResult  # noqa: F401
+from neo4j.v1 import GraphDatabase  # noqa: F401
 from pyhocon import ConfigFactory  # noqa: F401
 from pyhocon import ConfigTree  # noqa: F401
 from typing import Dict, Iterable, Any  # noqa: F401
 
 from databuilder import Scoped
-from databuilder.task.base_task import Task  # noqa: F401
 from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
-
+from databuilder.task.base_task import Task  # noqa: F401
 
 # A end point for Neo4j e.g: bolt://localhost:9999
 NEO4J_END_POINT_KEY = 'neo4j_endpoint'
@@ -20,19 +20,27 @@ NEO4J_PASSWORD = 'neo4j_password'
 TARGET_NODES = "target_nodes"
 TARGET_RELATIONS = "target_relations"
 BATCH_SIZE = "batch_size"
+DRY_RUN = "dry_run"
 # Staleness max percentage. Safety net to prevent majority of data being deleted.
 STALENESS_MAX_PCT = "staleness_max_pct"
 # Staleness max percentage per LABEL/TYPE. Safety net to prevent majority of data being deleted.
 STALENESS_PCT_MAX_DICT = "staleness_max_pct_dict"
+# Using this milliseconds and published timestamp to determine staleness
+MS_TO_EXPIRE = "milliseconds_to_expire"
+MIN_MS_TO_EXPIRE = "minimum_milliseconds_to_expire"
 
 DEFAULT_CONFIG = ConfigFactory.from_dict({BATCH_SIZE: 100,
                                           NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
                                           STALENESS_MAX_PCT: 5,
                                           TARGET_NODES: [],
                                           TARGET_RELATIONS: [],
-                                          STALENESS_PCT_MAX_DICT: {}})
+                                          STALENESS_PCT_MAX_DICT: {},
+                                          MIN_MS_TO_EXPIRE: 86400000,
+                                          DRY_RUN: False})
 
 LOGGER = logging.getLogger(__name__)
+
+MARKER_VAR_NAME = 'marker'
 
 
 class Neo4jStalenessRemovalTask(Task):
@@ -55,15 +63,25 @@ class Neo4jStalenessRemovalTask(Task):
 
     def init(self, conf):
         # type: (ConfigTree) -> None
-        conf = Scoped.get_scoped_conf(conf, self.get_scope())\
-            .with_fallback(conf)\
+        conf = Scoped.get_scoped_conf(conf, self.get_scope()) \
+            .with_fallback(conf) \
             .with_fallback(DEFAULT_CONFIG)
         self.target_nodes = set(conf.get_list(TARGET_NODES))
         self.target_relations = set(conf.get_list(TARGET_RELATIONS))
         self.batch_size = conf.get_int(BATCH_SIZE)
+        self.dry_run = conf.get_bool(DRY_RUN)
         self.staleness_pct = conf.get_int(STALENESS_MAX_PCT)
         self.staleness_pct_dict = conf.get(STALENESS_PCT_MAX_DICT)
-        self.publish_tag = conf.get_string(JOB_PUBLISH_TAG)
+
+        self.ms_to_expire = None
+        if conf.has_key(MS_TO_EXPIRE):
+            self.ms_to_expire = conf.get_int(MS_TO_EXPIRE)
+            if self.ms_to_expire < conf.get_int(MIN_MS_TO_EXPIRE):
+                raise Exception('{} is too small'.format(MS_TO_EXPIRE))
+            self.marker = '(timestamp() - {})'.format(conf.get_int(MS_TO_EXPIRE))
+        else:
+            self.marker = conf.get_string(JOB_PUBLISH_TAG)
+
         self._driver = \
             GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY),
                                  max_connection_life_time=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
@@ -94,26 +112,36 @@ class Neo4jStalenessRemovalTask(Task):
         self._validate_relation_staleness_pct()
 
     def _delete_stale_nodes(self):
-        statement = """
-        MATCH (n:{type})
-        WHERE n.published_tag <> $published_tag
-        OR NOT EXISTS(n.published_tag)
+        statement = textwrap.dedent("""
+        MATCH (n:{{type}})
+        WHERE {}
         WITH n LIMIT $batch_size
         DETACH DELETE (n)
         RETURN COUNT(*) as count;
-        """
-        self._batch_delete(statement=statement, targets=self.target_nodes)
+        """)
+        self._batch_delete(statement=self._decorate_staleness(statement), targets=self.target_nodes)
+
+    def _decorate_staleness(self, statement):
+        if self.ms_to_expire:
+            return statement.format(textwrap.dedent("""
+            n.publisher_last_updated_epoch_ms < ${marker}
+            OR NOT EXISTS(n.publisher_last_updated_epoch_ms)
+            """.format(marker=MARKER_VAR_NAME)))
+
+        return statement.format(textwrap.dedent("""
+        n.published_tag <> ${marker}
+        OR NOT EXISTS(n.published_tag)
+        """.format(marker=MARKER_VAR_NAME)))
 
     def _delete_stale_relations(self):
-        statement = """
-        MATCH ()-[r:{type}]-()
-        WHERE r.published_tag <> $published_tag
-        OR NOT EXISTS(r.published_tag)
-        WITH r LIMIT $batch_size
-        DELETE r
+        statement = textwrap.dedent("""
+        MATCH ()-[n:{{type}}]-()
+        WHERE {}
+        WITH n LIMIT $batch_size
+        DELETE n
         RETURN count(*) as count;
-        """
-        self._batch_delete(statement=statement, targets=self.target_relations)
+        """)
+        self._batch_delete(statement=self._decorate_staleness(statement), targets=self.target_relations)
 
     def _batch_delete(self, statement, targets):
         """
@@ -128,7 +156,7 @@ class Neo4jStalenessRemovalTask(Task):
             while True:
                 result = self._execute_cypher_query(statement=statement.format(type=t),
                                                     param_dict={'batch_size': self.batch_size,
-                                                                'published_tag': self.publish_tag}).single()
+                                                                MARKER_VAR_NAME: self.marker}).single()
                 count = result['count']
                 total_count = total_count + count
                 if count == 0:
@@ -160,44 +188,46 @@ class Neo4jStalenessRemovalTask(Task):
     def _validate_node_staleness_pct(self):
         # type: () -> None
 
-        total_nodes_statement = """
+        total_nodes_statement = textwrap.dedent("""
         MATCH (n)
         WITH DISTINCT labels(n) as node, count(*) as count
         RETURN head(node) as type, count
-        """
+        """)
 
-        stale_nodes_statement = """
+        stale_nodes_statement = textwrap.dedent("""
         MATCH (n)
-        WHERE n.published_tag <> $published_tag
-        OR NOT EXISTS(n.published_tag)
+        WHERE {}
         WITH DISTINCT labels(n) as node, count(*) as count
         RETURN head(node) as type, count
-        """
+        """)
+
+        stale_nodes_statement = textwrap.dedent(self._decorate_staleness(stale_nodes_statement))
 
         total_records = self._execute_cypher_query(statement=total_nodes_statement)
         stale_records = self._execute_cypher_query(statement=stale_nodes_statement,
-                                                   param_dict={'published_tag': self.publish_tag})
+                                                   param_dict={MARKER_VAR_NAME: self.marker})
         self._validate_staleness_pct(total_records=total_records,
                                      stale_records=stale_records,
                                      types=self.target_nodes)
 
     def _validate_relation_staleness_pct(self):
         # type: () -> None
-        total_relations_statement = """
+        total_relations_statement = textwrap.dedent("""
         MATCH ()-[r]-()
         RETURN type(r) as type, count(*) as count;
-        """
+        """)
 
-        stale_relations_statement = """
-        MATCH ()-[r]-()
-        WHERE r.published_tag <> $published_tag
-        OR NOT EXISTS(r.published_tag)
-        RETURN type(r) as type, count(*) as count
-        """
+        stale_relations_statement = textwrap.dedent("""
+        MATCH ()-[n]-()
+        WHERE {}
+        RETURN type(n) as type, count(*) as count
+        """)
+
+        stale_relations_statement = textwrap.dedent(self._decorate_staleness(stale_relations_statement))
 
         total_records = self._execute_cypher_query(statement=total_relations_statement)
         stale_records = self._execute_cypher_query(statement=stale_relations_statement,
-                                                   param_dict={'published_tag': self.publish_tag})
+                                                   param_dict={MARKER_VAR_NAME: self.marker})
         self._validate_staleness_pct(total_records=total_records,
                                      stale_records=stale_records,
                                      types=self.target_relations)
@@ -206,6 +236,11 @@ class Neo4jStalenessRemovalTask(Task):
         # type: (str, Dict[str, Any]) -> Iterable[Dict[str, Any]]
         LOGGER.info('Executing Cypher query: {statement} with params {params}: '.format(statement=statement,
                                                                                         params=param_dict))
+
+        if self.dry_run:
+            LOGGER.info('Skipping for it is a dryrun')
+            return []
+
         start = time.time()
         try:
             with self._driver.session() as session:
