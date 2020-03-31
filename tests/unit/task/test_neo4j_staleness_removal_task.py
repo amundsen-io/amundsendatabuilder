@@ -357,10 +357,11 @@ class TestRemoveStaleData(unittest.TestCase):
                 neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
             })
 
-            with self.assertRaises(Exception) as context:
+            try:
                 task.init(job_config)
-
-            self.assertTrue('milliseconds_to_expire is too small' in context.exception)
+                self.assertTrue(False, 'Should have failed with small TTL   ')
+            except Exception:
+                pass
 
         with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()
