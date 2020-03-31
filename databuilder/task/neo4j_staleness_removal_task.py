@@ -121,6 +121,11 @@ class Neo4jStalenessRemovalTask(Task):
         self._batch_delete(statement=self._decorate_staleness(statement), targets=self.target_nodes)
 
     def _decorate_staleness(self, statement):
+        """
+        Append where clause to the Cypher statement depends on which field to be used to expire stale data.
+        :param statement:
+        :return:
+        """
         if self.ms_to_expire:
             return statement.format(textwrap.dedent("""
             n.publisher_last_updated_epoch_ms < ${marker}
@@ -157,7 +162,6 @@ class Neo4jStalenessRemovalTask(Task):
                                                      dry_run=self.dry_run)
                 record = next(iter(results), None)
                 count = record['count'] if record else 0
-                # count = next(iter(results))['count'] if results else 0
                 total_count = total_count + count
                 if count == 0:
                     break
