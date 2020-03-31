@@ -2,7 +2,7 @@ import logging
 import textwrap
 import time
 
-from neo4j.v1 import GraphDatabase  # noqa: F401
+from neo4j import GraphDatabase  # noqa: F401
 from pyhocon import ConfigFactory  # noqa: F401
 from pyhocon import ConfigTree  # noqa: F401
 from typing import Dict, Iterable, Any  # noqa: F401
@@ -125,13 +125,11 @@ class Neo4jStalenessRemovalTask(Task):
         if self.ms_to_expire:
             return statement.format(textwrap.dedent("""
             n.publisher_last_updated_epoch_ms < ${marker}
-            OR NOT EXISTS(n.publisher_last_updated_epoch_ms)
-            """.format(marker=MARKER_VAR_NAME)))
+            OR NOT EXISTS(n.publisher_last_updated_epoch_ms)""".format(marker=MARKER_VAR_NAME)))
 
         return statement.format(textwrap.dedent("""
         n.published_tag <> ${marker}
-        OR NOT EXISTS(n.published_tag)
-        """.format(marker=MARKER_VAR_NAME)))
+        OR NOT EXISTS(n.published_tag)""".format(marker=MARKER_VAR_NAME)))
 
     def _delete_stale_relations(self):
         statement = textwrap.dedent("""
@@ -154,10 +152,13 @@ class Neo4jStalenessRemovalTask(Task):
             LOGGER.info('Deleting stale data of {} with batch size {}'.format(t, self.batch_size))
             total_count = 0
             while True:
-                result = self._execute_cypher_query(statement=statement.format(type=t),
-                                                    param_dict={'batch_size': self.batch_size,
-                                                                MARKER_VAR_NAME: self.marker}).single()
-                count = result['count']
+                results = self._execute_cypher_query(statement=statement.format(type=t),
+                                                     param_dict={'batch_size': self.batch_size,
+                                                                 MARKER_VAR_NAME: self.marker},
+                                                     dry_run=self.dry_run)
+                record = next(iter(results), None)
+                count = record['count'] if record else 0
+                # count = next(iter(results))['count'] if results else 0
                 total_count = total_count + count
                 if count == 0:
                     break
@@ -232,12 +233,12 @@ class Neo4jStalenessRemovalTask(Task):
                                      stale_records=stale_records,
                                      types=self.target_relations)
 
-    def _execute_cypher_query(self, statement, param_dict={}):
+    def _execute_cypher_query(self, statement, param_dict={}, dry_run=False):
         # type: (str, Dict[str, Any]) -> Iterable[Dict[str, Any]]
         LOGGER.info('Executing Cypher query: {statement} with params {params}: '.format(statement=statement,
                                                                                         params=param_dict))
 
-        if self.dry_run:
+        if dry_run:
             LOGGER.info('Skipping for it is a dryrun')
             return []
 

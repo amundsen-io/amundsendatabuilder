@@ -170,7 +170,6 @@ class TestRemoveStaleData(unittest.TestCase):
             WHERE 
             n.published_tag <> $marker
             OR NOT EXISTS(n.published_tag)
-            
             WITH DISTINCT labels(n) as node, count(*) as count
             RETURN head(node) as type, count
             """))
@@ -182,7 +181,6 @@ class TestRemoveStaleData(unittest.TestCase):
             WHERE 
             n.published_tag <> $marker
             OR NOT EXISTS(n.published_tag)
-            
             RETURN type(n) as type, count(*) as count
             """))
 
@@ -221,7 +219,6 @@ class TestRemoveStaleData(unittest.TestCase):
             WHERE 
             n.publisher_last_updated_epoch_ms < $marker
             OR NOT EXISTS(n.publisher_last_updated_epoch_ms)
-
             WITH DISTINCT labels(n) as node, count(*) as count
             RETURN head(node) as type, count
             """))
@@ -233,7 +230,6 @@ class TestRemoveStaleData(unittest.TestCase):
             WHERE 
             n.publisher_last_updated_epoch_ms < $marker
             OR NOT EXISTS(n.publisher_last_updated_epoch_ms)
-
             RETURN type(n) as type, count(*) as count
             """))
 
@@ -263,25 +259,25 @@ class TestRemoveStaleData(unittest.TestCase):
             task._delete_stale_nodes()
             task._delete_stale_relations()
 
-            mock_execute.assert_any_call(param_dict={'marker': u'foo', 'batch_size': 100},
+            mock_execute.assert_any_call(dry_run=False,
+                                         param_dict={'marker': u'foo', 'batch_size': 100},
                                          statement=textwrap.dedent("""
             MATCH (n:Foo)
             WHERE 
             n.published_tag <> $marker
             OR NOT EXISTS(n.published_tag)
-            
             WITH n LIMIT $batch_size
             DETACH DELETE (n)
             RETURN COUNT(*) as count;
             """))
 
-            mock_execute.assert_any_call(param_dict={'marker': u'foo', 'batch_size': 100},
+            mock_execute.assert_any_call(dry_run=False,
+                                         param_dict={'marker': u'foo', 'batch_size': 100},
                                          statement=textwrap.dedent("""
             MATCH ()-[n:BAR]-()
             WHERE 
             n.published_tag <> $marker
             OR NOT EXISTS(n.published_tag)
-            
             WITH n LIMIT $batch_size
             DELETE n
             RETURN count(*) as count;
@@ -315,25 +311,26 @@ class TestRemoveStaleData(unittest.TestCase):
             task._delete_stale_nodes()
             task._delete_stale_relations()
 
-            mock_execute.assert_any_call(param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size': 100},
+            print(mock_execute.mock_calls)
+            mock_execute.assert_any_call(dry_run=False,
+                                         param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size':  100},
                                          statement=textwrap.dedent("""
             MATCH (n:Foo)
             WHERE 
             n.publisher_last_updated_epoch_ms < $marker
             OR NOT EXISTS(n.publisher_last_updated_epoch_ms)
-
             WITH n LIMIT $batch_size
             DETACH DELETE (n)
             RETURN COUNT(*) as count;
             """))
 
-            mock_execute.assert_any_call(param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size': 100},
+            mock_execute.assert_any_call(dry_run=False,
+                                         param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size': 100},
                                          statement=textwrap.dedent("""
             MATCH ()-[n:BAR]-()
             WHERE 
             n.publisher_last_updated_epoch_ms < $marker
             OR NOT EXISTS(n.publisher_last_updated_epoch_ms)
-
             WITH n LIMIT $batch_size
             DELETE n
             RETURN count(*) as count;
