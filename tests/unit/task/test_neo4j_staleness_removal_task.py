@@ -311,7 +311,6 @@ class TestRemoveStaleData(unittest.TestCase):
             task._delete_stale_nodes()
             task._delete_stale_relations()
 
-            print(mock_execute.mock_calls)
             mock_execute.assert_any_call(dry_run=False,
                                          param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size':  100},
                                          statement=textwrap.dedent("""
@@ -384,6 +383,37 @@ class TestRemoveStaleData(unittest.TestCase):
                 neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
             })
             task.init(job_config)
+
+
+    def test_delete_dry_run(self):
+        with patch.object(GraphDatabase, 'driver') as mock_driver:
+            session_mock = mock_driver.return_value.session
+
+            task = Neo4jStalenessRemovalTask()
+            job_config = ConfigFactory.from_dict({
+                'job.identifier': 'remove_stale_data_job',
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.NEO4J_END_POINT_KEY):
+                    'foobar',
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.NEO4J_USER):
+                    'foo',
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.NEO4J_PASSWORD):
+                    'bar',
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.STALENESS_MAX_PCT):
+                    5,
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.TARGET_NODES):
+                    ['Foo'],
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.TARGET_RELATIONS):
+                    ['BAR'],
+                '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.DRY_RUN):
+                    True,
+                neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
+            })
+
+            task.init(job_config)
+            task._delete_stale_nodes()
+            task._delete_stale_relations()
+
+            session_mock.assert_not_called()
 
 
 if __name__ == '__main__':
