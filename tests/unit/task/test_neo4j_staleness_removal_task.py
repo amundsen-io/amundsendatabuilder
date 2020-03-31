@@ -199,8 +199,7 @@ class TestRemoveStaleData(unittest.TestCase):
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.STALENESS_MAX_PCT):
                     5,
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.MS_TO_EXPIRE):
-                    9876543210,
-                neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
+                    9876543210
             })
 
             task.init(job_config)
@@ -303,8 +302,7 @@ class TestRemoveStaleData(unittest.TestCase):
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.TARGET_RELATIONS):
                     ['BAR'],
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.MS_TO_EXPIRE):
-                    9876543210,
-                neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
+                    9876543210
             })
 
             task.init(job_config)
@@ -353,8 +351,7 @@ class TestRemoveStaleData(unittest.TestCase):
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.TARGET_RELATIONS):
                     ['BAR'],
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.MS_TO_EXPIRE):
-                    24 * 60 * 60 * 100 - 10,
-                neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
+                    24 * 60 * 60 * 100 - 10
             })
 
             try:
@@ -381,7 +378,6 @@ class TestRemoveStaleData(unittest.TestCase):
                     ['BAR'],
                 '{}.{}'.format(task.get_scope(), neo4j_staleness_removal_task.MS_TO_EXPIRE):
                     24 * 60 * 60 * 1000,
-                neo4j_csv_publisher.JOB_PUBLISH_TAG: 'foo',
             })
             task.init(job_config)
 

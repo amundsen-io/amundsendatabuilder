@@ -73,6 +73,9 @@ class Neo4jStalenessRemovalTask(Task):
         self.staleness_pct = conf.get_int(STALENESS_MAX_PCT)
         self.staleness_pct_dict = conf.get(STALENESS_PCT_MAX_DICT)
 
+        if JOB_PUBLISH_TAG in conf and MS_TO_EXPIRE in conf:
+            raise Exception('Cannot have both {} and {} in job config'.format(JOB_PUBLISH_TAG, MS_TO_EXPIRE))
+
         self.ms_to_expire = None
         if MS_TO_EXPIRE in conf:
             self.ms_to_expire = conf.get_int(MS_TO_EXPIRE)
