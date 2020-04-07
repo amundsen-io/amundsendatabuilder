@@ -78,13 +78,16 @@ class Neo4jSearchDataExtractor(Extractor):
         OPTIONAL MATCH (db)-[:DESCRIPTION]->(db_descr:Description)
         OPTIONAL MATCH (dbg)-[:DESCRIPTION]->(dbg_descr:Description)
         OPTIONAL MATCH (db)-[:EXECUTED]->(last_exec:Execution)
-        OPTIONAL MATCH (db)-[:HAS_QUERY]->(query:Query)
+        WHERE split(last_exec.key, '/')[5] = '_last_successful_execution'
         OPTIONAL MATCH (db)-[read:READ_BY]->(user:User)
+        OPTIONAL MATCH (db)-[:HAS_QUERY]->(query:Query)
         with db, dbg, db_descr, dbg_descr, cluster, last_exec, query, SUM(read.read_count) AS total_usage
-        where split(last_exec.key, '/')[5] = '_last_successful_execution'
-        return dbg.name as dashboard_group, db.name as dashboard_name, cluster.name as cluster, coalesce(db_descr.description, '') as description,
-        coalesce(dbg.description, '') as dashboard_group_description, dbg.dashboard_group_url as group_url, db.dashboard_url as url, db.key as uri,
-        'mode' as product, last_exec.timestamp as last_successful_run_timestamp, COLLECT(DISTINCT query.name) as query_names,
+        return dbg.name as dashboard_group, db.name as dashboard_name, cluster.name as cluster,
+        coalesce(db_descr.description, '') as description,
+        coalesce(dbg.description, '') as dashboard_group_description, dbg.dashboard_group_url as group_url,
+        db.dashboard_url as url, db.key as uri,
+        'mode' as product, last_exec.timestamp as last_successful_run_timestamp,
+        COLLECT(DISTINCT query.name) as query_names,
         total_usage
         order by dbg.name
         """
