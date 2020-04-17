@@ -1,8 +1,7 @@
 from typing import Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY)
 from databuilder.models.schema.schema_constant import SCHEMA_NODE_LABEL, SCHEMA_NAME_ATTR
 from databuilder.models.table_metadata import DescriptionMetadata
 
@@ -53,11 +52,7 @@ class SchemaModel(Neo4jCsvSerializable):
 
     def _create_relation_iterator(self):
         # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            RELATION_START_LABEL: SCHEMA_NODE_LABEL,
-            RELATION_END_LABEL: DescriptionMetadata.DESCRIPTION_NODE_LABEL,
-            RELATION_START_KEY: self._schema_key,
-            RELATION_END_KEY: self._get_description_node_key(),
-            RELATION_TYPE: DescriptionMetadata.DESCRIPTION_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: DescriptionMetadata.INVERSE_DESCRIPTION_RELATION_TYPE
-        }
+        if self._description:
+            yield self._description.get_relation(start_node=SCHEMA_NODE_LABEL,
+                                                 start_key=self._schema_key,
+                                                 end_key=self._get_description_node_key())
