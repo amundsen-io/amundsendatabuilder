@@ -22,7 +22,6 @@ from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticse
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
 from databuilder.transformer.base_transformer import NoopTransformer
 from databuilder.extractor.neo4j_extractor import Neo4jExtractor
-from databuilder.extractor.neo4j_es_last_updated_extractor import Neo4jEsLastUpdatedExtractor
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 
 LOGGER = logging.getLogger(__name__)
@@ -87,6 +86,7 @@ def create_sample_db2_job():
                      publisher=Neo4jCsvPublisher())
     return job
 
+
 def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index',
                                    elasticsearch_doc_type_key='table',
                                    model_name='databuilder.models.table_elasticsearch_document.TableESDocument',
@@ -149,10 +149,11 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
                      publisher=ElasticsearchPublisher())
     return job
 
+
 if __name__ == "__main__":
     job = create_sample_db2_job()
     job.launch()
-    
+
     job_es_table = create_es_publisher_sample_job(
         elasticsearch_index_alias='table_search_index',
         elasticsearch_doc_type_key='table',

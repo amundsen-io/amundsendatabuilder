@@ -23,9 +23,14 @@ class Db2MetadataExtractor(Extractor):
     # SELECT statement from Db2 SYSIBM to extract table and column metadata
     SQL_STATEMENT = """
     SELECT
-      {cluster_source} as cluster, c.TABSCHEMA as schema, c.TABNAME as name, t.REMARKS as description
-      ,c.COLNAME as col_name, CASE WHEN c.TYPENAME='VARCHAR' OR c.TYPENAME='CHARACTER' THEN TRIM (TRAILING FROM c.TYPENAME) concat '(' concat c.LENGTH concat ')' WHEN c.TYPENAME='DECIMAL' THEN TRIM (TRAILING FROM c.TYPENAME) concat '(' concat c.LENGTH concat ',' concat c.SCALE concat ')' ELSE TRIM (TRAILING FROM c.TYPENAME) END as col_type
-      , c.REMARKS as col_description, c.COLNO as col_sort_order
+      {cluster_source} as cluster, c.TABSCHEMA as schema, c.TABNAME as name, t.REMARKS as description,
+      c.COLNAME as col_name,
+      CASE WHEN c.TYPENAME='VARCHAR' OR c.TYPENAME='CHARACTER' THEN
+      TRIM (TRAILING FROM c.TYPENAME) concat '(' concat c.LENGTH concat ')'
+      WHEN c.TYPENAME='DECIMAL' THEN
+      TRIM (TRAILING FROM c.TYPENAME) concat '(' concat c.LENGTH concat ',' concat c.SCALE concat ')'
+      ELSE TRIM (TRAILING FROM c.TYPENAME) END as col_type,
+      c.REMARKS as col_description, c.COLNO as col_sort_order
     FROM SYSCAT.COLUMNS c
     INNER JOIN
       SYSCAT.TABLES as t on c.TABSCHEMA=t.TABSCHEMA and c.TABNAME=t.TABNAME
