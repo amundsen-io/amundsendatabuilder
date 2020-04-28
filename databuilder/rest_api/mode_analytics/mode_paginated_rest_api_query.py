@@ -1,4 +1,5 @@
 import logging
+
 import requests  # noqa: F401
 from jsonpath_rw import parse
 from typing import Any  # noqa: F401
@@ -41,7 +42,9 @@ class ModePaginatedRestApiQuery(RestApiQuery):
         :param record:
         :return: a URL that is ready to be called.
         """
-        page_suffix = PAGE_SUFFIX_TEMPLATE.format(self._current_page)
+        page_suffix = PAGE_SUFFIX_TEMPLATE.format(self._current_page)  # example: ?page=2
+
+        # example: http://foo.bar/resources?page=2
         self._url = self._original_url + '{page_suffix}'.format(original_url=self._original_url,
                                                                 page_suffix=page_suffix)
         return self._url.format(**record)
@@ -51,7 +54,9 @@ class ModePaginatedRestApiQuery(RestApiQuery):
                       ):
         # type: (...) -> None
         """
-        Updates trigger to pagination as well as current_page
+        Updates trigger to pagination (self._more_pages) as well as current_page (self._current_page)
+        Mode does not have explicit indicator that it just the number of records need to be certain number that
+        implying that there could be more records on next page.
         :return:
         """
 
