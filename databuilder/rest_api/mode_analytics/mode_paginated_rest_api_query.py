@@ -6,6 +6,7 @@ from typing import Any  # noqa: F401
 
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
+#  How many records considers as full and indicating there might be next page? In list reports on space API, it's 30.
 DEFAULT_MAX_RECORD_SIZE = 30
 PAGE_SUFFIX_TEMPLATE = '?page={}'
 
