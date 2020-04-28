@@ -32,7 +32,7 @@ class TestModePaginatedRestApiQuery(unittest.TestCase):
             query = ModePaginatedRestApiQuery(query_to_join=seed_query, url='foobar', params={},
                                               json_path=json_path, field_names=field_names,
                                               pagination_json_path='foo[*]',
-                                              max_page_size=2)
+                                              max_record_size=2)
 
             expected_list = [
                 {'name_field': 'v1', 'foo1': 'bar1'},
@@ -74,7 +74,7 @@ class TestModePaginatedRestApiQuery(unittest.TestCase):
             query = ModePaginatedRestApiQuery(query_to_join=seed_query, url='foobar', params={},
                                               json_path=json_path, field_names=field_names,
                                               pagination_json_path='foo[*]',
-                                              max_page_size=3)
+                                              max_record_size=3)
 
             expected_list = [
                 {'name_field': 'v1', 'foo1': 'bar1'},

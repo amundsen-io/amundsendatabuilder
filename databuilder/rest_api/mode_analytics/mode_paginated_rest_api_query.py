@@ -6,7 +6,7 @@ from typing import Any  # noqa: F401
 
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
-DEFAULT_MAX_PAGE_SIZE = 30
+DEFAULT_MAX_RECORD_SIZE = 30
 PAGE_SUFFIX_TEMPLATE = '?page={}'
 
 LOGGER = logging.getLogger(__name__)
@@ -22,14 +22,14 @@ class ModePaginatedRestApiQuery(RestApiQuery):
 
     def __init__(self,
                  pagination_json_path,  # type: str
-                 max_page_size=DEFAULT_MAX_PAGE_SIZE,  # type: int
+                 max_record_size=DEFAULT_MAX_RECORD_SIZE,  # type: int
                  **kwargs  # type: Any
                  ):
         # type (...) -> None
         super(ModePaginatedRestApiQuery, self).__init__(**kwargs)
 
         self._original_url = self._url
-        self._max_page_size = max_page_size
+        self._max_record_size = max_record_size
         self._current_page = 1
         self._pagination_jsonpath_expr = parse(pagination_json_path)
 
@@ -62,7 +62,7 @@ class ModePaginatedRestApiQuery(RestApiQuery):
 
         result_list = [match.value for match in self._pagination_jsonpath_expr.find(response.json())]
 
-        if result_list and len(result_list) >= self._max_page_size:
+        if result_list and len(result_list) >= self._max_record_size:
             self._more_pages = True
             self._current_page = self._current_page + 1
             return
