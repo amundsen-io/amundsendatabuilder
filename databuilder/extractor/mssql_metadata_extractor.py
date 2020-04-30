@@ -18,33 +18,34 @@ LOGGER = logging.getLogger(__name__)
 
 class MSSQLMetadataExtractor(Extractor):
     """
-    Extracts Microsoft SQL Server table and column metadata from underlying meta store database using SQLAlchemyExtractor
+    Extracts Microsoft SQL Server table and column metadata from underlying
+    meta store database using SQLAlchemyExtractor
     """
-    # SELECT statement from postgres information_schema to extract table and column metadata
+
+    # SELECT statement from MS SQL to extract table and column metadata
     SQL_STATEMENT = """
-            select distinct
-            {cluster_source} as cluster, 
-            tbl.table_schema as [schema_name],
-            tbl.table_name as [name], 
-            CAST(prop.value as nvarchar(MAX)) as [description],
-            col.column_name as [col_name], 
-            col.data_type as [col_type],
-            CAST(prop_col.value as nvarchar(MAX)) as [col_description],
-            col.ORDINAL_POSITION as col_sort_order
-        FROM information_schema.tables tbl
-        INNER JOIN information_schema.columns col 
-            ON col.table_name = tbl.table_name
-            AND col.table_schema = tbl.table_schema
-        LEFT JOIN sys.extended_properties prop 
-            ON prop.major_id = object_id(tbl.table_schema + '.' + tbl.table_name) 
-            AND prop.minor_id = 0
-            AND prop.name = 'MS_Description' 
-        LEFT JOIN sys.extended_properties prop_col 
-            ON prop_col.major_id = object_id(tbl.table_schema + '.' + tbl.table_name) 
-            AND prop_col.minor_id = col.ORDINAL_POSITION
-            AND prop_col.name = 'MS_Description' 
-            WHERE tbl.table_type = 'base table' {where_clause_suffix}
-            ORDER by cluster, schema_name, name, col_sort_order;
+            SELECT DISTINCT {cluster_source} AS CLUSTER,
+                 TBL.TABLE_SCHEMA AS [SCHEMA_NAME],
+                 TBL.TABLE_NAME AS [NAME],
+                 CAST(PROP.VALUE AS NVARCHAR(MAX)) AS [DESCRIPTION],
+                 COL.COLUMN_NAME AS [COL_NAME],
+                 COL.DATA_TYPE AS [COL_TYPE],
+                 CAST(PROP_COL.VALUE AS NVARCHAR(MAX)) AS [COL_DESCRIPTION],
+                 COL.ORDINAL_POSITION AS COL_SORT_ORDER
+FROM INFORMATION_SCHEMA.TABLES TBL
+INNER JOIN INFORMATION_SCHEMA.COLUMNS COL ON COL.TABLE_NAME = TBL.TABLE_NAME
+AND COL.TABLE_SCHEMA = TBL.TABLE_SCHEMA
+LEFT JOIN SYS.EXTENDED_PROPERTIES PROP ON PROP.MAJOR_ID = OBJECT_ID(TBL.TABLE_SCHEMA + '.' + TBL.TABLE_NAME)
+AND PROP.MINOR_ID = 0
+AND PROP.NAME = 'MS_Description'
+LEFT JOIN SYS.EXTENDED_PROPERTIES PROP_COL ON PROP_COL.MAJOR_ID = OBJECT_ID(TBL.TABLE_SCHEMA + '.' + TBL.TABLE_NAME)
+AND PROP_COL.MINOR_ID = COL.ORDINAL_POSITION
+AND PROP_COL.NAME = 'MS_Description'
+WHERE TBL.TABLE_TYPE = 'base table' {where_clause_suffix}
+ORDER BY CLUSTER,
+         SCHEMA_NAME,
+         NAME,
+         COL_SORT_ORDER;
     """
 
     # CONFIG KEYS
@@ -81,7 +82,7 @@ class MSSQLMetadataExtractor(Extractor):
 
         config_where_clause = conf.get_string(MSSQLMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY)
 
-        logging.info(f"Crawling for Schemas {config_where_clause}")
+        logging.info("Crawling for Schemas %s", config_where_clause)
 
         if len(config_where_clause) > 0:
             where_clause_suffix = MSSQLMetadataExtractor.DEFAULT_WHERE_CLAUSE_VALUE.format(schemas=config_where_clause)

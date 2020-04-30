@@ -202,7 +202,8 @@ class TestMSSQLMetadataExtractor(unittest.TestCase):
                                          MSSQLMetadataExtractor.CLUSTER_KEY)],
                                      'test_schema1', 'test_table2', 'test table 2',
                                      [ColumnMetadata('col_name', 'description of col_name', 'varchar', 0),
-                                      ColumnMetadata('col_name2', 'description of col_name2', 'varchar', 1)], tags='test_schema1')
+                                      ColumnMetadata('col_name2', 'description of col_name2', 'varchar', 1)],
+                                     tags='test_schema1')
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
             expected = TableMetadata('mssql',
