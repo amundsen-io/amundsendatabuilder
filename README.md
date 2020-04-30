@@ -234,6 +234,7 @@ to `False`, and `CLUSTER_KEY` to what you wish to use as the cluster name.
 The `where_clause_suffix` below should define which schemas you'd like to query.
 
 The SQL query driving the extraction is defined [here](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/mysql_metadata_extractor.py)
+
 ```python
 job_config = ConfigFactory.from_dict({
 	'extractor.mysql_metadata.{}'.format(MysqlMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause_suffix,
