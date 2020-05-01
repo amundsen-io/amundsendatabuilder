@@ -30,7 +30,7 @@ class ElasticsearchPublisher(Publisher):
     ELASTICSEARCH_MAPPING_CONFIG_KEY = 'mapping'
 
     # config to control how many max documents to publish at a time
-    ELASTICSEARCH_DEFAULT_PUBLISHER_COUNT = 'count'
+    ELASTICSEARCH_DEFAULT_PUBLISHER_STEP = 'publisher_step'
 
     # Specifying default mapping for elasticsearch index
     # Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
@@ -140,7 +140,7 @@ class ElasticsearchPublisher(Publisher):
 
         self.elasticsearch_mapping = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY,
                                                    ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING)
-        self.elasticsearch_step = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_DEFAULT_PUBLISHER_COUNT,
+        self.elasticsearch_step = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_DEFAULT_PUBLISHER_STEP,
                                                 10000)
         self.file_handler = open(self.file_path, self.file_mode)
 
