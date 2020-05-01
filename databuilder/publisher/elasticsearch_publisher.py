@@ -30,7 +30,7 @@ class ElasticsearchPublisher(Publisher):
     ELASTICSEARCH_MAPPING_CONFIG_KEY = 'mapping'
 
     # config to control how many max documents to publish at a time
-    ELASTICSEARCH_DEFAULT_PUBLISHER_STEP = 'publisher_step'
+    ELASTICSEARCH_PUBLISHER_BATCH_SIZE = 'batch_size'
 
     # Specifying default mapping for elasticsearch index
     # Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
@@ -140,8 +140,8 @@ class ElasticsearchPublisher(Publisher):
 
         self.elasticsearch_mapping = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY,
                                                    ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING)
-        self.elasticsearch_step = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_DEFAULT_PUBLISHER_STEP,
-                                                10000)
+        self.elasticsearch_batch_size = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_PUBLISHER_BATCH_SIZE,
+                                                      10000)
         self.file_handler = open(self.file_path, self.file_mode)
 
     def _fetch_old_index(self):
@@ -186,8 +186,9 @@ class ElasticsearchPublisher(Publisher):
             bulk_actions.append(index_row)
             bulk_actions.append(action)
             cnt += 1
-            if cnt == self.elasticsearch_step:
+            if cnt == self.elasticsearch_batch_size:
                 self.elasticsearch_client.bulk(bulk_actions)
+                LOGGER.info('Publish {} of records to ES'.format(str(cnt)))
                 cnt = 0
                 bulk_actions = []
 
