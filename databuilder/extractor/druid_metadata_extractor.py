@@ -22,7 +22,7 @@ class DruidMetadataExtractor(Extractor):
     Extracts Druid table and column metadata from druid using dbapi extractor
     """
     SQL_STATEMENT = textwrap.dedent("""
-        SELECT 
+        SELECT
         TABLE_SCHEMA as schema,
         TABLE_NAME as name,
         COLUMN_NAME as col_name,
