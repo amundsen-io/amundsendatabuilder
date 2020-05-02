@@ -7,7 +7,7 @@ from typing import Iterator, Union, Dict, Any  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.db_api_extractor import DBAPIExtractor
+from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
@@ -49,11 +49,11 @@ class DruidMetadataExtractor(Extractor):
             where_clause_suffix=conf.get_string(DruidMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY,
                                                 default=''))
 
-        self._dbapi_extractor = DBAPIExtractor()
-        sql_dbapi_conf = Scoped.get_scoped_conf(conf, self._dbapi_extractor.get_scope())\
-            .with_fallback(ConfigFactory.from_dict({DBAPIExtractor.EXTRACT_SQL: self.sql_stmt}))
+        self._alchemy_extractor = SQLAlchemyExtractor()
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
+            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
 
-        self._dbapi_extractor.init(sql_dbapi_conf)
+        self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter = None  # type: Union[None, Iterator]
 
     def extract(self):
@@ -77,7 +77,7 @@ class DruidMetadataExtractor(Extractor):
         """
         for key, group in groupby(self._get_raw_extract_iter(), self._get_table_key):
             columns = []
-
+            # no table description and column description
             for row in group:
                 last_row = row
                 columns.append(ColumnMetadata(name=row['col_name'],
@@ -97,10 +97,10 @@ class DruidMetadataExtractor(Extractor):
         Provides iterator of result row from dbapi extractor
         :return:
         """
-        row = self._dbapi_extractor.extract()
+        row = self._alchemy_extractor.extract()
         while row:
             yield row
-            row = self._dbapi_extractor.extract()
+            row = self._alchemy_extractor.extract()
 
     def _get_table_key(self, row):
         # type: (Dict[str, Any]) -> Union[TableKey, None]
