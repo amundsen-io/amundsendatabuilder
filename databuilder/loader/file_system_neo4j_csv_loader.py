@@ -174,8 +174,12 @@ class FsNeo4jCSVLoader(Loader):
             file_out.close()
         self._closer.register(file_out_close)
 
-        writer = csv.DictWriter(file_out, fieldnames=csv_record_dict.keys(),
-                                quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8')
+        if six.PY2:
+            writer = csv.DictWriter(file_out, fieldnames=csv_record_dict.keys(),
+                                    quoting=csv.QUOTE_NONNUMERIC, encoding='utf-8')
+        else:
+            writer = csv.DictWriter(file_out, fieldnames=csv_record_dict.keys(),
+                                    quoting=csv.QUOTE_NONNUMERIC)
 
         writer.writeheader()
         file_mapping[key] = writer
