@@ -394,6 +394,180 @@ job = DefaultJob(
 job.launch()
 ```
 
+### [RestAPIExtractor](./databuilder/extractor/restapi/rest_api_extractor.py)
+A extractor that utilizes [RestAPIQuery](#rest-api-query) to extract data. RestAPIQuery needs to be constructed ([example](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py#L40)) and needs to be injected to RestAPIExtractor.
+
+### Mode Dashboard Extractor
+Here are extractors that extracts metadata information from Mode via Mode's REST API.
+
+Prerequisite:
+
+ 1. You will need to [create API access token](https://mode.com/developer/api-reference/authentication/) that has admin privilege.
+ 2. You will need organization code. This is something you can easily get by looking at one of Mode report's URL. 	  
+	 `https://app.mode.com/<organization code>/reports/report_token`
+
+#### [ModeDashboardExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py)
+A Extractor that extracts core metadata on Mode dashboard. https://app.mode.com/
+
+It extracts list of reports that consists of:
+Dashboard group name (Space name)
+Dashboard group id (Space token)
+Dashboard group description (Space description)
+Dashboard name (Report name)
+Dashboard id (Report token)
+Dashboard description (Report description)
+
+Other information such as report run, owner, chart name, query name is in separate extractor.
+
+It calls two APIs ([spaces API](https://mode.com/developer/api-reference/management/spaces/#listSpaces) and [reports API](https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace)) joining together.
+
+You can create Databuilder job config like this. 
+```python
+task = DefaultTask(extractor=ModeDashboardExtractor(),
+				   loader=FsNeo4jCSVLoader(), )
+
+tmp_folder = '/var/tmp/amundsen/mode_dashboard_metadata'
+
+node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
+
+job_config = ConfigFactory.from_dict({
+	'extractor.mode_dashboard.{}'.format(ORGANIZATION): organization,
+	'extractor.mode_dashboard.{}'.format(MODE_ACCESS_TOKEN): mode_token,
+	'extractor.mode_dashboard.{}'.format(MODE_PASSWORD_TOKEN): mode_password,
+	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH): node_files_folder,
+	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH): relationship_files_folder,
+	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.SHOULD_DELETE_CREATED_DIR): True,
+	'task.progress_report_frequency': 100,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NODE_FILES_DIR): node_files_folder,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.RELATION_FILES_DIR): relationship_files_folder,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_END_POINT_KEY): neo4j_endpoint,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_USER): neo4j_user,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD): neo4j_password,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_CREATE_ONLY_NODES): [DESCRIPTION_NODE_LABEL],
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG): job_publish_tag
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
+#### [ModeDashboardExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py)
+A Extractor that extracts core metadata on Mode dashboard. https://app.mode.com/
+
+It extracts list of reports that consists of:
+Dashboard group name (Space name)
+Dashboard group id (Space token)
+Dashboard group description (Space description)
+Dashboard name (Report name)
+Dashboard id (Report token)
+Dashboard description (Report description)
+
+Other information such as report run, owner, chart name, query name is in separate extractor.
+
+It calls two APIs ([spaces API](https://mode.com/developer/api-reference/management/spaces/#listSpaces) and [reports API](https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace)) joining together.
+
+You can create Databuilder job config like this. 
+```python
+task = DefaultTask(extractor=ModeDashboardExtractor(),
+				   loader=FsNeo4jCSVLoader(), )
+
+tmp_folder = '/var/tmp/amundsen/mode_dashboard_metadata'
+
+node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
+
+job_config = ConfigFactory.from_dict({
+	'extractor.mode_dashboard.{}'.format(ORGANIZATION): organization,
+	'extractor.mode_dashboard.{}'.format(MODE_ACCESS_TOKEN): mode_token,
+	'extractor.mode_dashboard.{}'.format(MODE_PASSWORD_TOKEN): mode_password,
+	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH): node_files_folder,
+	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH): relationship_files_folder,
+	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.SHOULD_DELETE_CREATED_DIR): True,
+	'task.progress_report_frequency': 100,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NODE_FILES_DIR): node_files_folder,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.RELATION_FILES_DIR): relationship_files_folder,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_END_POINT_KEY): neo4j_endpoint,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_USER): neo4j_user,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD): neo4j_password,
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_CREATE_ONLY_NODES): [DESCRIPTION_NODE_LABEL],
+	'publisher.neo4j.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG): job_publish_tag
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
+#### [ModeDashboardOwnerExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_owner_extractor.py)
+An Extractor that extracts Dashboard owner. Mode itself does not have concept of owner and it will use creator as owner. Note that if user left the organization, it would skip the dashboard.
+
+You can create Databuilder job config like this. (configuration related to loader and publisher is omitted as it is mostly the same. Please take a look at this [example](#ModeDashboardExtractor) for the configuration that holds loader and publisher.
+
+```python
+extractor = ModeDashboardOwnerExtractor()
+task = DefaultTask(extractor=extractor,
+				   loader=FsNeo4jCSVLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(extractor.get_scope(), MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(extractor.get_scope(), MODE_PASSWORD_TOKEN): mode_password,
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
+#### [ModeDashboardLastSuccessfulExecutionExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_successful_executions_extractor.py)
+A Extractor that extracts Mode dashboard's last successful run (execution) timestamp.
+
+You can create Databuilder job config like this. (configuration related to loader and publisher is omitted as it is mostly the same. Please take a look at this [example](#ModeDashboardExtractor) for the configuration that holds loader and publisher.
+
+```python
+extractor = ModeDashboardLastSuccessfulExecutionExtractor()
+task = DefaultTask(extractor=extractor,
+				   loader=FsNeo4jCSVLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(extractor.get_scope(), MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(extractor.get_scope(), MODE_PASSWORD_TOKEN): mode_password,
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
+#### [ModeDashboardExecutionsExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_executions_extractor.py)
+A Extractor that extracts last run (execution) status and timestamp.
+
+You can create Databuilder job config like this. (configuration related to loader and publisher is omitted as it is mostly the same. Please take a look at this [example](#ModeDashboardExtractor) for the configuration that holds loader and publisher.
+
+```python
+extractor = ModeDashboardExecutionsExtractor()
+task = DefaultTask(extractor=extractor,
+				   loader=FsNeo4jCSVLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(extractor.get_scope(), MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(extractor.get_scope(), MODE_PASSWORD_TOKEN): mode_password,
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
 ## List of transformers
 #### [ChainedTransformer](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/transformer/base_transformer.py#L41 "ChainedTransformer")
 A chanined transformer that can take multiple transformer.
