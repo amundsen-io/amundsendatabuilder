@@ -1,3 +1,4 @@
+
 # Amundsen Models
 
 ## Overview
@@ -17,8 +18,7 @@ without developers needing to know the internals of the neo4j schema.
 
 ## The Models
 
-### TableMetadata
-[python class](../databuilder/models/table_metadata.py)
+### [TableMetadata](../databuilder/models/table_metadata.py)
 
 *What datasets does my org have?*
 
@@ -32,8 +32,7 @@ In general, for Table and Column Metadata, you should be able to use one of the 
 in the [extractor package](../databuilder/extractor)
 
 
-### Watermark
-[python class](../databuilder/models/watermark.py)
+### [Watermark](../databuilder/models/watermark.py)
 
 *What is the earliest data that this table has? What is the latest data?*
 This is NOT the same as when the data was last updated.
@@ -50,8 +49,7 @@ Depending on the datastore of your dataset, you would extract this by:
 - a query for the minimum and maximum record of a given timestamp column
 
 
-### ColumnUsageModel
-[python class](../databuilder/models/column_usage_model.py)
+### [ColumnUsageModel](../databuilder/models/column_usage_model.py)
 
 *How many queries is a given column getting? By which users?*
 
@@ -70,8 +68,7 @@ In other cases, you may need to use audit logs which could require a custom solu
 Finally, for none traditional data lakes, getting this information exactly maybe difficult and you may need to rely
 on a heuristic.
 
-### User
-[python class](../databuilder/models/user.py)
+### [User](../databuilder/models/user.py)
 
 *What users are there out there? Which team is this user on?*
 
@@ -82,8 +79,7 @@ This is required if you are going to be having authentication turned on.
 #### Extraction
 TODO
 
-### TableColumnStats
-[python class](../databuilder/models/table_stats.py)
+### [TableColumnStats](../databuilder/models/table_stats.py)
 
 * What are the min/max values for this column? How many nulls are in this column? *
 
@@ -100,8 +96,7 @@ For each table you care about:
 For each column you care about:
 Calculate statistics that you care about such as min/max/average etc.
 
-### Application
-[python class](../databuilder/models/application.py)
+### [Application](../databuilder/models/application.py)
 
 * What job/application is writing to this table? *
 
@@ -112,8 +107,7 @@ Currently the model assumes the application has to be in airflow, but in theory 
 #### Extraction
 TODO
 
-### Table Owner
-[python class](../databuilder/models/table_owner.py)
+### [Table Owner](../databuilder/models/table_owner.py)
 
 * What team or user owns this dataset? *
 
@@ -126,8 +120,7 @@ Although the main point of entry for owners is through the WebUI, you could in t
 extract this information based on who created a given table. 
 
 
-### Table Source
-[python class](../databuilder/models/table_source.py)
+### [Table Source](../databuilder/models/table_source.py)
 
 * Where is the source code for the application that writes to this dataset? *
 
@@ -140,8 +133,7 @@ You will need a github/gitlab/your repository crawler in order to populate this 
 The idea there would be to search for a given table name or something else that is a unique identifier such that you can be confident
 that the source correctly matches to this table.
 
-### TableLastUpdated
-[python class](../databuilder/models/table_last_updated.py)
+### [TableLastUpdated](../databuilder/models/table_last_updated.py)
 
 * When was the last time this data was updated? Is this table stale or deprecated? *
 
