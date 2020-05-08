@@ -568,6 +568,72 @@ job = DefaultJob(conf=job_config,
 job.launch()
 ```
 
+#### [ModeDashboardLastModifiedTimestampExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_modified_timestamp_extractor.py)
+A Extractor that extracts Mode dashboard's last modified timestamp.
+
+You can create Databuilder job config like this. (configuration related to loader and publisher is omitted as it is mostly the same. Please take a look at this [example](#ModeDashboardExtractor) for the configuration that holds loader and publisher.
+
+```python
+extractor = ModeDashboardLastModifiedTimestampExtractor()
+task = DefaultTask(extractor=extractor,
+				   loader=FsNeo4jCSVLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(extractor.get_scope(), MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(extractor.get_scope(), MODE_PASSWORD_TOKEN): mode_password,
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
+#### [ModeDashboardQueriesExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_queries_extractor.py)
+A Extractor that extracts Mode's query information.
+
+You can create Databuilder job config like this. (configuration related to loader and publisher is omitted as it is mostly the same. Please take a look at this [example](#ModeDashboardExtractor) for the configuration that holds loader and publisher.
+
+```python
+extractor = ModeDashboardQueriesExtractor()
+task = DefaultTask(extractor=extractor,
+				   loader=FsNeo4jCSVLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(extractor.get_scope(), MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(extractor.get_scope(), MODE_PASSWORD_TOKEN): mode_password,
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
+#### [ModeDashboardChartsExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_charts_extractor.py)
+A Extractor that extracts Mode Dashboard charts. Currently, Mode API response schema is undocumented and hard to be used for the schema seems different per chart type. For this reason, this extractor can only extracts Chart token, and Chart URL at this point.
+
+You can create Databuilder job config like this. (configuration related to loader and publisher is omitted as it is mostly the same. Please take a look at this [example](#ModeDashboardExtractor) for the configuration that holds loader and publisher.
+
+```python
+extractor = ModeDashboardChartsExtractor()
+task = DefaultTask(extractor=extractor,
+				   loader=FsNeo4jCSVLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(extractor.get_scope(), MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(extractor.get_scope(), MODE_PASSWORD_TOKEN): mode_password,
+})
+
+job = DefaultJob(conf=job_config,
+				 task=task,
+				 publisher=Neo4jCsvPublisher())
+job.launch()
+```
+
 ## List of transformers
 #### [ChainedTransformer](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/transformer/base_transformer.py#L41 "ChainedTransformer")
 A chanined transformer that can take multiple transformer.
