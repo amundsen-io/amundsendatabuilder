@@ -454,53 +454,6 @@ job = DefaultJob(conf=job_config,
 job.launch()
 ```
 
-#### [ModeDashboardExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py)
-A Extractor that extracts core metadata on Mode dashboard. https://app.mode.com/
-
-It extracts list of reports that consists of:
-Dashboard group name (Space name)
-Dashboard group id (Space token)
-Dashboard group description (Space description)
-Dashboard name (Report name)
-Dashboard id (Report token)
-Dashboard description (Report description)
-
-Other information such as report run, owner, chart name, query name is in separate extractor.
-
-It calls two APIs ([spaces API](https://mode.com/developer/api-reference/management/spaces/#listSpaces) and [reports API](https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace)) joining together.
-
-You can create Databuilder job config like this. 
-```python
-task = DefaultTask(extractor=ModeDashboardExtractor(),
-				   loader=FsNeo4jCSVLoader(), )
-
-tmp_folder = '/var/tmp/amundsen/mode_dashboard_metadata'
-
-node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
-relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
-
-job_config = ConfigFactory.from_dict({
-	'extractor.mode_dashboard.{}'.format(ORGANIZATION): organization,
-	'extractor.mode_dashboard.{}'.format(MODE_ACCESS_TOKEN): mode_token,
-	'extractor.mode_dashboard.{}'.format(MODE_PASSWORD_TOKEN): mode_password,
-	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH): node_files_folder,
-	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH): relationship_files_folder,
-	'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.SHOULD_DELETE_CREATED_DIR): True,
-	'task.progress_report_frequency': 100,
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NODE_FILES_DIR): node_files_folder,
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.RELATION_FILES_DIR): relationship_files_folder,
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_END_POINT_KEY): neo4j_endpoint,
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_USER): neo4j_user,
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD): neo4j_password,
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_CREATE_ONLY_NODES): [DESCRIPTION_NODE_LABEL],
-	'publisher.neo4j.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG): job_publish_tag
-})
-
-job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
-job.launch()
-```
 
 #### [ModeDashboardOwnerExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_owner_extractor.py)
 An Extractor that extracts Dashboard owner. Mode itself does not have concept of owner and it will use creator as owner. Note that if user left the organization, it would skip the dashboard.
