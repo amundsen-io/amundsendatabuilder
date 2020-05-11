@@ -1,6 +1,7 @@
 import copy
 import csv
 import ctypes
+from io import open
 import logging
 import time
 from os import listdir
