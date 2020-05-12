@@ -53,10 +53,61 @@ job.launch()
 ```
 Step 2. Extract past ? days usage data from your Data warehouse and publish it to Neo4j.
 You could use [existing extractors](../README.md#list-of-extractors) to achieve this with [DashboardUsage model](./models.md#dashboardusage) along with [FsNeo4jCSVLoader](../README.md#fsneo4jcsvloader) and [Neo4jCsvPublisher](../README.md#neo4jcsvpublisher).
-
+  
 ### 3. Update Elasticsearch index using Neo4j data
 
-TBD
+Once data is ready in Neo4j, extract Neo4j data and push it to Elasticsearch using [Neo4jSearchDataExtractor](../databuilder/extractor/neo4j_search_data_extractor.py) and [ElasticsearchPublisher](../databuilder/publisher/elasticsearch_publisher.py)
+
+```python
+tmp_es_file_path = '/var/tmp/amundsen_dashboard/elasticsearch_dashboard_upload/es_data.json'
+
+elasticsearch_new_index_name = 'dashboard_search_index_{ds}_{hex_str}'.format(ds='2020-05-12',
+                                                                              hex_str=uuid.uuid4().hex)
+
+elasticsearch_doc_type = 'dashboard'
+elasticsearch_index_alias = 'dashboard_search_index'
+job_config = ConfigFactory.from_dict({
+    'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY):
+        neo4j_endpoint,
+    'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY):
+        'databuilder.models.dashboard_elasticsearch_document.DashboardESDocument',
+    'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER):
+        neo4j_user,
+    'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW):
+        neo4j_password,
+    'extractor.search_data.{}'.format(Neo4jSearchDataExtractor.CYPHER_QUERY_CONFIG_KEY):
+        Neo4jSearchDataExtractor.DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY,
+    'extractor.search_data.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG):
+        job_publish_tag,
+    'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY):
+        tmp_es_file_path,
+    'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_MODE_CONFIG_KEY):
+        'w',
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.FILE_PATH_CONFIG_KEY):
+        tmp_es_file_path,
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.FILE_MODE_CONFIG_KEY):
+        'r',
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_CLIENT_CONFIG_KEY):
+        elasticsearch_client,
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY):
+        elasticsearch_new_index,
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY):
+        elasticsearch_doc_type,
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY):
+        DASHBOARD_ELASTICSEARCH_INDEX_MAPPING,
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY):
+        elasticsearch_index_alias,
+})
+
+job = DefaultJob(conf=job_config,
+                 task=DefaultTask(extractor=Neo4jSearchDataExtractor(),
+                                  loader=FSElasticsearchJSONLoader()),
+                 publisher=ElasticsearchPublisher())
+job.launch()
+```
+
+*Note that `DASHBOARD_ELASTICSEARCH_INDEX_MAPPING` is defined [here](../databuilder/publisher/elasticsearch_constants.py).  
+
 
 ### 4. Remove stale data
 Dashboard ingestion, like Table ingestion, is UPSERT (CREATE OR UPDATE) operation and there could be some data deleted on source. Not removing it in Neo4j basically leaving a stale data in Amundsen.
