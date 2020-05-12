@@ -147,3 +147,61 @@ DASHBOARD_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
 
     """
 )
+
+USER_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
+    """
+    {
+        "mappings":{
+            "user":{
+              "properties": {
+                "email": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "first_name": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "last_name": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "full_name": {
+                  "type":"text",
+                  "analyzer": "simple",
+                  "fields": {
+                    "raw": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "total_read":{
+                  "type": "long"
+                },
+                "total_own": {
+                  "type": "long"
+                },
+                "total_follow": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        }
+    """
+)
