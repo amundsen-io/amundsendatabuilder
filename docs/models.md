@@ -147,7 +147,8 @@ that you can refer to. But you will need access to history that provides informa
 If this data isn't available for your data source, you maybe able to approximate it by looking at the max of some timestamp column.  
 
 ## Dashboard models
-Dashboard models are normalized which means that the model is separated so that it can be easily decoupled with how data is extracted. (If model is denormalized, all metadata is in model, then one extraction needs to able to pull all the data which makes extraction hard and complex) There's trade off in this decision of normalized design where it can be inefficient in the case that some ingestion can be done in one job for metadata source happen to provide all data it need. However, to make model flexible for most of metadata, it is normalized.
+Dashboard models are normalized which means that the model is separated so that it can be easily decoupled with how data is extracted. (If model is denormalized, all metadata is in model, then one extraction needs to able to pull all the data which makes extraction hard and complex) There's trade off in this decision of normalized design where it can be inefficient in the case that some ingestion can be done in one job for metadata source happen to provide all data it need. However, to make model flexible for most of metadata, it is normalized.  
+
 
 ### [DashboardMetadata](../databuilder/models/dashboard/dashboard_metadata.py)
 
@@ -155,7 +156,8 @@ Dashboard models are normalized which means that the model is separated so that 
 A baseline of Dashboard metadata that consists of  dashboard group name, dashboard group description, dashboard description, etc. This model needs to be ingested first as other model builds relation to this.
 
 #### Extraction
-[ModeDashboardExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py)
+[ModeDashboardExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py)  
+
 
 #### [DashboardOwner](../databuilder/models/dashboard/dashboard_owner.py)
 
@@ -163,7 +165,8 @@ A baseline of Dashboard metadata that consists of  dashboard group name, dashboa
 A model that encapsulate Dashboard's owner. Note that it does not create new user as it has insufficient information about user but it builds relation between User and Dashboard
 
 #### Extraction
-[ModeDashboardOwnerExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_owner_extractor.py)   
+[ModeDashboardOwnerExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_owner_extractor.py)  
+ 
 
 #### [DashboardTable](../databuilder/models/dashboard/dashboard_table.py)
 A model that link Dashboard with the tables used in various charts of the dashboard. Note that it does not create new dashboard, table as it has insufficient information but it builds relation between Tables and Dashboard.
@@ -178,13 +181,15 @@ A model that encapsulate Dashboard usage between Dashboard and User
 #### Extraction
 You can use [ModeDashboardUsageExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) . However, currently Mode only provides accumulated view count where we need recent view counts (past 30, 60, or 90 days). To get recent view count, in Lyft, we use [ModeDashboardUsageExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) to extract accumulated view count and [GenericLoader](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/loader/generic_loader.py) to load its record (no publisher here and publisher is not mandatory in DefaultJob) as a event where event materialized as daily snapshot. Once it captures daily accumulated view count, ingest recent view count by querying the datastore. In Lyft, we query via [DBAPIExtractor](../databuilder/extractor/db_api_extractor.py) through Presto.  
 
+
 #### [DashboardLastModifiedTimestamp](../databuilder/models/dashboard/dashboard_last_modified.py)
 
 #### Description
 A model that encapsulate Dashboard's last modified timestamp in epoch
 
 #### Extraction
-[ModeDashboardLastModifiedTimestampExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_modified_timestamp_extractor.py)  
+[ModeDashboardLastModifiedTimestampExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_modified_timestamp_extractor.py)   
+
 
 #### [DashboardExecution](../models/dashboard/dashboard_execution.py)
 A model that encapsulate Dashboard's execution timestamp in epoch and execution state. Note that this model supports last_execution and last_successful_execution by using [different identifier](../databuilder/models/dashboard/dashboard_execution.py#L23) in the URI.
@@ -192,7 +197,8 @@ A model that encapsulate Dashboard's execution timestamp in epoch and execution 
 #### Extraction
 [ModeDashboardExecutionsExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_executions_extractor.py) which extracts last_execution.
 
-[ModeDashboardLastSuccessfulExecutionExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_successful_executions_extractor.py)   
+[ModeDashboardLastSuccessfulExecutionExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_successful_executions_extractor.py)  
+ 
 
 #### [DashboardQuery](../databuilder/models/dashboard/dashboard_query.py)
 
