@@ -616,6 +616,16 @@ job = DefaultJob(
 job.launch()
 ```
 
+#### [TemplateVariableSubstitutionTransformer](./databuilder/transformer/template_variable_substitution_transformer.py)
+Adds or replaces field in Dict by string.format based on given template and provide record Dict as a template parameter
+
+#### [DictToModel](./databuilder/transformer/dict_to_model.py)
+Transforms dictionary into model
+
+#### `[TimestampStringToEpoch](./databuilder/transformer/timestamp_string_to_epoch.py)`
+Transforms string timestamp into int epoch
+
+
 ## List of loader
 #### [FsNeo4jCSVLoader](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/loader/file_system_neo4j_csv_loader.py "FsNeo4jCSVLoader")
 Write node and relationship CSV file(s) that can be consumed by Neo4jCsvPublisher. It assumes that the record it consumes is instance of Neo4jCsvSerializable.
