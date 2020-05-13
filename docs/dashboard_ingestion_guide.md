@@ -112,7 +112,7 @@ job.launch()
 ### 4. Remove stale data
 Dashboard ingestion, like Table ingestion, is UPSERT (CREATE OR UPDATE) operation and there could be some data deleted on source. Not removing it in Neo4j basically leaving a stale data in Amundsen.
 
-You can use ### [Neo4jStalenessRemovalTask](../README.md#removing-stale-data-in-neo4j----neo4jstalenessremovaltask) to remove stale data.
+You can use [Neo4jStalenessRemovalTask](../README.md#removing-stale-data-in-neo4j----neo4jstalenessremovaltask) to remove stale data.
 
 There are two strategies to remove stale data. One is to use `job_publish_tag` and the other one is to use `milliseconds_to_expire`.
 

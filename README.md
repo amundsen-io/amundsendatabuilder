@@ -592,8 +592,8 @@ job.launch()
 A Extractor that extracts Mode dashboard's accumulated view count.
 
 Note that this provides accumulated view count which does [not effectively show relevancy](./docs/dashboard_ingestion_guide.md#21-ingest-dashboard-usage-data-and-decorate-neo4j-over-base-data). Thus, fields from this extractor is not directly compatible with [DashboardUsage](./docs/models.md#dashboardusage) model.
-  
-If you are fine with `accumulated usage`, you could use TemplateVariableSubstitutionTransformer to transform Dict payload from [ModeDashboardUsageExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) to fit [DashboardUsage](./docs/models.md#dashboardusage) and transform Dict to  [DashboardUsage](./docs/models.md#dashboardusage) by DictToModel transformer. ([Example](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_queries_extractor.py#L36) on how to combining these two transformers)
+
+If you are fine with `accumulated usage`, you could use TemplateVariableSubstitutionTransformer to transform Dict payload from [ModeDashboardUsageExtractor](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) to fit [DashboardUsage](./docs/models.md#dashboardusage) and transform Dict to  [DashboardUsage](./docs/models.md#dashboardusage) by [TemplateVariableSubstitutionTransformer](./databuilder/transformer/template_variable_substitution_transformer.py), and [DictToModel](./databuilder/transformer/dict_to_model.py) transformers. ([Example](./databuilder/extractor/dashboard/mode_analytics/mode_dashboard_queries_extractor.py#L36) on how to combining these two transformers)
 
 
 ## List of transformers
@@ -622,7 +622,7 @@ Adds or replaces field in Dict by string.format based on given template and prov
 #### [DictToModel](./databuilder/transformer/dict_to_model.py)
 Transforms dictionary into model
 
-#### `[TimestampStringToEpoch](./databuilder/transformer/timestamp_string_to_epoch.py)`
+#### [TimestampStringToEpoch](./databuilder/transformer/timestamp_string_to_epoch.py)
 Transforms string timestamp into int epoch
 
 
@@ -643,6 +643,29 @@ job = DefaultJob(
 	publisher=Neo4jCsvPublisher())
 job.launch()
 ```
+
+#### [GenericLoader](./databuilder/loader/generic_loader.py)
+Loader class that calls user provided callback function with record as a parameter
+
+Example that pushes Mode Dashboard accumulated usage via GenericLoader where callback_function expected to insert record to data warehouse.
+
+```python
+extractor = ModeDashboardUsageExtractor()
+task = DefaultTask(extractor=extractor,
+                   loader=GenericLoader(), )
+
+job_config = ConfigFactory.from_dict({
+	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
+	'{}.{}'.format(MODE_ACCESS_TOKEN): mode_token,
+	'{}.{}'.format(MODE_PASSWORD_TOKEN): mode_password,
+	'loader.generic.callback_function': callback_function
+})
+
+job = DefaultJob(conf=job_config, task=task)
+job.launch()
+
+```
+
 
 #### [FSElasticsearchJSONLoader](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/loader/file_system_elasticsearch_json_loader.py "FSElasticsearchJSONLoader")
 Write Elasticsearch document in JSON format which can be consumed by ElasticsearchPublisher. It assumes that the record it consumes is instance of ElasticsearchDocument.
