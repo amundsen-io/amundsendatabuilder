@@ -449,8 +449,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
@@ -472,8 +472,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
@@ -485,7 +485,7 @@ You can create Databuilder job config like this. (configuration related to loade
 ```python
 extractor = ModeDashboardLastSuccessfulExecutionExtractor()
 task = DefaultTask(extractor=extractor,
-				   loader=FsNeo4jCSVLoader(), )
+                   loader=FsNeo4jCSVLoader(), )
 
 job_config = ConfigFactory.from_dict({
 	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
@@ -494,8 +494,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
@@ -516,8 +516,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
@@ -528,8 +528,7 @@ You can create Databuilder job config like this. (configuration related to loade
 
 ```python
 extractor = ModeDashboardLastModifiedTimestampExtractor()
-task = DefaultTask(extractor=extractor,
-				   loader=FsNeo4jCSVLoader(), )
+task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
 
 job_config = ConfigFactory.from_dict({
 	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
@@ -538,8 +537,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
@@ -550,8 +549,7 @@ You can create Databuilder job config like this. (configuration related to loade
 
 ```python
 extractor = ModeDashboardQueriesExtractor()
-task = DefaultTask(extractor=extractor,
-				   loader=FsNeo4jCSVLoader(), )
+task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
 
 job_config = ConfigFactory.from_dict({
 	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
@@ -560,8 +558,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
@@ -572,8 +570,7 @@ You can create Databuilder job config like this. (configuration related to loade
 
 ```python
 extractor = ModeDashboardChartsExtractor()
-task = DefaultTask(extractor=extractor,
-				   loader=FsNeo4jCSVLoader(), )
+task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
 
 job_config = ConfigFactory.from_dict({
 	'{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
@@ -582,8 +579,8 @@ job_config = ConfigFactory.from_dict({
 })
 
 job = DefaultJob(conf=job_config,
-				 task=task,
-				 publisher=Neo4jCsvPublisher())
+                 task=task,
+                 publisher=Neo4jCsvPublisher())
 job.launch()
 ```
 
