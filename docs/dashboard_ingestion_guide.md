@@ -12,6 +12,9 @@ Note that Databuilder jobs need to be sequenced as 1 -> 2 -> 3 -> 4. To sequenci
 
 Also, step 1, 3, 4 is expected to have one Databuilder job where Step 2 is expected to have **multiple** Databuilder jobs and number of Databuilder jobs in step 2 is expected to grow as we add more metadata into Dashboard. To improve performance, it is recommended, but not required, to execute Databuilder jobs in step 2 concurrently.
 
+Once finished step 1 and 2, you will have Graph like this:
+![Dashboard graph modeling](./assets/dashboard_graph_modeling.png?raw=true "Dashboard graph modeling")
+
 Here this documentation will be using [Mode Dashboard](https://app.mode.com/) as concrete example to show how to ingest Dashboard metadata. However, this ingestion process not limited to Mode Dashboard and any other Dashboard can follow this flow.
 
 ### 1. Ingest base data to Neo4j.
