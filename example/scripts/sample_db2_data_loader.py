@@ -5,30 +5,31 @@ This is a example script which demo how to load data into neo4j without using Ai
 import logging
 import os
 from pyhocon import ConfigFactory
-from urllib.parse import unquote_plus
-import uuid
+
 import sys
+import uuid
 
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
+from databuilder.extractor.db2_metadata_extractor import Db2MetadataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
 from databuilder.publisher import neo4j_csv_publisher
 from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
-from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
-from databuilder.extractor.neo4j_extractor import Neo4jExtractor
+
+from elasticsearch import Elasticsearch
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader
-from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
-from elasticsearch.client import Elasticsearch
+from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
 from databuilder.transformer.base_transformer import NoopTransformer
+from databuilder.extractor.neo4j_extractor import Neo4jExtractor
+from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
-# Disable snowflake logging
-logging.getLogger("snowflake.connector.network").disabled = True
+# Disable Db2 logging
+logging.getLogger("db2.connector.network").disabled = True
 
-SNOWFLAKE_DATABASE_KEY = 'YourSnowflakeDbName'
+DB2_CONN_STRING = 'db2+ibm_db://username:password@database.host.name:50000/DB;'
 
 # set env NEO4J_HOST to override localhost
 NEO4J_ENDPOINT = 'bolt://{}:7687'.format(os.getenv('NEO4J_HOST', 'localhost'))
@@ -36,8 +37,6 @@ neo4j_endpoint = NEO4J_ENDPOINT
 
 neo4j_user = 'neo4j'
 neo4j_password = 'test'
-
-IGNORED_SCHEMAS = ['\'DVCORE\'', '\'INFORMATION_SCHEMA\'', '\'STAGE_ORACLE\'']
 
 es_host = None
 neo_host = None
@@ -50,37 +49,27 @@ es = Elasticsearch([
     {'host': es_host if es_host else 'localhost'},
 ])
 
-
-# todo: connection string needs to change
-def connection_string():
-    user = 'username'
-    password = 'password'
-    account = 'YourSnowflakeAccountHere'
-    return "snowflake://%s:%s@%s" % (user, unquote_plus(password), account)
+IGNORED_SCHEMAS = ['\'SYSIBM\'', '\'SYSIBMTS\'', '\'SYSTOOLS\'', '\'SYSCAT\'', '\'SYSIBMADM\'', '\'SYSSTAT\'']
 
 
-def create_sample_snowflake_job():
+def create_sample_db2_job():
 
-    where_clause = "WHERE c.TABLE_SCHEMA not in ({0}) \
-            AND c.TABLE_SCHEMA not like 'STAGE_%' \
-            AND c.TABLE_SCHEMA not like 'HIST_%' \
-            AND c.TABLE_SCHEMA not like 'SNAP_%' \
-            AND lower(c.COLUMN_NAME) not like 'dw_%';".format(','.join(IGNORED_SCHEMAS))
+    where_clause = "WHERE c.TABSCHEMA not in ({0}) ;".format(','.join(IGNORED_SCHEMAS))
 
     tmp_folder = '/var/tmp/amundsen/{}'.format('tables')
     node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
-    sql_extractor = SnowflakeMetadataExtractor()
+    sql_extractor = Db2MetadataExtractor()
     csv_loader = FsNeo4jCSVLoader()
 
     task = DefaultTask(extractor=sql_extractor,
                        loader=csv_loader)
 
     job_config = ConfigFactory.from_dict({
-        'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): connection_string(),
-        'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.DATABASE_KEY): SNOWFLAKE_DATABASE_KEY,
-        'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause,
+        'extractor.db2_metadata.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): DB2_CONN_STRING,
+        'extractor.db2_metadata.{}'.format(Db2MetadataExtractor.DATABASE_KEY): 'DEMODB',
+        'extractor.db2_metadata.{}'.format(Db2MetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH): node_files_folder,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH): relationship_files_folder,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.SHOULD_DELETE_CREATED_DIR): True,
@@ -115,7 +104,7 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
                                        if None is given (default) it uses the `Table` query baked into the Publisher
     """
     # loader saves data to this location and publisher reads it from here
-    extracted_search_data_path = '/var/tmp/amundsen/search_data.json'
+    extracted_search_data_path = '/var/tmp/amundsen/db2_data.json'
 
     task = DefaultTask(loader=FSElasticsearchJSONLoader(),
                        extractor=Neo4jSearchDataExtractor(),
@@ -162,7 +151,7 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
 
 
 if __name__ == "__main__":
-    job = create_sample_snowflake_job()
+    job = create_sample_db2_job()
     job.launch()
 
     job_es_table = create_es_publisher_sample_job(

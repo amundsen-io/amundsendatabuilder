@@ -103,6 +103,7 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
                                unique_usage=5,
                                tags=['test_tag1', 'test_tag2'],
                                badges=['badge1'],
+                               schema_description='schema description',
                                programmatic_descriptions=['test'])
         loader.load(data)
         loader.close()
@@ -113,7 +114,8 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
              '"column_names": ["test_col1", "test_col2"], "name": "test_table", '
              '"last_updated_timestamp": 123456789, "display_name": "test_schema.test_table", '
              '"description": "test_description", "unique_usage": 5, "total_usage": 10, '
-             '"tags": ["test_tag1", "test_tag2"], "programmatic_descriptions": ["test"], '
+             '"tags": ["test_tag1", "test_tag2"], "schema_description": "schema description", '
+             '"programmatic_descriptions": ["test"], '
              '"badges": ["badge1"]}')
         ]
 
@@ -142,6 +144,7 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
                                 unique_usage=5,
                                 tags=['test_tag1', 'test_tag2'],
                                 badges=['badge1'],
+                                schema_description='schema_description',
                                 programmatic_descriptions=['test'])] * 5
 
         for d in data:
@@ -154,7 +157,8 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
              '"column_names": ["test_col1", "test_col2"], "name": "test_table", '
              '"last_updated_timestamp": 123456789, "display_name": "test_schema.test_table", '
              '"description": "test_description", "unique_usage": 5, "total_usage": 10, '
-             '"tags": ["test_tag1", "test_tag2"], "programmatic_descriptions":["test"], '
+             '"tags": ["test_tag1", "test_tag2"], "schema_description": "schema_description", '
+             '"programmatic_descriptions":["test"], '
              '"badges": ["badge1"]}')
         ] * 5
 

@@ -1,4 +1,5 @@
 import logging
+import six
 from collections import namedtuple
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
@@ -10,67 +11,70 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
-
 TableKey = namedtuple('TableKey', ['schema', 'table_name'])
 
 LOGGER = logging.getLogger(__name__)
 
 
-class HiveTableMetadataExtractor(Extractor):
+class Db2MetadataExtractor(Extractor):
     """
-    Extracts Hive table and column metadata from underlying meta store database using SQLAlchemyExtractor
+    Extracts Db2 table and column metadata from underlying meta store database using SQLAlchemyExtractor
     """
-    # SELECT statement from hive metastore database to extract table and column metadata
-    # Below SELECT statement uses UNION to combining two queries together.
-    # 1st query is retrieving partition columns
-    # 2nd query is retrieving columns
-    # Using UNION to combine above two statements and order by table & partition identifier.
+    # SELECT statement from Db2 SYSIBM to extract table and column metadata
     SQL_STATEMENT = """
-    SELECT source.* FROM
-    (SELECT t.TBL_ID, d.NAME as `schema`, t.TBL_NAME name, t.TBL_TYPE, tp.PARAM_VALUE as description,
-           p.PKEY_NAME as col_name, p.INTEGER_IDX as col_sort_order,
-           p.PKEY_TYPE as col_type, p.PKEY_COMMENT as col_description, 1 as "is_partition_col",
-           IF(t.TBL_TYPE = 'VIRTUAL_VIEW', 1, 0) "is_view"
-    FROM TBLS t
-    JOIN DBS d ON t.DB_ID = d.DB_ID
-    JOIN PARTITION_KEYS p ON t.TBL_ID = p.TBL_ID
-    LEFT JOIN TABLE_PARAMS tp ON (t.TBL_ID = tp.TBL_ID AND tp.PARAM_KEY='comment')
+    SELECT
+      {cluster_source} as cluster, c.TABSCHEMA as schema, c.TABNAME as name, t.REMARKS as description,
+      c.COLNAME as col_name,
+      CASE WHEN c.TYPENAME='VARCHAR' OR c.TYPENAME='CHARACTER' THEN
+      TRIM (TRAILING FROM c.TYPENAME) concat '(' concat c.LENGTH concat ')'
+      WHEN c.TYPENAME='DECIMAL' THEN
+      TRIM (TRAILING FROM c.TYPENAME) concat '(' concat c.LENGTH concat ',' concat c.SCALE concat ')'
+      ELSE TRIM (TRAILING FROM c.TYPENAME) END as col_type,
+      c.REMARKS as col_description, c.COLNO as col_sort_order
+    FROM SYSCAT.COLUMNS c
+    INNER JOIN
+      SYSCAT.TABLES as t on c.TABSCHEMA=t.TABSCHEMA and c.TABNAME=t.TABNAME
     {where_clause_suffix}
-    UNION
-    SELECT t.TBL_ID, d.NAME as `schema`, t.TBL_NAME name, t.TBL_TYPE, tp.PARAM_VALUE as description,
-           c.COLUMN_NAME as col_name, c.INTEGER_IDX as col_sort_order,
-           c.TYPE_NAME as col_type, c.COMMENT as col_description, 0 as "is_partition_col",
-           IF(t.TBL_TYPE = 'VIRTUAL_VIEW', 1, 0) "is_view"
-    FROM TBLS t
-    JOIN DBS d ON t.DB_ID = d.DB_ID
-    JOIN SDS s ON t.SD_ID = s.SD_ID
-    JOIN COLUMNS_V2 c ON s.CD_ID = c.CD_ID
-    LEFT JOIN TABLE_PARAMS tp ON (t.TBL_ID = tp.TBL_ID AND tp.PARAM_KEY='comment')
-    {where_clause_suffix}
-    ) source
-    ORDER by tbl_id, is_partition_col desc;
+    ORDER by cluster, schema, name, col_sort_order ;
     """
 
     # CONFIG KEYS
     WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CLUSTER_KEY = 'cluster'
+    CLUSTER_KEY = 'cluster_key'
+    DATABASE_KEY = 'database_key'
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({WHERE_CLAUSE_SUFFIX_KEY: ' ',
-                                              CLUSTER_KEY: 'gold'})
+    # Default values
+    DEFAULT_CLUSTER_NAME = 'master'
+
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {WHERE_CLAUSE_SUFFIX_KEY: ' ', CLUSTER_KEY: DEFAULT_CLUSTER_NAME}
+    )
 
     def init(self, conf):
         # type: (ConfigTree) -> None
-        conf = conf.with_fallback(HiveTableMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(HiveTableMetadataExtractor.CLUSTER_KEY))
+        conf = conf.with_fallback(Db2MetadataExtractor.DEFAULT_CONFIG)
+        self._cluster = '{}'.format(conf.get_string(Db2MetadataExtractor.CLUSTER_KEY))
 
-        self.sql_stmt = HiveTableMetadataExtractor.SQL_STATEMENT.format(
-            where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY))
+        cluster_source = "'{}'".format(self._cluster)
 
-        LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
+        database = conf.get_string(Db2MetadataExtractor.DATABASE_KEY, default='db2')
+        if six.PY2 and isinstance(database, six.text_type):
+            database = database.encode('utf-8', 'ignore')
+
+        self._database = database
+
+        self.sql_stmt = Db2MetadataExtractor.SQL_STATEMENT.format(
+            where_clause_suffix=conf.get_string(Db2MetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
+            cluster_source=cluster_source
+        )
 
         self._alchemy_extractor = SQLAlchemyExtractor()
         sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
             .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+
+        self.sql_stmt = sql_alch_conf.get_string(SQLAlchemyExtractor.EXTRACT_SQL)
+
+        LOGGER.info('SQL for Db2 metadata: {}'.format(self.sql_stmt))
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter = None  # type: Union[None, Iterator]
@@ -86,7 +90,7 @@ class HiveTableMetadataExtractor(Extractor):
 
     def get_scope(self):
         # type: () -> str
-        return 'extractor.hive_table_metadata'
+        return 'extractor.db2_metadata'
 
     def _get_extract_iter(self):
         # type: () -> Iterator[TableMetadata]
@@ -101,13 +105,12 @@ class HiveTableMetadataExtractor(Extractor):
                 last_row = row
                 columns.append(ColumnMetadata(row['col_name'], row['col_description'],
                                               row['col_type'], row['col_sort_order']))
-            is_view = last_row['is_view'] == 1
-            yield TableMetadata('hive', self._cluster,
+
+            yield TableMetadata(self._database, last_row['cluster'],
                                 last_row['schema'],
                                 last_row['name'],
                                 last_row['description'],
-                                columns,
-                                is_view=is_view)
+                                columns)
 
     def _get_raw_extract_iter(self):
         # type: () -> Iterator[Dict[str, Any]]

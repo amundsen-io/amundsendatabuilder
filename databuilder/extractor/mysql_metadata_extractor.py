@@ -1,4 +1,5 @@
 import logging
+import six
 from collections import namedtuple
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
@@ -16,61 +17,73 @@ TableKey = namedtuple('TableKey', ['schema', 'table_name'])
 LOGGER = logging.getLogger(__name__)
 
 
-class HiveTableMetadataExtractor(Extractor):
+class MysqlMetadataExtractor(Extractor):
     """
-    Extracts Hive table and column metadata from underlying meta store database using SQLAlchemyExtractor
+    Extracts mysql table and column metadata from underlying meta store database using SQLAlchemyExtractor
     """
-    # SELECT statement from hive metastore database to extract table and column metadata
-    # Below SELECT statement uses UNION to combining two queries together.
-    # 1st query is retrieving partition columns
-    # 2nd query is retrieving columns
-    # Using UNION to combine above two statements and order by table & partition identifier.
+    # SELECT statement from mysql information_schema to extract table and column metadata
     SQL_STATEMENT = """
-    SELECT source.* FROM
-    (SELECT t.TBL_ID, d.NAME as `schema`, t.TBL_NAME name, t.TBL_TYPE, tp.PARAM_VALUE as description,
-           p.PKEY_NAME as col_name, p.INTEGER_IDX as col_sort_order,
-           p.PKEY_TYPE as col_type, p.PKEY_COMMENT as col_description, 1 as "is_partition_col",
-           IF(t.TBL_TYPE = 'VIRTUAL_VIEW', 1, 0) "is_view"
-    FROM TBLS t
-    JOIN DBS d ON t.DB_ID = d.DB_ID
-    JOIN PARTITION_KEYS p ON t.TBL_ID = p.TBL_ID
-    LEFT JOIN TABLE_PARAMS tp ON (t.TBL_ID = tp.TBL_ID AND tp.PARAM_KEY='comment')
-    {where_clause_suffix}
-    UNION
-    SELECT t.TBL_ID, d.NAME as `schema`, t.TBL_NAME name, t.TBL_TYPE, tp.PARAM_VALUE as description,
-           c.COLUMN_NAME as col_name, c.INTEGER_IDX as col_sort_order,
-           c.TYPE_NAME as col_type, c.COMMENT as col_description, 0 as "is_partition_col",
-           IF(t.TBL_TYPE = 'VIRTUAL_VIEW', 1, 0) "is_view"
-    FROM TBLS t
-    JOIN DBS d ON t.DB_ID = d.DB_ID
-    JOIN SDS s ON t.SD_ID = s.SD_ID
-    JOIN COLUMNS_V2 c ON s.CD_ID = c.CD_ID
-    LEFT JOIN TABLE_PARAMS tp ON (t.TBL_ID = tp.TBL_ID AND tp.PARAM_KEY='comment')
-    {where_clause_suffix}
-    ) source
-    ORDER by tbl_id, is_partition_col desc;
+        SELECT
+        lower(c.column_name) AS col_name,
+        c.column_comment AS col_description,
+        lower(c.data_type) AS col_type,
+        lower(c.ordinal_position) AS col_sort_order,
+        {cluster_source} AS cluster,
+        lower(c.table_schema) AS "schema",
+        lower(c.table_name) AS name,
+        t.table_comment AS description,
+        case when lower(t.table_type) = "view" then "true" else "false" end AS is_view
+        FROM
+        INFORMATION_SCHEMA.COLUMNS AS c
+        LEFT JOIN
+        INFORMATION_SCHEMA.TABLES t
+            ON c.TABLE_NAME = t.TABLE_NAME
+            AND c.TABLE_SCHEMA = t.TABLE_SCHEMA
+        {where_clause_suffix}
+        ORDER by cluster, "schema", name, col_sort_order ;
     """
 
     # CONFIG KEYS
     WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CLUSTER_KEY = 'cluster'
+    CLUSTER_KEY = 'cluster_key'
+    USE_CATALOG_AS_CLUSTER_NAME = 'use_catalog_as_cluster_name'
+    DATABASE_KEY = 'database_key'
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({WHERE_CLAUSE_SUFFIX_KEY: ' ',
-                                              CLUSTER_KEY: 'gold'})
+    # Default values
+    DEFAULT_CLUSTER_NAME = 'master'
+
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {WHERE_CLAUSE_SUFFIX_KEY: ' ', CLUSTER_KEY: DEFAULT_CLUSTER_NAME, USE_CATALOG_AS_CLUSTER_NAME: True}
+    )
 
     def init(self, conf):
         # type: (ConfigTree) -> None
-        conf = conf.with_fallback(HiveTableMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(HiveTableMetadataExtractor.CLUSTER_KEY))
+        conf = conf.with_fallback(MysqlMetadataExtractor.DEFAULT_CONFIG)
+        self._cluster = '{}'.format(conf.get_string(MysqlMetadataExtractor.CLUSTER_KEY))
 
-        self.sql_stmt = HiveTableMetadataExtractor.SQL_STATEMENT.format(
-            where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY))
+        if conf.get_bool(MysqlMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME):
+            cluster_source = "c.table_catalog"
+        else:
+            cluster_source = "'{}'".format(self._cluster)
 
-        LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
+        database = conf.get_string(MysqlMetadataExtractor.DATABASE_KEY, default='mysql')
+        if six.PY2 and isinstance(database, six.text_type):
+            database = database.encode('utf-8', 'ignore')
+
+        self._database = database
+
+        self.sql_stmt = MysqlMetadataExtractor.SQL_STATEMENT.format(
+            where_clause_suffix=conf.get_string(MysqlMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
+            cluster_source=cluster_source
+        )
 
         self._alchemy_extractor = SQLAlchemyExtractor()
         sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
             .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+
+        self.sql_stmt = sql_alch_conf.get_string(SQLAlchemyExtractor.EXTRACT_SQL)
+
+        LOGGER.info('SQL for mysql metadata: {}'.format(self.sql_stmt))
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter = None  # type: Union[None, Iterator]
@@ -86,7 +99,7 @@ class HiveTableMetadataExtractor(Extractor):
 
     def get_scope(self):
         # type: () -> str
-        return 'extractor.hive_table_metadata'
+        return 'extractor.mysql_metadata'
 
     def _get_extract_iter(self):
         # type: () -> Iterator[TableMetadata]
@@ -101,13 +114,13 @@ class HiveTableMetadataExtractor(Extractor):
                 last_row = row
                 columns.append(ColumnMetadata(row['col_name'], row['col_description'],
                                               row['col_type'], row['col_sort_order']))
-            is_view = last_row['is_view'] == 1
-            yield TableMetadata('hive', self._cluster,
+
+            yield TableMetadata(self._database, last_row['cluster'],
                                 last_row['schema'],
                                 last_row['name'],
                                 last_row['description'],
                                 columns,
-                                is_view=is_view)
+                                is_view=last_row['is_view'])
 
     def _get_raw_extract_iter(self):
         # type: () -> Iterator[Dict[str, Any]]

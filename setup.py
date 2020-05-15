@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 
-__version__ = '2.5.1'
+__version__ = '2.5.14'
 
 requirements_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'requirements.txt')
 with open(requirements_path) as requirements_file:
@@ -32,7 +32,16 @@ bigquery = [
 
 jsonpath = ['jsonpath_rw==1.4.0']
 
-all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery + jsonpath
+db2 = [
+    'ibm_db',
+    'ibm-db-sa-py3'
+]
+
+druid = [
+    'pydruid'
+]
+
+all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery + jsonpath + db2 + druid
 
 setup(
     name='amundsen-databuilder',
@@ -54,7 +63,9 @@ setup(
         'snowflake': snowflake,
         'athena': athena,
         'bigquery': bigquery,
-        'jsonpath': jsonpath
+        'jsonpath': jsonpath,
+        'db2': db2,
+        'druid': druid,
     },
     classifiers=[
         'Programming Language :: Python :: 2.7',
