@@ -4,15 +4,16 @@
 [![Build Status](https://api.travis-ci.com/lyft/amundsendatabuilder.svg?branch=master)](https://travis-ci.com/lyft/amundsendatabuilder)
 [![Coverage Status](https://img.shields.io/codecov/c/github/lyft/amundsendatabuilder/master.svg)](https://codecov.io/github/lyft/amundsendatabuilder?branch=master)
 [![License](http://img.shields.io/:license-Apache%202-blue.svg)](LICENSE)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/amundsen-databuilder.svg)](https://pypi.org/project/amundsen-databuilder/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://amundsenworkspace.slack.com/join/shared_invite/enQtNTk2ODQ1NDU1NDI0LTc3MzQyZmM0ZGFjNzg5MzY1MzJlZTg4YjQ4YTU0ZmMxYWU2MmVlMzhhY2MzMTc1MDg0MzRjNTA4MzRkMGE0Nzk)
 
-Amundsen Databuilder is a data ingestion library, which is inspired by [Apache Gobblin](https://gobblin.apache.org/). It could be used in an orchestration framework(e.g. Apache Airflow) to build data from Amundsen. You could use the library either with an adhoc python script([example](https://github.com/lyft/amundsendatabuilder/blob/master/example/scripts/sample_data_loader.py)) or inside an Apache Airflow DAG([example](https://github.com/lyft/amundsendatabuilder/blob/master/example/dags/sample_dag.py)).
+Amundsen Databuilder is a data ingestion library, which is inspired by [Apache Gobblin](https://gobblin.apache.org/). It could be used in an orchestration framework(e.g. Apache Airflow) to build data from Amundsen. You could use the library either with an adhoc python script([example](https://github.com/lyft/amundsendatabuilder/blob/master/example/scripts/sample_data_loader.py)) or inside an Apache Airflow DAG([example](https://github.com/lyft/amundsendatabuilder/blob/master/example/dags/hive_sample_dag.py)).
 
 For information about Amundsen and our other services, visit the [main repository](https://github.com/lyft/amundsen#amundsen) `README.md` . Please also see our instructions for a [quick start](https://github.com/lyft/amundsen/blob/master/docs/installation.md#bootstrap-a-default-version-of-amundsen-using-docker) setup  of Amundsen with dummy data, and an [overview of the architecture](https://github.com/lyft/amundsen/blob/master/docs/architecture.md#architecture).
 
 ## Requirements
-- Python = 2.7.x (And Python >= 3.x if you don't use column usage transformer as it depends on antlr python 2 runtime)
+- Python = 2.7.x or Python >= 3.6.x
 
 ## Concept
 ETL job consists of extraction of records from the source, transform records, if necessary, and load records into the sink. Amundsen Databuilder is a ETL framework for Amundsen and there are corresponding components for ETL called Extractor, Transformer, and Loader that deals with record level operation. A component called task controls all these three components.
@@ -71,7 +72,7 @@ job.launch()
 An extractor that takes list of dict from user through config.
 
 #### [HiveTableLastUpdatedExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/hive_table_last_updated_extractor.py "HiveTableLastUpdatedExtractor")
-An extractor that extracts last updated time from Hive metastore and underlying file system. Although, hive metastore as a parameter called "last_modified_time", but it cannot be used as it provides DDL timestamp not DML timestamp.
+An extractor that extracts last updated time from Hive metastore and underlying file system. Although, hive metastore has a parameter called "last_modified_time", but it cannot be used as it provides DDL timestamp not DML timestamp.
 For this reason, HiveTableLastUpdatedExtractor is utilizing underlying file of Hive to fetch latest updated date. However, it is not efficient to poke all files in Hive, and it only pokes underlying storage for non-partitioned table. For partitioned table, it will fetch partition created timestamp, and it's close enough for last updated timestamp.
 
 As getting metadata from files could be time consuming there're several features to increase performance.
@@ -149,7 +150,7 @@ Cluster([127.0.0.1], **kwargs)
 #### [GlueExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/glue_extractor.py "GlueExtractor")
 An extractor that extracts table and column metadata including database, schema, table name, table description, column name and column description from AWS Glue metastore.
 
-Before running make sure you have a working AWS profile configured and have access to search tables on Glue 
+Before running make sure you have a working AWS profile configured and have access to search tables on Glue
 ```python
 job_config = ConfigFactory.from_dict({
 	'extractor.glue.{}'.format(GlueExtractor.CLUSTER_KEY): cluster_identifier_string,
@@ -231,7 +232,7 @@ The API calls driving the extraction is defined [here](https://github.com/lyft/a
 
 You will need to create a service account for reading metadata and grant it "BigQuery Metadata Viewer" access to all of your datasets. This can all be done via the bigquery ui.
 
-Download the creditials file and store it securely. Set the `GOOGLE_APPLICATION_CREDENTIALS` environment varible to the location of your credtials files and your code should have access to everything it needs. 
+Download the creditials file and store it securely. Set the `GOOGLE_APPLICATION_CREDENTIALS` environment varible to the location of your credtials files and your code should have access to everything it needs.
 
 You can configure bigquery like this. You can optionally set a label filter if you only want to pull tables with a certain label.
 ```python
@@ -435,13 +436,75 @@ To solve this challenges, we introduce [RestApiQuery](https://github.com/lyft/am
 RestAPIQuery is:  
  1. Assuming that REST API is using HTTP(S) call with GET method -- RestAPIQuery intention's is **read**, not write -- where basic HTTP auth is supported out of the box. There's extension point on other authentication scheme such as Oauth, and pagination, etc.
  2. Usually, you want the subset of the response you get from the REST API call -- value extraction. To extract the value you want, RestApiQuery uses [JSONPath](https://goessner.net/articles/JsonPath/) which is similar product as XPATH of XML.
- 3. You can JOIN multiple RestApiQuery together. 
+ 3. You can JOIN multiple RestApiQuery together.
 
 More detail on JOIN operation in RestApiQuery:  
  1. It joins multiple RestApiQuery together by accepting prior RestApiQuery as a constructor -- a [Decorator pattern](https://en.wikipedia.org/wiki/Decorator_pattern)
- 2. In REST API, URL is the one that locates the resource we want. Here, JOIN simply means we need to find resource **based on the identifier that other query's result has**. In other words, when RestApiQuery forms URL, it uses previous query's result to compute the URL `e.g: Previous record: {"dashboard_id": "foo"}, URL before: http://foo.bar/dashboard/{dashboard_id} URL after compute: http://foo.bar/dashboard/foo` 
+ 2. In REST API, URL is the one that locates the resource we want. Here, JOIN simply means we need to find resource **based on the identifier that other query's result has**. In other words, when RestApiQuery forms URL, it uses previous query's result to compute the URL `e.g: Previous record: {"dashboard_id": "foo"}, URL before: http://foo.bar/dashboard/{dashboard_id} URL after compute: http://foo.bar/dashboard/foo`
 With this pattern RestApiQuery supports 1:1 and 1:N JOIN relationship.  
 (GROUP BY or any other aggregation, sub-query join is not supported)  
 
-To see in action, take a peek at [ModeDashboardExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/dashboard/mode_dashboard_extractor.py)
+To see in action, take a peek at [ModeDashboardExtractor](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/extractor/dashboard/mode_analytics/mode_dashboard_extractor.py)
 
+
+### Removing stale data in Neo4j -- [Neo4jStalenessRemovalTask](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/task/neo4j_staleness_removal_task.py):
+
+As Databuilder ingestion mostly consists of either INSERT OR UPDATE, there could be some stale data that has been removed from metadata source but still remains in Neo4j database. Neo4jStalenessRemovalTask basically detects staleness and removes it.
+
+In [Neo4jCsvPublisher](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/publisher/neo4j_csv_publisher.py), it adds attributes "published_tag" and "publisher_last_updated_epoch_ms" on every nodes and relations. You can use either of these two attributes to detect staleness and remove those stale node or relation from the database.
+
+#### Using "published_tag" to remove stale data
+Use *published_tag* to remove stale data, when it is certain that non-matching tag is stale once all the ingestion is completed. For example, suppose that you use current date (or execution date in Airflow) as a *published_tag*, "2020-03-31". Once Databuilder ingests all tables and all columns, all table nodes and column nodes should have *published_tag* as "2020-03-31". It is safe to assume that table nodes and column nodes whose *published_tag* is different -- such as "2020-03-30" or "2020-02-10" -- means that it is deleted from the source metadata. You can use Neo4jStalenessRemovalTask to delete those stale data.
+
+    task = Neo4jStalenessRemovalTask()
+    job_config_dict = {
+        'job.identifier': 'remove_stale_data_job',
+        'task.remove_stale_data.neo4j_endpoint': neo4j_endpoint,
+        'task.remove_stale_data.neo4j_user': neo4j_user,
+        'task.remove_stale_data.neo4j_password': neo4j_password,
+        'task.remove_stale_data.staleness_max_pct': 10,
+        'task.remove_stale_data.target_nodes': ['Table', 'Column'],
+        'task.remove_stale_data.job_publish_tag': '2020-03-31'
+    }
+    job_config = ConfigFactory.from_dict(job_config_dict)
+    job = DefaultJob(conf=job_config, task=task)
+    job.launch()
+
+Note that there's protection mechanism, **staleness_max_pct**, that protect your data being wiped out when something is clearly wrong. "**staleness_max_pct**" basically first measure the proportion of elements that will be deleted and if it exceeds threshold per type ( 10% on the configuration above ), the deletion won't be executed and the task aborts.
+
+#### Using "publisher_last_updated_epoch_ms" to remove stale data
+You can think this approach as TTL based eviction. This is particularly useful when there are multiple ingestion pipelines and you cannot be sure when all ingestion is done. In this case, you might still can say that if specific node or relation has not been published past 3 days, it's stale data.
+
+    task = Neo4jStalenessRemovalTask()
+    job_config_dict = {
+        'job.identifier': 'remove_stale_data_job',
+        'task.remove_stale_data.neo4j_endpoint': neo4j_endpoint,
+        'task.remove_stale_data.neo4j_user': neo4j_user,
+        'task.remove_stale_data.neo4j_password': neo4j_password,
+        'task.remove_stale_data.staleness_max_pct': 10,
+        'task.remove_stale_data.target_relations': ['READ', 'READ_BY'],
+        'task.remove_stale_data.milliseconds_to_expire': 86400000 * 3
+    }
+    job_config = ConfigFactory.from_dict(job_config_dict)
+    job = DefaultJob(conf=job_config, task=task)
+    job.launch()
+
+Above configuration is trying to delete stale usage relation (READ, READ_BY), by deleting READ or READ_BY relation that has not been published past 3 days. If number of elements to be removed is more than 10% per type, this task will be aborted without executing any deletion.
+
+#### Dry run
+Deletion is always scary and it's better to perform dryrun before put this into action. You can use Dry run to see what sort of Cypher query will be executed.
+
+    task = Neo4jStalenessRemovalTask()
+    job_config_dict = {
+        'job.identifier': 'remove_stale_data_job',
+        'task.remove_stale_data.neo4j_endpoint': neo4j_endpoint,
+        'task.remove_stale_data.neo4j_user': neo4j_user,
+        'task.remove_stale_data.neo4j_password': neo4j_password,
+        'task.remove_stale_data.staleness_max_pct': 10,
+        'task.remove_stale_data.target_relations': ['READ', 'READ_BY'],
+        'task.remove_stale_data.milliseconds_to_expire': 86400000 * 3
+        'task.remove_stale_data.dry_run': True
+    }
+    job_config = ConfigFactory.from_dict(job_config_dict)
+    job = DefaultJob(conf=job_config, task=task)
+    job.launch()
