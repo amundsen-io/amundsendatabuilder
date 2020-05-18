@@ -47,8 +47,7 @@ TABLE_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
             },
             "column_names": {
               "type":"text",
-              "analyzer": "simple",
-              "search_analyzer": "whitespace",
+              "analyzer": "whitespace",
               "fields": {
                 "raw": {
                   "type": "keyword"
@@ -71,8 +70,7 @@ TABLE_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
             },
             "database": {
               "type": "text",
-              "analyzer": "simple",
-              "search_analyzer": "whitespace",
+              "analyzer": "whitespace",
               "fields": {
                 "raw": {
                   "type": "keyword"
