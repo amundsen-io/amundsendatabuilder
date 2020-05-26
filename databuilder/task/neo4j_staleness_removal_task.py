@@ -16,6 +16,8 @@ NEO4J_END_POINT_KEY = 'neo4j_endpoint'
 NEO4J_MAX_CONN_LIFE_TIME_SEC = 'neo4j_max_conn_life_time_sec'
 NEO4J_USER = 'neo4j_user'
 NEO4J_PASSWORD = 'neo4j_password'
+NEO4J_ENCRYPTED = 'neo4j_encrypted'
+"""NEO4J_ENCRYPTED is a boolean indicating whether to use SSL/TLS when connecting."""
 
 TARGET_NODES = "target_nodes"
 TARGET_RELATIONS = "target_relations"
@@ -88,7 +90,8 @@ class Neo4jStalenessRemovalTask(Task):
         self._driver = \
             GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY),
                                  max_connection_life_time=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
-                                 auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)))
+                                 auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
+                                 encrypted=conf.get_bool(NEO4J_ENCRYPTED))
 
     def run(self):
         # type: () -> None
