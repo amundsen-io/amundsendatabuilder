@@ -3,7 +3,7 @@ import logging
 from typing import Any, Iterator, Union  # noqa: F401
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from neo4j.v1 import GraphDatabase
+from neo4j import GraphDatabase
 
 from databuilder.extractor.base_extractor import Extractor
 
@@ -23,7 +23,7 @@ class Neo4jExtractor(Extractor):
     NEO4J_ENCRYPTED = 'neo4j_encrypted'
     """NEO4J_ENCRYPTED is a boolean indicating whether to use SSL/TLS when connecting."""
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50, })
+    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50, NEO4J_ENCRYPTED: True})
 
     def init(self, conf):
         # type: (ConfigTree) -> None

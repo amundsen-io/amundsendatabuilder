@@ -9,7 +9,7 @@ from os.path import isfile, join
 from string import Template
 
 import six
-from neo4j.v1 import GraphDatabase, Transaction  # noqa: F401
+from neo4j import GraphDatabase, Transaction  # noqa: F401
 from neo4j.exceptions import CypherError
 from pyhocon import ConfigFactory  # noqa: F401
 from pyhocon import ConfigTree  # noqa: F401
@@ -91,6 +91,7 @@ DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_TRANSCATION_SIZE: 500,
                                           NEO4J_PROGRESS_REPORT_FREQUENCY: 500,
                                           NEO4J_RELATIONSHIP_CREATION_CONFIRM: False,
                                           NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
+                                          NEO4J_ENCRYPTED: True,
                                           RELATION_PREPROCESSOR: NoopRelationPreprocessor()})
 
 NODE_MERGE_TEMPLATE = Template("""MERGE (node:$LABEL {key: '${KEY}'})
