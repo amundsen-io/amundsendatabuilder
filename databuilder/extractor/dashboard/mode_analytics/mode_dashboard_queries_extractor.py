@@ -8,13 +8,12 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import ModePaginatedRestApiQuery
 from databuilder.rest_api.rest_api_query import RestApiQuery
-from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.template_variable_substitution_transformer import \
-    TemplateVariableSubstitutionTransformer, TEMPLATE, FIELD_NAME
 from databuilder.transformer.regex_str_replace_transformer import RegexStrReplaceTransformer, \
     REGEX_REPLACE_TUPLE_LIST, ATTRIBUTE_NAME
+from databuilder.transformer.template_variable_substitution_transformer import \
+    TemplateVariableSubstitutionTransformer, TEMPLATE, FIELD_NAME
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,6 +46,7 @@ class ModeDashboardQueriesExtractor(Extractor):
 
         transformers.append(variable_substitution_transformer)
 
+        # Escape backslash as it breaks Cypher statement.
         replace_transformer = RegexStrReplaceTransformer()
         replace_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, replace_transformer.get_scope()).with_fallback(
