@@ -37,7 +37,7 @@ class FsNeo4jCSVLoader(Loader):
 
     _DEFAULT_CONFIG = ConfigFactory.from_dict({
         SHOULD_DELETE_CREATED_DIR: True,
-        FORCE_CREATE_DIR: True
+        FORCE_CREATE_DIR: False
     })
 
     def __init__(self):
