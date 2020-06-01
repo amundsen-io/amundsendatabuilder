@@ -25,9 +25,10 @@ class Neo4jSearchDataExtractor(Extractor):
         OPTIONAL MATCH (table)-[:DESCRIPTION]->(table_description:Description)
         OPTIONAL MATCH (schema)-[:DESCRIPTION]->(schema_description:Description)
         OPTIONAL MATCH (table)-[:DESCRIPTION]->(prog_descs:Programmatic_Description)
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
         WITH db, cluster, schema, schema_description, table, table_description,
-        COLLECT(prog_descs.description) as programmatic_descriptions,
+        COLLECT(prog_descs.description) as programmatic_descriptions
+        OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
+        WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions,
         COLLECT(DISTINCT tags.key) as tags
         OPTIONAL MATCH (table)-[:TAGGED_BY]->(badges:Tag) WHERE badges.tag_type='badge'
         WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions, tags,
