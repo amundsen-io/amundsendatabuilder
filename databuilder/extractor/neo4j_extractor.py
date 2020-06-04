@@ -4,6 +4,7 @@ from typing import Any, Iterator, Union  # noqa: F401
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from neo4j import GraphDatabase
+import neo4j
 
 from databuilder.extractor.base_extractor import Extractor
 
@@ -22,8 +23,12 @@ class Neo4jExtractor(Extractor):
     NEO4J_MAX_CONN_LIFE_TIME_SEC = 'neo4j_max_conn_life_time_sec'
     NEO4J_ENCRYPTED = 'neo4j_encrypted'
     """NEO4J_ENCRYPTED is a boolean indicating whether to use SSL/TLS when connecting."""
+    NEO4J_VALIDATE_SSL = 'neo4j_validate_ssl'
+    """NEO4J_VALIDATE_SSL is a boolean indicating whether to validate the server's SSL/TLS cert against system CAs."""
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50, NEO4J_ENCRYPTED: True})
+    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
+                                              NEO4J_ENCRYPTED: True,
+                                              NEO4J_VALIDATE_SSL: False})
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -59,12 +64,15 @@ class Neo4jExtractor(Extractor):
         """
         Create a Neo4j connection to Database
         """
+        trust = neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES if self.conf.get_bool(Neo4jExtractor.NEO4J_VALIDATE_SSL) \
+            else neo4j.TRUST_ALL_CERTIFICATES
         return GraphDatabase.driver(self.graph_url,
                                     max_connection_life_time=self.conf.get_int(
                                         Neo4jExtractor.NEO4J_MAX_CONN_LIFE_TIME_SEC),
                                     auth=(self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_USER),
                                           self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_PW)),
-                                    encrypted=self.conf.get_bool(Neo4jExtractor.NEO4J_ENCRYPTED))
+                                    encrypted=self.conf.get_bool(Neo4jExtractor.NEO4J_ENCRYPTED),
+                                    trust=trust)
 
     def _execute_query(self, tx):
         # type: (Any) -> Any
