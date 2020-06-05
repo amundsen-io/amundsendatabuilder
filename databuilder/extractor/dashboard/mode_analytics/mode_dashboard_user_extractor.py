@@ -41,7 +41,7 @@ class ModeDashboardUserExtractor(Extractor):
         remove_fields_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, remove_fields_transformer.get_scope()).with_fallback(
                 ConfigFactory.from_dict(
-                    {FIELD_NAMES: ['organization', 'mode_user_resource_path']})))
+                    {FIELD_NAMES: ['organization', 'mode_user_resource_path', 'product']})))
         transformers.append(remove_fields_transformer)
 
         dict_to_model_transformer = DictToModel()
@@ -79,6 +79,7 @@ class ModeDashboardUserExtractor(Extractor):
             'organization': self._conf.get_string(ORGANIZATION),
             'is_active': None,
             'updated_at': None,
+            'do_not_update_empty_attribute': True,
         }]
         seed_query = RestApiQuerySeed(seed_record=seed_record)
 
