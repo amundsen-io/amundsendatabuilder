@@ -26,7 +26,6 @@ class TestRemoveFieldTransformer(unittest.TestCase):
         }
         self.assertDictEqual(expected, actual)
 
-
     def test_conversion_missing_field(self):
         # type: () -> None
 
