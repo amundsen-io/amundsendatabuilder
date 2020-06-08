@@ -18,6 +18,7 @@ https://github.com/lyft/amundsendatabuilder#list-of-extractors
 """
 
 import logging
+import os
 import sqlite3
 import sys
 import textwrap
@@ -37,22 +38,27 @@ from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
 
-es_host = None
-neo_host = None
+# configured by Kube DNS based on service name
+es_host = "elasticsearch"
+neo_host = "neo4j"
+
+es_port = os.getenv("ELASTICSEARCH_SERVICE_PORT_ELASTICSEARCH_HTTP", 9200)
+neo_port = os.getenv("NEO4J_SERVICE_PORT_NEO4J_BOLT", 7687)
 if len(sys.argv) > 1:
     es_host = sys.argv[1]
 if len(sys.argv) > 2:
     neo_host = sys.argv[2]
 
+                    
 es = Elasticsearch([
-    {'host': es_host if es_host else 'localhost'},
+    {'host': es_host,'port': es_port},
 ])
 
 DB_FILE = '/tmp/test.db'
 SQLITE_CONN_STRING = 'sqlite:////tmp/test.db'
 Base = declarative_base()
 
-NEO4J_ENDPOINT = 'bolt://{}:7687'.format(neo_host if neo_host else 'localhost')
+NEO4J_ENDPOINT = 'bolt://{}:{}'.format(neo_host, neo_port)
 
 neo4j_endpoint = NEO4J_ENDPOINT
 
