@@ -1,12 +1,12 @@
 import json
 import logging
-import textwrap
+
+from elasticsearch.exceptions import NotFoundError
+from pyhocon import ConfigTree  # noqa: F401
 from typing import List  # noqa: F401
 
-from pyhocon import ConfigTree  # noqa: F401
-from elasticsearch.exceptions import NotFoundError
-
 from databuilder.publisher.base_publisher import Publisher
+from databuilder.publisher.elasticsearch_constants import TABLE_ELASTICSEARCH_INDEX_MAPPING
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,95 +29,10 @@ class ElasticsearchPublisher(Publisher):
     ELASTICSEARCH_ALIAS_CONFIG_KEY = 'alias'
     ELASTICSEARCH_MAPPING_CONFIG_KEY = 'mapping'
 
-    # Specifying default mapping for elasticsearch index
-    # Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
-    # Setting type to "text" for all fields that would be used in search
-    # Using Simple Analyzer to convert all text into search terms
-    # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-simple-analyzer.html
-    # Standard Analyzer is used for all text fields that don't explicitly specify an analyzer
-    # https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-standard-analyzer.html
-    # TODO use amundsencommon for this when this project is updated to py3
-    DEFAULT_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
-        """
-        {
-        "mappings":{
-            "table":{
-              "properties": {
-                "name": {
-                  "type":"text",
-                  "analyzer": "simple",
-                  "fields": {
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "schema": {
-                  "type":"text",
-                  "analyzer": "simple",
-                  "fields": {
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "display_name": {
-                  "type": "keyword"
-                },
-                "last_updated_timestamp": {
-                  "type": "date",
-                  "format": "epoch_second"
-                },
-                "description": {
-                  "type": "text",
-                  "analyzer": "simple"
-                },
-                "column_names": {
-                  "type":"text",
-                  "analyzer": "simple",
-                  "fields": {
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "column_descriptions": {
-                  "type": "text",
-                  "analyzer": "simple"
-                },
-                "tags": {
-                  "type": "keyword"
-                },
-                "badges": {
-                  "type": "keyword"
-                },
-                "cluster": {
-                  "type": "text"
-                },
-                "database": {
-                  "type": "text",
-                  "analyzer": "simple",
-                  "fields": {
-                    "raw": {
-                      "type": "keyword"
-                    }
-                  }
-                },
-                "key": {
-                  "type": "keyword"
-                },
-                "total_usage":{
-                  "type": "long"
-                },
-                "unique_usage": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        }
-        """
-    )
+    # config to control how many max documents to publish at a time
+    ELASTICSEARCH_PUBLISHER_BATCH_SIZE = 'batch_size'
+
+    DEFAULT_ELASTICSEARCH_INDEX_MAPPING = TABLE_ELASTICSEARCH_INDEX_MAPPING
 
     def __init__(self):
         # type: () -> None
@@ -137,7 +52,8 @@ class ElasticsearchPublisher(Publisher):
 
         self.elasticsearch_mapping = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY,
                                                    ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING)
-
+        self.elasticsearch_batch_size = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_PUBLISHER_BATCH_SIZE,
+                                                      10000)
         self.file_handler = open(self.file_path, self.file_mode)
 
     def _fetch_old_index(self):
@@ -150,8 +66,8 @@ class ElasticsearchPublisher(Publisher):
             indices = self.elasticsearch_client.indices.get_alias(self.elasticsearch_alias).keys()
             return indices
         except NotFoundError:
-            LOGGER.warn('Received index not found error from Elasticsearch. ' +
-                        'The index doesnt exist for a newly created ES.')
+            LOGGER.warn("Received index not found error from Elasticsearch. " +
+                        "The index doesn't exist for a newly created ES. It's OK on first run.")
             # return empty list on exception
             return []
 
@@ -172,17 +88,25 @@ class ElasticsearchPublisher(Publisher):
         # Bulk load JSON format is defined here:
         # https://www.elastic.co/guide/en/elasticsearch/reference/6.2/docs-bulk.html
         bulk_actions = []
+        cnt = 0
+
+        # create new index with mapping
+        self.elasticsearch_client.indices.create(index=self.elasticsearch_new_index, body=self.elasticsearch_mapping)
         for action in actions:
             index_row = dict(index=dict(_index=self.elasticsearch_new_index,
                                         _type=self.elasticsearch_type))
             bulk_actions.append(index_row)
             bulk_actions.append(action)
+            cnt += 1
+            if cnt == self.elasticsearch_batch_size:
+                self.elasticsearch_client.bulk(bulk_actions)
+                LOGGER.info('Publish {} of records to ES'.format(str(cnt)))
+                cnt = 0
+                bulk_actions = []
 
-        # create new index with mapping
-        self.elasticsearch_client.indices.create(index=self.elasticsearch_new_index, body=self.elasticsearch_mapping)
-
-        # bulk upload data
-        self.elasticsearch_client.bulk(bulk_actions)
+        # Do the final bulk actions
+        if bulk_actions:
+            self.elasticsearch_client.bulk(bulk_actions)
 
         # fetch indices that have {elasticsearch_alias} as alias
         elasticsearch_old_indices = self._fetch_old_index()

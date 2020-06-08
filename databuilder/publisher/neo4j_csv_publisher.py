@@ -1,6 +1,7 @@
 import copy
 import csv
 import ctypes
+from io import open
 import logging
 import time
 from os import listdir
@@ -8,7 +9,9 @@ from os.path import isfile, join
 from string import Template
 
 import six
-from neo4j.v1 import GraphDatabase, Transaction  # noqa: F401
+from neo4j import GraphDatabase, Transaction  # noqa: F401
+import neo4j
+from neo4j.exceptions import CypherError
 from pyhocon import ConfigFactory  # noqa: F401
 from pyhocon import ConfigTree  # noqa: F401
 from typing import Set, List  # noqa: F401
@@ -43,6 +46,10 @@ NEO4J_CREATE_ONLY_NODES = 'neo4j_create_only_nodes'
 
 NEO4J_USER = 'neo4j_user'
 NEO4J_PASSWORD = 'neo4j_password'
+NEO4J_ENCRYPTED = 'neo4j_encrypted'
+"""NEO4J_ENCRYPTED is a boolean indicating whether to use SSL/TLS when connecting."""
+NEO4J_VALIDATE_SSL = 'neo4j_validate_ssl'
+"""NEO4J_VALIDATE_SSL is a boolean indicating whether to validate the server's SSL/TLS cert against system CAs."""
 
 # This will be used to provide unique tag to the node and relationship
 JOB_PUBLISH_TAG = 'job_publish_tag'
@@ -87,6 +94,8 @@ DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_TRANSCATION_SIZE: 500,
                                           NEO4J_PROGRESS_REPORT_FREQUENCY: 500,
                                           NEO4J_RELATIONSHIP_CREATION_CONFIRM: False,
                                           NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
+                                          NEO4J_ENCRYPTED: True,
+                                          NEO4J_VALIDATE_SSL: False,
                                           RELATION_PREPROCESSOR: NoopRelationPreprocessor()})
 
 NODE_MERGE_TEMPLATE = Template("""MERGE (node:$LABEL {key: '${KEY}'})
@@ -132,10 +141,14 @@ class Neo4jCsvPublisher(Publisher):
         self._relation_files = self._list_files(conf, RELATION_FILES_DIR)
         self._relation_files_iter = iter(self._relation_files)
 
+        trust = neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES if conf.get_bool(NEO4J_VALIDATE_SSL) \
+            else neo4j.TRUST_ALL_CERTIFICATES
         self._driver = \
             GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY),
                                  max_connection_life_time=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
-                                 auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)))
+                                 auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
+                                 encrypted=conf.get_bool(NEO4J_ENCRYPTED),
+                                 trust=trust)
         self._transaction_size = conf.get_int(NEO4J_TRANSCATION_SIZE)
         self._session = self._driver.session()
         self._confirm_rel_created = conf.get_bool(NEO4J_RELATIONSHIP_CREATION_CONFIRM)
@@ -222,7 +235,7 @@ class Neo4jCsvPublisher(Publisher):
         # type: (str) -> None
         LOGGER.info('Creating indices. (Existing indices will be ignored)')
 
-        with open(node_file, 'r') as node_csv:
+        with open(node_file, 'r', encoding='utf8') as node_csv:
             for node_record in csv.DictReader(node_csv):
                 label = node_record[NODE_LABEL_KEY]
                 if label not in self.labels:
@@ -250,7 +263,7 @@ class Neo4jCsvPublisher(Publisher):
         :return:
         """
 
-        with open(node_file, 'r') as node_csv:
+        with open(node_file, 'r', encoding='utf8') as node_csv:
             for count, node_record in enumerate(csv.DictReader(node_csv)):
                 stmt = self.create_node_merge_statement(node_record=node_record)
                 tx = self._execute_statement(stmt, tx)
@@ -306,7 +319,7 @@ class Neo4jCsvPublisher(Publisher):
             LOGGER.info('Pre-processing relation with {}'.format(self._relation_preprocessor))
 
             count = 0
-            with open(relation_file, 'r') as relation_csv:
+            with open(relation_file, 'r', encoding='utf8') as relation_csv:
                 for rel_record in csv.DictReader(relation_csv):
                     stmt, params = self._relation_preprocessor.preprocess_cypher(
                         start_label=rel_record[RELATION_START_LABEL],
@@ -322,7 +335,7 @@ class Neo4jCsvPublisher(Publisher):
 
             LOGGER.info('Executed pre-processing Cypher statement {} times'.format(count))
 
-        with open(relation_file, 'r') as relation_csv:
+        with open(relation_file, 'r', encoding='utf8') as relation_csv:
             for count, rel_record in enumerate(csv.DictReader(relation_csv)):
                 stmt = self.create_relationship_merge_statement(rel_record=rel_record)
                 tx = self._execute_statement(stmt, tx,
@@ -450,7 +463,7 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
         # type: (str) -> None
         """
         For any label seen first time for this publisher it will try to create unique index.
-        There's no side effect on Neo4j side issuing index creation for existing index.
+        Neo4j ignores a second creation in 3.x, but raises an error in 4.x.
         :param label:
         :return:
         """
@@ -458,4 +471,9 @@ ON MATCH SET {update_prop_body}""".format(create_prop_body=create_prop_body,
         LOGGER.info('Trying to create index for label {label} if not exist: {stmt}'.format(label=label,
                                                                                            stmt=stmt))
         with self._driver.session() as session:
-            session.run(stmt)
+            try:
+                session.run(stmt)
+            except CypherError as e:
+                if 'An equivalent constraint already exists' not in e.__str__():
+                    raise
+                # Else, swallow the exception, to make this function idempotent.

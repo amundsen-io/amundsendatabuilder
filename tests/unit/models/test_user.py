@@ -21,7 +21,8 @@ class TestUser(unittest.TestCase):
                          manager_email='test_manager@email.com',
                          slack_id='slack',
                          is_active=True,
-                         updated_at=1)
+                         updated_at=1,
+                         role_name='swe')
 
     def test_get_user_model_key(self):
         # type: () -> None
@@ -45,11 +46,11 @@ class TestUser(unittest.TestCase):
                          slack_id='slack',
                          is_active=True,
                          updated_at=1,
-                         role='SWE',
+                         role_name='swe',
                          enable_notify=True)
         nodes = test_user.create_nodes()
         self.assertEqual(nodes[0]['email'], 'test@email.com')
-        self.assertEqual(nodes[0]['role'], 'SWE')
+        self.assertEqual(nodes[0]['role_name'], 'swe')
         self.assertTrue(nodes[0]['enable_notify'])
 
     def test_create_relation(self):

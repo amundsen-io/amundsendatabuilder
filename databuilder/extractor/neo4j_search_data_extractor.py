@@ -23,19 +23,28 @@ class Neo4jSearchDataExtractor(Extractor):
         <-[:SCHEMA_OF]-(schema:Schema)<-[:TABLE_OF]-(table:Table)
         {publish_tag_filter}
         OPTIONAL MATCH (table)-[:DESCRIPTION]->(table_description:Description)
+        OPTIONAL MATCH (schema)-[:DESCRIPTION]->(schema_description:Description)
+        OPTIONAL MATCH (table)-[:DESCRIPTION]->(prog_descs:Programmatic_Description)
+        WITH db, cluster, schema, schema_description, table, table_description,
+        COLLECT(prog_descs.description) as programmatic_descriptions
         OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
-        WITH db, cluster, schema, table, table_description, COLLECT(DISTINCT tags.key) as tags
+        WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions,
+        COLLECT(DISTINCT tags.key) as tags
         OPTIONAL MATCH (table)-[:TAGGED_BY]->(badges:Tag) WHERE badges.tag_type='badge'
-        WITH db, cluster, schema, table, table_description, tags, COLLECT(DISTINCT badges.key) as badges
+        WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions, tags,
+        COLLECT(DISTINCT badges.key) as badges
         OPTIONAL MATCH (table)-[read:READ_BY]->(user:User)
-        WITH db, cluster, schema, table, table_description, tags, badges, SUM(read.read_count) AS total_usage,
+        WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions, tags, badges,
+        SUM(read.read_count) AS total_usage,
         COUNT(DISTINCT user.email) as unique_usage
         OPTIONAL MATCH (table)-[:COLUMN]->(col:Column)
         OPTIONAL MATCH (col)-[:DESCRIPTION]->(col_description:Description)
-        WITH db, cluster, schema, table, table_description, tags, badges, total_usage, unique_usage,
+        WITH db, cluster, schema, schema_description, table, table_description, tags, badges, total_usage, unique_usage,
+        programmatic_descriptions,
         COLLECT(col.name) AS column_names, COLLECT(col_description.description) AS column_descriptions
         OPTIONAL MATCH (table)-[:LAST_UPDATED_AT]->(time_stamp:Timestamp)
         RETURN db.name as database, cluster.name AS cluster, schema.name AS schema,
+        schema_description.description AS schema_description,
         table.name AS name, table.key AS key, table_description.description AS description,
         time_stamp.last_updated_timestamp AS last_updated_timestamp,
         column_names,
@@ -43,7 +52,8 @@ class Neo4jSearchDataExtractor(Extractor):
         total_usage,
         unique_usage,
         tags,
-        badges
+        badges,
+        programmatic_descriptions
         ORDER BY table.name;
         """
     )
@@ -69,22 +79,26 @@ class Neo4jSearchDataExtractor(Extractor):
         """
     )
 
-    # todo: 1. change total_read once we have the usage;
-    #  2. add more fields once we have in the graph; 3. change mode to generic once add more support for dashboard
+    # todo: 1. change mode to generic once add more support for dashboard
     DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY = textwrap.dedent(
         """
-        MATCH (dashboard:Dashboard)
-        OPTIONAL MATCH (dashboard)-[:DASHBOARD_OF]->(dbg:Dashboardgroup)
-        OPTIONAL MATCH (dashboard)-[:DESCRIPTION]->(db_descr:Description)
+        MATCH (db:Dashboard)
+        MATCH (db)-[:DASHBOARD_OF]->(dbg:Dashboardgroup)
+        MATCH (dbg)-[:DASHBOARD_GROUP_OF]->(cluster:Cluster)
+        OPTIONAL MATCH (db)-[:DESCRIPTION]->(db_descr:Description)
         OPTIONAL MATCH (dbg)-[:DESCRIPTION]->(dbg_descr:Description)
-        {publish_tag_filter}
-        with dashboard, dbg, db_descr, dbg_descr
-        where dashboard.name is not null
-        return dbg.name as dashboard_group, dashboard.name as dashboard_name,
+        OPTIONAL MATCH (db)-[:EXECUTED]->(last_exec:Execution)
+        WHERE split(last_exec.key, '/')[5] = '_last_successful_execution'
+        OPTIONAL MATCH (db)-[read:READ_BY]->(user:User)
+        OPTIONAL MATCH (db)-[:HAS_QUERY]->(query:Query)
+        with db, dbg, db_descr, dbg_descr, cluster, last_exec, query, SUM(read.read_count) AS total_usage
+        return dbg.name as group_name, db.name as name, cluster.name as cluster,
         coalesce(db_descr.description, '') as description,
-        coalesce(dbg.description, '') as dashboard_group_description,
-        'mode' as product,
-        1 AS total_usage
+        coalesce(dbg.description, '') as group_description, dbg.dashboard_group_url as group_url,
+        db.dashboard_url as url, db.key as uri,
+        'mode' as product, toInt(last_exec.timestamp) as last_successful_run_timestamp,
+        COLLECT(DISTINCT query.name) as query_names,
+        total_usage
         order by dbg.name
         """
     )

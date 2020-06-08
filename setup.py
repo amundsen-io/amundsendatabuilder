@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 
-__version__ = '2.4.0'
+__version__ = '2.6.0'
 
 requirements_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'requirements.txt')
 with open(requirements_path) as requirements_file:
@@ -32,7 +32,16 @@ bigquery = [
 
 jsonpath = ['jsonpath_rw==1.4.0']
 
-all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery + jsonpath
+db2 = [
+    'ibm_db==3.0.1',
+    'ibm-db-sa-py3==0.3.1-1'
+]
+
+druid = [
+    'pydruid'
+]
+
+all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery + jsonpath + db2 + druid
 
 setup(
     name='amundsen-databuilder',
@@ -44,6 +53,7 @@ setup(
     packages=find_packages(exclude=['tests*']),
     dependency_links=[],
     install_requires=requirements,
+    python_requires='>=3.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*',
     extras_require={
         ':python_version=="2.7"': ['typing>=3.6'],  # allow typehinting PY2
         'all': all_deps,
@@ -53,6 +63,12 @@ setup(
         'snowflake': snowflake,
         'athena': athena,
         'bigquery': bigquery,
-        'jsonpath': jsonpath
+        'jsonpath': jsonpath,
+        'db2': db2,
+        'druid': druid,
     },
+    classifiers=[
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+    ],
 )
