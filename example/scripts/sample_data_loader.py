@@ -51,7 +51,7 @@ if len(sys.argv) > 2:
 
                     
 es = Elasticsearch([
-    {'host': es_host,'port': es_port},
+    {'host': es_host, 'port': es_port},
 ])
 
 DB_FILE = '/tmp/test.db'

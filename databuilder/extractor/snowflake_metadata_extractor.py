@@ -85,7 +85,6 @@ class SnowflakeMetadataExtractor(Extractor):
             self._database = self._database.encode('utf-8', 'ignore')
             self._snowflake_database = self._snowflake_database.encode('utf-8', 'ignore')
 
-
         self.sql_stmt = SnowflakeMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
             cluster_source=cluster_source,

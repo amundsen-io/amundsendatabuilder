@@ -306,7 +306,6 @@ class TestSnowflakeMetadataExtractorDefaultSnowflakeDatabaseKey(unittest.TestCas
             self.assertTrue(self.snowflake_database_key in extractor.sql_stmt)
 
 
-
 class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
     # test when DATABASE_KEY is specified
     def setUp(self):
@@ -341,25 +340,27 @@ class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
 
             sql_execute.return_value = [
                 {'schema': 'test_schema',
-                     'name': 'test_table',
-                     'description': 'a table for testing',
-                     'cluster': 'MY_CLUSTER',
-                     'is_view': 'false',
-                     'col_name': 'ds',
-                     'col_type': 'varchar',
-                     'col_description': None,
-                     'col_sort_order': 0
-                }
+                 'name': 'test_table',
+                 'description': 'a table for testing',
+                 'cluster': 'MY_CLUSTER',
+                 'is_view': 'false',
+                 'col_name': 'ds',
+                 'col_type': 'varchar',
+                 'col_description': None,
+                 'col_sort_order': 0}
             ]
 
             extractor = SnowflakeMetadataExtractor()
             extractor.init(self.conf)
             actual = extractor.extract()
-            expected = TableMetadata(self.database_key, 'MY_CLUSTER', 'test_schema', 'test_table', 'a table for testing',
-                                     [ColumnMetadata('ds', None, 'varchar', 0)])
+            expected = TableMetadata(
+                self.database_key, 'MY_CLUSTER', 'test_schema', 'test_table', 'a table for testing',
+                [ColumnMetadata('ds', None, 'varchar', 0)]
+            )
 
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
+
 
 class TestSnowflakeMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is NOT specified
