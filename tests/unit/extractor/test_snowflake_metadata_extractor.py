@@ -22,7 +22,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
             'MY_CLUSTER',
             'extractor.snowflake_metadata.{}'.format(SnowflakeMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME):
             False,
-            'extractor.snowflake_metadata.{}'.format(SnowflakeMetadataExtractor.DATABASE_KEY):
+            'extractor.snowflake_metadata.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY):
             'prod'
         }
         self.conf = ConfigFactory.from_dict(config_dict)
