@@ -49,7 +49,7 @@ if len(sys.argv) > 1:
 if len(sys.argv) > 2:
     neo_host = sys.argv[2]
 
-                    
+
 es = Elasticsearch([
     {'host': es_host, 'port': es_port},
 ])
