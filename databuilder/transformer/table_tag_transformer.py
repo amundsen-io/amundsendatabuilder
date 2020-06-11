@@ -17,7 +17,6 @@ class TableTagTransformer(Transformer):
         if isinstance(tags, str):
             tags = tags.split(",")
         self.tags = tags
-        print("\n\n\n***** SETTING UP TABLES WITH TAGS {}".format(self.tags))
 
     def transform(self, record):
         if isinstance(record, TableMetadata):
