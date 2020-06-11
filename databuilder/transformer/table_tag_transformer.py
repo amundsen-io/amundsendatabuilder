@@ -1,7 +1,7 @@
+from pyhocon import ConfigFactory
+
 from databuilder.transformer.base_transformer import Transformer
 from databuilder.models.table_metadata import TableMetadata
-
-from pyhocon import ConfigFactory
 
 
 class TableTagTransformer(Transformer):
