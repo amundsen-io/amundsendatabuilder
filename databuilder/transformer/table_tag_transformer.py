@@ -1,3 +1,9 @@
+from databuilder.transformer.base_transformer import Transformer
+from databuilder.models.table_metadata import TableMetadata
+
+from pyhocon import ConfigFactory
+
+
 class TableTagTransformer(Transformer):
     """Simple transformer that adds tags to all table nodes produced as part of a job."""
     # Config
