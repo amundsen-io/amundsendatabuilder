@@ -106,7 +106,7 @@ DASHBOARD_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
               }
             }
           }
-        },   
+        },
         "mappings":{
             "dashboard":{
               "properties": {
