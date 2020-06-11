@@ -143,12 +143,17 @@ DASHBOARD_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
                       "type": "keyword"
                     }
                   }
+                },
+                "tags": {
+                  "type": "keyword"
+                },
+                "badges": {
+                  "type": "keyword"
                 }
               }
             }
           }
         }
-
     """
 )
 
