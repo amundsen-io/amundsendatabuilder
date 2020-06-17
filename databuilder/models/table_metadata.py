@@ -260,11 +260,8 @@ class TableMetadata(Neo4jCsvSerializable):
         self.columns = columns if columns else []
         self.is_view = is_view
         self.attrs = None
-        if isinstance(tags, str):
-            tags = list(filter(None, tags.split(',')))
-        if isinstance(tags, list):
-            tags = [tag.lower().strip() for tag in tags]
-        self.tags = tags
+
+        self.tags = TableMetadata.format_tags(tags)
 
         if kwargs:
             self.attrs = copy.deepcopy(kwargs)
@@ -330,6 +327,14 @@ class TableMetadata(Neo4jCsvSerializable):
                                                                tbl=self.name,
                                                                col=col.name,
                                                                description_id=description.get_description_id())
+
+    @staticmethod
+    def format_tags(tags):
+        if isinstance(tags, str):
+            tags = list(filter(None, tags.split(',')))
+        if isinstance(tags, list):
+            tags = [tag.lower().strip() for tag in tags]
+        return tags
 
     def create_next_node(self):
         # type: () -> Union[Dict[str, Any], None]

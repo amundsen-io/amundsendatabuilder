@@ -14,18 +14,17 @@ class TableTagTransformer(Transformer):
         conf = conf.with_fallback(TableTagTransformer.DEFAULT_CONFIG)
         tags = conf.get_string(TableTagTransformer.TAGS)
 
-        if isinstance(tags, str):
-            tags = tags.split(",")
-        self.tags = tags
+        self.tags = TableMetadata.format_tags(tags)
 
     def transform(self, record):
         if isinstance(record, TableMetadata):
             if record.tags:
+                print(record.tags)
                 record.tags += self.tags
             else:
                 record.tags = self.tags
-            return record
+        return record
 
     def get_scope(self):
         # type: () -> str
-        return "transformer.tabletag"
+        return "transformer.table_tag"
