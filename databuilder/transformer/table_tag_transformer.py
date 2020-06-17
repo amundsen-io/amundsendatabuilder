@@ -19,7 +19,6 @@ class TableTagTransformer(Transformer):
     def transform(self, record):
         if isinstance(record, TableMetadata):
             if record.tags:
-                print(record.tags)
                 record.tags += self.tags
             else:
                 record.tags = self.tags
