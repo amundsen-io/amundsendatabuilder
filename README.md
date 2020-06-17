@@ -649,7 +649,7 @@ Transforms string timestamp into int epoch
 #### [RemoveFieldTransformer](./databuilder/transformer/remove_field_transformer.py)
 Remove fields from the Dict.
 
-#### [RemoveFieldTransformer](./databuilder/transformer/generic_transformer.py)
+#### [GenericTransformer](./databuilder/transformer/generic_transformer.py)
 Transforms dictionary based on callback function that user provides.
 
 
