@@ -3,14 +3,11 @@ import unittest
 from pyhocon import ConfigFactory
 
 from databuilder.transformer.table_tag_transformer import TableTagTransformer
-from databuilder.models.table_metadata import TableMetadata, TagMetadata
+from databuilder.models.table_metadata import TableMetadata
 
 
 class TestTableTagTransformer(unittest.TestCase):
-
     def test_single_tag(self):
-        # type: () -> None
-
         transformer = TableTagTransformer()
         config = ConfigFactory.from_dict({
             TableTagTransformer.TAGS: "foo",
@@ -18,13 +15,13 @@ class TestTableTagTransformer(unittest.TestCase):
         transformer.init(conf=config)
 
         result = transformer.transform(TableMetadata(
-            database = "test_db",
-            cluster = "test_cluster",
-            schema = "test_schema",
-            name = "test_table",
-            description = "",
+            database="test_db",
+            cluster="test_cluster",
+            schema="test_schema",
+            name="test_table",
+            description="",
         ))
-        
+
         self.assertEqual(result.tags, ["foo"])
 
     def test_multiple_tags_comma_delimited(self):
@@ -35,13 +32,13 @@ class TestTableTagTransformer(unittest.TestCase):
         transformer.init(conf=config)
 
         result = transformer.transform(TableMetadata(
-            database = "test_db",
-            cluster = "test_cluster",
-            schema = "test_schema",
-            name = "test_table",
-            description = "",
+            database="test_db",
+            cluster="test_cluster",
+            schema="test_schema",
+            name="test_table",
+            description="",
         ))
-        
+
         self.assertEqual(result.tags, ["foo", "bar"])
 
     def test_add_tag_to_existing_tags(self):
@@ -52,25 +49,27 @@ class TestTableTagTransformer(unittest.TestCase):
         transformer.init(conf=config)
 
         result = transformer.transform(TableMetadata(
-            database = "test_db",
-            cluster = "test_cluster",
-            schema = "test_schema",
-            name = "test_table",
-            description = "",
-            tags = "foo,bar",
+            database="test_db",
+            cluster="test_cluster",
+            schema="test_schema",
+            name="test_table",
+            description="",
+            tags="foo,bar",
         ))
         self.assertEqual(result.tags, ["foo", "bar", "baz"])
-    
+
     def test_tags_not_added_to_other_objects(self):
         transformer = TableTagTransformer()
         config = ConfigFactory.from_dict({
             TableTagTransformer.TAGS: "new_tag",
         })
         transformer.init(conf=config)
+
         class NotATable():
             tags = "existing_tag"
+
         result = transformer.transform(NotATable())
-        
+
         self.assertEqual(result.tags, "existing_tag")
 
 
