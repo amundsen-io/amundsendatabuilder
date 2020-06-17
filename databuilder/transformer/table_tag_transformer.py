@@ -7,7 +7,7 @@ from databuilder.models.table_metadata import TableMetadata
 class TableTagTransformer(Transformer):
     """Simple transformer that adds tags to all table nodes produced as part of a job."""
     # Config
-    TAGS = "tags"
+    TAGS = 'tags'
     DEFAULT_CONFIG = ConfigFactory.from_dict({TAGS: None})
 
     def init(self, conf):
@@ -26,4 +26,4 @@ class TableTagTransformer(Transformer):
 
     def get_scope(self):
         # type: () -> str
-        return "transformer.table_tag"
+        return 'transformer.table_tag'
