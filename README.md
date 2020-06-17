@@ -652,6 +652,9 @@ Remove fields from the Dict.
 #### [TableTagTransformer](./databuilder/transformer/table_tag_transformer.py)
 Adds the same set of tags to all tables produced by the job.
 
+#### [GenericTransformer](./databuilder/transformer/generic_transformer.py)
+Transforms dictionary based on callback function that user provides.
+
 ## List of loader
 #### [FsNeo4jCSVLoader](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/loader/file_system_neo4j_csv_loader.py "FsNeo4jCSVLoader")
 Write node and relationship CSV file(s) that can be consumed by Neo4jCsvPublisher. It assumes that the record it consumes is instance of Neo4jCsvSerializable.
