@@ -623,14 +623,14 @@ The included `RedashDashboardExtractor` provides support for extracting basic me
 Note: `DashboardUsage` and `DashboardExecution` metadata are not supported in this extractor. For implementation suggestions, please see TODO: link here.
 
 ```python
-extractor = ModeDashboardUserExtractor()
+extractor = RedashDashboardExtractor()
 task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
 
 job_config = ConfigFactory.from_dict({
 	'extractor.redash_dashboard.redash_base_url': redash_base_url, # ex: https://redash.example.org
 	'extractor.redash_dashboard.api_base_url': api_base_url, # ex: https://redash.example.org/api
-	"extractor.redash_dashboard.api_key": api_key, # ex: abc1234
-	"extractor.redash_dashboard.table_parser": table_parser # ex: my_library.module.parse_tables
+	'extractor.redash_dashboard.api_key': api_key, # ex: abc1234
+	'extractor.redash_dashboard.table_parser': table_parser # ex: my_library.module.parse_tables
 })
 
 job = DefaultJob(conf=job_config,
