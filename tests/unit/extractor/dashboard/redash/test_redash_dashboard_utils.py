@@ -167,3 +167,7 @@ class TestRedashDashboardUtils(unittest.TestCase):
                 n_records += 1
 
             self.assertEqual(n_records, 12)
+
+
+if __name__ == '__main__':
+    unittest.main()
