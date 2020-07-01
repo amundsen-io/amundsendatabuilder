@@ -11,7 +11,8 @@ from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.rest_api.base_rest_api_query import EmptyRestApiQuerySeed
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY
 from databuilder.extractor.dashboard.redash.redash_dashboard_utils import \
-    get_auth_headers, get_text_widgets, get_visualization_widgets, sort_widgets, generate_dashboard_description, RedashPaginatedRestApiQuery
+    get_auth_headers, get_text_widgets, get_visualization_widgets, sort_widgets, \
+    generate_dashboard_description, RedashPaginatedRestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME as TS_FIELD_NAME
 

@@ -35,25 +35,25 @@ class TestRedashDashboardUtils(unittest.TestCase):
         random.shuffle(widgets)
         sorted_widgets = sort_widgets(widgets)
         self.assertListEqual([widget['text'] for widget in sorted_widgets], ['a', 'b', 'c', 'd'])
-    
+
     def test_widget_filters(self):
         widgets = [
-            { 'text': 'asdf', 'options': {'ex': 1}},
-            { 'text': 'asdf', 'options': {'ex': 2}},
-            { 'visualization': {}, 'options': {'ex': 1}},
-            { 'visualization': {}, 'options': {'ex': 2}},
-            { 'visualization': {}, 'options': {'ex': 3}}
+            {'text': 'asdf', 'options': {'ex': 1}},
+            {'text': 'asdf', 'options': {'ex': 2}},
+            {'visualization': {}, 'options': {'ex': 1}},
+            {'visualization': {}, 'options': {'ex': 2}},
+            {'visualization': {}, 'options': {'ex': 3}}
         ]
         self.assertEqual(len(get_text_widgets(widgets)), 2)
         self.assertEqual(len(get_visualization_widgets(widgets)), 3)
-    
+
     def test_text_widget_props(self):
         widget_data = {
             'text': 'asdf'
         }
         widget = get_text_widgets([widget_data])[0]
         self.assertEqual(widget.text, 'asdf')
-    
+
     def test_visualization_widget_props(self):
         widget_data = {
             'visualization': {
@@ -66,7 +66,7 @@ class TestRedashDashboardUtils(unittest.TestCase):
             }
         }
         widget = get_visualization_widgets([widget_data])[0]
-        
+
         self.assertEqual(widget.query_id, 123)
         self.assertEqual(widget.data_source_id, 1)
         self.assertEqual(widget.raw_query, 'SELECT 2+2 FROM DUAL')
@@ -74,8 +74,8 @@ class TestRedashDashboardUtils(unittest.TestCase):
 
     def test_descriptions_from_text(self):
         text_widgets = get_text_widgets([
-            { 'text': 'T1' },
-            { 'text': 'T2' }
+            {'text': 'T1'},
+            {'text': 'T2'}
         ])
         viz_widgets = get_visualization_widgets([
             {
@@ -124,7 +124,8 @@ class TestRedashDashboardUtils(unittest.TestCase):
         self.assertTrue('testkey' in headers['Authorization'])
 
     def test_paginated_rest_api_query(self):
-        paged_content = [{
+        paged_content = [
+            {
                 'page': 1,
                 'page_size': 5,
                 'count': 12,
@@ -152,7 +153,7 @@ class TestRedashDashboardUtils(unittest.TestCase):
 
         with patch('databuilder.rest_api.rest_api_query.requests.get') as mock_get:
             # .json() is called twice (ugh), so we have to double each page
-            mock_get.return_value.json.side_effect = [page for page in paged_content for page in [page]*2]
+            mock_get.return_value.json.side_effect = [page for page in paged_content for page in [page] * 2]
 
             q = RedashPaginatedRestApiQuery(seed_record=EmptyRestApiQuerySeed(),
                                             query_to_join=EmptyRestApiQuerySeed(),
@@ -165,5 +166,5 @@ class TestRedashDashboardUtils(unittest.TestCase):
             for record in q.execute():
                 self.assertEqual(record['test'], True)
                 n_records += 1
-            
+
             self.assertEqual(n_records, 12)
