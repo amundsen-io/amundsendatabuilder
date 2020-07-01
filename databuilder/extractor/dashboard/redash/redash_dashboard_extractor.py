@@ -11,7 +11,7 @@ from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.rest_api.base_rest_api_query import EmptyRestApiQuerySeed
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY
 from databuilder.extractor.dashboard.redash.redash_dashboard_utils import \
-    get_auth_headers, get_text_widgets, get_visualization_widgets, sort_widgets, RedashPaginatedRestApiQuery
+    get_auth_headers, get_text_widgets, get_visualization_widgets, sort_widgets, generate_dashboard_description, RedashPaginatedRestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME as TS_FIELD_NAME
 
@@ -131,22 +131,8 @@ class RedashDashboardExtractor(Extractor):
             text_widgets = get_text_widgets(widgets)
             viz_widgets = get_visualization_widgets(widgets)
 
-            # Redash doesn't have dashboard descriptions, so we'll make our own.
-            # If there exist any text widgets, concatenate them,
-            # and use this text as the description for this dashboard.
-            # If not, put together a list of query names.
-            # If all else fails, this looks like an empty dashboard.
-            if len(text_widgets) > 0:
-                dash_data['description'] = '\n\n'.join([w.text for w in text_widgets])
-            elif len(viz_widgets) > 0:
-                query_list = '\n'.join(['- {}'.format(v.query_name) for v in set(viz_widgets)])
-                dash_data['description'] = 'A dashboard containing the following queries:\n\n' + query_list
-            else:
-                dash_data['description'] = 'This dashboard appears to be empty!'
-
-            # TODO: This needs to be removed, pending the following PR:
-            # https://github.com/lyft/amundsendatabuilder/pull/291
-            dash_data['description'] = dash_data['description'].replace('\\', '\\\\')
+            # generate a description for this dashboard, since Redash does not have descriptions
+            dash_data['description'] = generate_dashboard_description(text_widgets, viz_widgets)
 
             yield DashboardMetadata(**dash_data)
 
@@ -170,9 +156,6 @@ class RedashDashboardExtractor(Extractor):
                     'query_text': viz.raw_query
                 }
 
-                # TODO: This needs to be removed, pending the following PR:
-                # https://github.com/lyft/amundsendatabuilder/pull/291
-                query_data['query_text'] = query_data['query_text'].replace('\\', '\\\\')
                 query_data.update(identity_data)
                 yield DashboardQuery(**query_data)
 

@@ -34,6 +34,25 @@ def get_auth_headers(api_key):
     return {'Authorization': 'Key {}'.format(api_key)}
 
 
+def generate_dashboard_description(text_widgets, viz_widgets):
+    # type: (Iterator[RedashTextWidget], Iterator[RedashVisualizationWidget]) -> str
+    """
+    Redash doesn't have dashboard descriptions, so we'll make our own.
+    If there exist any text widgets, concatenate them,
+    and use this text as the description for this dashboard.
+    If not, put together a list of query names.
+    If all else fails, this looks like an empty dashboard.
+    """
+
+    if len(text_widgets) > 0:
+        return '\n\n'.join([w.text for w in text_widgets])
+    elif len(viz_widgets) > 0:
+        query_list = '\n'.join(['- {}'.format(v.query_name) for v in set(viz_widgets)])
+        return 'A dashboard containing the following queries:\n\n' + query_list
+    
+    return 'This dashboard appears to be empty!'
+
+
 class RedashVisualizationWidget:
     """
     A visualization widget in a Redash dashboard.
