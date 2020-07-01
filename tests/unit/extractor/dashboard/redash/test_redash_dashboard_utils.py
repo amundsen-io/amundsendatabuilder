@@ -155,8 +155,7 @@ class TestRedashDashboardUtils(unittest.TestCase):
             # .json() is called twice (ugh), so we have to double each page
             mock_get.return_value.json.side_effect = [page for page in paged_content for page in [page] * 2]
 
-            q = RedashPaginatedRestApiQuery(seed_record=EmptyRestApiQuerySeed(),
-                                            query_to_join=EmptyRestApiQuerySeed(),
+            q = RedashPaginatedRestApiQuery(query_to_join=EmptyRestApiQuerySeed(),
                                             url='example.com',
                                             json_path='results[*].[test]',
                                             params={},
