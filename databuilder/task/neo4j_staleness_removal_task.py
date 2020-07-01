@@ -83,15 +83,6 @@ class Neo4jStalenessRemovalTask(Task):
         if JOB_PUBLISH_TAG in conf and MS_TO_EXPIRE in conf:
             raise Exception('Cannot have both {} and {} in job config'.format(JOB_PUBLISH_TAG, MS_TO_EXPIRE))
 
-        self.ms_to_expire = None
-        if MS_TO_EXPIRE in conf:
-            self.ms_to_expire = conf.get_int(MS_TO_EXPIRE)
-            if self.ms_to_expire < conf.get_int(MIN_MS_TO_EXPIRE):
-                raise Exception('{} is too small'.format(MS_TO_EXPIRE))
-            self.marker = '(timestamp() - {})'.format(conf.get_int(MS_TO_EXPIRE))
-        else:
-            self.marker = conf.get_string(JOB_PUBLISH_TAG)
-
         trust = neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES if conf.get_bool(NEO4J_VALIDATE_SSL) \
             else neo4j.TRUST_ALL_CERTIFICATES
         self._driver = \
@@ -100,6 +91,16 @@ class Neo4jStalenessRemovalTask(Task):
                                  auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
                                  encrypted=conf.get_bool(NEO4J_ENCRYPTED),
                                  trust=trust)
+
+        self.ms_to_expire = None
+        if MS_TO_EXPIRE in conf:
+            self.ms_to_expire = conf.get_int(MS_TO_EXPIRE)
+            if self.ms_to_expire < conf.get_int(MIN_MS_TO_EXPIRE):
+                raise Exception('{} is too small'.format(MS_TO_EXPIRE))
+            neo_timestamp = self._execute_cypher_query('return timestamp() as timestamp').single()['timestamp']
+            self.marker = neo_timestamp - conf.get_int(MS_TO_EXPIRE)
+        else:
+            self.marker = conf.get_string(JOB_PUBLISH_TAG)
 
     def run(self):
         # type: () -> None

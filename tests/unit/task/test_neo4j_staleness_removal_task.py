@@ -97,7 +97,9 @@ class TestRemoveStaleData(unittest.TestCase):
             task._validate_staleness_pct(total_records=total_records, stale_records=stale_records, types=targets)
 
     def test_marker(self):
-        with patch.object(GraphDatabase, 'driver'):
+        with patch.object(GraphDatabase, 'driver'), patch.object(Neo4jStalenessRemovalTask, '_execute_cypher_query') \
+                as mock_execute:
+            mock_execute.return_value.single.return_value = {'timestamp': 86400000 + 9999999999}
             task = Neo4jStalenessRemovalTask()
             job_config = ConfigFactory.from_dict({
                 'job.identifier': 'remove_stale_data_job',
@@ -133,7 +135,7 @@ class TestRemoveStaleData(unittest.TestCase):
 
             task.init(job_config)
             self.assertIsNotNone(task.ms_to_expire)
-            self.assertEqual(task.marker, '(timestamp() - 86400000)')
+            self.assertEqual(task.marker, 9999999999)
 
     def test_validation_statement_publish_tag(self):
         with patch.object(GraphDatabase, 'driver'), patch.object(Neo4jStalenessRemovalTask, '_execute_cypher_query') \
@@ -187,6 +189,7 @@ class TestRemoveStaleData(unittest.TestCase):
     def test_validation_statement_ms_to_expire(self):
         with patch.object(GraphDatabase, 'driver'), patch.object(Neo4jStalenessRemovalTask, '_execute_cypher_query') \
                 as mock_execute:
+            mock_execute.return_value.single.return_value = {'timestamp': 9876543210 + 9999999999}
             task = Neo4jStalenessRemovalTask()
             job_config = ConfigFactory.from_dict({
                 'job.identifier': 'remove_stale_data_job',
@@ -212,7 +215,7 @@ class TestRemoveStaleData(unittest.TestCase):
             RETURN head(node) as type, count
             """))
 
-            mock_execute.assert_any_call(param_dict={'marker': '(timestamp() - 9876543210)'},
+            mock_execute.assert_any_call(param_dict={'marker': 9999999999},
                                          statement=textwrap.dedent("""
             MATCH (n)
             WHERE 
@@ -223,7 +226,7 @@ class TestRemoveStaleData(unittest.TestCase):
             """))
 
             task._validate_relation_staleness_pct()
-            mock_execute.assert_any_call(param_dict={'marker': '(timestamp() - 9876543210)'},
+            mock_execute.assert_any_call(param_dict={'marker': 9999999999},
                                          statement=textwrap.dedent("""
             MATCH ()-[n]-()
             WHERE 
@@ -285,7 +288,7 @@ class TestRemoveStaleData(unittest.TestCase):
     def test_delete_statement_ms_to_expire(self):
         with patch.object(GraphDatabase, 'driver'), patch.object(Neo4jStalenessRemovalTask, '_execute_cypher_query') \
                 as mock_execute:
-            mock_execute.return_value.single.return_value = {'count': 0}
+            mock_execute.return_value.single.return_value = {'count': 0, 'timestamp': 9876543210 + 9999999999}
             task = Neo4jStalenessRemovalTask()
             job_config = ConfigFactory.from_dict({
                 'job.identifier': 'remove_stale_data_job',
@@ -310,7 +313,7 @@ class TestRemoveStaleData(unittest.TestCase):
             task._delete_stale_relations()
 
             mock_execute.assert_any_call(dry_run=False,
-                                         param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size':  100},
+                                         param_dict={'marker': 9999999999, 'batch_size':  100},
                                          statement=textwrap.dedent("""
             MATCH (n:Foo)
             WHERE 
@@ -322,7 +325,7 @@ class TestRemoveStaleData(unittest.TestCase):
             """))
 
             mock_execute.assert_any_call(dry_run=False,
-                                         param_dict={'marker': '(timestamp() - 9876543210)', 'batch_size': 100},
+                                         param_dict={'marker': 9999999999, 'batch_size': 100},
                                          statement=textwrap.dedent("""
             MATCH ()-[n:BAR]-()
             WHERE 
