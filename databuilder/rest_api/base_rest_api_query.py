@@ -52,4 +52,4 @@ class EmptyRestApiQuerySeed(RestApiQuerySeed):
     def __init__(self):
         # type: () -> None
 
-        super(EmptyRestApiQuerySeed, self).__init__([{'empty_rest_api_seed': 1}])
+        super(EmptyRestApiQuerySeed, self).__init__([{'empty_rest_api_query_seed': 1}])

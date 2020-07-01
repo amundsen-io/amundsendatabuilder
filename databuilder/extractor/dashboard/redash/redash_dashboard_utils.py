@@ -2,7 +2,7 @@ from databuilder.rest_api.rest_api_query import RestApiQuery
 
 
 def sort_widgets(widgets):
-    # type: (Iterator[Any]) -> Iterator[Any]
+    # type: (Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]
     """
     Sort widgets according to their position in the dashboard (top to bottom, left to right)
     Redash does not return widgets in order of their position in the dashboard,
