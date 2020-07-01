@@ -211,11 +211,9 @@ class RedashDashboardExtractor(Extractor):
         # type: () -> RestAPIExtractor
 
         extractor = RestAPIExtractor()
-        rest_api_extractor_conf = ConfigFactory.from_dict(
-            {
+        rest_api_extractor_conf = ConfigFactory.from_dict({
                 REST_API_QUERY: self._build_restapi_query()
-            }
-        )
+        })
         extractor.init(rest_api_extractor_conf)
         return extractor
 
@@ -226,17 +224,15 @@ class RedashDashboardExtractor(Extractor):
 
         # transform timestamps from ISO to unix epoch
         ts_transformer_1 = TimestampStringToEpoch()
-        ts_transformer_1.init(conf=ConfigFactory.from_dict({
+        ts_transformer_1.init(ConfigFactory.from_dict({
             TS_FIELD_NAME: 'created_timestamp',
         }))
         transformers.append(ts_transformer_1)
 
         ts_transformer_2 = TimestampStringToEpoch()
-        ts_transformer_2.init(
-            conf=ConfigFactory.from_dict({
+        ts_transformer_2.init(ConfigFactory.from_dict({
                 TS_FIELD_NAME: 'last_modified_timestamp',
-            })
-        )
+        }))
         transformers.append(ts_transformer_2)
 
         return ChainedTransformer(transformers=transformers)
