@@ -109,7 +109,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
                 'dashboard_id': 123,
                 'dashboard_group_id': RedashDashboardExtractor.DASHBOARD_GROUP_ID,
                 'product': RedashDashboardExtractor.PRODUCT,
-                'cluster': RedashDashboardExtractor.DEFAULT_CLUSTER
+                'cluster': u'prod'
             }
             expected = DashboardLastModifiedTimestamp(
                 last_modified_timestamp=1577923200,
@@ -127,7 +127,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
             expected = DashboardQuery(
                 query_id=1234,
                 query_name='Test Query',
-                url='{base}/queries/1234'.format(base=redash_base_url),
+                url=u'{base}/queries/1234'.format(base=redash_base_url),
                 query_text='SELECT id FROM users',
                 **identity
             )
