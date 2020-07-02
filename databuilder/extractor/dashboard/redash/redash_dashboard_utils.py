@@ -4,8 +4,9 @@ from databuilder.rest_api.rest_api_query import RestApiQuery
 def sort_widgets(widgets):
     # type: (Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]
     """
-    Sort widgets according to their position in the dashboard (top to bottom, left to right)
-    Redash does not return widgets in order of their position in the dashboard,
+    Sort raw widget data (as returned from the API) according to the position 
+    of the widgets in the dashboard (top to bottom, left to right)
+    Redash does not return widgets in order of their position,
     so we do this to ensure that we look at widgets in a sensible order.
     """
 
@@ -18,13 +19,23 @@ def sort_widgets(widgets):
 
 
 def get_text_widgets(widgets):
-    # type: (Iterator[Dict[str, Any]]) -> Iterator[RedashTextWidget]
+    # type: (Iterator[Dict[str, Any]]) -> List[RedashTextWidget]
+    """
+    From the raw set of widget data returned from the API, filter down
+    to text widgets and return them as a list of `RedashTextWidget`
+    """
+
     return [RedashTextWidget(widget) for widget in widgets
             if 'text' in widget and 'visualization' not in widget]
 
 
 def get_visualization_widgets(widgets):
-    # type: (Iterator[Dict[str, Any]]) -> Iterator[RedashVisualizationWidget]
+    # type: (Iterator[Dict[str, Any]]) -> List[RedashVisualizationWidget]
+    """
+    From the raw set of widget data returned from the API, filter down
+    to visualization widgets and return them as a list of `RedashVisualizationWidget`
+    """
+
     return [RedashVisualizationWidget(widget) for widget in widgets
             if 'visualization' in widget]
 
