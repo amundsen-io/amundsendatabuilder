@@ -618,9 +618,9 @@ If you are fine with `accumulated usage`, you could use TemplateVariableSubstitu
 
 ### [RedashDashboardExtractor](./databuilder/extractor/dashboard/redash/redash_dashboard_extractor.py)
 
-The included `RedashDashboardExtractor` provides support for extracting basic metadata for Redash dashboards (dashboard name, description, owner, URL, created/updated timestamps) and their associated queries (query name, URL, and raw query). It can be extended with a configurable table parser function to also support extraction of `DashboardTable` metadata. (See below.)
+The included `RedashDashboardExtractor` provides support for extracting basic metadata for Redash dashboards (dashboard name, owner, URL, created/updated timestamps, and a generated description) and their associated queries (query name, URL, and raw query). It can be extended with a configurable table parser function to also support extraction of `DashboardTable` metadata. (See below for example usage.)
 
-Note: `DashboardUsage` and `DashboardExecution` metadata are not supported in this extractor. For implementation suggestions, please see TODO: link here.
+Note: `DashboardUsage` and `DashboardExecution` metadata are not supported in this extractor, as these concepts are not supported by the Redash API.
 
 ```python
 extractor = RedashDashboardExtractor()
@@ -646,7 +646,7 @@ The `RedashDashboardExtractor` extracts raw queries from each dashboard. You may
 ```python
 def parse_tables(viz_widget):
 	# type: (RedashVisualiationWidget) -> Iterator[TableRelationData]
-	# Each viz_widget has one query.
+	# Each viz_widget corresponds to one query.
 	# viz_widget.data_source_id is the ID of the target DB in Redash.
 	# viz_widget.raw_query is the raw query (e.g., SQL).
 	if viz_widget.data_source_id == 123:
