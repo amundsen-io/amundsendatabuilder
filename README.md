@@ -622,6 +622,8 @@ The included `RedashDashboardExtractor` provides support for extracting basic me
 
 Note: `DashboardUsage` and `DashboardExecution` metadata are not supported in this extractor, as these concepts are not supported by the Redash API.
 
+The `RedashDashboardExtractor` depends on the following Redash API endpoints: `GET /api/dashboards`, `GET /api/dashboards/<dashboard-slug>`. It has been tested against Redash 8 and is also expected to work with Redash 9.
+
 ```python
 extractor = RedashDashboardExtractor()
 task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
