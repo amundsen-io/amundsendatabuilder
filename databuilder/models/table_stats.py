@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
 from databuilder.models.table_metadata import ColumnMetadata
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
 class TableColumnStats(Neo4jCsvSerializable):
@@ -46,7 +46,7 @@ class TableColumnStats(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphNode, None]
         # return the string representation of the data
         try:
             return next(self._node_iter)
@@ -54,7 +54,7 @@ class TableColumnStats(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iter)
         except StopIteration:
@@ -79,33 +79,37 @@ class TableColumnStats(Neo4jCsvSerializable):
                                                        col=self.col_name)
 
     def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphNode]
         """
         Create a list of Neo4j node records
         :return:
         """
-        results = [{
-            NODE_KEY: self.get_table_stat_model_key(),
-            NODE_LABEL: TableColumnStats.LABEL,
-            'stat_val:UNQUOTED': self.stat_val,
-            'stat_name': self.stat_name,
-            'start_epoch': self.start_epoch,
-            'end_epoch': self.end_epoch,
-        }]
+        node = GraphNode(
+            id=self.get_table_stat_model_key(),
+            label=TableColumnStats.LABEL,
+            node_attributes={
+                'stat_val:UNQUOTED': self.stat_val,
+                'stat_name': self.stat_name,
+                'start_epoch': self.start_epoch,
+                'end_epoch': self.end_epoch,
+            }
+        )
+        results = [node]
         return results
 
     def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphRelationship]
         """
         Create a list of relation map between table stat record with original hive table
         :return:
         """
-        results = [{
-            RELATION_START_KEY: self.get_table_stat_model_key(),
-            RELATION_START_LABEL: TableColumnStats.LABEL,
-            RELATION_END_KEY: self.get_col_key(),
-            RELATION_END_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
-            RELATION_TYPE: TableColumnStats.STAT_Column_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: TableColumnStats.Column_STAT_RELATION_TYPE
-        }]
+        relationship = GraphRelationship(
+            start_key=self.get_table_stat_model_key(),
+            start_label=TableColumnStats.LABEL,
+            end_key=self.get_col_key(),
+            end_label=ColumnMetadata.COLUMN_NODE_LABEL,
+            type=TableColumnStats.STAT_Column_RELATION_TYPE,
+            reverse_type=TableColumnStats.Column_STAT_RELATION_TYPE
+        )
+        results = [relationship]
         return results
