@@ -1,9 +1,6 @@
 from typing import Union, Dict, Any, Iterator  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, RELATION_START_KEY, RELATION_END_KEY,
-    RELATION_START_LABEL, RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-)
+from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
 from databuilder.models.usage.usage_constants import (
     READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
 )
@@ -75,7 +72,7 @@ class ColumnUsageModel(Neo4jCsvSerializable):
             return None
 
     def create_relation(self):
-        # type: () -> Iterator[Any]
+        # type: () -> Iterator[GraphRelationship]
         relationship = GraphRelationship(
             start_key=self._get_table_key(),
             start_label=TableMetadata.TABLE_NODE_LABEL,

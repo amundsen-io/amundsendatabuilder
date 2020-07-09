@@ -93,7 +93,7 @@ class Application(Neo4jCsvSerializable):
         )
         application_node = GraphNode(
             id=self.get_application_model_key(),
-            labels=[Application.APPLICATION_LABEL],
+            label=Application.APPLICATION_LABEL,
             node_attributes={
                 Application.APPLICATION_URL_NAME: self.application_url,
                 Application.APPLICATION_NAME: Application.APPLICATION_TYPE,

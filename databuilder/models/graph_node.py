@@ -1,3 +1,3 @@
 from collections import namedtuple
 
-GraphNode = namedtuple('GraphNode', ['id', 'labels', 'node_attributes'])
+GraphNode = namedtuple('GraphNode', ['id', 'label', 'node_attributes'])
