@@ -9,6 +9,8 @@ from databuilder.models.usage.usage_constants import (
 )
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
 class ColumnUsageModel(Neo4jCsvSerializable):
@@ -48,7 +50,7 @@ class ColumnUsageModel(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
 
         try:
             return next(self._node_iter)
@@ -56,7 +58,7 @@ class ColumnUsageModel(Neo4jCsvSerializable):
             return None
 
     def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphNode]
         """
         Create a list of Neo4j node records
         :return:
@@ -65,7 +67,7 @@ class ColumnUsageModel(Neo4jCsvSerializable):
         return User(email=self.user_email).create_nodes()
 
     def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphRelationship, None]
 
         try:
             return next(self._relation_iter)
@@ -74,15 +76,18 @@ class ColumnUsageModel(Neo4jCsvSerializable):
 
     def create_relation(self):
         # type: () -> Iterator[Any]
-        return [{
-            RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-            RELATION_END_LABEL: User.USER_NODE_LABEL,
-            RELATION_START_KEY: self._get_table_key(),
-            RELATION_END_KEY: self._get_user_key(self.user_email),
-            RELATION_TYPE: ColumnUsageModel.TABLE_USER_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: ColumnUsageModel.USER_TABLE_RELATION_TYPE,
-            ColumnUsageModel.READ_RELATION_COUNT: self.read_count
-        }]
+        relationship = GraphRelationship(
+            start_key=self._get_table_key(),
+            start_label=TableMetadata.TABLE_NODE_LABEL,
+            end_key=self._get_user_key(self.user_email),
+            end_label=User.USER_NODE_LABEL,
+            type=ColumnUsageModel.TABLE_USER_RELATION_TYPE,
+            reverse_type=ColumnUsageModel.USER_TABLE_RELATION_TYPE,
+            relationship_attributes={
+                ColumnUsageModel.READ_RELATION_COUNT: self.read_count
+            }
+        )
+        return [relationship]
 
     def _get_table_key(self):
         # type: (ColumnReader) -> str

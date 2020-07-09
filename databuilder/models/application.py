@@ -1,12 +1,11 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
 
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+
 
 class Application(Neo4jCsvSerializable):
     """
@@ -48,7 +47,7 @@ class Application(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphNode, None]
         # creates new node
         try:
             return next(self._node_iter)
@@ -56,7 +55,7 @@ class Application(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphNode, None]
         try:
             return next(self._relation_iter)
         except StopIteration:
