@@ -2,6 +2,8 @@ import abc
 
 import six
 from typing import Dict, Set, Any, Union  # noqa: F401
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 NODE_KEY = 'KEY'
 NODE_LABEL = 'LABEL'
@@ -35,7 +37,7 @@ class Neo4jCsvSerializable(object):
 
     @abc.abstractmethod
     def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
         """
         Creates dict where keys represent header in CSV and value represents
         row in CSV file. Should the class could have different types of
@@ -52,7 +54,7 @@ class Neo4jCsvSerializable(object):
 
     @abc.abstractmethod
     def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphRelationship, None]
         """
         Creates dict where keys represent header in CSV and value represents
         row in CSV file. Should the class could have different types of
@@ -68,7 +70,7 @@ class Neo4jCsvSerializable(object):
         raise NotImplementedError
 
     def next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
         """
         Provides node(vertex) in dict form.
         Note that subsequent call can create different header (dict.keys())
@@ -81,11 +83,11 @@ class Neo4jCsvSerializable(object):
         if not node_dict:
             return None
 
-        self._validate(NODE_REQUIRED_HEADERS, node_dict)
+        self._validate_node(node_dict)
         return node_dict
 
     def next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
         """
         Provides relation(edge) in dict form.
         Note that subsequent call can create different header (dict.keys())
@@ -98,38 +100,32 @@ class Neo4jCsvSerializable(object):
         if not relation_dict:
             return None
 
-        self._validate(RELATION_REQUIRED_HEADERS, relation_dict)
+        self._validate_relation(relation_dict)
         return relation_dict
 
-    def _validate(self, required_set, val_dict):
-        # type: (Set[str], Dict[str, Any]) -> None
-        """
-        Validates dict that represents CSV header and a row.
-         - Checks if it has required headers for either Node or Relation
-         - Checks value of LABEL if only first character is upper case
-         - Checks value of TYPE if it's all upper case characters
+    def _validate_node(self, node):
+        # type: ( GraphNode) -> None
+        node_id, node_label, _ = node
 
-        :param required_set:
-        :param val_dict:
-        :return:
-        """
-        required_count = 0
-        for header_col, val_col in \
-                ((header_col, val_col) for header_col, val_col
-                 in six.iteritems(val_dict) if header_col in required_set):
-            required_count += 1
+        if node_id is None:
+            RuntimeError('Required header missing. Required attributes id and label , Missing: id')
 
-            if header_col in LABELS:
-                if not val_col.istitle():
-                    raise RuntimeError(
-                        'LABEL should only have upper case character on its '
-                        'first one: {}'.format(val_col))
-            elif header_col in TYPES:
-                if not val_col == val_col.upper():
-                    raise RuntimeError(
-                        'TYPE needs to be upper case: '.format(val_col))
+        if node_label is None:
+            RuntimeError('Required header missing. Required attributes id and label , Missing: label')
 
-        if required_count != len(required_set):
-            raise RuntimeError(
-                'Required header missing. Required: {} , Header: {}'.format(
-                    required_set, val_dict.keys()))
+        self._validate_label_value(node_label)
+
+    def _validate_relation(self, relation):
+        # type: (GraphRelationship) -> None
+        self._validate_label_value(relation.start_label)
+        self._validate_label_value(relation.end_label)
+        self._validate_relation_type_value(relation.type)
+        self._validate_relation_type_value(relation.reverse_type)
+
+    def _validate_relation_type_value(self, value):
+        if not value == value.upper():
+            raise RuntimeError('TYPE needs to be upper case: '.format(value))
+
+    def _validate_label_value(self, value):
+        if not value.istitle():
+            raise RuntimeError('LABEL should only have upper case character on its first one: {}'.format(value))
