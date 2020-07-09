@@ -4,7 +4,6 @@ from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_node import GraphNode
 
 
-
 def convert_relationship(relationship):
     # type: (GraphRelationship) -> Dict[str, Any]
     pass
