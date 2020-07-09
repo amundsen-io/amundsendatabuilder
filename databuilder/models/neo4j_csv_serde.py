@@ -1,7 +1,7 @@
 import abc
 
 import six
-from typing import Dict, Set, Any, Union  # noqa: F401
+from typing import  Union  # noqa: F401
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 

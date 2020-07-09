@@ -114,17 +114,19 @@ class FsNeo4jCSVLoader(Loader):
         :return:
         """
 
-        node_dict = csv_serializable.next_node()
-        while node_dict:
-            key = (node_dict[NODE_LABEL], len(node_dict))
+        node = csv_serializable.next_node()
+        while node:
+            num_attributes = len(node.node_attributes) + 2
+            node_header = []
+            key = (node.label, num_attributes)
             file_suffix = '{}_{}'.format(*key)
-            node_writer = self._get_writer(node_dict,
+            node_writer = self._get_writer(node,
                                            self._node_file_mapping,
                                            key,
                                            self._node_dir,
                                            file_suffix)
-            node_writer.writerow(node_dict)
-            node_dict = csv_serializable.next_node()
+            node_writer.writerow(node)
+            node = csv_serializable.next_node()
 
         relation_dict = csv_serializable.next_relation()
         while relation_dict:
