@@ -1,12 +1,11 @@
 import re
-from typing import Any, Dict, List, Union  # noqa: F401
+from typing import List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, \
-    RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
 
 from databuilder.models.table_metadata import TableMetadata
-
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 class TableLineage(Neo4jCsvSerializable):
     # type: (...) -> None
@@ -38,7 +37,7 @@ class TableLineage(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphNode, None]
         # return the string representation of the data
         try:
             return next(self._node_iter)
@@ -46,7 +45,7 @@ class TableLineage(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iter)
         except StopIteration:
@@ -60,7 +59,7 @@ class TableLineage(Neo4jCsvSerializable):
                                                           table=table)
 
     def create_nodes(self):
-        # type: () -> List[Union[Dict[str, Any], None]]
+        # type: () -> List[Union[GraphNode, None]]
         """
         It won't create any node for this model
         :return:
@@ -68,7 +67,7 @@ class TableLineage(Neo4jCsvSerializable):
         return []
 
     def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphRelationship]
         """
         Create a list of relation between source table and all the downstream tables
         :return:
@@ -80,20 +79,24 @@ class TableLineage(Neo4jCsvSerializable):
             m = re.match('(\w+)://(\w+)\.(\w+)\/(\w+)', downstream_tab)
             if m:
                 # if not match, skip those records
-                results.append({
-                    RELATION_START_KEY: self.get_table_model_key(db=self.db,
-                                                                 cluster=self.cluster,
-                                                                 schema=self.schema,
-                                                                 table=self.table),
-                    RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-                    RELATION_END_KEY: self.get_table_model_key(db=m.group(1),
-                                                               cluster=m.group(2),
-                                                               schema=m.group(3),
-                                                               table=m.group(4)),
-                    RELATION_END_LABEL: TableMetadata.TABLE_NODE_LABEL,
-                    RELATION_TYPE: TableLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
-                    RELATION_REVERSE_TYPE: TableLineage.DEPENDENCY_ORIGIN_RELATION_TYPE
-                })
+                relationship = GraphRelationship(
+                    start_key=self.get_table_model_key(
+                        db=self.db,
+                        cluster=self.cluster,
+                        schema=self.schema,
+                        table=self.table
+                    ),
+                    start_label=TableMetadata.TABLE_NODE_LABEL,
+                    end_key=self.get_table_model_key(
+                        db=m.group(1),
+                        cluster=m.group(2),
+                        schema=m.group(3),
+                        table=m.group(4)
+                    ),
+                    type=TableLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
+                    reverse_type=TableLineage.DEPENDENCY_ORIGIN_RELATION_TYPE
+                )
+                results.append(relationship)
         return results
 
     def __repr__(self):
