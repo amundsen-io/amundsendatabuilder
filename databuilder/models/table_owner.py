@@ -1,11 +1,10 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
 from databuilder.models.owner_constants import OWNER_RELATION_TYPE, OWNER_OF_OBJECT_RELATION_TYPE
 from databuilder.models.user import User
-
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 class TableOwner(Neo4jCsvSerializable):
     # type: (...) -> None
@@ -35,7 +34,7 @@ class TableOwner(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphNode, None]
         # return the string representation of the data
         try:
             return next(self._node_iter)
@@ -43,7 +42,7 @@ class TableOwner(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iter)
         except StopIteration:
@@ -62,7 +61,7 @@ class TableOwner(Neo4jCsvSerializable):
                                                           table=self.table)
 
     def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphNode]
         """
         Create a list of Neo4j node records
         :return:
@@ -70,29 +69,33 @@ class TableOwner(Neo4jCsvSerializable):
         results = []
         for owner in self.owners:
             if owner:
-                results.append({
-                    NODE_KEY: self.get_owner_model_key(owner),
-                    NODE_LABEL: User.USER_NODE_LABEL,
-                    User.USER_NODE_EMAIL: owner
-                })
+                node = GraphNode(
+                    id=self.get_owner_model_key(owner),
+                    label=User.USER_NODE_LABEL,
+                    node_attributes={
+                        User.USER_NODE_EMAIL: owner
+                    }
+                )
+                results.append(node)
         return results
 
     def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphRelationship]
         """
         Create a list of relation map between owner record with original hive table
         :return:
         """
         results = []
         for owner in self.owners:
-            results.append({
-                RELATION_START_KEY: self.get_owner_model_key(owner),
-                RELATION_START_LABEL: User.USER_NODE_LABEL,
-                RELATION_END_KEY: self.get_metadata_model_key(),
-                RELATION_END_LABEL: 'Table',
-                RELATION_TYPE: TableOwner.OWNER_TABLE_RELATION_TYPE,
-                RELATION_REVERSE_TYPE: TableOwner.TABLE_OWNER_RELATION_TYPE
-            })
+            relationship = GraphRelationship(
+                start_key=self.get_owner_model_key(owner),
+                start_label=User.USER_NODE_LABEL,
+                end_key=self.get_metadata_model_key(),
+                end_label='Table',
+                type=TableOwner.OWNER_TABLE_RELATION_TYPE,
+                reverse_type=TableOwner.TABLE_OWNER_RELATION_TYPE
+            )
+            results.append(relationship)
 
         return results
 
