@@ -5,10 +5,10 @@ from typing import Optional, Dict, Any, List, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+    Neo4jCsvSerializable)
 from databuilder.models.table_metadata import TableMetadata
-
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,39 +41,40 @@ class DashboardTable(Neo4jCsvSerializable):
         self._relation_iterator = self._create_relation_iterator()
 
     def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
         return None
 
     def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
     def _create_relation_iterator(self):
-        # type: () -> Optional[None, Iterator[[Dict[str, Any]]]]
+        # type: () -> Optional[None, Iterator[GraphRelationship]]
         for table_id in self._table_ids:
             m = re.match('(\w+)://(\w+)\.(\w+)\/(\w+)', table_id)
             if m:
-                yield {
-                    RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
-                    RELATION_END_LABEL: TableMetadata.TABLE_NODE_LABEL,
-                    RELATION_START_KEY: DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+                relationship = GraphRelationship(
+                    start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
+                    end_label=TableMetadata.TABLE_NODE_LABEL,
+                    start_key=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
                         product=self._product,
                         cluster=self._cluster,
                         dashboard_group=self._dashboard_group_id,
                         dashboard_name=self._dashboard_id
                     ),
-                    RELATION_END_KEY: TableMetadata.TABLE_KEY_FORMAT.format(
+                    end_key=TableMetadata.TABLE_KEY_FORMAT.format(
                         db=m.group(1),
                         cluster=m.group(2),
                         schema=m.group(3),
                         tbl=m.group(4)
                     ),
-                    RELATION_TYPE: DashboardTable.DASHBOARD_TABLE_RELATION_TYPE,
-                    RELATION_REVERSE_TYPE: DashboardTable.TABLE_DASHBOARD_RELATION_TYPE
-                }
+                    type=DashboardTable.DASHBOARD_TABLE_RELATION_TYPE,
+                    reverse_type=DashboardTable.TABLE_DASHBOARD_RELATION_TYPE
+                )
+                yield relationship
 
     def __repr__(self):
         return 'DashboardTable({!r}, {!r}, {!r}, {!r}, ({!r}))'.format(

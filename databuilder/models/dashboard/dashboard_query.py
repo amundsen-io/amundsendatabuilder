@@ -4,8 +4,10 @@ from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+    Neo4jCsvSerializable)
+
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 LOGGER = logging.getLogger(__name__)
 
@@ -50,44 +52,49 @@ class DashboardQuery(Neo4jCsvSerializable):
             return None
 
     def _create_node_iterator(self):  # noqa: C901
-        # type: () -> Iterator[[Dict[str, Any]]]
-        node = {
-            NODE_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
-            NODE_KEY: self._get_query_node_key(),
+        # type: () -> Iterator[GraphNode]
+        node_attributes = {
             'id': self._query_id,
             'name': self._query_name,
         }
 
         if self._url:
-            node['url'] = self._url
+            node_attributes['url'] = self._url
 
         if self._query_text:
-            node['query_text'] = self._query_text
+            node_attributes['query_text'] = self._query_tex
+
+        node = GraphNode(
+            id=self._get_query_node_key(),
+            label=DashboardQuery.DASHBOARD_QUERY_LABEL,
+            node_attributes=node_attributes
+        )
 
         yield node
 
     def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
     def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
-            RELATION_END_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
-            RELATION_START_KEY: DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+        # type: () -> Iterator[GraphRelationship]
+        relationship = GraphRelationship(
+            start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
+            end_label=DashboardQuery.DASHBOARD_QUERY_LABEL,
+            start_key=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
                 product=self._product,
                 cluster=self._cluster,
                 dashboard_group=self._dashboard_group_id,
                 dashboard_name=self._dashboard_id
             ),
-            RELATION_END_KEY: self._get_query_node_key(),
-            RELATION_TYPE: DashboardQuery.DASHBOARD_QUERY_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE
-        }
+            end_key=self._get_query_node_key(),
+            type=DashboardQuery.DASHBOARD_QUERY_RELATION_TYPE,
+            reverse_type=DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE
+        )
+        yield relationship
 
     def _get_query_node_key(self):
         return DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(

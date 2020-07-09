@@ -3,9 +3,10 @@ import logging
 from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+from databuilder.models.neo4j_csv_serde import (Neo4jCsvSerializable)
+
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,43 +45,47 @@ class DashboardExecution(Neo4jCsvSerializable):
         self._relation_iterator = self._create_relation_iterator()
 
     def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
     def _create_node_iterator(self):  # noqa: C901
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            NODE_LABEL: DashboardExecution.DASHBOARD_EXECUTION_LABEL,
-            NODE_KEY: self._get_last_execution_node_key(),
-            'timestamp': self._execution_timestamp,
-            'state': self._execution_state
-        }
+        # type: () -> Iterator[GraphNode]
+        node = GraphNode(
+            id=self._get_last_execution_node_key(),
+            label=DashboardExecution.DASHBOARD_EXECUTION_LABEL,
+            node_attributes={
+                'timestamp': self._execution_timestamp,
+                'state': self._execution_state
+            }
+        )
+        yield node
 
     def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
     def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
-            RELATION_END_LABEL: DashboardExecution.DASHBOARD_EXECUTION_LABEL,
-            RELATION_START_KEY: DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+        # type: () -> Iterator[GraphRelationship]
+        relationship = GraphRelationship(
+            start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
+            start_key=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
                 product=self._product,
                 cluster=self._cluster,
                 dashboard_group=self._dashboard_group_id,
                 dashboard_name=self._dashboard_id
             ),
-            RELATION_END_KEY: self._get_last_execution_node_key(),
-            RELATION_TYPE: DashboardExecution.DASHBOARD_EXECUTION_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: DashboardExecution.EXECUTION_DASHBOARD_RELATION_TYPE
-        }
+            end_label=DashboardExecution.DASHBOARD_EXECUTION_LABEL,
+            end_key=self._get_last_execution_node_key(),
+            type=DashboardExecution.DASHBOARD_EXECUTION_RELATION_TYPE,
+            reverse_type=DashboardExecution.EXECUTION_DASHBOARD_RELATION_TYPE
+        )
+        yield relationship
 
     def _get_last_execution_node_key(self):
         return DashboardExecution.DASHBOARD_EXECUTION_KEY_FORMAT.format(
