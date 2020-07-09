@@ -1,9 +1,10 @@
 from typing import Dict, Any, Union, Iterator  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY)
+from databuilder.models.neo4j_csv_serde import (Neo4jCsvSerializable)
 from databuilder.models.schema.schema_constant import SCHEMA_NODE_LABEL, SCHEMA_NAME_ATTR
 from databuilder.models.table_metadata import DescriptionMetadata
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
 class SchemaModel(Neo4jCsvSerializable):
@@ -23,19 +24,22 @@ class SchemaModel(Neo4jCsvSerializable):
         self._relation_iterator = self._create_relation_iterator()
 
     def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+        # type: () -> Union[GraphNode, None]
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
     def _create_node_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            NODE_LABEL: SCHEMA_NODE_LABEL,
-            NODE_KEY: self._schema_key,
-            SCHEMA_NAME_ATTR: self._schema,
-        }
+        # type: () -> Iterator[GraphNode]
+        node = GraphNode(
+            id=self._schema_key,
+            label=SCHEMA_NODE_LABEL,
+            node_attributes={
+                SCHEMA_NAME_ATTR: self._schema,
+            }
+        )
+        yield node
 
         if self._description:
             yield self._description.get_node(self._get_description_node_key())
@@ -51,7 +55,7 @@ class SchemaModel(Neo4jCsvSerializable):
         return '{}/{}'.format(self._schema_key, self._description.get_description_id())
 
     def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
+        # type: () -> Iterator[GraphRelationship]
         if self._description:
             yield self._description.get_relation(start_node=SCHEMA_NODE_LABEL,
                                                  start_key=self._schema_key,
