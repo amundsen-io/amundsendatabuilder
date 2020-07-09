@@ -7,6 +7,7 @@ from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
+
 class TableLineage(Neo4jCsvSerializable):
     # type: (...) -> None
     """

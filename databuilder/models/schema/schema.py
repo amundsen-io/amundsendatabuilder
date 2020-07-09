@@ -38,7 +38,7 @@ class SchemaModel(Neo4jCsvSerializable):
         }
 
         if self._description:
-            yield self._description.get_node_dict(self._get_description_node_key())
+            yield self._description.get_node(self._get_description_node_key())
 
     def create_next_relation(self):
         # type: () -> Union[Dict[str, Any], None]
