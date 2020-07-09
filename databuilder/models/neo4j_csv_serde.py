@@ -87,7 +87,7 @@ class Neo4jCsvSerializable(object):
         return node_dict
 
     def next_relation(self):
-        # type: () -> Union[GraphNode, None]
+        # type: () -> Union[GraphRelationship, None]
         """
         Provides relation(edge) in dict form.
         Note that subsequent call can create different header (dict.keys())
