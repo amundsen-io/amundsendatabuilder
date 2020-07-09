@@ -5,7 +5,8 @@ from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 
 from databuilder.models.table_metadata import TableMetadata
-
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 class Application(Neo4jCsvSerializable):
     """
@@ -77,41 +78,47 @@ class Application(Neo4jCsvSerializable):
                                                          task=self.task)
 
     def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphNode]
         """
         Create a list of Neo4j node records
         :return:
         """
         results = []
-
-        results.append({
-            NODE_KEY: self.get_application_model_key(),
-            NODE_LABEL: Application.APPLICATION_LABEL,
-            Application.APPLICATION_URL_NAME: self.application_url,
-            Application.APPLICATION_NAME: Application.APPLICATION_TYPE,
-            Application.APPLICATION_DESCRIPTION:
-                '{app_type} with id {id}'.format(app_type=Application.APPLICATION_TYPE,
-                                                 id=Application.APPLICATION_ID_FORMAT.format(dag_id=self.dag,
-                                                                                             task_id=self.task)),
-            Application.APPLICATION_ID: Application.APPLICATION_ID_FORMAT.format(dag_id=self.dag,
-                                                                                 task_id=self.task)
-        })
+        application_description = '{app_type} with id {id}'.format(
+            app_type=Application.APPLICATION_TYPE,
+            id=Application.APPLICATION_ID_FORMAT.format(dag_id=self.dag, task_id=self.task)
+        )
+        application_id = Application.APPLICATION_ID_FORMAT.format(
+            dag_id=self.dag,
+            task_id=self.task
+        )
+        application_node = GraphNode(
+            id=self.get_application_model_key(),
+            labels=[Application.APPLICATION_LABEL],
+            node_attributes={
+                Application.APPLICATION_URL_NAME: self.application_url,
+                Application.APPLICATION_NAME: Application.APPLICATION_TYPE,
+                Application.APPLICATION_DESCRIPTION: application_description,
+                Application.APPLICATION_ID: application_id
+            }
+        )
+        results.append(application_node)
 
         return results
 
     def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphRelationship]
         """
         Create a list of relations between application and table nodes
         :return:
         """
-        results = [{
-            RELATION_START_KEY: self.get_table_model_key(),
-            RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-            RELATION_END_KEY: self.get_application_model_key(),
-            RELATION_END_LABEL: Application.APPLICATION_LABEL,
-            RELATION_TYPE: Application.TABLE_APPLICATION_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: Application.APPLICATION_TABLE_RELATION_TYPE
-        }]
-
+        graph_relationship = GraphRelationship(
+            start_key=self.get_table_model_key(),
+            start_label=TableMetadata.TABLE_NODE_LABEL,
+            end_key=self.get_application_model_key(),
+            end_label=Application.APPLICATION_LABEL,
+            type=Application.TABLE_APPLICATION_RELATION_TYPE,
+            reverse_type=Application.APPLICATION_TABLE_RELATION_TYPE
+        )
+        results = [graph_relationship]
         return results
