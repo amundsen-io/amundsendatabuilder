@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
 
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.timestamp import timestamp_constants
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
 class TableLastUpdated(Neo4jCsvSerializable):
@@ -42,7 +42,7 @@ class TableLastUpdated(Neo4jCsvSerializable):
             .format(self.table_name, self.last_updated_time, self.schema, self.db, self.cluster)
 
     def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphNode, None]
         # creates new node
         try:
             return next(self._node_iter)
@@ -50,7 +50,7 @@ class TableLastUpdated(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+        # type: (...) -> Union[GraphRelationship, None]
         try:
             return next(self._relation_iter)
         except StopIteration:
@@ -73,36 +73,41 @@ class TableLastUpdated(Neo4jCsvSerializable):
                                                                tbl=self.table_name)
 
     def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphNode]
         """
         Create a list of Neo4j node records
         :return:
         """
         results = []
 
-        results.append({
-            NODE_KEY: self.get_last_updated_model_key(),
-            NODE_LABEL: TableLastUpdated.LAST_UPDATED_NODE_LABEL,
-            TableLastUpdated.TIMESTAMP_PROPERTY: self.last_updated_time,
-            timestamp_constants.TIMESTAMP_PROPERTY: self.last_updated_time,
-            TableLastUpdated.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name
-        })
+        node = GraphNode(
+            id=self.get_last_updated_model_key(),
+            label=TableLastUpdated.LAST_UPDATED_NODE_LABEL,
+            node_attributes={
+                TableLastUpdated.TIMESTAMP_PROPERTY: self.last_updated_time,
+                timestamp_constants.TIMESTAMP_PROPERTY: self.last_updated_time,
+                TableLastUpdated.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name
+            }
+        )
+
+        results.append(node)
 
         return results
 
     def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+        # type: () -> List[GraphRelationship]
         """
         Create a list of relations mapping last updated node with table node
         :return:
         """
-        results = [{
-            RELATION_START_KEY: self.get_table_model_key(),
-            RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-            RELATION_END_KEY: self.get_last_updated_model_key(),
-            RELATION_END_LABEL: TableLastUpdated.LAST_UPDATED_NODE_LABEL,
-            RELATION_TYPE: TableLastUpdated.TABLE_LASTUPDATED_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: TableLastUpdated.LASTUPDATED_TABLE_RELATION_TYPE
-        }]
+        relationship = GraphRelationship(
+            start_label=TableMetadata.TABLE_NODE_LABEL,
+            start_key=self.get_table_model_key(),
+            end_label=TableLastUpdated.LAST_UPDATED_NODE_LABEL,
+            end_key=self.get_last_updated_model_key(),
+            type=TableLastUpdated.TABLE_LASTUPDATED_RELATION_TYPE,
+            reverse_type=TableLastUpdated.LASTUPDATED_TABLE_RELATION_TYPE
+        )
+        results = [relationship]
 
         return results

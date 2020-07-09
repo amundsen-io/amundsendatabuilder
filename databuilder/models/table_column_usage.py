@@ -1,8 +1,7 @@
 from typing import Iterable, Union, Dict, Any, Iterator  # noqa: F401
 
 from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, RELATION_START_KEY, RELATION_END_KEY,
-    RELATION_START_LABEL, RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+    Neo4jCsvSerializable
 )
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
