@@ -1,0 +1,5 @@
+API_VERSION = 'api_version'
+TABLEAU_HOST = 'tableau_host'
+SITE_NAME = 'site_name'
+TABLEAU_ACCESS_TOKEN_NAME = 'tableau_personal_access_token_name'
+TABLEAU_ACCESS_TOKEN_SECRET = 'tableau_personal_access_token_secret'
