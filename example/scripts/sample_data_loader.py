@@ -43,6 +43,11 @@ from databuilder.transformer.base_transformer import NoopTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.generic_transformer import GenericTransformer, CALLBACK_FUNCTION, FIELD_NAME
 
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_extractor import TableauDashboardExtractor
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_owner_extractor import TableauDashboardOwnerExtractor
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_user_extractor import TableauDashboardUserExtractor
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor import TableauDashboardLastModifiedExtractor
+
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
 neo_host = os.getenv('CREDENTIALS_NEO4J_PROXY_HOST', 'localhost')
 
@@ -70,6 +75,11 @@ neo4j_password = 'test'
 
 LOGGER = logging.getLogger(__name__)
 
+tableau_host = ""
+tableau_api_version = 0
+tableau_site_name = ""
+tableau_personal_access_token_name = ""
+tableau_personal_access_token_secret = ""
 
 def create_connection(db_file):
     try:
@@ -271,13 +281,160 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
                      publisher=ElasticsearchPublisher())
     return job
 
+def run_tableau_metadata_job():
+    task = DefaultTask(extractor=TableauDashboardExtractor(),
+                   loader=FsNeo4jCSVLoader())
+
+    tmp_folder = '/var/tmp/amundsen/tableau_dashboard_metadata'
+
+    node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+    relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
+
+    job_config = ConfigFactory.from_dict({
+        'extractor.tableau.tableau_host': tableau_host,
+        'extractor.tableau.api_version': tableau_api_version,
+        'extractor.tableau.site_name': tableau_site_name,
+        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
+        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
+        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
+        'loader.filesystem_csv_neo4j.delete_created_directories': True,
+        'task.progress_report_frequency': 100,
+        'publisher.neo4j.node_files_directory': node_files_folder,
+        'publisher.neo4j.relation_files_directory': relationship_files_folder,
+        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
+        'publisher.neo4j.neo4j_user': neo4j_user,
+        'publisher.neo4j.neo4j_password': neo4j_password,
+        'publisher.neo4j.neo4j_encrypted': False,
+        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+    })
+
+    job = DefaultJob(conf=job_config,
+               task=task,
+               publisher=Neo4jCsvPublisher())
+
+    job.launch()
+
+def run_tableau_owner_job():
+    task = DefaultTask(extractor=TableauDashboardOwnerExtractor(),
+                   loader=FsNeo4jCSVLoader())
+
+    tmp_folder = '/var/tmp/amundsen/tableau_dashboard_owner'
+
+    node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+    relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
+
+    job_config = ConfigFactory.from_dict({
+        'extractor.tableau.tableau_host': tableau_host,
+        'extractor.tableau.api_version': tableau_api_version,
+        'extractor.tableau.site_name': tableau_site_name,
+        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
+        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
+        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
+        'loader.filesystem_csv_neo4j.delete_created_directories': True,
+        'task.progress_report_frequency': 100,
+        'publisher.neo4j.node_files_directory': node_files_folder,
+        'publisher.neo4j.relation_files_directory': relationship_files_folder,
+        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
+        'publisher.neo4j.neo4j_user': neo4j_user,
+        'publisher.neo4j.neo4j_password': neo4j_password,
+        'publisher.neo4j.neo4j_encrypted': False,
+        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+    })
+
+    job = DefaultJob(conf=job_config,
+               task=task,
+               publisher=Neo4jCsvPublisher())
+
+    job.launch()
+
+def run_tableau_user_job():
+    task = DefaultTask(extractor=TableauDashboardUserExtractor(),
+                   loader=FsNeo4jCSVLoader())
+
+    tmp_folder = '/var/tmp/amundsen/tableau_dashboard_user'
+
+    node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+    relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
+
+    job_config = ConfigFactory.from_dict({
+        'extractor.tableau.tableau_host': tableau_host,
+        'extractor.tableau.api_version': tableau_api_version,
+        'extractor.tableau.site_name': tableau_site_name,
+        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
+        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
+        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
+        'loader.filesystem_csv_neo4j.delete_created_directories': True,
+        'task.progress_report_frequency': 100,
+        'publisher.neo4j.node_files_directory': node_files_folder,
+        'publisher.neo4j.relation_files_directory': relationship_files_folder,
+        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
+        'publisher.neo4j.neo4j_user': neo4j_user,
+        'publisher.neo4j.neo4j_password': neo4j_password,
+        'publisher.neo4j.neo4j_encrypted': False,
+        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+    })
+
+    job = DefaultJob(conf=job_config,
+               task=task,
+               publisher=Neo4jCsvPublisher())
+
+    job.launch()
+
+def run_tableau_last_modified_job():
+    task = DefaultTask(extractor=TableauDashboardLastModifiedExtractor(),
+                   loader=FsNeo4jCSVLoader())
+
+    tmp_folder = '/var/tmp/amundsen/tableau_dashboard_user'
+
+    node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
+    relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
+
+    job_config = ConfigFactory.from_dict({
+        'extractor.tableau.tableau_host': tableau_host,
+        'extractor.tableau.api_version': tableau_api_version,
+        'extractor.tableau.site_name': tableau_site_name,
+        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
+        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
+        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
+        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
+        'loader.filesystem_csv_neo4j.delete_created_directories': True,
+        'task.progress_report_frequency': 100,
+        'publisher.neo4j.node_files_directory': node_files_folder,
+        'publisher.neo4j.relation_files_directory': relationship_files_folder,
+        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
+        'publisher.neo4j.neo4j_user': neo4j_user,
+        'publisher.neo4j.neo4j_password': neo4j_password,
+        'publisher.neo4j.neo4j_encrypted': False,
+        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+    })
+
+    job = DefaultJob(conf=job_config,
+               task=task,
+               publisher=Neo4jCsvPublisher())
+
+    job.launch()
+
+
+def run_tableau_jobs():
+    run_tableau_metadata_job()
+    run_tableau_owner_job()
+    run_tableau_user_job()
+    run_tableau_last_modified_job()
 
 if __name__ == "__main__":
     # Uncomment next line to get INFO level logging
-    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
     if create_connection(DB_FILE):
+        create_dashboard_tables_job().launch()
         run_table_column_job('example/sample_data/sample_table.csv', 'example/sample_data/sample_col.csv')
+
+        run_tableau_jobs()
+
         run_csv_job('example/sample_data/sample_table_column_stats.csv', 'test_table_column_stats',
                     'databuilder.models.table_stats.TableColumnStats')
         run_csv_job('example/sample_data/sample_table_programmatic_source.csv', 'test_programmatic_source',
@@ -300,22 +457,6 @@ if __name__ == "__main__":
                     'databuilder.models.table_last_updated.TableLastUpdated')
         run_csv_job('example/sample_data/sample_schema_description.csv', 'test_schema_description',
                     'databuilder.models.schema.schema.SchemaModel')
-        run_csv_job('example/sample_data/sample_dashboard_base.csv', 'test_dashboard_base',
-                    'databuilder.models.dashboard.dashboard_metadata.DashboardMetadata')
-        run_csv_job('example/sample_data/sample_dashboard_usage.csv', 'test_dashboard_usage',
-                    'databuilder.models.dashboard.dashboard_usage.DashboardUsage')
-        run_csv_job('example/sample_data/sample_dashboard_owner.csv', 'test_dashboard_owner',
-                    'databuilder.models.dashboard.dashboard_owner.DashboardOwner')
-        run_csv_job('example/sample_data/sample_dashboard_query.csv', 'test_dashboard_query',
-                    'databuilder.models.dashboard.dashboard_query.DashboardQuery')
-        run_csv_job('example/sample_data/sample_dashboard_last_execution.csv', 'test_dashboard_last_execution',
-                    'databuilder.models.dashboard.dashboard_execution.DashboardExecution')
-        run_csv_job('example/sample_data/sample_dashboard_last_modified.csv', 'test_dashboard_last_modified',
-                    'databuilder.models.dashboard.dashboard_last_modified.DashboardLastModifiedTimestamp')
-
-        create_dashboard_tables_job().launch()
-
-        create_last_updated_job().launch()
 
         job_es_table = create_es_publisher_sample_job(
             elasticsearch_index_alias='table_search_index',
@@ -323,7 +464,6 @@ if __name__ == "__main__":
             entity_type='table',
             model_name='databuilder.models.table_elasticsearch_document.TableESDocument')
         job_es_table.launch()
-
         job_es_user = create_es_publisher_sample_job(
             elasticsearch_index_alias='user_search_index',
             elasticsearch_doc_type_key='user',
@@ -331,7 +471,6 @@ if __name__ == "__main__":
             entity_type='user',
             elasticsearch_mapping=USER_ELASTICSEARCH_INDEX_MAPPING)
         job_es_user.launch()
-
         job_es_dashboard = create_es_publisher_sample_job(
             elasticsearch_index_alias='dashboard_search_index',
             elasticsearch_doc_type_key='dashboard',
