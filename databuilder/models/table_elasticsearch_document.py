@@ -10,6 +10,7 @@ class TableESDocument(ElasticsearchDocument):
     """
     Schema for the Search index document
     """
+
     def __init__(self,
                  database,  # type: str
                  cluster,  # type: str

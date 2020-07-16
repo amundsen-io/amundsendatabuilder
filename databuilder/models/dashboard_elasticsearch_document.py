@@ -10,6 +10,7 @@ class DashboardESDocument(ElasticsearchDocument):
     """
     Schema for the ES dashboard ES document
     """
+
     def __init__(self,
                  group_name,  # type: str
                  name,  # type: str

@@ -17,6 +17,7 @@ class SQLAlchemyExtractor(Extractor):
     """
     An Extractor that extracts records via SQLAlchemy. Database that supports SQLAlchemy can use this extractor
     """
+
     def init(self, conf):
         # type: (ConfigTree) -> None
         """

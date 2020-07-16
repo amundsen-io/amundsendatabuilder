@@ -6,6 +6,7 @@ class PrestoQueryLogs:
     Presto Query logs model.
     Sql result has one row per presto query.
     """
+
     def __init__(self,
                  user,  # type: str
                  query_text,  # type: str

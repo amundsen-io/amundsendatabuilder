@@ -32,6 +32,7 @@ class Neo4jCsvSerializable(object):
 
     Any model class that needs to be pushed to Neo4j should inherit this class.
     """
+
     def __init__(self):
         # type: () -> None
         pass

@@ -19,6 +19,7 @@ class CsvExtractor(Extractor):
     """
     An Extractor that extracts records via CSV.
     """
+
     def init(self, conf):
         # type: (ConfigTree) -> None
         """
@@ -76,6 +77,7 @@ class CsvTableColumnExtractor(Extractor):
     """
     An Extractor that combines Table and Column CSVs.
     """
+
     def init(self, conf):
         # type: (ConfigTree) -> None
         """

@@ -14,6 +14,7 @@ class FileSystemCSVLoader(Loader):
     """
     Loader class to write csv files to Local FileSystem
     """
+
     def init(self, conf):
         # type: (ConfigTree) -> None
         """

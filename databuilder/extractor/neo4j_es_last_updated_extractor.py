@@ -14,6 +14,7 @@ class Neo4jEsLastUpdatedExtractor(GenericExtractor):
     """
     Extractor to extract last updated timestamp for neo4j and Es
     """
+
     def init(self, conf):
         # type: (ConfigTree) -> None
         """

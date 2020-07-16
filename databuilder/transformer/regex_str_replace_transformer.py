@@ -24,6 +24,7 @@ class RegexStrReplaceTransformer(Transformer):
 
     Any non-string values will be ignored.
     """
+
     def init(self, conf):
         # type: (ConfigTree) -> None
         self._regex_replace_tuples = conf.get_list(REGEX_REPLACE_TUPLE_LIST)

@@ -8,6 +8,7 @@ class UserESDocument(ElasticsearchDocument):
     """
     Schema for the Search index document for user
     """
+
     def __init__(self,
                  email,  # type: str
                  first_name,  # type: str

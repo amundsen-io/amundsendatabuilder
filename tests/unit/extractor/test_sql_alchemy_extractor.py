@@ -102,6 +102,7 @@ class TableMetadataResult:
     Table metadata result model.
     SQL result has one row per column
     """
+
     def __init__(self,
                  database,  # type: str
                  schema,  # type: str

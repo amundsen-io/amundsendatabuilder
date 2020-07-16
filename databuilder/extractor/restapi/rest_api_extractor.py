@@ -44,7 +44,6 @@ class RestAPIExtractor(Extractor):
 
     def extract(self):
         # type: () -> Any
-
         """
         Fetch one result row from RestApiQuery, convert to {model_class} if specified before
         returning.

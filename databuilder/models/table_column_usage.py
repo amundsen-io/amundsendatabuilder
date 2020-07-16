@@ -16,6 +16,7 @@ class ColumnReader(object):
     """
     A class represent user's read action on column. Implicitly assumes that read count is one.
     """
+
     def __init__(self,
                  database,  # type: str
                  cluster,  # type: str

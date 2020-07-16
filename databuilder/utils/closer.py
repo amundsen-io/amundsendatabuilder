@@ -15,6 +15,7 @@ class Closer(object):
     Order of closing registered closeable callable will be LIFO
     as closeable instance can have dependency each other.
     """
+
     def __init__(self):
         # type: () -> None
         self._stack = []  # type: List
