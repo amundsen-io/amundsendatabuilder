@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 # Validation of Cypher statements causing Flake8 to fail. Disabling it on this file only
 # flake8: noqa
 
