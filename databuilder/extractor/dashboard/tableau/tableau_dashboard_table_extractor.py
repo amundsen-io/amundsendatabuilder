@@ -38,19 +38,8 @@ class TableauDashboardTableExtractor(Extractor):
 
         self._auth = TableauDashboardAuth(self._conf)
 
-        self._extractor = TableauDashboardUtils.create_tableau_metadata_extractor(self._conf, self._auth.token)
-
-        record = self._extractor.extract()
-
-        transformers = []
-        dict_to_model_transformer = DictToModel()
-        dict_to_model_transformer.init(
-            conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_table.DashboardTable'})))
-        transformers.append(dict_to_model_transformer)
-        self._transformer = ChainedTransformer(transformers=transformers)
-
+        # TODO: implement this
+        self._extractor = None
 
     def extract(self):
         # type: () -> Any
@@ -65,25 +54,3 @@ class TableauDashboardTableExtractor(Extractor):
         # type: () -> str
 
         return 'extractor.tableau'
-
-    def _get_top_level_projects(self):
-        projects_url = 'https://{tableau_host}/api/{api_version}/sites/{site_id}/projects'\
-        .format(tableau_host=self._conf.get_string(TABLEAU_HOST), api_version=self._conf.get_string(API_VERSION), site_id=self._auth._site_id)
-
-        headers = {
-            "X-Tableau-Auth": self._auth._current_token,
-            "Accept": "application/json"
-        }
-        params = {
-            "headers": headers,
-            "verify": False
-        }
-
-        response = requests.get(url=projects_url, **params)
-
-        project_names = [project['name'] for project in response.json()['projects']['project']]
-        name_id_map = {}
-        for name in project_names:
-            name_id_map[name] = str(uuid.uuid4())
-
-        return name_id_map

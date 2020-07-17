@@ -29,7 +29,7 @@ from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToE
 LOGGER = logging.getLogger(__name__)
 
 
-class TableauDashboardExtractor(Extractor):
+class TableauDashboardQueryExtractor(Extractor):
     """
     """
 
@@ -39,29 +39,25 @@ class TableauDashboardExtractor(Extractor):
         self._conf = conf
         self._auth = TableauDashboardAuth(self._conf)
         self.query = """query {
-            workbooks {
-                id
-                name
-                createdAt
-                description
-                projectName
+          customSQLTables {
+            id
+            name
+            query
+            downstreamWorkbooks {
+              name
+              projectName
             }
+          }        
         }"""
 
         self._extractor = self._build_extractor()
 
         transformers = []
-        timestamp_str_to_epoch_transformer = TimestampStringToEpoch()
-        timestamp_str_to_epoch_transformer.init(
-            conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({FIELD_NAME: 'created_timestamp', })))
-        transformers.append(timestamp_str_to_epoch_transformer)
-
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
                 ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_metadata.DashboardMetadata'})))
+                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_query.DashboardQuery'})))
         transformers.append(dict_to_model_transformer)
         self._transformer = ChainedTransformer(transformers=transformers)
 
@@ -83,7 +79,7 @@ class TableauDashboardExtractor(Extractor):
     def _build_extractor(self):
         """
         """
-        extractor = TableauGraphQLApiMetadataExtractor()
+        extractor = TableauGraphQLApiQueryExtractor()
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
@@ -96,22 +92,22 @@ class TableauDashboardExtractor(Extractor):
         return extractor
 
 
-class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
+class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
     """docstring for TableauDashboardMetadataExtractor"""
     def execute(self):
         response = self.execute_query()
 
-        for workbook in [workbook for workbook in response['workbooks'] if workbook['projectName'] not in ["ZZZ - Archived", "WIP", "Tableau Samples"]]:
-            data = {}
-            data['dashboard_group'] = workbook['projectName']
-            data['dashboard_name'] = html.escape(str(workbook['name']))
-            if "description" not in workbook:
-                workbook['description'] = ""
-            data['description'] = workbook['description']
-            data['created_timestamp'] = workbook['createdAt']
-            data['dashboard_group_url'] = 'https://example.com'
-            data['dashboard_url'] = 'https://example.com'
-            data['product'] = 'tableau'
-            data['cluster'] = 'gold'
+        for query in response['customSQLTables']:
+            for workbook in query['downstreamWorkbooks']:
+                if workbook['projectName'] not in ["ZZZ - Archived", "WIP", "Tableau Samples"]:
+                    data = {}
 
-            yield data
+                    data['dashboard_group_id'] = html.escape(str(workbook['projectName']))
+                    data['dashboard_id'] = html.escape(str(workbook['name']))
+                    data['query_name'] = query['name']
+                    data['query_id'] = query['id']
+                    data['query_text'] = query['query']
+                    data['product'] = 'tableau'
+                    data['cluster'] = 'gold'
+
+                    yield data
