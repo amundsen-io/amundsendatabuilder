@@ -46,7 +46,8 @@ from databuilder.transformer.generic_transformer import GenericTransformer, CALL
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_extractor import TableauDashboardExtractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_owner_extractor import TableauDashboardOwnerExtractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_user_extractor import TableauDashboardUserExtractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor import TableauDashboardLastModifiedExtractor
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor import \
+    TableauDashboardLastModifiedExtractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_query_extractor import TableauDashboardQueryExtractor
 
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
@@ -82,6 +83,7 @@ tableau_site_name = ""
 tableau_personal_access_token_name = ""
 tableau_personal_access_token_secret = ""
 tableau_excluded_projects = []
+
 
 def create_connection(db_file):
     try:
@@ -159,8 +161,7 @@ def create_last_updated_job():
     node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
-    task = DefaultTask(extractor=Neo4jEsLastUpdatedExtractor(),
-                       loader=FsNeo4jCSVLoader())
+    task = DefaultTask(extractor=Neo4jEsLastUpdatedExtractor(), loader=FsNeo4jCSVLoader())
 
     job_config = ConfigFactory.from_dict({
         'extractor.neo4j_es_last_updated.model_class':
@@ -283,9 +284,9 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
                      publisher=ElasticsearchPublisher())
     return job
 
+
 def run_tableau_metadata_job():
-    task = DefaultTask(extractor=TableauDashboardExtractor(),
-                   loader=FsNeo4jCSVLoader())
+    task = DefaultTask(extractor=TableauDashboardExtractor(), loader=FsNeo4jCSVLoader())
 
     tmp_folder = '/var/tmp/amundsen/tableau_dashboard_metadata'
 
@@ -314,14 +315,14 @@ def run_tableau_metadata_job():
     })
 
     job = DefaultJob(conf=job_config,
-               task=task,
-               publisher=Neo4jCsvPublisher())
+                     task=task,
+                     publisher=Neo4jCsvPublisher())
 
     job.launch()
 
+
 def run_tableau_owner_job():
-    task = DefaultTask(extractor=TableauDashboardOwnerExtractor(),
-                   loader=FsNeo4jCSVLoader())
+    task = DefaultTask(extractor=TableauDashboardOwnerExtractor(), loader=FsNeo4jCSVLoader())
 
     tmp_folder = '/var/tmp/amundsen/tableau_dashboard_owner'
 
@@ -349,14 +350,14 @@ def run_tableau_owner_job():
     })
 
     job = DefaultJob(conf=job_config,
-               task=task,
-               publisher=Neo4jCsvPublisher())
+                     task=task,
+                     publisher=Neo4jCsvPublisher())
 
     job.launch()
 
+
 def run_tableau_user_job():
-    task = DefaultTask(extractor=TableauDashboardUserExtractor(),
-                   loader=FsNeo4jCSVLoader())
+    task = DefaultTask(extractor=TableauDashboardUserExtractor(), loader=FsNeo4jCSVLoader())
 
     tmp_folder = '/var/tmp/amundsen/tableau_dashboard_user'
 
@@ -384,14 +385,14 @@ def run_tableau_user_job():
     })
 
     job = DefaultJob(conf=job_config,
-               task=task,
-               publisher=Neo4jCsvPublisher())
+                     task=task,
+                     publisher=Neo4jCsvPublisher())
 
     job.launch()
 
+
 def run_tableau_last_modified_job():
-    task = DefaultTask(extractor=TableauDashboardLastModifiedExtractor(),
-                   loader=FsNeo4jCSVLoader())
+    task = DefaultTask(extractor=TableauDashboardLastModifiedExtractor(), loader=FsNeo4jCSVLoader())
 
     tmp_folder = '/var/tmp/amundsen/tableau_dashboard_user'
 
@@ -420,14 +421,14 @@ def run_tableau_last_modified_job():
     })
 
     job = DefaultJob(conf=job_config,
-               task=task,
-               publisher=Neo4jCsvPublisher())
+                     task=task,
+                     publisher=Neo4jCsvPublisher())
 
     job.launch()
 
+
 def run_tableau_query_job():
-    task = DefaultTask(extractor=TableauDashboardQueryExtractor(),
-                   loader=FsNeo4jCSVLoader())
+    task = DefaultTask(extractor=TableauDashboardQueryExtractor(), loader=FsNeo4jCSVLoader())
 
     tmp_folder = '/var/tmp/amundsen/tableau_dashboard_query'
 
@@ -455,10 +456,11 @@ def run_tableau_query_job():
     })
 
     job = DefaultJob(conf=job_config,
-               task=task,
-               publisher=Neo4jCsvPublisher())
+                     task=task,
+                     publisher=Neo4jCsvPublisher())
 
     job.launch()
+
 
 def run_tableau_jobs():
     run_tableau_metadata_job()
@@ -466,6 +468,7 @@ def run_tableau_jobs():
     run_tableau_user_job()
     run_tableau_last_modified_job()
     run_tableau_query_job()
+
 
 if __name__ == "__main__":
     # Uncomment next line to get INFO level logging
