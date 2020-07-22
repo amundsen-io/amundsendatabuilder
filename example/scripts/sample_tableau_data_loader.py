@@ -77,12 +77,12 @@ neo4j_password = 'test'
 
 LOGGER = logging.getLogger(__name__)
 
-tableau_host = ""
-tableau_api_version = 0
+tableau_host = "tableau.gustocorp.com"
+tableau_api_version = 3.7
 tableau_site_name = ""
-tableau_personal_access_token_name = ""
-tableau_personal_access_token_secret = ""
-tableau_excluded_projects = []
+tableau_access_token_name = "carter-landis-lodestar-pat"
+tableau_access_token_secret = "NaM5DYgCTECMpjsJYsCvlA==:Me9ol1Wyu28a4qCZoz01KIAKvcH7um40"
+tableau_excluded_projects = ["ZZZ - Archived", "Default", "Tableau Samples"]
 
 
 def create_connection(db_file):
@@ -297,8 +297,8 @@ def run_tableau_metadata_job():
         'extractor.tableau.tableau_host': tableau_host,
         'extractor.tableau.api_version': tableau_api_version,
         'extractor.tableau.site_name': tableau_site_name,
-        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau.tableau_access_token_name': tableau_access_token_name,
+        'extractor.tableau.tableau_access_token_secret': tableau_access_token_secret,
         'extractor.tableau.excluded_projects': tableau_excluded_projects,
         'extractor.tableau.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
@@ -333,8 +333,8 @@ def run_tableau_owner_job():
         'extractor.tableau.tableau_host': tableau_host,
         'extractor.tableau.api_version': tableau_api_version,
         'extractor.tableau.site_name': tableau_site_name,
-        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau.tableau_access_token_name': tableau_access_token_name,
+        'extractor.tableau.tableau_access_token_secret': tableau_access_token_secret,
         'extractor.tableau.excluded_projects': tableau_excluded_projects,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
@@ -368,8 +368,8 @@ def run_tableau_user_job():
         'extractor.tableau.tableau_host': tableau_host,
         'extractor.tableau.api_version': tableau_api_version,
         'extractor.tableau.site_name': tableau_site_name,
-        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau.tableau_access_token_name': tableau_access_token_name,
+        'extractor.tableau.tableau_access_token_secret': tableau_access_token_secret,
         'extractor.tableau.excluded_projects': tableau_excluded_projects,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
@@ -404,8 +404,8 @@ def run_tableau_last_modified_job():
         'extractor.tableau.api_version': tableau_api_version,
         'extractor.tableau.site_name': tableau_site_name,
         'extractor.tableau.excluded_projects': tableau_excluded_projects,
-        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau.tableau_access_token_name': tableau_access_token_name,
+        'extractor.tableau.tableau_access_token_secret': tableau_access_token_secret,
         'extractor.tableau.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
@@ -439,8 +439,8 @@ def run_tableau_query_job():
         'extractor.tableau.tableau_host': tableau_host,
         'extractor.tableau.api_version': tableau_api_version,
         'extractor.tableau.site_name': tableau_site_name,
-        'extractor.tableau.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau.tableau_access_token_name': tableau_access_token_name,
+        'extractor.tableau.tableau_access_token_secret': tableau_access_token_secret,
         'extractor.tableau.excluded_projects': tableau_excluded_projects,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
