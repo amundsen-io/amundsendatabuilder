@@ -185,7 +185,7 @@ class TestGlueExtractor(unittest.TestCase):
                             }
                         ]
                     },
-                    'Parameters': {'comment': 'description of test table 3 from comment',},
+                    'Parameters': {'comment': 'description of test table 3 from comment'},
                     'TableType': 'EXTERNAL_TABLE',
                 },
                 {

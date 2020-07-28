@@ -48,8 +48,8 @@ class GlueExtractor(Extractor):
         for row in self._get_raw_extract_iter():
             columns, i = [], 0
 
-            for column in row['StorageDescriptor']['Columns'] + \
-                          row.get('PartitionKeys', []):
+            for column in row['StorageDescriptor']['Columns'] \
+                    + row.get('PartitionKeys', []):
                 columns.append(ColumnMetadata(
                     column['Name'],
                     column['Comment'] if 'Comment' in column else None,
@@ -57,7 +57,6 @@ class GlueExtractor(Extractor):
                     i
                 ))
                 i += 1
-
 
             yield TableMetadata(
                 'glue',
