@@ -63,7 +63,8 @@ class GlueExtractor(Extractor):
                 row['DatabaseName'],
                 row['Name'],
                 row['Description'] if 'Description' in row else None,
-                columns
+                columns,
+                row.get('TableType') == 'VIRTUAL_VIEW',
             )
 
     def _get_raw_extract_iter(self):
