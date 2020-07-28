@@ -189,7 +189,7 @@ class TestGlueExtractor(unittest.TestCase):
                     'TableType': 'EXTERNAL_TABLE',
                 },
                 {
-                    'Name': 'test_view',
+                    'Name': 'test_view1',
                     'DatabaseName': 'test_schema1',
                     'Description': 'test view 1',
                     'StorageDescriptor': {
