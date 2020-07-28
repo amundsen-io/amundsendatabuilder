@@ -62,7 +62,7 @@ class GlueExtractor(Extractor):
                 self._cluster,
                 row['DatabaseName'],
                 row['Name'],
-                row['Description'] if 'Description' in row else None,
+                row.get('Description') or row.get('Parameters', {}).get('comment'),
                 columns,
                 row.get('TableType') == 'VIRTUAL_VIEW',
             )
