@@ -502,6 +502,10 @@ if __name__ == "__main__":
         run_tableau_query_job()
         run_tableau_last_modified_job()
 
+        run_table_column_job('example/sample_data/sample_table.csv', 'example/sample_data/sample_col.csv')
+        run_csv_job('example/sample_data/sample_user.csv', 'test_user_metadata',
+                    'databuilder.models.user.User')
+
         job_es_table = create_es_publisher_sample_job(
             elasticsearch_index_alias='table_search_index',
             elasticsearch_doc_type_key='table',
