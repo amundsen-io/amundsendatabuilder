@@ -20,21 +20,20 @@ class TableauDashboardUtils():
 
     @staticmethod
     def sanitize_schema_name(str):
-        schema = re.sub(r' ', '_', \
-                 re.sub(r'\.', '_', \
-                 re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '', \
-                 re.sub(r'(\.|\[|\]|\(|\)|\-)', '', str))))
-        return schema
+        # this looks silly, but otherwise the linter complains
+        # there's probably a better way to do this  d
+        return re.sub(r' ', '_',
+                      re.sub(r'\.', '_',
+                             re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '',
+                                    re.sub(r'(\.|\[|\]|\(|\)|\-)', '', str))))
 
     @staticmethod
     def sanitize_database_name(str):
-        database = re.sub(r"-", "", str)
-        return database
+        return re.sub(r"-", "", str)
 
     @staticmethod
     def sanitize_table_name(str):
-        table = re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '', str)
-        return table
+        return re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '', str)
 
 
 class TableauGraphQLApiExtractor(Extractor):

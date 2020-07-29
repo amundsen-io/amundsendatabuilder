@@ -1,6 +1,5 @@
 import logging
 import html
-import re
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
@@ -88,7 +87,9 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
                 for downstreamTable in table['tables']:
                     data = {}
                     data['cluster'] = self._conf.get_string(EXTERNAL_CLUSTER_NAME)
-                    data['database'] = TableauDashboardUtils.sanitize_database_name(html.escape(table['connectionType']))
+                    data['database'] = TableauDashboardUtils.sanitize_database_name(
+                        html.escape(table['connectionType'])
+                    )
                     data['schema'] = TableauDashboardUtils.sanitize_schema_name(html.escape(table['name']))
                     data['name'] = TableauDashboardUtils.sanitize_table_name(html.escape(downstreamTable['name']))
                     data['description'] = html.escape(table['description'])

@@ -1,6 +1,5 @@
 import logging
 import html
-import re
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
@@ -10,7 +9,7 @@ from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS,\
-    EXTERNAL_CLUSTER_NAME, EXTERNAL_DATABASE_NAME
+    EXTERNAL_CLUSTER_NAME
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
 
@@ -19,7 +18,6 @@ from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
 
 LOGGER = logging.getLogger(__name__)
 
@@ -113,7 +111,9 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     schema, name = html.escape(schema), html.escape(name)
                 else:
                     cluster = self._conf.get_string(EXTERNAL_CLUSTER_NAME)
-                    database = TableauDashboardUtils.sanitize_database_name(html.escape(table['database']['connectionType']))
+                    database = TableauDashboardUtils.sanitize_database_name(
+                        html.escape(table['database']['connectionType'])
+                    )
                     schema = TableauDashboardUtils.sanitize_schema_name(html.escape(table['database']['name']))
                     name = TableauDashboardUtils.sanitize_table_name(html.escape(table['name']))
 
