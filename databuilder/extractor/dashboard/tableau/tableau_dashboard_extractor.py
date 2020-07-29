@@ -70,7 +70,7 @@ class TableauDashboardExtractor(Extractor):
     def get_scope(self):
         # type: () -> str
 
-        return 'extractor.tableau'
+        return 'extractor.tableau_dashboard_metadata'
 
     def _build_extractor(self):
         """
@@ -105,7 +105,6 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
             data['created_timestamp'] = workbook['createdAt']
             data['dashboard_group_url'] = 'https://example.com'
             data['dashboard_url'] = 'https://example.com'
-            data['product'] = 'tableau'
-            data['cluster'] = 'gold'
+            data['cluster'] = self._conf.get_string('cluster')
 
             yield data

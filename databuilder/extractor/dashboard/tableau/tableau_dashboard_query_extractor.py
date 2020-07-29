@@ -65,7 +65,7 @@ class TableauDashboardQueryExtractor(Extractor):
     def get_scope(self):
         # type: () -> str
 
-        return 'extractor.tableau'
+        return 'extractor.tableau_dashboard_query'
 
     def _build_extractor(self):
         """

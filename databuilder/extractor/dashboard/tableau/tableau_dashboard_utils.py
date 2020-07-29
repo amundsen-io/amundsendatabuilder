@@ -1,5 +1,6 @@
 import json
 import requests
+import re
 import xml.etree.ElementTree as ET
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
@@ -14,7 +15,26 @@ from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 
 class TableauDashboardUtils():
-    pass
+
+    HTML_ESCAPE_CHAR_REGEX = r'(\&\#[x\d]+;)|(&amp;)'
+
+    @staticmethod
+    def sanitize_schema_name(str):
+        schema = re.sub(r' ', '_', \
+                 re.sub(r'\.', '_', \
+                 re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '', \
+                 re.sub(r'(\.|\[|\]|\(|\)|\-)', '', str))))
+        return schema
+
+    @staticmethod
+    def sanitize_database_name(str):
+        database = re.sub(r"-", "", str)
+        return database
+
+    @staticmethod
+    def sanitize_table_name(str):
+        table = re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '', str)
+        return table
 
 
 class TableauGraphQLApiExtractor(Extractor):
