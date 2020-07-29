@@ -48,7 +48,8 @@ from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_ext
     TableauDashboardLastModifiedExtractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_query_extractor import TableauDashboardQueryExtractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_table_extractor import TableauDashboardTableExtractor
-from databuilder.extractor.dashboard.tableau.tableau_external_table_extractor import TableauDashboardExternalTableExtractor
+from databuilder.extractor.dashboard.tableau.tableau_external_table_extractor import \
+    TableauDashboardExternalTableExtractor
 
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
 neo_host = os.getenv('CREDENTIALS_NEO4J_PROXY_HOST', 'localhost')
@@ -89,11 +90,11 @@ tableau_external_table_cluster = ""
 tableau_external_table_database = ""
 
 common_tableau_config = {
-        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
-        'publisher.neo4j.neo4j_user': neo4j_user,
-        'publisher.neo4j.neo4j_password': neo4j_password,
-        'publisher.neo4j.neo4j_encrypted': False,
-        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+    'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
+    'publisher.neo4j.neo4j_user': neo4j_user,
+    'publisher.neo4j.neo4j_password': neo4j_password,
+    'publisher.neo4j.neo4j_encrypted': False,
+    'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
 }
 
 
@@ -310,12 +311,15 @@ def run_tableau_metadata_job():
         'extractor.tableau_dashboard_metadata.tableau_host': tableau_host,
         'extractor.tableau_dashboard_metadata.api_version': tableau_api_version,
         'extractor.tableau_dashboard_metadata.site_name': tableau_site_name,
-        'extractor.tableau_dashboard_metadata.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau_dashboard_metadata.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau_dashboard_metadata.tableau_personal_access_token_name':
+            tableau_personal_access_token_name,
+        'extractor.tableau_dashboard_metadata.tableau_personal_access_token_secret':
+            tableau_personal_access_token_secret,
         'extractor.tableau_dashboard_metadata.excluded_projects': tableau_excluded_projects,
         'extractor.tableau_dashboard_metadata.cluster': tableau_dashboard_cluster,
         'extractor.tableau_dashboard_metadata.database': tableau_dashboard_database,
-        'extractor.tableau_dashboard_metadata.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
+        'extractor.tableau_dashboard_metadata.transformer.timestamp_str_to_epoch.timestamp_format':
+            "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -345,13 +349,15 @@ def run_tableau_last_modified_job():
         'extractor.tableau_dashboard_last_modified.tableau_host': tableau_host,
         'extractor.tableau_dashboard_last_modified.api_version': tableau_api_version,
         'extractor.tableau_dashboard_last_modified.site_name': tableau_site_name,
-        'extractor.tableau_dashboard_last_modified.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau_dashboard_last_modified.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau_dashboard_last_modified.tableau_personal_access_token_name':
+            tableau_personal_access_token_name,
+        'extractor.tableau_dashboard_last_modified.tableau_personal_access_token_secret':
+            tableau_personal_access_token_secret,
         'extractor.tableau_dashboard_last_modified.excluded_projects': tableau_excluded_projects,
         'extractor.tableau_dashboard_last_modified.cluster': tableau_dashboard_cluster,
         'extractor.tableau_dashboard_last_modified.database': tableau_dashboard_database,
-        'extractor.tableau_dashboard_last_modified.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
-
+        'extractor.tableau_dashboard_last_modified.transformer.timestamp_str_to_epoch.timestamp_format':
+            "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -378,17 +384,18 @@ def run_tableau_query_job():
 
     dict_config = common_tableau_config
     dict_config.update({
-       'extractor.tableau_dashboard_query.tableau_host': tableau_host,
+        'extractor.tableau_dashboard_query.tableau_host': tableau_host,
         'extractor.tableau_dashboard_query.api_version': tableau_api_version,
         'extractor.tableau_dashboard_query.site_name': tableau_site_name,
-        'extractor.tableau_dashboard_query.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau_dashboard_query.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau_dashboard_query.tableau_personal_access_token_name':
+            tableau_personal_access_token_name,
+        'extractor.tableau_dashboard_query.tableau_personal_access_token_secret':
+            tableau_personal_access_token_secret,
         'extractor.tableau_dashboard_query.excluded_projects': tableau_excluded_projects,
         'extractor.tableau_dashboard_query.cluster': tableau_dashboard_cluster,
         'extractor.tableau_dashboard_query.database': tableau_dashboard_database,
-        'extractor.tableau_dashboard_query.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
-
-
+        'extractor.tableau_dashboard_query.transformer.timestamp_str_to_epoch.timestamp_format':
+            "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -418,8 +425,10 @@ def run_tableau_table_job():
         'extractor.tableau_dashboard_table.tableau_host': tableau_host,
         'extractor.tableau_dashboard_table.api_version': tableau_api_version,
         'extractor.tableau_dashboard_table.site_name': tableau_site_name,
-        'extractor.tableau_dashboard_table.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau_dashboard_table.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau_dashboard_table.tableau_personal_access_token_name':
+            tableau_personal_access_token_name,
+        'extractor.tableau_dashboard_table.tableau_personal_access_token_secret':
+            tableau_personal_access_token_secret,
         'extractor.tableau_dashboard_table.excluded_projects': tableau_excluded_projects,
         'extractor.tableau_dashboard_table.cluster': tableau_dashboard_cluster,
         'extractor.tableau_dashboard_table.database': tableau_dashboard_database,
@@ -441,6 +450,7 @@ def run_tableau_table_job():
 
     job.launch()
 
+
 def run_tableau_external_table_job():
     task = DefaultTask(extractor=TableauDashboardExternalTableExtractor(), loader=FsNeo4jCSVLoader())
 
@@ -454,14 +464,17 @@ def run_tableau_external_table_job():
         'extractor.tableau_external_table.tableau_host': tableau_host,
         'extractor.tableau_external_table.api_version': tableau_api_version,
         'extractor.tableau_external_table.site_name': tableau_site_name,
-        'extractor.tableau_external_table.tableau_personal_access_token_name': tableau_personal_access_token_name,
-        'extractor.tableau_external_table.tableau_personal_access_token_secret': tableau_personal_access_token_secret,
+        'extractor.tableau_external_table.tableau_personal_access_token_name':
+            tableau_personal_access_token_name,
+        'extractor.tableau_external_table.tableau_personal_access_token_secret':
+            tableau_personal_access_token_secret,
         'extractor.tableau_external_table.excluded_projects': tableau_excluded_projects,
         'extractor.tableau_external_table.cluster': tableau_dashboard_cluster,
         'extractor.tableau_external_table.database': tableau_dashboard_database,
         'extractor.tableau_external_table.external_cluster_name': tableau_external_table_cluster,
         'extractor.tableau_external_table.external_database_name': tableau_external_table_database,
-        'tableau_external_table_databaseernal_table.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
+        'tableau_external_table_databaseernal_table.transformer.timestamp_str_to_epoch.timestamp_format':
+            "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,

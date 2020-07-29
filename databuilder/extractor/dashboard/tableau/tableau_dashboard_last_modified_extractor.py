@@ -101,7 +101,6 @@ class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
             data['dashboard_group_id'] = workbook['projectName']
             data['dashboard_id'] = html.escape(str(workbook['name']))
             data['last_modified_timestamp'] = workbook['updatedAt']
-            data['product'] = 'tableau'
-            data['cluster'] = 'gold'
+            data['cluster'] = self._conf.get_string('cluster')
 
             yield data
