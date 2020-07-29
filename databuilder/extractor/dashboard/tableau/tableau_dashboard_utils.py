@@ -86,6 +86,8 @@ class TableauGraphQLApiExtractor(Extractor):
 class TableauDashboardAuth():
 
     def __init__(self, conf):
+        self.site_id = None
+        self._token = None
         self._conf = conf
         self._site_name = self._conf.get_string(SITE_NAME)
         self._tableau_host = self._conf.get_string(TABLEAU_HOST)
@@ -93,10 +95,11 @@ class TableauDashboardAuth():
         self._access_token_name = self._conf.get_string(TABLEAU_ACCESS_TOKEN_NAME)
         self._access_token_secret = self._conf.get_string(TABLEAU_ACCESS_TOKEN_SECRET)
 
-        self.site_id = None
-        self.token = None
-
-        self._authenticate()
+    @property
+    def token(self):
+        if not self._token:
+            self._token = self._authenticate()
+        return self._token
 
     def _authenticate(self):
         self._auth_url = "https://{tableau_host}/api/{api_version}/auth/signin".format(
@@ -113,6 +116,7 @@ class TableauDashboardAuth():
             }
         })
         headers = {
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
         params = {
@@ -120,16 +124,10 @@ class TableauDashboardAuth():
             "verify": False
         }
 
-        response = requests.post(url=self._auth_url, data=payload, **params)
+        response_json = requests.post(url=self._auth_url, data=payload, **params).json()
+        self.site_id = response_json['credentials']['site']['id']
 
-        # TODO: use Accept application/json
-        root = ET.fromstring(response.text)
-        credentials = root.getchildren()[0]
-        self.token = credentials.attrib['token']
-
-        site = credentials.getchildren()[0]
-        self.site_id = site.attrib['id']
-
+        return response_json['credentials']['token']
 
 class TableauRestApiHelper():
     pass
