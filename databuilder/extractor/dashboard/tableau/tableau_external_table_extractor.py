@@ -25,20 +25,20 @@ class TableauDashboardExternalTableExtractor(Extractor):
     """
     Creates the "external" Tableau tables.
     In this context, "external" tables are "tables" that are not from a typical database, and are loaded
-    using some other data format, like CSV files. 
+    using some other data format, like CSV files.
     This extractor handles the following types of external tables:
         Excel spreadsheets
         Text files (including CSV files)
         Salesforce connections
         Google Sheets connections
 
-    Excel spreadsheets, Salesforce connections, and Google Sheets connections are all classified as 
+    Excel spreadsheets, Salesforce connections, and Google Sheets connections are all classified as
     "databases" in terms of Tableau's Metadata API, with their "subsheets" forming their "tables" when
     present. However, these tables are not assigned a schema, this extractor chooses to use the name
-    parent sheet as the schema, and assign a new table to each subsheet. The connection type is 
+    parent sheet as the schema, and assign a new table to each subsheet. The connection type is
     always used as the database, and for text files, the schema is set using the EXTERNAL_SCHEMA_NAME
     config option. Since these external tables are usually named for human consumption only and often
-    contain a wider range of characters, all inputs are transformed to remove any problematic 
+    contain a wider range of characters, all inputs are transformed to remove any problematic
     occurences before they are inserted: see the sanitize methods TableauDashboardUtils for specifics.
 
     A more concrete example: if I had a Google Sheet titled "Growth by Region" with 2 subsheets called

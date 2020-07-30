@@ -79,7 +79,10 @@ class TableauDashboardLastModifiedExtractor(Extractor):
 
     def _build_extractor(self):
         """
+        Builds a TableauGraphQLApiExtractor. All data required can be retrieved with a single GraphQL call.
+        :return: A TableauGraphQLApiLastModifiedExtractor that provides dashboard update metadata.
         """
+        # type: () -> TableauGraphQLApiLastModifiedExtractor
         extractor = TableauGraphQLApiLastModifiedExtractor()
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
@@ -93,7 +96,10 @@ class TableauDashboardLastModifiedExtractor(Extractor):
 
 
 class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
-    """docstring for TableauDashboardMetadataExtractor"""
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the DashboardLastModifiedTimestamp model. Allows workbooks to be exlcuded based on their project.
+    """
     def execute(self):
         response = self.execute_query()
 

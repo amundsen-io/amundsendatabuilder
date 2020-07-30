@@ -75,6 +75,8 @@ class TableauDashboardQueryExtractor(Extractor):
 
     def _build_extractor(self):
         """
+        Builds a TableauGraphQLApiQueryExtractor. All data required can be retrieved with a single GraphQL call.
+        :return: A TableauGraphQLApiQueryExtractor that provides dashboard query metadata.
         """
         extractor = TableauGraphQLApiQueryExtractor()
         tableau_extractor_conf = \
@@ -89,7 +91,10 @@ class TableauDashboardQueryExtractor(Extractor):
 
 
 class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
-    """docstring for TableauDashboardMetadataExtractor"""
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the DashboardQuery model. Allows workbooks to be exlcuded based on their project.
+    """
     def execute(self):
         response = self.execute_query()
 
