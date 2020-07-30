@@ -24,6 +24,10 @@ LOGGER = logging.getLogger(__name__)
 
 class TableauDashboardLastModifiedExtractor(Extractor):
     """
+    Extracts metadata about the time of last update for Tableau dashboards.
+    For the purposes of this extractor, Tableau "workbooks" are mapped to Amundsen dashboards, and the
+    top-level project in which these workbooks preside is the dashboard group. The metadata it gathers is:
+        Dashboard last modified timestamp (Workbook last modified timestamp)
     """
 
     def init(self, conf):

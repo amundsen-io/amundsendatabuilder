@@ -24,6 +24,10 @@ LOGGER = logging.getLogger(__name__)
 
 class TableauDashboardTableExtractor(Extractor):
     """
+    Extracts metadata about the tables associated with Tableau workbooks.
+    It can handle both "regular" database tables as well as "external" tables 
+    (see TableauExternalTableExtractor for more info on external tables).
+    Assumes that the nodes for both the dashboard and the table have already been created.
     """
 
     def init(self, conf):

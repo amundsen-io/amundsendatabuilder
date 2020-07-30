@@ -8,7 +8,7 @@ from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXTERNAL_CLUSTER_NAME,\
-    EXTERNAL_DATABASE_NAME
+    EXTERNAL_SCHEMA_NAME
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
 
@@ -23,6 +23,28 @@ LOGGER = logging.getLogger(__name__)
 
 class TableauDashboardExternalTableExtractor(Extractor):
     """
+    Creates the "external" Tableau tables.
+    In this context, "external" tables are "tables" that are not from a typical database, and are loaded
+    using some other data format, like CSV files. 
+    This extractor handles the following types of external tables:
+        Excel spreadsheets
+        Text files (including CSV files)
+        Salesforce connections
+        Google Sheets connections
+
+    Excel spreadsheets, Salesforce connections, and Google Sheets connections are all classified as 
+    "databases" in terms of Tableau's Metadata API, with their "subsheets" forming their "tables" when
+    present. However, these tables are not assigned a schema, this extractor chooses to use the name
+    parent sheet as the schema, and assign a new table to each subsheet. The connection type is 
+    always used as the database, and for text files, the schema is set using the EXTERNAL_SCHEMA_NAME
+    config option. Since these external tables are usually named for human consumption only and often
+    contain a wider range of characters, all inputs are transformed to remove any problematic 
+    occurences before they are inserted: see the sanitize methods TableauDashboardUtils for specifics.
+
+    A more concrete example: if I had a Google Sheet titled "Growth by Region" with 2 subsheets called
+    "FY19 Report" and "FY20 Report", two tables would be generated with the following keys:
+    googlesheets://external.growth_by_region/FY_20_Report
+    googlesheets://external.growth_by_region/FY_19_Report
     """
 
     def init(self, conf):
@@ -99,7 +121,7 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
                 data = {}
                 data['cluster'] = self._conf.get_string(EXTERNAL_CLUSTER_NAME)
                 data['database'] = TableauDashboardUtils.sanitize_database_name(table['connectionType'])
-                data['schema'] = self._conf.get_string(EXTERNAL_DATABASE_NAME)
+                data['schema'] = self._conf.get_string(EXTERNAL_SCHEMA_NAME)
                 data['name'] = TableauDashboardUtils.sanitize_table_name(table['name'])
                 data['description'] = html.escape(table['description'])
                 yield data

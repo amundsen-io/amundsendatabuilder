@@ -23,6 +23,12 @@ LOGGER = logging.getLogger(__name__)
 
 class TableauDashboardQueryExtractor(Extractor):
     """
+    Extracts metadata about the queries associated with Tableau workbooks.
+    In terms of Tableau's Metadata API, these queries are called "custom SQL tables".
+    However, not every workbook uses custom SQL queries, and most are built with a mixture of using the
+    datasource fields directly and various "calculated" columns.
+    This extractor iterates through one query at a time, yielding a new relationship for every downstream
+    workbook that uses the query.
     """
 
     def init(self, conf):
@@ -97,7 +103,6 @@ class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
                     data['query_name'] = query['name']
                     data['query_id'] = query['id']
                     data['query_text'] = query['query']
-                    data['product'] = 'tableau'
-                    data['cluster'] = 'gold'
+                    data['cluster'] = self._conf.get_string('cluster')
 
                     yield data

@@ -87,7 +87,7 @@ tableau_excluded_projects = []
 tableau_dashboard_cluster = ""
 tableau_dashboard_database = ""
 tableau_external_table_cluster = ""
-tableau_external_table_database = ""
+tableau_external_table_schema = ""
 
 common_tableau_config = {
     'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
@@ -433,7 +433,7 @@ def run_tableau_table_job():
         'extractor.tableau_dashboard_table.cluster': tableau_dashboard_cluster,
         'extractor.tableau_dashboard_table.database': tableau_dashboard_database,
         'extractor.tableau_dashboard_table.external_cluster_name': tableau_external_table_cluster,
-        'extractor.tableau_dashboard_table.external_database_name': tableau_external_table_database,
+        'extractor.tableau_dashboard_table.external_schema_name': tableau_external_table_schema,
         'extractor.tableau_dashboard_table.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
@@ -472,9 +472,7 @@ def run_tableau_external_table_job():
         'extractor.tableau_external_table.cluster': tableau_dashboard_cluster,
         'extractor.tableau_external_table.database': tableau_dashboard_database,
         'extractor.tableau_external_table.external_cluster_name': tableau_external_table_cluster,
-        'extractor.tableau_external_table.external_database_name': tableau_external_table_database,
-        'tableau_external_table_databaseernal_table.transformer.timestamp_str_to_epoch.timestamp_format':
-            "%Y-%m-%dT%H:%M:%SZ",
+        'extractor.tableau_external_table.external_schema_name': tableau_external_table_schema,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
