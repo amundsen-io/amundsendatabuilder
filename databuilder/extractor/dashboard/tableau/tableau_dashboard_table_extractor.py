@@ -25,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 class TableauDashboardTableExtractor(Extractor):
     """
     Extracts metadata about the tables associated with Tableau workbooks.
-    It can handle both "regular" database tables as well as "external" tables 
+    It can handle both "regular" database tables as well as "external" tables
     (see TableauExternalTableExtractor for more info on external tables).
     Assumes that the nodes for both the dashboard and the table have already been created.
     """
@@ -76,6 +76,8 @@ class TableauDashboardTableExtractor(Extractor):
 
     def _build_extractor(self):
         """
+        Builds a TableauGraphQLDashboardTableExtractor. All data required can be retrieved with a single GraphQL call.
+        :return: A TableauGraphQLDashboardTableExtractor that creates dashboard <> table relationships.
         """
         extractor = TableauGraphQLDashboardTableExtractor()
         tableau_extractor_conf = \
@@ -90,7 +92,10 @@ class TableauDashboardTableExtractor(Extractor):
 
 
 class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
-    """docstring for TableauDashboardMetadataExtractor"""
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the DashboardTable model. Allows workbooks to be exlcuded based on their project.
+    """
     def execute(self):
         response = self.execute_query()
 
@@ -106,8 +111,17 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
 
             for table in workbook['upstreamTables']:
                 table_id_format = "{database}://{cluster}.{schema}/{table}"
+
+                # external tables have no schema, so they must be parsed differently
+                # see TableauExternalTableExtractor for more specifics
                 if table['schema'] != "":
                     cluster, database = self._conf.get_string("cluster"), self._conf.get_string("database")
+
+                    # Tableau sometimes incorrectly assigns the "schema" value incorrectly
+                    # based on how the datasource connection is used in a workbook.
+                    # It will hide the REAL schema in the table name, like "real_schema.real_table",
+                    # with a "schema" value of "fake_schema". In every case discovered so far, the "schema"
+                    # value is incorrect, so when this happens, the "inner" schema is used instead.
                     if "." in table['name']:
                         schema, name = table['name'].split(".")
                     else:

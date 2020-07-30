@@ -81,7 +81,10 @@ class TableauDashboardExtractor(Extractor):
 
     def _build_extractor(self):
         """
+        Builds a TableauGraphQLApiMetadataExtractor. All data required can be retrieved with a single GraphQL call.
+        :return: A TableauGraphQLApiMetadataExtractor that provides core dashboard metadata.
         """
+        # type: () -> TableauGraphQLApiMetadataExtractor
         extractor = TableauGraphQLApiMetadataExtractor()
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
@@ -95,7 +98,10 @@ class TableauDashboardExtractor(Extractor):
 
 
 class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
-    """docstring for TableauDashboardMetadataExtractor"""
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the DashboardMetadata model. Allows workbooks to be exlcuded based on their project.
+    """
     def execute(self):
         response = self.execute_query()
 
@@ -106,12 +112,14 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
             data = {}
             data['dashboard_group'] = workbook['projectName']
             data['dashboard_name'] = html.escape(str(workbook['name']))
-            if "description" not in workbook:
-                workbook['description'] = ""
             data['description'] = workbook['description']
             data['created_timestamp'] = workbook['createdAt']
             data['dashboard_group_url'] = 'https://example.com'
             data['dashboard_url'] = 'https://example.com'
             data['cluster'] = self._conf.get_string('cluster')
+
+            # some workbooks have an empty description key, and some don't have it at all
+            if "description" not in workbook:
+                workbook['description'] = ""
 
             yield data
