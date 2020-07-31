@@ -8,12 +8,9 @@ from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS, TABLEAU_HOST
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor
-
-from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
-from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -45,6 +42,8 @@ class TableauDashboardExtractor(Extractor):
                 createdAt
                 description
                 projectName
+                projectVizportalUrlId
+                vizportalUrlId
             }
         }"""
 
@@ -109,17 +108,19 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
                           if workbook['projectName'] not in self._conf.get_list(EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
-            data = {}
-            data['dashboard_group'] = workbook['projectName']
-            data['dashboard_name'] = html.escape(str(workbook['name']))
-            data['description'] = workbook['description']
-            data['created_timestamp'] = workbook['createdAt']
-            data['dashboard_group_url'] = 'https://example.com'
-            data['dashboard_url'] = 'https://example.com'
-            data['cluster'] = self._conf.get_string('cluster')
-
-            # some workbooks have an empty description key, and some don't have it at all
-            if "description" not in workbook:
-                workbook['description'] = ""
-
+            data = {
+                'dashboard_group': workbook['projectName'],
+                'dashboard_name': html.escape(str(workbook['name'])),
+                'description': workbook.get('description', ''),
+                'created_timestamp': workbook['createdAt'],
+                'dashboard_group_url': 'https://{}/#/projects/{}'.format(
+                    self._conf.get(TABLEAU_HOST),
+                    workbook['projectVizportalUrlId']
+                ),
+                'dashboard_url': 'https://{}/#/workbooks/{}/views'.format(
+                    self._conf.get(TABLEAU_HOST),
+                    workbook['vizportalUrlId']
+                ),
+                'cluster': self._conf.get_string('cluster')
+            }
             yield data
