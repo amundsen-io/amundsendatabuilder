@@ -27,6 +27,7 @@ class TableauDashboardExtractor(Extractor):
         Dashboard description (Workbook description)
         Dashboard creation timestamp (Workbook creationstamp)
         Dashboard group name (Workbook top-level folder name)
+    As with all the Tableau extractors, uses the Metadata API: https://help.tableau.com/current/api/metadata_api/en-us/index.html
     """
 
     def init(self, conf):
