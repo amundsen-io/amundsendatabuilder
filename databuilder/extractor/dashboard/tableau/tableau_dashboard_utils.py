@@ -56,7 +56,17 @@ class TableauDashboardUtils():
             - all HTML escape sequences matching HTML_ESCAPE_CHAR_REGEX are deleted
         """
         # type: (str) -> str
-        return re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '', str)
+        return re.sub(r'(\/|\')', '', str)
+
+    @staticmethod
+    def sanitize_workbook_name(str):
+        """
+        Sanitizes a given string so that it can safely be used as a table's database.
+        Replaces behaves as follows:
+            - all HTML escape sequences matching HTML_ESCAPE_CHAR_REGEX are deleted
+        """
+        # type: (str) -> str
+        return re.sub(r'(\/|\')', '', str)
 
 
 class TableauGraphQLApiExtractor(Extractor):
@@ -64,10 +74,11 @@ class TableauGraphQLApiExtractor(Extractor):
     Base class for querying the Tableau Metdata API, which uses a GraphQL schema.
     """
 
-    def init(self, conf, auth_token, query):
+    def init(self, conf, auth_token, query, query_variables={}):
         self._conf = conf
         self._auth_token = auth_token
         self._query = query
+        self._query_variables = query_variables
         self._iterator = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
         self._metadata_url = 'https://{TABLEAU_HOST}/api/metadata/graphql'.format(
@@ -80,7 +91,8 @@ class TableauGraphQLApiExtractor(Extractor):
         """
         # type: () -> dict
         query_payload = json.dumps({
-            "query": self._query
+            "query": self._query,
+            "variables": self._query_variables
         })
         headers = {
             "Content-Type": "application/json",

@@ -8,7 +8,7 @@ from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXTERNAL_CLUSTER_NAME,\
-    EXTERNAL_SCHEMA_NAME
+    EXTERNAL_SCHEMA_NAME, EXTERNAL_TABLE_TYPES
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
 
@@ -52,8 +52,8 @@ class TableauDashboardExternalTableExtractor(Extractor):
 
         self._conf = conf
         self._auth = TableauDashboardAuth(self._conf)
-        self.query = """query {
-          databases (filter: {connectionTypeWithin: ["excel-direct", "textscan", "salesforce", "google-sheets"]}) {
+        self.query = """query externalTables($externalTableTypes: [String]) {
+          databases (filter: {connectionTypeWithin: $externalTableTypes}) {
             name
             connectionType
             description
@@ -62,6 +62,7 @@ class TableauDashboardExternalTableExtractor(Extractor):
             }
           }
         }"""
+        self.query_variables = {"externalTableTypes": self._conf.get_list(EXTERNAL_TABLE_TYPES)}
         self._extractor = self._build_extractor()
 
         transformers = []
@@ -95,7 +96,10 @@ class TableauDashboardExternalTableExtractor(Extractor):
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
                   .with_fallback(ConfigFactory.from_dict({}))
-        extractor.init(conf=tableau_extractor_conf, auth_token=self._auth.token, query=self.query)
+        extractor.init(conf=tableau_extractor_conf,
+                       auth_token=self._auth.token,
+                       query=self.query,
+                       query_variables=self.query_variables)
         return extractor
 
 
@@ -104,24 +108,25 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
     def execute(self):
         response = self.execute_query()
 
-        for table in response['databases']:
-            if table['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
-                for downstreamTable in table['tables']:
-                    data = {}
-                    data['cluster'] = self._conf.get_string(EXTERNAL_CLUSTER_NAME)
-                    data['database'] = TableauDashboardUtils.sanitize_database_name(
-                        html.escape(table['connectionType'])
-                    )
-                    data['schema'] = TableauDashboardUtils.sanitize_schema_name(html.escape(table['name']))
-                    data['name'] = TableauDashboardUtils.sanitize_table_name(html.escape(downstreamTable['name']))
-                    data['description'] = html.escape(table['description'])
-
+        for database in response['databases']:
+            if database['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
+                for downstreamTable in database['tables']:
+                    data = {
+                        'cluster': self._conf.get_string(EXTERNAL_CLUSTER_NAME),
+                        'database': TableauDashboardUtils.sanitize_database_name(
+                            database['connectionType']
+                        ),
+                        'schema': TableauDashboardUtils.sanitize_schema_name(database['name']),
+                        'name': TableauDashboardUtils.sanitize_table_name(downstreamTable['name']),
+                        'description': database['description']
+                    }
                     yield data
             else:
-                data = {}
-                data['cluster'] = self._conf.get_string(EXTERNAL_CLUSTER_NAME)
-                data['database'] = TableauDashboardUtils.sanitize_database_name(table['connectionType'])
-                data['schema'] = self._conf.get_string(EXTERNAL_SCHEMA_NAME)
-                data['name'] = TableauDashboardUtils.sanitize_table_name(table['name'])
-                data['description'] = html.escape(table['description'])
+                data = {
+                    'cluster': self._conf.get_string(EXTERNAL_CLUSTER_NAME),
+                    'database': TableauDashboardUtils.sanitize_database_name(database['connectionType']),
+                    'schema': self._conf.get_string(EXTERNAL_SCHEMA_NAME),
+                    'name': TableauDashboardUtils.sanitize_table_name(database['name']),
+                    'description': database['description']
+                }
                 yield data
