@@ -1,5 +1,4 @@
 import logging
-import html
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
@@ -10,7 +9,7 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS, TABLEAU_HOST
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor
+    TableauGraphQLApiExtractor, TableauDashboardUtils
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -110,7 +109,7 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
         for workbook in workbooks_data:
             data = {
                 'dashboard_group': workbook['projectName'],
-                'dashboard_name': html.escape(str(workbook['name'])),
+                'dashboard_name': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
                 'description': workbook.get('description', ''),
                 'created_timestamp': workbook['createdAt'],
                 'dashboard_group_url': 'https://{}/#/projects/{}'.format(

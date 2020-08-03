@@ -1,5 +1,4 @@
 import logging
-import html
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401

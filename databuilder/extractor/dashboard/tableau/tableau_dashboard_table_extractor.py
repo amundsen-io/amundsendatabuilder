@@ -1,5 +1,4 @@
 import logging
-import html
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
@@ -103,11 +102,12 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                           if workbook['projectName'] not in self._conf.get_list(EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
-            data = {}
-            data['dashboard_group_id'] = workbook['projectName']
-            data['dashboard_id'] = html.escape(workbook['name'])
-            data['cluster'] = self._conf.get_string("cluster")
-            data['table_ids'] = []
+            data = {
+                'dashboard_group_id': workbook['projectName'],
+                'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
+                'cluster': self._conf.get_string("cluster"),
+                'table_ids': []
+            }
 
             for table in workbook['upstreamTables']:
                 table_id_format = "{database}://{cluster}.{schema}/{table}"
@@ -126,14 +126,14 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                         schema, name = table['name'].split(".")
                     else:
                         schema, name = table['schema'], table['name']
-                    schema, name = html.escape(schema), html.escape(name)
+                    schema, name = TableauDashboardUtils.sanitize_schema_name(schema), TableauDashboardUtils.sanitize_table_name(name)
                 else:
                     cluster = self._conf.get_string(EXTERNAL_CLUSTER_NAME)
                     database = TableauDashboardUtils.sanitize_database_name(
-                        html.escape(table['database']['connectionType'])
+                        table['database']['connectionType']
                     )
-                    schema = TableauDashboardUtils.sanitize_schema_name(html.escape(table['database']['name']))
-                    name = TableauDashboardUtils.sanitize_table_name(html.escape(table['name']))
+                    schema = TableauDashboardUtils.sanitize_schema_name(table['database']['name'])
+                    name = TableauDashboardUtils.sanitize_table_name(table['name'])
 
                 table_id = table_id_format.format(
                     database=database,

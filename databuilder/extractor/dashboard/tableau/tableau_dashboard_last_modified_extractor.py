@@ -1,5 +1,4 @@
 import logging
-import html
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from typing import Any  # noqa: F401
@@ -8,7 +7,7 @@ from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor
+    TableauGraphQLApiExtractor, TableauDashboardUtils
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS
 
@@ -107,10 +106,10 @@ class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
                           if workbook['projectName'] not in self._conf.get_list(EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
-            data = {}
-            data['dashboard_group_id'] = workbook['projectName']
-            data['dashboard_id'] = html.escape(str(workbook['name']))
-            data['last_modified_timestamp'] = workbook['updatedAt']
-            data['cluster'] = self._conf.get_string('cluster')
-
+            data = {
+                'dashboard_group_id': workbook['projectName'],
+                'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
+                'last_modified_timestamp': workbook['updatedAt'],
+                'cluster': self._conf.get_string('cluster')
+            }
             yield data

@@ -50,7 +50,6 @@ from databuilder.extractor.dashboard.tableau.tableau_dashboard_query_extractor i
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_table_extractor import TableauDashboardTableExtractor
 from databuilder.extractor.dashboard.tableau.tableau_external_table_extractor import \
     TableauDashboardExternalTableExtractor
-
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
 neo_host = os.getenv('CREDENTIALS_NEO4J_PROXY_HOST', 'localhost')
 
@@ -87,7 +86,8 @@ tableau_excluded_projects = []
 tableau_dashboard_cluster = ""
 tableau_dashboard_database = ""
 tableau_external_table_cluster = ""
-tableau_external_table_schema = ""
+tableau_external_table_database = ""
+tableau_external_table_types = []
 
 common_tableau_config = {
     'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
@@ -473,6 +473,7 @@ def run_tableau_external_table_job():
         'extractor.tableau_external_table.database': tableau_dashboard_database,
         'extractor.tableau_external_table.external_cluster_name': tableau_external_table_cluster,
         'extractor.tableau_external_table.external_schema_name': tableau_external_table_schema,
+        'extractor.tableau_external_table.external_table_types': tableau_external_table_types,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,

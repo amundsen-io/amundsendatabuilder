@@ -18,25 +18,20 @@ class TableauDashboardUtils():
     Provides various utility functions specifc to the Tableau dashboard extractors.
     """
 
-    # matches "&#x123;" or "&amp;" where 123 is some valid HTML escape code
-    HTML_ESCAPE_CHAR_REGEX = r'(\&\#[x\d]+;)|(&amp;)'
-
     @staticmethod
     def sanitize_schema_name(str):
         """
         Sanitizes a given string so that it can safely be used as a table's schema.
         Replaces behaves as follows:
             - all spaces and periods are replaced by underscores
-            - all square brackets, parenthesis, pipes, and hyphens are deleted
-            - all HTML escape sequences matching HTML_ESCAPE_CHAR_REGEX are deleted
+            - any [], (), -, &, and ? characters are deleted
         """
         # type: (str) -> str
         # this indentation looks silly, but otherwise the linter complains
         # there's probably a better way to do this
         return re.sub(r' ', '_',
                       re.sub(r'\.', '_',
-                             re.sub(TableauDashboardUtils.HTML_ESCAPE_CHAR_REGEX, '',
-                                    re.sub(r'(\[|\]|\(|\)|\-)', '', str))))
+                             re.sub(r'(\[|\]|\(|\)|\-|\&|\?)', '', str)))
 
     @staticmethod
     def sanitize_database_name(str):
@@ -51,9 +46,11 @@ class TableauDashboardUtils():
     @staticmethod
     def sanitize_table_name(str):
         """
-        Sanitizes a given string so that it can safely be used as a table's database.
+        Sanitizes a given string so that it can safely be used as a table name.
+        Mimics the current behavior of sanitize_workbook_name, but this is purely coincidental.
+        As more breaking characters/patterns are found, each should be updated to reflect this.
         Replaces behaves as follows:
-            - all HTML escape sequences matching HTML_ESCAPE_CHAR_REGEX are deleted
+            - all forward slashes and single quotes characters are deleted
         """
         # type: (str) -> str
         return re.sub(r'(\/|\')', '', str)
@@ -61,9 +58,11 @@ class TableauDashboardUtils():
     @staticmethod
     def sanitize_workbook_name(str):
         """
-        Sanitizes a given string so that it can safely be used as a table's database.
+        Sanitizes a given string so that it can safely be used as a workbook ID.
+        Mimics the current behavior of sanitize_table_name for now, but is purely coincidental.
+        As more breaking characters/patterns are found, each should be updated to reflect this.
         Replaces behaves as follows:
-            - all HTML escape sequences matching HTML_ESCAPE_CHAR_REGEX are deleted
+            - all forward slashes and single quotes characters are deleted
         """
         # type: (str) -> str
         return re.sub(r'(\/|\')', '', str)
