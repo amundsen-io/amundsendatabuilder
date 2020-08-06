@@ -4,6 +4,7 @@
 import abc
 
 import logging
+from typing import Dict, List, Tuple
 import textwrap
 
 LOGGER = logging.getLogger(__name__)

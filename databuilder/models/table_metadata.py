@@ -4,7 +4,7 @@
 import copy
 from collections import namedtuple
 
-from typing import Iterable, Any, Union, Iterator, Dict, Set  # noqa: F401
+from typing import Any, Dict, Iterable, Iterator, List, Set, Union  # noqa: F401
 
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.neo4j_csv_serde import (

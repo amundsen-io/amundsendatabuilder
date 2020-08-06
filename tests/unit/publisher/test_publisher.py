@@ -4,6 +4,7 @@
 import unittest
 
 from mock import MagicMock
+from pyhocon import ConfigTree
 
 from databuilder.publisher.base_publisher import Publisher, NoopPublisher
 

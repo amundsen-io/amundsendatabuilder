@@ -3,6 +3,7 @@
 
 import unittest
 from mock import patch
+from typing import Any
 
 from pyhocon import ConfigFactory
 from databuilder import Scoped
