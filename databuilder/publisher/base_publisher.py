@@ -24,7 +24,7 @@ class Publisher(Scoped):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.call_backs: List[Callback] = []
 
     @abc.abstractmethod

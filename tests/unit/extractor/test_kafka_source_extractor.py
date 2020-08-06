@@ -25,7 +25,7 @@ class TestKafkaSourceExtractor(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_consume_success(self):
+    def test_consume_success(self) -> None:
         kafka_extractor = KafkaSourceExtractor()
         kafka_extractor.init(Scoped.get_scoped_conf(conf=self.conf,
                                                     scope=kafka_extractor.get_scope()))
@@ -41,7 +41,7 @@ class TestKafkaSourceExtractor(unittest.TestCase):
             records = kafka_extractor.consume()
             self.assertEqual(len(records), 1)
 
-    def test_consume_fail(self):
+    def test_consume_fail(self) -> None:
         kafka_extractor = KafkaSourceExtractor()
         kafka_extractor.init(Scoped.get_scoped_conf(conf=self.conf,
                                                     scope=kafka_extractor.get_scope()))

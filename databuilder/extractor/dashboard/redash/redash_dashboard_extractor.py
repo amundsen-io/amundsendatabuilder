@@ -4,7 +4,7 @@
 import importlib
 
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, Optional
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 from databuilder.models.dashboard.dashboard_last_modified import DashboardLastModifiedTimestamp
@@ -93,7 +93,7 @@ class RedashDashboardExtractor(Extractor):
 
         self._extractor = self._build_extractor()
         self._transformer = self._build_transformer()
-        self._extract_iter = None
+        self._extract_iter: Optional[Iterator[Any]] = None
 
     def _is_published_dashboard(self, record: Dict[str, Any]) -> bool:
         return not (record['is_archived'] or record['is_draft'])
@@ -137,7 +137,8 @@ class RedashDashboardExtractor(Extractor):
             viz_widgets = get_visualization_widgets(widgets)
 
             # generate a description for this dashboard, since Redash does not have descriptions
-            dash_data['description'] = generate_dashboard_description(text_widgets, viz_widgets)
+            dash_data['description'] = generate_dashboard_description(
+                iter(text_widgets), iter(viz_widgets))
 
             yield DashboardMetadata(**dash_data)
 

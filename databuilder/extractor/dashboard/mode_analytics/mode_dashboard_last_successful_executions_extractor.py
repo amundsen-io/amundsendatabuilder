@@ -22,7 +22,7 @@ class ModeDashboardLastSuccessfulExecutionExtractor(ModeDashboardExecutionsExtra
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(ModeDashboardLastSuccessfulExecutionExtractor, self).__init__()
 
     def init(self, conf: ConfigTree) -> None:

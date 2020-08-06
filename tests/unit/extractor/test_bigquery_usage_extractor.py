@@ -178,7 +178,7 @@ ci1wcm9qZWN0LWhlcmUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iCn0KCgo=
 
 
 class MockLoggingClient():
-    def __init__(self, data):
+    def __init__(self, data) -> None:
         self.data = data
         self.a = Mock()
         self.a.execute.return_value = self.data

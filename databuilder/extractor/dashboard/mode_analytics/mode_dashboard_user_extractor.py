@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from typing import Any  # noqa: F401
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from requests.auth import HTTPBasicAuth
+from typing import Any, List  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
@@ -15,7 +15,7 @@ from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import 
 from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
 from databuilder.rest_api.rest_api_failure_handlers import HttpFailureSkipOnStatus
 from databuilder.rest_api.rest_api_query import RestApiQuery
-from databuilder.transformer.base_transformer import ChainedTransformer
+from databuilder.transformer.base_transformer import ChainedTransformer, Transformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.remove_field_transformer import RemoveFieldTransformer, FIELD_NAMES
 
@@ -37,7 +37,7 @@ class ModeDashboardUserExtractor(Extractor):
         )
 
         # Remove all unnecessary fields because User model accepts all attributes and push it to Neo4j.
-        transformers = []
+        transformers: List[Transformer] = []
 
         remove_fields_transformer = RemoveFieldTransformer()
         remove_fields_transformer.init(

@@ -4,14 +4,14 @@
 import logging
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from typing import Any  # noqa: F401
+from typing import Any, List  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import ModePaginatedRestApiQuery
 from databuilder.rest_api.rest_api_query import RestApiQuery
-from databuilder.transformer.base_transformer import ChainedTransformer
+from databuilder.transformer.base_transformer import ChainedTransformer, Transformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.template_variable_substitution_transformer import \
     TemplateVariableSubstitutionTransformer, FIELD_NAME, TEMPLATE
@@ -35,7 +35,7 @@ class ModeDashboardChartsExtractor(Extractor):
         )
 
         # Constructing URL using resource path via TemplateVariableSubstitutionTransformer
-        transformers = []
+        transformers: List[Transformer] = []
         chart_url_transformer = TemplateVariableSubstitutionTransformer()
         chart_url_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, chart_url_transformer.get_scope()).with_fallback(

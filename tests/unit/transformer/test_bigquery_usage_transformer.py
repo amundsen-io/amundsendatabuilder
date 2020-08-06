@@ -47,7 +47,7 @@ class TestBigQueryUsageTransform(unittest.TestCase):
         self.assertEqual(col_reader.user_email, TestBigQueryUsageTransform.EMAIL)
         self.assertEqual(col_reader.read_count, TestBigQueryUsageTransform.READ_COUNT)
 
-    def test_scope(self):
+    def test_scope(self) -> None:
         config = ConfigFactory.from_dict({})
 
         transformer = BigqueryUsageTransformer()

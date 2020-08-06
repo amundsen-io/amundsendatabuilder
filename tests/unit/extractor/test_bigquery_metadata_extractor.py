@@ -117,7 +117,7 @@ except NameError:
 
 
 class MockBigQueryClient():
-    def __init__(self, dataset_list_data, table_list_data, table_data):
+    def __init__(self, dataset_list_data, table_list_data, table_data) -> None:
         self.ds_execute = Mock()
         self.ds_execute.execute.return_value = dataset_list_data
         self.ds_list = Mock()

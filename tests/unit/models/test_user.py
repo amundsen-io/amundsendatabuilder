@@ -33,7 +33,7 @@ class TestUser(unittest.TestCase):
         nodes = self.user.create_nodes()
         self.assertEquals(len(nodes), 1)
 
-    def test_create_node_additional_attr(self):
+    def test_create_node_additional_attr(self) -> None:
         test_user = User(first_name='test_first',
                          last_name='test_last',
                          name='test_first test_last',

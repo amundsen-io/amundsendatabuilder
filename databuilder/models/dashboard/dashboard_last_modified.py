@@ -28,7 +28,7 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
                  last_modified_timestamp: int,
                  product: Optional[str] = '',
                  cluster: str = 'gold',
-                 **kwargs
+                 **kwargs: Any
                  ):
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
