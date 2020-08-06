@@ -16,15 +16,13 @@ from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
 class ModeDashboardUtils(object):
 
     @staticmethod
-    def get_spaces_query_api(conf,  # type: ConfigTree
-                             ):
+    def get_spaces_query_api(conf: ConfigTree) -> BaseRestApiQuery:
         """
         Provides RestApiQuerySeed where it will provides iterator of dictionaries as records where dictionary keys are
          organization, dashboard_group_id, dashboard_group and dashboard_group_description
         :param conf:
         :return:
         """
-        # type: (...) -> BaseRestApiQuery
 
         # https://mode.com/developer/api-reference/management/spaces/#listSpaces
         spaces_url_template = 'https://app.mode.com/api/{organization}/spaces?filter=all'
@@ -45,8 +43,7 @@ class ModeDashboardUtils(object):
         return spaces_query
 
     @staticmethod
-    def get_auth_params(conf,  # type: ConfigTree
-                        ):
+    def get_auth_params(conf: ConfigTree):
         params = {'auth': HTTPBasicAuth(conf.get_string(MODE_ACCESS_TOKEN),
                                         conf.get_string(MODE_PASSWORD_TOKEN)
                                         )
@@ -54,8 +51,8 @@ class ModeDashboardUtils(object):
         return params
 
     @staticmethod
-    def create_mode_rest_api_extractor(restapi_query,  # type: BaseRestApiQuery
-                                       conf,  # type: ConfigTree
+    def create_mode_rest_api_extractor(restapi_query: BaseRestApiQuery,
+                                       conf: ConfigTree
                                        ):
         """
         Creates RestAPIExtractor. Note that RestAPIExtractor is already initialized

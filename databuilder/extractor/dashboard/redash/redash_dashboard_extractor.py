@@ -95,9 +95,7 @@ class RedashDashboardExtractor(Extractor):
         self._transformer = self._build_transformer()
         self._extract_iter = None
 
-    def _is_published_dashboard(self, record):
-        # type: Dict[str, Any] -> bool
-
+    def _is_published_dashboard(self, record: Dict[str, Any]) -> bool:
         return not (record['is_archived'] or record['is_draft'])
 
     def _get_extract_iter(self) -> Iterator[Any]:

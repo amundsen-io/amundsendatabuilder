@@ -101,8 +101,7 @@ class Neo4jStalenessRemovalTask(Task):
                                  encrypted=conf.get_bool(NEO4J_ENCRYPTED),
                                  trust=trust)
 
-    def run(self):
-        # type: () -> None
+    def run(self) -> None:
         """
         First, performs a safety check to make sure this operation would not delete more than a threshold where
         default threshold is 5%. Once it passes a safety check, it will first delete stale nodes, and then stale
@@ -113,13 +112,12 @@ class Neo4jStalenessRemovalTask(Task):
         self._delete_stale_nodes()
         self._delete_stale_relations()
 
-    def validate(self):
+    def validate(self) -> None:
         """
         Validation method. Focused on limit the risk on deleting nodes and relations.
          - Check if deleted nodes will be within 10% of total nodes.
         :return:
         """
-        # type: () -> None
         self._validate_node_staleness_pct()
         self._validate_relation_staleness_pct()
 
