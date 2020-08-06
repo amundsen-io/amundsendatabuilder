@@ -29,12 +29,10 @@ def null_iterator(items):
 
 class TestHiveTableLastUpdatedExtractor(unittest.TestCase):
 
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
-    def test_extraction_with_empty_query_result(self):
-        # type: () -> None
+    def test_extraction_with_empty_query_result(self) -> None:
 
         config_dict = {
             'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
@@ -49,8 +47,7 @@ class TestHiveTableLastUpdatedExtractor(unittest.TestCase):
             result = extractor.extract()
             self.assertEqual(result, None)
 
-    def test_extraction_with_partition_table_result(self):
-        # type: () -> None
+    def test_extraction_with_partition_table_result(self) -> None:
         config_dict = {
             'filesystem.{}'.format(FileSystem.DASK_FILE_SYSTEM): MagicMock()
         }
@@ -87,8 +84,7 @@ class TestHiveTableLastUpdatedExtractor(unittest.TestCase):
 
             self.assertIsNone(extractor.extract())
 
-    def test_extraction(self):
-        # type: () -> None
+    def test_extraction(self) -> None:
         old_datetime = datetime(2018, 8, 14, 4, 12, 3, tzinfo=UTC)
         new_datetime = datetime(2018, 11, 14, 4, 12, 3, tzinfo=UTC)
 

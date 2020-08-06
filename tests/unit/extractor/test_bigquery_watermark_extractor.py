@@ -86,8 +86,7 @@ class MockBigQueryClient():
 # Patch fallback auth method to avoid actually calling google API
 @patch('google.auth.default', lambda scopes: ['dummy', 'dummy'])
 class TestBigQueryWatermarkExtractor(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         config_dict = {
             'extractor.bigquery_watermarks.{}'.format(BigQueryWatermarkExtractor.PROJECT_ID_KEY):
                 'your-project-here'}

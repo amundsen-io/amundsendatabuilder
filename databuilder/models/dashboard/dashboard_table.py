@@ -27,11 +27,11 @@ class DashboardTable(Neo4jCsvSerializable):
     TABLE_DASHBOARD_RELATION_TYPE = 'TABLE_OF_DASHBOARD'
 
     def __init__(self,
-                 dashboard_group_id,  # type: str
-                 dashboard_id,  # type: str
-                 table_ids,  # type: List[str]
-                 product='',  # type: Optional[str]
-                 cluster='gold',  # type: str
+                 dashboard_group_id: str,
+                 dashboard_id: str,
+                 table_ids: List[str],
+                 product: Optional[str] = '',
+                 cluster: str = 'gold',
                  **kwargs
                  ):
         self._dashboard_group_id = dashboard_group_id
@@ -43,19 +43,16 @@ class DashboardTable(Neo4jCsvSerializable):
 
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         return None
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self):
-        # type: () -> Optional[None, Iterator[[Dict[str, Any]]]]
+    def _create_relation_iterator(self) -> Optional[None, Iterator[[Dict[str, Any]]]]:
         for table_id in self._table_ids:
             m = re.match('(\w+)://(\w+)\.(\w+)\/(\w+)', table_id)
             if m:

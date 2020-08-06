@@ -10,8 +10,7 @@ from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_STAR
 
 class TestDashboardChart(unittest.TestCase):
 
-    def test_create_nodes(self):
-        # type: () -> None
+    def test_create_nodes(self) -> None:
 
         dashboard_chart = DashboardChart(dashboard_group_id='dg_id',
                                          dashboard_id='d_id',
@@ -41,8 +40,7 @@ class TestDashboardChart(unittest.TestCase):
                      'url': 'http://gold.foo.bar/'}
         self.assertDictEqual(expected2, actual2)
 
-    def test_create_relation(self):
-        # type: () -> None
+    def test_create_relation(self) -> None:
         dashboard_chart = DashboardChart(dashboard_group_id='dg_id',
                                          dashboard_id='d_id',
                                          query_id='q_id',

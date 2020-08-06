@@ -27,8 +27,8 @@ class TagMetadata(Neo4jCsvSerializable):
     METRIC_TYPE = 'metric'
 
     def __init__(self,
-                 name,  # type: str,
-                 tag_type='default',  # type: str
+                 name: str,,
+                 tag_type: str = 'default',
                  ):
         self._name = name
         self._tag_type = tag_type
@@ -36,8 +36,7 @@ class TagMetadata(Neo4jCsvSerializable):
         self._relations = iter([])
 
     @staticmethod
-    def get_tag_key(name):
-        # type: (str) -> str
+    def get_tag_key(name: str) -> str:
         if not name:
             return ''
         return TagMetadata.TAG_KEY_FORMAT.format(tag=name)
@@ -48,16 +47,14 @@ class TagMetadata(Neo4jCsvSerializable):
                 NODE_KEY: TagMetadata.get_tag_key(name),
                 TagMetadata.TAG_TYPE: tag_type}
 
-    def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         # return the string representation of the data
         try:
             return next(self._nodes)
         except StopIteration:
             return None
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         # We don't emit any relations for Tag ingestion
         try:
             return next(self._relations)
@@ -79,8 +76,8 @@ class DescriptionMetadata:
     DEFAULT_SOURCE = "description"
 
     def __init__(self,
-                 text,  # type: Union[None, str]
-                 source=DEFAULT_SOURCE  # type: str
+                 text: Union[None, str],
+                 source: str = DEFAULT_SOURCE
                  ):
         """
         :param source: The unique source of what is populating this description.
@@ -95,8 +92,8 @@ class DescriptionMetadata:
             self._label = self.PROGRAMMATIC_DESCRIPTION_NODE_LABEL
 
     @staticmethod
-    def create_description_metadata(text, source=DEFAULT_SOURCE):
-        # type: (Union[None,str], str) -> ProgrammaticDescription
+    def create_description_metadata(text: Union[None,str],
+                                    source: str = DEFAULT_SOURCE) -> ProgrammaticDescription:
 
         # We do not want to create a node if there is no description text!
         if text is None:
@@ -107,15 +104,13 @@ class DescriptionMetadata:
             description_node = DescriptionMetadata(text=text, source=source)
         return description_node
 
-    def get_description_id(self):
-        # type: () -> str
+    def get_description_id(self) -> str:
         if self._source == self.DEFAULT_SOURCE:
             return "_description"
         else:
             return "_" + self._source + "_description"
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'DescriptionMetadata({!r}, {!r})'.format(self._source, self._text)
 
     def get_node_dict(self, node_key):
@@ -153,13 +148,12 @@ class ColumnMetadata:
     TAG_COL_RELATION_TYPE = 'TAG'
 
     def __init__(self,
-                 name,  # type: str
-                 description,  # type: Union[str, None]
-                 col_type,  # type: str
-                 sort_order,  # type: int
-                 tags=None  # type: Union[List[str], None]
-                 ):
-        # type: (...) -> None
+                 name: str,
+                 description: Union[str, None],
+                 col_type: str,
+                 sort_order: int,
+                 tags: Union[List[str], None] = None
+                 ) -> None:
         """
         TODO: Add stats
         :param name:
@@ -174,8 +168,7 @@ class ColumnMetadata:
         self.sort_order = sort_order
         self.tags = tags
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'ColumnMetadata({!r}, {!r}, {!r}, {!r})'.format(self.name,
                                                                self.description,
                                                                self.type,
@@ -227,22 +220,21 @@ class TableMetadata(Neo4jCsvSerializable):
     TAG_TABLE_RELATION_TYPE = 'TAG'
 
     # Only for deduping database, cluster, and schema (table and column will be always processed)
-    serialized_nodes = set()  # type: Set[Any]
-    serialized_rels = set()  # type: Set[Any]
+    serialized_nodes: Set[Any] = set()
+    serialized_rels: Set[Any] = set()
 
     def __init__(self,
-                 database,  # type: str
-                 cluster,  # type: str
-                 schema,  # type: str
-                 name,  # type: str
-                 description,  # type: Union[str, None]
-                 columns=None,  # type: Iterable[ColumnMetadata]
-                 is_view=False,  # type: bool
-                 tags=None,  # type: Union[List, str]
-                 description_source=None,  # type: Union[str, None]
-                 **kwargs  # type: Dict
-                 ):
-        # type: (...) -> None
+                 database: str,
+                 cluster: str,
+                 schema: str,
+                 name: str,
+                 description: Union[str, None],
+                 columns: Iterable[ColumnMetadata] = None,
+                 is_view: bool = False,
+                 tags: Union[List, str] = None,
+                 description_source: Union[str, None] = None,
+                 **kwargs: Dict
+                 ) -> None:
         """
         :param database:
         :param cluster:
@@ -272,8 +264,7 @@ class TableMetadata(Neo4jCsvSerializable):
         self._node_iterator = self._create_next_node()
         self._relation_iterator = self._create_next_relation()
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
                '{!r}, {!r}, {!r}, {!r})'.format(self.database,
                                                 self.cluster,
@@ -284,46 +275,42 @@ class TableMetadata(Neo4jCsvSerializable):
                                                 self.is_view,
                                                 self.tags)
 
-    def _get_table_key(self):
-        # type: () -> str
+    def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
                                                      cluster=self.cluster,
                                                      schema=self.schema,
                                                      tbl=self.name)
 
-    def _get_table_description_key(self, description):
-        # type: (DescriptionMetadata) -> str
+    def _get_table_description_key(self,
+                                   description: DescriptionMetadata) -> str:
         return TableMetadata.TABLE_DESCRIPTION_FORMAT.format(db=self.database,
                                                              cluster=self.cluster,
                                                              schema=self.schema,
                                                              tbl=self.name,
                                                              description_id=description.get_description_id())
 
-    def _get_database_key(self):
-        # type: () -> str
+    def _get_database_key(self) -> str:
         return TableMetadata.DATABASE_KEY_FORMAT.format(db=self.database)
 
-    def _get_cluster_key(self):
-        # type: () -> str
+    def _get_cluster_key(self) -> str:
         return TableMetadata.CLUSTER_KEY_FORMAT.format(db=self.database,
                                                        cluster=self.cluster)
 
-    def _get_schema_key(self):
-        # type: () -> str
+    def _get_schema_key(self) -> str:
         return TableMetadata.SCHEMA_KEY_FORMAT.format(db=self.database,
                                                       cluster=self.cluster,
                                                       schema=self.schema)
 
-    def _get_col_key(self, col):
-        # type: (ColumnMetadata) -> str
+    def _get_col_key(self, col: ColumnMetadata) -> str:
         return ColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
                                                        cluster=self.cluster,
                                                        schema=self.schema,
                                                        tbl=self.name,
                                                        col=col.name)
 
-    def _get_col_description_key(self, col, description):
-        # type: (ColumnMetadata, DescriptionMetadata) -> str
+    def _get_col_description_key(self,
+                                 col: ColumnMetadata,
+                                 description: DescriptionMetadata) -> str:
         return ColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
                                                                cluster=self.cluster,
                                                                schema=self.schema,
@@ -339,15 +326,13 @@ class TableMetadata(Neo4jCsvSerializable):
             tags = [tag.lower().strip() for tag in tags]
         return tags
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_next_node(self):  # noqa: C901
-        # type: () -> Iterator[Any]
+    def _create_next_node(self) -> Iterator[Any]:  # noqa: C901
 
         table_node = {NODE_LABEL: TableMetadata.TABLE_NODE_LABEL,
                       NODE_KEY: self._get_table_key(),
@@ -407,15 +392,13 @@ class TableMetadata(Neo4jCsvSerializable):
                     'name': node_tuple.name
                 }
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_next_relation(self):
-        # type: () -> Iterator[Any]
+    def _create_next_relation(self) -> Iterator[Any]:
 
         yield {
             RELATION_START_LABEL: TableMetadata.SCHEMA_NODE_LABEL,

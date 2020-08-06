@@ -10,8 +10,7 @@ from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_STAR
 
 class TestDashboardLastModifiedTimestamp(unittest.TestCase):
 
-    def test_dashboard_timestamp_nodes(self):
-        # type: () -> None
+    def test_dashboard_timestamp_nodes(self) -> None:
         dashboard_last_modified = DashboardLastModifiedTimestamp(last_modified_timestamp=123456789,
                                                                  cluster='cluster_id',
                                                                  product='product_id',
@@ -27,8 +26,7 @@ class TestDashboardLastModifiedTimestamp(unittest.TestCase):
         self.assertDictEqual(actual, expected)
         self.assertIsNone(dashboard_last_modified.create_next_node())
 
-    def test_dashboard_owner_relations(self):
-        # type: () -> None
+    def test_dashboard_owner_relations(self) -> None:
         dashboard_last_modified = DashboardLastModifiedTimestamp(last_modified_timestamp=123456789,
                                                                  cluster='cluster_id',
                                                                  product='product_id',

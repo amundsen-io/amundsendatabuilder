@@ -8,8 +8,7 @@ from databuilder.models.schema.schema import SchemaModel
 
 class TestSchemaDescription(unittest.TestCase):
 
-    def test_create_nodes(self):
-        # type: () -> None
+    def test_create_nodes(self) -> None:
 
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name',
@@ -22,8 +21,7 @@ class TestSchemaDescription(unittest.TestCase):
                               'KEY': 'db://cluster.schema/_description', 'LABEL': 'Description'})
         self.assertIsNone(schema.create_next_node())
 
-    def test_create_nodes_no_description(self):
-        # type: () -> None
+    def test_create_nodes_no_description(self) -> None:
 
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name')
@@ -32,8 +30,7 @@ class TestSchemaDescription(unittest.TestCase):
                              {'name': 'schema_name', 'KEY': 'db://cluster.schema', 'LABEL': 'Schema'})
         self.assertIsNone(schema.create_next_node())
 
-    def test_create_nodes_programmatic_description(self):
-        # type: () -> None
+    def test_create_nodes_programmatic_description(self) -> None:
 
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name',
@@ -47,8 +44,7 @@ class TestSchemaDescription(unittest.TestCase):
                               'KEY': 'db://cluster.schema/_bar_description', 'LABEL': 'Programmatic_Description'})
         self.assertIsNone(schema.create_next_node())
 
-    def test_create_relation(self):
-        # type: () -> None
+    def test_create_relation(self) -> None:
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name',
                              description='foo')
@@ -60,15 +56,13 @@ class TestSchemaDescription(unittest.TestCase):
         self.assertEqual(expected, actual)
         self.assertIsNone(schema.create_next_relation())
 
-    def test_create_relation_no_description(self):
-        # type: () -> None
+    def test_create_relation_no_description(self) -> None:
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name')
 
         self.assertIsNone(schema.create_next_relation())
 
-    def test_create_relation_programmatic_description(self):
-        # type: () -> None
+    def test_create_relation_programmatic_description(self) -> None:
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name',
                              description='foo',

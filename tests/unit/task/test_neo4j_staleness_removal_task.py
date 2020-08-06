@@ -19,12 +19,10 @@ from databuilder.task.neo4j_staleness_removal_task import Neo4jStalenessRemovalT
 
 class TestRemoveStaleData(unittest.TestCase):
 
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
-    def test_validation_failure(self):
-        # type: () -> None
+    def test_validation_failure(self) -> None:
 
         with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()
@@ -47,8 +45,7 @@ class TestRemoveStaleData(unittest.TestCase):
             targets = {'foo'}
             task._validate_staleness_pct(total_records=total_records, stale_records=stale_records, types=targets)
 
-    def test_validation(self):
-        # type: () -> None
+    def test_validation(self) -> None:
 
         with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()
@@ -71,8 +68,7 @@ class TestRemoveStaleData(unittest.TestCase):
             targets = {'foo'}
             self.assertRaises(Exception, task._validate_staleness_pct, total_records, stale_records, targets)
 
-    def test_validation_threshold_override(self):
-        # type: () -> None
+    def test_validation_threshold_override(self) -> None:
 
         with patch.object(GraphDatabase, 'driver'):
             task = Neo4jStalenessRemovalTask()

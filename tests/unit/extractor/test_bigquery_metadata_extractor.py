@@ -140,8 +140,7 @@ class MockBigQueryClient():
 # Patch fallback auth method to avoid actually calling google API
 @patch('google.auth.default', lambda scopes: ['dummy', 'dummy'])
 class TestBigQueryMetadataExtractor(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         config_dict = {
             'extractor.bigquery_table_metadata.{}'.format(BigQueryMetadataExtractor.PROJECT_ID_KEY):
                 'your-project-here'}

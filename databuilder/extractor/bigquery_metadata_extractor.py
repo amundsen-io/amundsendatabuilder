@@ -29,13 +29,11 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
     column name.
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         BaseBigQueryExtractor.init(self, conf)
         self.grouped_tables = set([])
 
-    def _retrieve_tables(self, dataset):
-        # type: () -> Any
+    def _retrieve_tables(self, dataset) -> Any:
         for page in self._page_table_list_results(dataset):
             if 'tables' not in page:
                 continue
@@ -86,8 +84,11 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
 
                 yield(table_meta)
 
-    def _iterate_over_cols(self, parent, column, cols, total_cols):
-        # type: (str, str, List[ColumnMetadata()], int) -> int
+    def _iterate_over_cols(self,
+                           parent: str,
+                           column: str,
+                           cols: List[ColumnMetadata()],
+                           total_cols: int) -> int:
         if len(parent) > 0:
             col_name = '{parent}.{field}'.format(parent=parent, field=column['name'])
         else:
@@ -113,6 +114,5 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
             cols.append(col)
             return total_cols + 1
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.bigquery_table_metadata'

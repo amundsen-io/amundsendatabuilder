@@ -24,14 +24,14 @@ class DashboardQuery(Neo4jCsvSerializable):
     QUERY_DASHBOARD_RELATION_TYPE = 'QUERY_OF'
 
     def __init__(self,
-                 dashboard_group_id,  # type: Optional[str]
-                 dashboard_id,  # type: Optional[str]
-                 query_name,  # type: str
-                 query_id=None,  # type: Optional[str]
-                 url='',  # type: Optional[str]
-                 query_text=None,  # type: Optional[str]
-                 product='',  # type: Optional[str]
-                 cluster='gold',  # type: str
+                 dashboard_group_id: Optional[str],
+                 dashboard_id: Optional[str],
+                 query_name: str,
+                 query_id: Optional[str] = None,
+                 url: Optional[str] = '',
+                 query_text: Optional[str] = None,
+                 product: Optional[str] = '',
+                 cluster: str = 'gold',
                  **kwargs
                  ):
         self._dashboard_group_id = dashboard_group_id
@@ -45,15 +45,13 @@ class DashboardQuery(Neo4jCsvSerializable):
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_node_iterator(self):  # noqa: C901
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_node_iterator(self) -> Iterator[[Dict[str, Any]]]:  # noqa: C901
         node = {
             NODE_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
             NODE_KEY: self._get_query_node_key(),
@@ -69,15 +67,13 @@ class DashboardQuery(Neo4jCsvSerializable):
 
         yield node
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_relation_iterator(self) -> Iterator[[Dict[str, Any]]]:
         yield {
             RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
             RELATION_END_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,

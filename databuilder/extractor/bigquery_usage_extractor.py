@@ -29,8 +29,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
     EMAIL_PATTERN = 'email_pattern'
     DELAY_TIME = 'delay_time'
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         BaseBigQueryExtractor.init(self, conf)
         self.timestamp = conf.get_string(
             BigQueryTableUsageExtractor.TIMESTAMP_KEY,
@@ -43,8 +42,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
         self._count_usage()
         self.iter = iter(self.table_usage_counts)
 
-    def _count_usage(self):  # noqa: C901
-        # type: () -> None
+    def _count_usage(self) -> None:  # noqa: C901
         count = 0
         for entry in self._retrieve_records():
             count += 1
@@ -95,8 +93,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
                 new_count = self.table_usage_counts.get(key, 0) + 1
                 self.table_usage_counts[key] = new_count
 
-    def _retrieve_records(self):
-        # type: () -> Optional[Dict]
+    def _retrieve_records(self) -> Optional[Dict]:
         """
         Extracts bigquery log data by looking at the principalEmail in the
         authenticationInfo block and referencedTables in the jobStatistics.
@@ -116,16 +113,14 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
             for entry in page['entries']:
                 yield(entry)
 
-    def extract(self):
-        # type: () -> Optional[tuple]
+    def extract(self) -> Optional[tuple]:
         try:
             key = next(self.iter)
             return key, self.table_usage_counts[key]
         except StopIteration:
             return None
 
-    def _page_over_results(self, body):
-        # type: (Dict) -> Optional[Dict]
+    def _page_over_results(self, body: Dict) -> Optional[Dict]:
         response = self.logging_service.entries().list(body=body).execute(
             num_retries=BigQueryTableUsageExtractor.NUM_RETRIES)
         while response:
@@ -143,6 +138,5 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
                 # Add a delay when BQ quota exceeds limitation
                 sleep(self.delay_time)
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.bigquery_table_usage'

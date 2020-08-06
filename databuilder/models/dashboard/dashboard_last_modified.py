@@ -23,11 +23,11 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
                                          '{dashboard_id}/_last_modified_timestamp'
 
     def __init__(self,
-                 dashboard_group_id,  # type: Optional[str]
-                 dashboard_id,  # type: Optional[str]
-                 last_modified_timestamp,  # type: int
-                 product='',  # type: Optional[str]
-                 cluster='gold',  # type: str
+                 dashboard_group_id: Optional[str],
+                 dashboard_id: Optional[str],
+                 last_modified_timestamp: int,
+                 product: Optional[str] = '',
+                 cluster: str = 'gold',
                  **kwargs
                  ):
         self._dashboard_group_id = dashboard_group_id
@@ -38,15 +38,13 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_node_iterator(self):  # noqa: C901
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_node_iterator(self) -> Iterator[[Dict[str, Any]]]:  # noqa: C901
         yield {
             NODE_LABEL: timestamp_constants.NODE_LABEL,
             NODE_KEY: self._get_last_modified_node_key(),
@@ -54,15 +52,13 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
             timestamp_constants.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name,
         }
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_relation_iterator(self) -> Iterator[[Dict[str, Any]]]:
         yield {
             RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
             RELATION_END_LABEL: timestamp_constants.NODE_LABEL,

@@ -10,8 +10,7 @@ from databuilder.callback import call_back
 
 class TestCallBack(unittest.TestCase):
 
-    def test_success_notify(self):
-        # type: () -> None
+    def test_success_notify(self) -> None:
         callback1 = MagicMock()
         callback2 = MagicMock()
         callbacks = [callback1, callback2]
@@ -23,8 +22,7 @@ class TestCallBack(unittest.TestCase):
         self.assertTrue(callback2.on_success.called)
         self.assertTrue(not callback2.on_failure.called)
 
-    def test_failure_notify(self):
-        # type: () -> None
+    def test_failure_notify(self) -> None:
         callback1 = MagicMock()
         callback2 = MagicMock()
         callbacks = [callback1, callback2]
@@ -36,8 +34,7 @@ class TestCallBack(unittest.TestCase):
         self.assertTrue(not callback2.on_success.called)
         self.assertTrue(callback2.on_failure.called)
 
-    def test_notify_failure(self):
-        # type: () -> None
+    def test_notify_failure(self) -> None:
         callback1 = MagicMock()
         callback2 = MagicMock()
         callback2.on_success.side_effect = Exception('Boom')

@@ -11,16 +11,14 @@ from databuilder.extractor.bigquery_usage_extractor import TableColumnUsageTuple
 
 class BigqueryUsageTransformer(Transformer):
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         """
         Transformer to convert TableColumnUsageTuple data to bigquery usage data
         which can be uploaded to Neo4j
         """
         self.conf = conf
 
-    def transform(self, record):
-        # type: (Dict) -> Optional[TableColumnUsage]
+    def transform(self, record: Dict) -> Optional[TableColumnUsage]:
         if not record:
             return None
 
@@ -40,6 +38,5 @@ class BigqueryUsageTransformer(Transformer):
 
         return TableColumnUsage(col_readers=col_readers)
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'transformer.bigquery_usage'

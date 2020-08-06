@@ -26,14 +26,16 @@ class TableRelationData:
     It is used as the type returned by the (optional) table parser.
     """
 
-    def __init__(self, database, cluster, schema, name):
-        # type: (str, str, str, str) -> None
+    def __init__(self,
+                 database: str,
+                 cluster: str,
+                 schema: str,
+                 name: str) -> None:
 
         self._data = {'db': database, 'cluster': cluster, 'schema': schema, 'tbl': name}
 
     @property
-    def key(self):
-        # type: () -> str
+    def key(self) -> str:
 
         return TableMetadata.TABLE_KEY_FORMAT.format(**self._data)
 
@@ -68,8 +70,7 @@ class RedashDashboardExtractor(Extractor):
     DASHBOARD_GROUP_ID = 'redash'
     DASHBOARD_GROUP_NAME = 'Redash'
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
 
         # required configuration
         self._redash_base_url = conf.get_string(RedashDashboardExtractor.REDASH_BASE_URL_KEY)
@@ -96,8 +97,7 @@ class RedashDashboardExtractor(Extractor):
 
         return not (record['is_archived'] or record['is_draft'])
 
-    def _get_extract_iter(self):
-        # type: () -> Iterator[Any]
+    def _get_extract_iter(self) -> Iterator[Any]:
 
         while True:
             record = self._extractor.extract()
@@ -171,8 +171,7 @@ class RedashDashboardExtractor(Extractor):
             if len(table_keys) > 0:
                 yield DashboardTable(table_ids=list(table_keys), **identity_data)
 
-    def extract(self):
-        # type: () -> Any
+    def extract(self) -> Any:
 
         if not self._extract_iter:
             self._extract_iter = self._get_extract_iter()
@@ -181,8 +180,7 @@ class RedashDashboardExtractor(Extractor):
         except StopIteration:
             return None
 
-    def _build_restapi_query(self):
-        # type: () -> RestApiQuery
+    def _build_restapi_query(self) -> RestApiQuery:
 
         dashes_query = RedashPaginatedRestApiQuery(
             query_to_join=EmptyRestApiQuerySeed(),
@@ -205,13 +203,11 @@ class RedashDashboardExtractor(Extractor):
             skip_no_result=True
         )
 
-    def _get_default_api_query_params(self):
-        # type: () -> Dict[str, Any]
+    def _get_default_api_query_params(self) -> Dict[str, Any]:
 
         return {'headers': get_auth_headers(self._api_key)}
 
-    def _build_extractor(self):
-        # type: () -> RestAPIExtractor
+    def _build_extractor(self) -> RestAPIExtractor:
 
         extractor = RestAPIExtractor()
         rest_api_extractor_conf = ConfigFactory.from_dict({
@@ -220,8 +216,7 @@ class RedashDashboardExtractor(Extractor):
         extractor.init(rest_api_extractor_conf)
         return extractor
 
-    def _build_transformer(self):
-        # type: () -> ChainedTransformer
+    def _build_transformer(self) -> ChainedTransformer:
 
         transformers = []
 
@@ -240,7 +235,6 @@ class RedashDashboardExtractor(Extractor):
 
         return ChainedTransformer(transformers=transformers)
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
 
         return 'extractor.redash_dashboard'

@@ -22,17 +22,14 @@ LOGGER = logging.getLogger(__name__)
 
 class BigQueryWatermarkExtractor(BaseBigQueryExtractor):
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         BaseBigQueryExtractor.init(self, conf)
         self.iter = iter(self._iterate_over_tables())
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.bigquery_watermarks'
 
-    def _retrieve_tables(self, dataset):
-        # type: () -> Any
+    def _retrieve_tables(self, dataset) -> Any:
         sharded_table_watermarks = {}
 
         for page in self._page_table_list_results(dataset):

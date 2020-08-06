@@ -12,8 +12,7 @@ from databuilder.extractor.kafka_source_extractor import KafkaSourceExtractor
 
 
 class TestKafkaSourceExtractor(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         config_dict = {
             'extractor.kafka_source.consumer_config': {'"group.id"': 'consumer-group',

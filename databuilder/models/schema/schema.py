@@ -25,15 +25,13 @@ class SchemaModel(Neo4jCsvSerializable):
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_node_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_node_iterator(self) -> Iterator[[Dict[str, Any]]]:
         yield {
             NODE_LABEL: SCHEMA_NODE_LABEL,
             NODE_KEY: self._schema_key,
@@ -43,8 +41,7 @@ class SchemaModel(Neo4jCsvSerializable):
         if self._description:
             yield self._description.get_node_dict(self._get_description_node_key())
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
@@ -53,8 +50,7 @@ class SchemaModel(Neo4jCsvSerializable):
     def _get_description_node_key(self):
         return '{}/{}'.format(self._schema_key, self._description.get_description_id())
 
-    def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_relation_iterator(self) -> Iterator[[Dict[str, Any]]]:
         if self._description:
             yield self._description.get_relation(start_node=SCHEMA_NODE_LABEL,
                                                  start_key=self._schema_key,

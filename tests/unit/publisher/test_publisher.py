@@ -10,8 +10,7 @@ from databuilder.publisher.base_publisher import Publisher, NoopPublisher
 
 class TestPublisher(unittest.TestCase):
 
-    def testCallback(self):
-        # type: () -> None
+    def testCallback(self) -> None:
 
         publisher = NoopPublisher()
         callback = MagicMock()
@@ -20,8 +19,7 @@ class TestPublisher(unittest.TestCase):
 
         self.assertTrue(callback.on_success.called)
 
-    def testFailureCallback(self):
-        # type: () -> None
+    def testFailureCallback(self) -> None:
 
         publisher = FailedPublisher()
         callback = MagicMock()
@@ -37,16 +35,13 @@ class TestPublisher(unittest.TestCase):
 
 class FailedPublisher(Publisher):
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         super(FailedPublisher, self).__init__()
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         pass
 
-    def publish_impl(self):
-        # type: () -> None
+    def publish_impl(self) -> None:
         raise Exception('Bomb')
 
 

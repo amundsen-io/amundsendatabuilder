@@ -61,19 +61,18 @@ class MetricMetadata(Neo4jCsvSerializable):
     METRIC_TAG_RELATION_TYPE = 'TAG'
     TAG_METRIC_RELATION_TYPE = 'TAG_OF'
 
-    serialized_nodes = set()  # type: Set[Any]
-    serialized_rels = set()  # type: Set[Any]
+    serialized_nodes: Set[Any] = set()
+    serialized_rels: Set[Any] = set()
 
     def __init__(self,
-                 dashboard_group,  # type: str
-                 dashboard_name,  # type: str
-                 name,  # type: Union[str, None]
-                 expression,   # type: str
-                 description,   # type: str
-                 type,   # type: str
-                 tags,   # type: List
-                 ):
-        # type: (...) -> None
+                 dashboard_group: str,
+                 dashboard_name: str,
+                 name: Union[str, None],
+                 expression: str,
+                 description: str,
+                 type: str,
+                 tags: List,
+                 ) -> None:
 
         self.dashboard_group = dashboard_group
         self.dashboard_name = dashboard_name
@@ -85,8 +84,7 @@ class MetricMetadata(Neo4jCsvSerializable):
         self._node_iterator = self._create_next_node()
         self._relation_iterator = self._create_next_relation()
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'MetricMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}'.format(
             self.dashboard_group,
             self.dashboard_name,
@@ -97,36 +95,29 @@ class MetricMetadata(Neo4jCsvSerializable):
             self.tags
         )
 
-    def _get_metric_key(self):
-        # type: () -> str
+    def _get_metric_key(self) -> str:
         return MetricMetadata.METRIC_KEY_FORMAT.format(name=self.name)
 
-    def _get_metric_type_key(self):
-        # type: () -> str
+    def _get_metric_type_key(self) -> str:
         return MetricMetadata.METRIC_TYPE_KEY_FORMAT.format(type=self.type)
 
-    def _get_dashboard_key(self):
-        # type: () -> str
+    def _get_dashboard_key(self) -> str:
         return MetricMetadata.DASHBOARD_KEY_FORMAT.format(dashboard_group=self.dashboard_group,
                                                           dashboard_name=self.dashboard_name)
 
-    def _get_metric_description_key(self):
-        # type: () -> str
+    def _get_metric_description_key(self) -> str:
         return MetricMetadata.METRIC_DESCRIPTION_FORMAT.format(name=self.name)
 
-    def _get_metric_expression_key(self):
-        # type: () -> str
+    def _get_metric_expression_key(self) -> str:
         return MetricMetadata.METRIC_EXPRESSION_KEY_FORMAT.format(name=self.name)
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_next_node(self):
-        # type: () -> Iterator[Any]
+    def _create_next_node(self) -> Iterator[Any]:
 
         # Metric node
         yield {NODE_LABEL: MetricMetadata.METRIC_NODE_LABEL,
@@ -165,15 +156,13 @@ class MetricMetadata(Neo4jCsvSerializable):
                     'name': node_tuple.name
                 }
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_next_relation(self):
-        # type: () -> Iterator[Any]
+    def _create_next_relation(self) -> Iterator[Any]:
 
         # Dashboard > Metric relation
         yield {

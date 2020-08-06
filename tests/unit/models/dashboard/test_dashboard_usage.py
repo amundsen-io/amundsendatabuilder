@@ -10,8 +10,7 @@ from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_STAR
 
 class TestDashboardOwner(unittest.TestCase):
 
-    def test_dashboard_usage_user_nodes(self):
-        # type: () -> None
+    def test_dashboard_usage_user_nodes(self) -> None:
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123, cluster='cluster_id',
                                          product='product_id', should_create_user_node=True)
@@ -34,8 +33,7 @@ class TestDashboardOwner(unittest.TestCase):
         self.assertDictEqual(expected, actual)
         self.assertIsNone(dashboard_usage.create_next_node())
 
-    def test_dashboard_usage_no_user_nodes(self):
-        # type: () -> None
+    def test_dashboard_usage_no_user_nodes(self) -> None:
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123,
                                          should_create_user_node=False, cluster='cluster_id',
@@ -43,8 +41,7 @@ class TestDashboardOwner(unittest.TestCase):
 
         self.assertIsNone(dashboard_usage.create_next_node())
 
-    def test_dashboard_owner_relations(self):
-        # type: () -> None
+    def test_dashboard_owner_relations(self) -> None:
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123, cluster='cluster_id',
                                          product='product_id')

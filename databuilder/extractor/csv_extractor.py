@@ -20,8 +20,7 @@ class CsvExtractor(Extractor):
     An Extractor that extracts records via CSV.
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         """
         :param conf:
         """
@@ -35,8 +34,7 @@ class CsvExtractor(Extractor):
             self.model_class = getattr(mod, class_name)
         self._load_csv()
 
-    def _load_csv(self):
-        # type: () -> None
+    def _load_csv(self) -> None:
         """
         Create an iterator to execute sql.
         """
@@ -51,8 +49,7 @@ class CsvExtractor(Extractor):
             results = self.results
         self.iter = iter(results)
 
-    def extract(self):
-        # type: () -> Any
+    def extract(self) -> Any:
         """
         Yield the csv result one at a time.
         convert the result to model if a model_class is provided
@@ -64,8 +61,7 @@ class CsvExtractor(Extractor):
         except Exception as e:
             raise e
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.csv'
 
 
@@ -78,8 +74,7 @@ class CsvTableColumnExtractor(Extractor):
     An Extractor that combines Table and Column CSVs.
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         """
         :param conf:
         """
@@ -94,8 +89,7 @@ class CsvTableColumnExtractor(Extractor):
                                                      schema=schema,
                                                      tbl=tbl)
 
-    def _load_csv(self):
-        # type: () -> None
+    def _load_csv(self) -> None:
         """
         Create an iterator to execute sql.
         """
@@ -144,8 +138,7 @@ class CsvTableColumnExtractor(Extractor):
             results.append(table)
         self._iter = iter(results)
 
-    def extract(self):
-        # type: () -> Any
+    def extract(self) -> Any:
         """
         Yield the csv result one at a time.
         convert the result to model if a model_class is provided
@@ -157,6 +150,5 @@ class CsvTableColumnExtractor(Extractor):
         except Exception as e:
             raise e
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.csvtablecolumn'

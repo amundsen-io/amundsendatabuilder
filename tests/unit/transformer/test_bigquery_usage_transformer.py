@@ -20,8 +20,7 @@ class TestBigQueryUsageTransform(unittest.TestCase):
     EMAIL = 'your-user-here@test.com'
     READ_COUNT = 305
 
-    def test_transform_function(self):
-        # type: () -> None
+    def test_transform_function(self) -> None:
         config = ConfigFactory.from_dict({})
 
         transformer = BigqueryUsageTransformer()

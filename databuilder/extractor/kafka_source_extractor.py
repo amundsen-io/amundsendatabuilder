@@ -47,13 +47,12 @@ class KafkaSourceExtractor(Extractor, Callback):
     # The value transformer to deserde the Kafka message
     RAW_VALUE_TRANSFORMER = 'raw_value_transformer'
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         self.conf = conf
         self.consumer_config = conf.get_config(KafkaSourceExtractor.CONSUMER_CONFIG).\
             as_plain_ordered_dict()
 
-        self.topic_names = conf.get_list(KafkaSourceExtractor.TOPIC_NAME_LIST)  # type: list
+        self.topic_names: list = conf.get_list(KafkaSourceExtractor.TOPIC_NAME_LIST)
 
         if not self.topic_names:
             raise Exception('Kafka topic needs to be provided by the user.')
@@ -94,8 +93,7 @@ class KafkaSourceExtractor(Extractor, Callback):
         except Exception:
             raise RuntimeError('Consumer could not start correctly!')
 
-    def extract(self):
-        # type: () -> Any
+    def extract(self) -> Any:
         """
         :return: Provides a record or None if no more to extract
         """
@@ -170,6 +168,5 @@ class KafkaSourceExtractor(Extractor, Callback):
         finally:
             return records
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.kafka_source'

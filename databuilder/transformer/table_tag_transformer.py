@@ -27,6 +27,5 @@ class TableTagTransformer(Transformer):
                 record.tags = self.tags
         return record
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'transformer.table_tag'

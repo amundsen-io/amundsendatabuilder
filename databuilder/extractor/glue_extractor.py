@@ -24,10 +24,9 @@ class GlueExtractor(Extractor):
         self._cluster = '{}'.format(conf.get_string(GlueExtractor.CLUSTER_KEY))
         self._filters = conf.get(GlueExtractor.FILTER_KEY)
         self._glue = boto3.client('glue')
-        self._extract_iter = None  # type: Union[None, Iterator]
+        self._extract_iter: Union[None, Iterator] = None
 
-    def extract(self):
-        # type: () -> Union[TableMetadata, None]
+    def extract(self) -> Union[TableMetadata, None]:
         if not self._extract_iter:
             self._extract_iter = self._get_extract_iter()
         try:
@@ -35,12 +34,10 @@ class GlueExtractor(Extractor):
         except StopIteration:
             return None
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.glue'
 
-    def _get_extract_iter(self):
-        # type: () -> Iterator[TableMetadata]
+    def _get_extract_iter(self) -> Iterator[TableMetadata]:
         """
         It gets all tables and yields TableMetadata
         :return:
@@ -68,8 +65,7 @@ class GlueExtractor(Extractor):
                 row.get('TableType') == 'VIRTUAL_VIEW',
             )
 
-    def _get_raw_extract_iter(self):
-        # type: () -> Iterator[Dict[str, Any]]
+    def _get_raw_extract_iter(self) -> Iterator[Dict[str, Any]]:
         """
         Provides iterator of results row from glue client
         :return:
