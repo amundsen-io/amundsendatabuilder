@@ -27,7 +27,7 @@ class TagMetadata(Neo4jCsvSerializable):
     METRIC_TYPE = 'metric'
 
     def __init__(self,
-                 name: str,,
+                 name: str,
                  tag_type: str = 'default',
                  ):
         self._name = name

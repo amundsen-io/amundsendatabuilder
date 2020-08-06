@@ -29,7 +29,7 @@ class Application(Neo4jCsvSerializable):
 
     def __init__(self,
                  task_id: str,
-                 dag_id: str,,
+                 dag_id: str,
                  application_url_template: str,
                  db_name: str = 'hive',
                  cluster: str = 'gold',

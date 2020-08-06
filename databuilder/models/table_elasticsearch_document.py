@@ -23,7 +23,7 @@ class TableESDocument(ElasticsearchDocument):
                  column_descriptions: List[str],
                  total_usage: int,
                  unique_usage: int,
-                 tags: List[str],,
+                 tags: List[str],
                  badges: Optional[List[str]] = None,
                  display_name: Optional[str] = None,
                  schema_description: Optional[str] = None,
