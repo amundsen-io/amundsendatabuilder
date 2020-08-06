@@ -1,66 +1,9 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import Any, Dict, Iterator, List
+
 from databuilder.rest_api.rest_api_query import RestApiQuery
-
-
-def sort_widgets(widgets: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
-    """
-    Sort raw widget data (as returned from the API) according to the position
-    of the widgets in the dashboard (top to bottom, left to right)
-    Redash does not return widgets in order of their position,
-    so we do this to ensure that we look at widgets in a sensible order.
-    """
-
-    def row_and_col(widget):
-        # these entities usually but not always have explicit rows and cols
-        pos = widget['options'].get('position', {})
-        return (pos.get('row', 0), pos.get('col', 0))
-
-    return sorted(widgets, key=row_and_col)
-
-
-def get_text_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashTextWidget]:
-    """
-    From the raw set of widget data returned from the API, filter down
-    to text widgets and return them as a list of `RedashTextWidget`
-    """
-
-    return [RedashTextWidget(widget) for widget in widgets
-            if 'text' in widget and 'visualization' not in widget]
-
-
-def get_visualization_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashVisualizationWidget]:
-    """
-    From the raw set of widget data returned from the API, filter down
-    to visualization widgets and return them as a list of `RedashVisualizationWidget`
-    """
-
-    return [RedashVisualizationWidget(widget) for widget in widgets
-            if 'visualization' in widget]
-
-
-def get_auth_headers(api_key: str) -> Dict[str, str]:
-    return {'Authorization': 'Key {}'.format(api_key)}
-
-
-def generate_dashboard_description(text_widgets: Iterator[RedashTextWidget],
-                                   viz_widgets: Iterator[RedashVisualizationWidget]) -> str:
-    """
-    Redash doesn't have dashboard descriptions, so we'll make our own.
-    If there exist any text widgets, concatenate them,
-    and use this text as the description for this dashboard.
-    If not, put together a list of query names.
-    If all else fails, this looks like an empty dashboard.
-    """
-
-    if len(text_widgets) > 0:
-        return '\n\n'.join([w.text for w in text_widgets])
-    elif len(viz_widgets) > 0:
-        query_list = '\n'.join(['- {}'.format(v.query_name) for v in set(viz_widgets)])
-        return 'A dashboard containing the following queries:\n\n' + query_list
-
-    return 'This dashboard appears to be empty!'
 
 
 class RedashVisualizationWidget:
@@ -138,3 +81,62 @@ class RedashPaginatedRestApiQuery(RestApiQuery):
         else:
             self._params['params']['page'] = self._next_page(parsed)
             self._more_pages = True
+
+
+def sort_widgets(widgets: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
+    """
+    Sort raw widget data (as returned from the API) according to the position
+    of the widgets in the dashboard (top to bottom, left to right)
+    Redash does not return widgets in order of their position,
+    so we do this to ensure that we look at widgets in a sensible order.
+    """
+
+    def row_and_col(widget):
+        # these entities usually but not always have explicit rows and cols
+        pos = widget['options'].get('position', {})
+        return (pos.get('row', 0), pos.get('col', 0))
+
+    return sorted(widgets, key=row_and_col)
+
+
+def get_text_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashTextWidget]:
+    """
+    From the raw set of widget data returned from the API, filter down
+    to text widgets and return them as a list of `RedashTextWidget`
+    """
+
+    return [RedashTextWidget(widget) for widget in widgets
+            if 'text' in widget and 'visualization' not in widget]
+
+
+def get_visualization_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashVisualizationWidget]:
+    """
+    From the raw set of widget data returned from the API, filter down
+    to visualization widgets and return them as a list of `RedashVisualizationWidget`
+    """
+
+    return [RedashVisualizationWidget(widget) for widget in widgets
+            if 'visualization' in widget]
+
+
+def get_auth_headers(api_key: str) -> Dict[str, str]:
+    return {'Authorization': 'Key {}'.format(api_key)}
+
+
+def generate_dashboard_description(text_widgets: Iterator[RedashTextWidget],
+                                   viz_widgets: Iterator[RedashVisualizationWidget]) -> str:
+    """
+    Redash doesn't have dashboard descriptions, so we'll make our own.
+    If there exist any text widgets, concatenate them,
+    and use this text as the description for this dashboard.
+    If not, put together a list of query names.
+    If all else fails, this looks like an empty dashboard.
+    """
+
+    if len(text_widgets) > 0:
+        return '\n\n'.join([w.text for w in text_widgets])
+    elif len(viz_widgets) > 0:
+        query_list = '\n'.join(['- {}'.format(v.query_name) for v in set(viz_widgets)])
+        return 'A dashboard containing the following queries:\n\n' + query_list
+
+    return 'This dashboard appears to be empty!'

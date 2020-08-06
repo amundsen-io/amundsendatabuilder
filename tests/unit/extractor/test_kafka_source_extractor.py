@@ -5,7 +5,7 @@ import logging
 from mock import patch, MagicMock
 import unittest
 
-from pyhocon import ConfigFactory
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder import Scoped
 from databuilder.extractor.kafka_source_extractor import KafkaSourceExtractor

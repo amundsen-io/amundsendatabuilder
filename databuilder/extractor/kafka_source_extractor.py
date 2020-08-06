@@ -6,6 +6,8 @@ import importlib
 import logging
 
 from confluent_kafka import Consumer, KafkaException, KafkaError
+from pyhocon import ConfigTree
+from typing import Any
 
 from databuilder import Scoped
 from databuilder.callback.call_back import Callback

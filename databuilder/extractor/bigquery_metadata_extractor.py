@@ -87,7 +87,7 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
     def _iterate_over_cols(self,
                            parent: str,
                            column: str,
-                           cols: List[ColumnMetadata()],
+                           cols: List[ColumnMetadata],
                            total_cols: int) -> int:
         if len(parent) > 0:
             col_name = '{parent}.{field}'.format(parent=parent, field=column['name'])
