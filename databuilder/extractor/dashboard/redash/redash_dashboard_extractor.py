@@ -137,8 +137,7 @@ class RedashDashboardExtractor(Extractor):
             viz_widgets = get_visualization_widgets(widgets)
 
             # generate a description for this dashboard, since Redash does not have descriptions
-            dash_data['description'] = generate_dashboard_description(
-                iter(text_widgets), iter(viz_widgets))
+            dash_data['description'] = generate_dashboard_description(text_widgets, viz_widgets)
 
             yield DashboardMetadata(**dash_data)
 

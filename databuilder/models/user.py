@@ -172,8 +172,7 @@ class User(Neo4jCsvSerializable):
             }]
         return []
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'User({!r}, {!r}, {!r}, {!r}, {!r}, ' \
                '{!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.first_name,
                                                                   self.last_name,

@@ -32,8 +32,8 @@ class DashboardQuery(Neo4jCsvSerializable):
                  query_text: Optional[str] = None,
                  product: Optional[str] = '',
                  cluster: str = 'gold',
-                 **kwargs
-                 ):
+                 **kwargs: Any
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._query_name = query_name
@@ -88,7 +88,7 @@ class DashboardQuery(Neo4jCsvSerializable):
             RELATION_REVERSE_TYPE: DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE
         }
 
-    def _get_query_node_key(self):
+    def _get_query_node_key(self) -> str:
         return DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(
             product=self._product,
             cluster=self._cluster,
@@ -97,7 +97,7 @@ class DashboardQuery(Neo4jCsvSerializable):
             query_id=self._query_id
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardQuery({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

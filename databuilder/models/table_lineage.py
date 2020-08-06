@@ -27,8 +27,7 @@ class TableLineage(Neo4jCsvSerializable):
                  table_name,  # type: str
                  cluster,  # type: str
                  downstream_deps=None,  # type: List
-                 ):
-        # type: (...) -> None
+                 ) -> None:
         self.db = db_name.lower()
         self.schema = schema.lower()
         self.table = table_name.lower()
@@ -40,38 +39,33 @@ class TableLineage(Neo4jCsvSerializable):
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
 
-    def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[Dict[str, Any], None]:
         # return the string representation of the data
         try:
             return next(self._node_iter)
         except StopIteration:
             return None
 
-    def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iter)
         except StopIteration:
             return None
 
-    def get_table_model_key(self, db, cluster, schema, table):
-        # type: (...) -> str
+    def get_table_model_key(self, db, cluster, schema, table) -> str:
         return '{db}://{cluster}.{schema}/{table}'.format(db=db,
                                                           cluster=cluster,
                                                           schema=schema,
                                                           table=table)
 
-    def create_nodes(self):
-        # type: () -> List[Union[Dict[str, Any], None]]
+    def create_nodes(self) -> List[Union[Dict[str, Any], None]]:
         """
         It won't create any node for this model
         :return:
         """
         return []
 
-    def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+    def create_relation(self) -> List[Dict[str, Any]]:
         """
         Create a list of relation between source table and all the downstream tables
         :return:
@@ -99,8 +93,7 @@ class TableLineage(Neo4jCsvSerializable):
                 })
         return results
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'TableLineage({!r}, {!r}, {!r}, {!r})'.format(self.db,
                                                              self.cluster,
                                                              self.schema,

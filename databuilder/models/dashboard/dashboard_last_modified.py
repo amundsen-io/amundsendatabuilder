@@ -29,7 +29,7 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
                  product: Optional[str] = '',
                  cluster: str = 'gold',
                  **kwargs: Any
-                 ):
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._last_modified_timestamp = last_modified_timestamp
@@ -73,7 +73,7 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
             RELATION_REVERSE_TYPE: timestamp_constants.LASTUPDATED_REVERSE_RELATION_TYPE
         }
 
-    def _get_last_modified_node_key(self):
+    def _get_last_modified_node_key(self) -> str:
         return DashboardLastModifiedTimestamp.DASHBOARD_LAST_MODIFIED_KEY_FORMAT.format(
             product=self._product,
             cluster=self._cluster,
@@ -81,7 +81,7 @@ class DashboardLastModifiedTimestamp(Neo4jCsvSerializable):
             dashboard_id=self._dashboard_id,
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardLastModifiedTimestamp({!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

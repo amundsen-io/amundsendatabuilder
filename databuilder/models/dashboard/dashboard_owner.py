@@ -32,8 +32,8 @@ class DashboardOwner(Neo4jCsvSerializable):
                  email: str,
                  product: Optional[str] = '',
                  cluster: str = 'gold',
-                 **kwargs
-                 ):
+                 **kwargs: Any
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._email = email
@@ -66,7 +66,7 @@ class DashboardOwner(Neo4jCsvSerializable):
             RELATION_REVERSE_TYPE: OWNER_OF_OBJECT_RELATION_TYPE
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardOwner({!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

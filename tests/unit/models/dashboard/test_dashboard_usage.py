@@ -3,6 +3,8 @@
 
 import unittest
 
+from typing import Any, Dict
+
 from databuilder.models.dashboard.dashboard_usage import DashboardUsage
 from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
@@ -16,7 +18,7 @@ class TestDashboardOwner(unittest.TestCase):
                                          product='product_id', should_create_user_node=True)
 
         actual = dashboard_usage.create_next_node()
-        expected = {'is_active:UNQUOTED': True,
+        expected: Dict[str, Any] = {'is_active:UNQUOTED': True,
                     'last_name': '',
                     'full_name': '',
                     'employee_type': '',
@@ -30,6 +32,7 @@ class TestDashboardOwner(unittest.TestCase):
                     'email': 'foo@bar.com',
                     'role_name': ''}
 
+        assert actual is not None
         self.assertDictEqual(expected, actual)
         self.assertIsNone(dashboard_usage.create_next_node())
 
@@ -47,7 +50,7 @@ class TestDashboardOwner(unittest.TestCase):
                                          product='product_id')
 
         actual = dashboard_usage.create_next_relation()
-        expected = {'read_count:UNQUOTED': 123,
+        expected: Dict[str, Any] = {'read_count:UNQUOTED': 123,
                     RELATION_END_KEY: 'foo@bar.com',
                     RELATION_START_LABEL: 'Dashboard',
                     RELATION_END_LABEL: 'User',
@@ -55,5 +58,6 @@ class TestDashboardOwner(unittest.TestCase):
                     RELATION_TYPE: 'READ_BY',
                     RELATION_REVERSE_TYPE: 'READ'}
 
+        assert actual is not None
         self.assertDictEqual(expected, actual)
         self.assertIsNone(dashboard_usage.create_next_relation())

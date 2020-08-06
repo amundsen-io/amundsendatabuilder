@@ -29,4 +29,5 @@ class TestDashboardTable(unittest.TestCase):
                     RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
                     RELATION_TYPE: 'DASHBOARD_WITH_TABLE',
                     RELATION_REVERSE_TYPE: 'TABLE_OF_DASHBOARD'}
+        assert actual is not None
         self.assertDictEqual(actual, expected)

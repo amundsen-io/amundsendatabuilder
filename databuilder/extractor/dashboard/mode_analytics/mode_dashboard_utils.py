@@ -3,6 +3,7 @@
 
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 from requests.auth import HTTPBasicAuth
+from typing import Any, Dict
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_constants import ORGANIZATION, MODE_ACCESS_TOKEN, \
@@ -43,7 +44,7 @@ class ModeDashboardUtils(object):
         return spaces_query
 
     @staticmethod
-    def get_auth_params(conf: ConfigTree):
+    def get_auth_params(conf: ConfigTree) -> Dict[str, Any]:
         params = {'auth': HTTPBasicAuth(conf.get_string(MODE_ACCESS_TOKEN),
                                         conf.get_string(MODE_PASSWORD_TOKEN)
                                         )
@@ -53,7 +54,7 @@ class ModeDashboardUtils(object):
     @staticmethod
     def create_mode_rest_api_extractor(restapi_query: BaseRestApiQuery,
                                        conf: ConfigTree
-                                       ):
+                                       ) -> RestAPIExtractor:
         """
         Creates RestAPIExtractor. Note that RestAPIExtractor is already initialized
         :param restapi_query:

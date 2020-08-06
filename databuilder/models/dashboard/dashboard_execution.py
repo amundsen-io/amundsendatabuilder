@@ -34,8 +34,8 @@ class DashboardExecution(Neo4jCsvSerializable):
                  execution_id: str = LAST_EXECUTION_ID,
                  product: Optional[str] = '',
                  cluster: str = 'gold',
-                 **kwargs
-                 ):
+                 **kwargs: Any
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._execution_timestamp = execution_timestamp
@@ -81,7 +81,7 @@ class DashboardExecution(Neo4jCsvSerializable):
             RELATION_REVERSE_TYPE: DashboardExecution.EXECUTION_DASHBOARD_RELATION_TYPE
         }
 
-    def _get_last_execution_node_key(self):
+    def _get_last_execution_node_key(self) -> str:
         return DashboardExecution.DASHBOARD_EXECUTION_KEY_FORMAT.format(
             product=self._product,
             cluster=self._cluster,
@@ -90,7 +90,7 @@ class DashboardExecution(Neo4jCsvSerializable):
             execution_id=self._execution_id
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardExecution({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

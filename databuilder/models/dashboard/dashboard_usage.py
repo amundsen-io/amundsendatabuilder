@@ -30,7 +30,7 @@ class DashboardUsage(Neo4jCsvSerializable):
                  should_create_user_node: Optional[bool] = False,
                  product: Optional[str] = '',
                  cluster: Optional[str] = 'gold',
-                 **kwargs
+                 **kwargs: Any
                  ) -> None:
         """
 
@@ -60,6 +60,8 @@ class DashboardUsage(Neo4jCsvSerializable):
         if self._should_create_user_node:
             return self._user_model.create_next_node()
 
+        return None
+
     def create_next_relation(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._relation_iterator)
@@ -67,7 +69,6 @@ class DashboardUsage(Neo4jCsvSerializable):
             return None
 
     def _create_relation_iterator(self) -> Iterator[Dict[str, Any]]:
-
         yield {
             RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
             RELATION_END_LABEL: User.USER_NODE_LABEL,
@@ -83,7 +84,7 @@ class DashboardUsage(Neo4jCsvSerializable):
             READ_RELATION_COUNT_PROPERTY: self._view_count
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

@@ -49,8 +49,7 @@ class ModePaginatedRestApiQuery(RestApiQuery):
         page_suffix = PAGE_SUFFIX_TEMPLATE.format(self._current_page)  # example: ?page=2
 
         # example: http://foo.bar/resources?page=2
-        self._url = self._original_url + '{page_suffix}'.format(original_url=self._original_url,
-                                                                page_suffix=page_suffix)
+        self._url = self._original_url + '{page_suffix}'.format(page_suffix=page_suffix)
         return self._url.format(**record)
 
     def _post_process(self,

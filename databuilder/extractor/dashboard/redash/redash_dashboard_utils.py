@@ -1,7 +1,7 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Dict, Iterator, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 from databuilder.rest_api.rest_api_query import RestApiQuery
 
@@ -18,8 +18,7 @@ class RedashVisualizationWidget:
         self._data = data
 
     @property
-    def raw_query(self):
-        # type () -> str
+    def raw_query(self) -> str:
         return self._data['visualization']['query']['query']
 
     @property
@@ -58,7 +57,7 @@ class RedashPaginatedRestApiQuery(RestApiQuery):
     Paginated Redash API queries
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super(RedashPaginatedRestApiQuery, self).__init__(**kwargs)
         if 'params' not in self._params:
             self._params['params'] = {}
@@ -83,7 +82,7 @@ class RedashPaginatedRestApiQuery(RestApiQuery):
             self._more_pages = True
 
 
-def sort_widgets(widgets: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
+def sort_widgets(widgets: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Sort raw widget data (as returned from the API) according to the position
     of the widgets in the dashboard (top to bottom, left to right)
@@ -91,7 +90,7 @@ def sort_widgets(widgets: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
     so we do this to ensure that we look at widgets in a sensible order.
     """
 
-    def row_and_col(widget):
+    def row_and_col(widget: Dict[str, Any]) -> Tuple[Any, Any]:
         # these entities usually but not always have explicit rows and cols
         pos = widget['options'].get('position', {})
         return (pos.get('row', 0), pos.get('col', 0))
@@ -99,7 +98,7 @@ def sort_widgets(widgets: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
     return sorted(widgets, key=row_and_col)
 
 
-def get_text_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashTextWidget]:
+def get_text_widgets(widgets: Iterable[Dict[str, Any]]) -> List[RedashTextWidget]:
     """
     From the raw set of widget data returned from the API, filter down
     to text widgets and return them as a list of `RedashTextWidget`
@@ -109,7 +108,7 @@ def get_text_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashTextWidget
             if 'text' in widget and 'visualization' not in widget]
 
 
-def get_visualization_widgets(widgets: Iterator[Dict[str, Any]]) -> List[RedashVisualizationWidget]:
+def get_visualization_widgets(widgets: Iterable[Dict[str, Any]]) -> List[RedashVisualizationWidget]:
     """
     From the raw set of widget data returned from the API, filter down
     to visualization widgets and return them as a list of `RedashVisualizationWidget`
@@ -123,8 +122,8 @@ def get_auth_headers(api_key: str) -> Dict[str, str]:
     return {'Authorization': 'Key {}'.format(api_key)}
 
 
-def generate_dashboard_description(text_widgets: Iterator[RedashTextWidget],
-                                   viz_widgets: Iterator[RedashVisualizationWidget]) -> str:
+def generate_dashboard_description(text_widgets: List[RedashTextWidget],
+                                   viz_widgets: List[RedashVisualizationWidget]) -> str:
     """
     Redash doesn't have dashboard descriptions, so we'll make our own.
     If there exist any text widgets, concatenate them,

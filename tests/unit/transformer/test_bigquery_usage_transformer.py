@@ -36,9 +36,11 @@ class TestBigQueryUsageTransform(unittest.TestCase):
         t1 = (key, TestBigQueryUsageTransform.READ_COUNT)
         xformed = transformer.transform(t1)
 
+        assert xformed is not None
         self.assertIsInstance(xformed, TableColumnUsage)
-        self.assertEqual(len(xformed.col_readers), 1)
-        col_reader = xformed.col_readers[0]
+        col_readers = list(xformed.col_readers)
+        self.assertEqual(len(col_readers), 1)
+        col_reader = col_readers[0]
         self.assertEqual(col_reader.cluster, TestBigQueryUsageTransform.CLUSTER)
         self.assertEqual(col_reader.database, TestBigQueryUsageTransform.DATABASE)
         self.assertEqual(col_reader.schema, TestBigQueryUsageTransform.DATASET)

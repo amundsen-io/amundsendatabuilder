@@ -32,8 +32,8 @@ class DashboardTable(Neo4jCsvSerializable):
                  table_ids: List[str],
                  product: Optional[str] = '',
                  cluster: str = 'gold',
-                 **kwargs
-                 ):
+                 **kwargs: Any
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         # A list of tables uri used in the dashboard
@@ -47,6 +47,9 @@ class DashboardTable(Neo4jCsvSerializable):
         return None
 
     def create_next_relation(self) -> Union[Dict[str, Any], None]:
+        if self._relation_iterator is None:
+            return None
+
         try:
             return next(self._relation_iterator)
         except StopIteration:
@@ -75,7 +78,7 @@ class DashboardTable(Neo4jCsvSerializable):
                     RELATION_REVERSE_TYPE: DashboardTable.TABLE_DASHBOARD_RELATION_TYPE
                 }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardTable({!r}, {!r}, {!r}, {!r}, ({!r}))'.format(
             self._dashboard_group_id,
             self._dashboard_id,

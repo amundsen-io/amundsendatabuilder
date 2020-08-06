@@ -6,6 +6,7 @@ import random
 import unittest
 
 from mock import patch
+from typing import Any, Dict, List
 
 from databuilder.rest_api.base_rest_api_query import EmptyRestApiQuerySeed
 from databuilder.extractor.dashboard.redash.redash_dashboard_utils import \
@@ -40,7 +41,7 @@ class TestRedashDashboardUtils(unittest.TestCase):
         self.assertListEqual([widget['text'] for widget in sorted_widgets], ['a', 'b', 'c', 'd'])
 
     def test_widget_filters(self) -> None:
-        widgets = [
+        widgets: List[Dict[str, Any]] = [
             {'text': 'asdf', 'options': {'ex': 1}},
             {'text': 'asdf', 'options': {'ex': 2}},
             {'visualization': {}, 'options': {'ex': 1}},

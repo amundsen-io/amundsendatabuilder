@@ -23,7 +23,7 @@ class CassandraExtractor(Extractor):
     KWARGS_KEY = 'kwargs'
     # Key to define custom filter function based on keyspace and table
     # since the cluster metadata doesn't support native filters,
-    # it should be like def filter(keyspace, table) and return False if
+    # it should be like def filter(keyspace: str, table: str) -> bool and return False if
     # going to skip that table and True if not
     FILTER_FUNCTION_KEY = 'filter'
 

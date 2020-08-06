@@ -60,7 +60,7 @@ class RestApiQuery(BaseRestApiQuery):
                  skip_no_result: bool=False,
                  json_path_contains_or: bool=False,
                  can_skip_failure: Callable=None,
-                 **kwargs
+                 **kwargs: Any
                  ) -> None:
         """
         :param query_to_join: Previous query to JOIN. RestApiQuerySeed can be used for the first query

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pyhocon import ConfigTree  # noqa: F401
-from typing import Dict, Optional  # noqa: F401
+from typing import Dict, Optional, Tuple  # noqa: F401
 
 from databuilder.transformer.base_transformer import Transformer
 from databuilder.models.table_column_usage import ColumnReader, TableColumnUsage
@@ -18,7 +18,7 @@ class BigqueryUsageTransformer(Transformer):
         """
         self.conf = conf
 
-    def transform(self, record: Dict) -> Optional[TableColumnUsage]:
+    def transform(self, record: Tuple[TableColumnUsageTuple, int]) -> Optional[TableColumnUsage]:
         if not record:
             return None
 
