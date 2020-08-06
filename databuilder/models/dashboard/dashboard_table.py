@@ -52,7 +52,7 @@ class DashboardTable(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self) -> Optional[None, Iterator[[Dict[str, Any]]]]:
+    def _create_relation_iterator(self) -> Optional[Iterator[Dict[str, Any]]]:
         for table_id in self._table_ids:
             m = re.match('(\w+)://(\w+)\.(\w+)\/(\w+)', table_id)
             if m:

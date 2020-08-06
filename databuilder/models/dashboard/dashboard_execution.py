@@ -52,7 +52,7 @@ class DashboardExecution(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_node_iterator(self) -> Iterator[[Dict[str, Any]]]:  # noqa: C901
+    def _create_node_iterator(self) -> Iterator[Dict[str, Any]]:  # noqa: C901
         yield {
             NODE_LABEL: DashboardExecution.DASHBOARD_EXECUTION_LABEL,
             NODE_KEY: self._get_last_execution_node_key(),
@@ -66,7 +66,7 @@ class DashboardExecution(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self) -> Iterator[[Dict[str, Any]]]:
+    def _create_relation_iterator(self) -> Iterator[Dict[str, Any]]:
         yield {
             RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
             RELATION_END_LABEL: DashboardExecution.DASHBOARD_EXECUTION_LABEL,

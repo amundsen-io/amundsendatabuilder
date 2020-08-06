@@ -66,7 +66,7 @@ class DashboardUsage(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self) -> Iterator[[Dict[str, Any]]]:
+    def _create_relation_iterator(self) -> Iterator[Dict[str, Any]]:
 
         yield {
             RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,

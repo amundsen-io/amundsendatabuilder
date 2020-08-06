@@ -53,7 +53,7 @@ class DashboardChart(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_node_iterator(self) -> Iterator[[Dict[str, Any]]]:  # noqa: C901
+    def _create_node_iterator(self) -> Iterator[Dict[str, Any]]:  # noqa: C901
         node = {
             NODE_LABEL: DashboardChart.DASHBOARD_CHART_LABEL,
             NODE_KEY: self._get_chart_node_key(),
@@ -77,7 +77,7 @@ class DashboardChart(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self) -> Iterator[[Dict[str, Any]]]:
+    def _create_relation_iterator(self) -> Iterator[Dict[str, Any]]:
         yield {
             RELATION_START_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
             RELATION_END_LABEL: DashboardChart.DASHBOARD_CHART_LABEL,

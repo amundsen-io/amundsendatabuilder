@@ -24,8 +24,8 @@ class DashboardESDocument(ElasticsearchDocument):
                  url: Optional[str] = None,
                  uri: Optional[str] = None,
                  last_successful_run_timestamp: Optional[int] = None,
-                 tags: Optional[list[str]] = None,
-                 badges: Optional[list[str]] = None,
+                 tags: Optional[List[str]] = None,
+                 badges: Optional[List[str]] = None,
                  ) -> None:
         self.group_name = group_name
         self.name = name
