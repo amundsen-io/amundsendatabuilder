@@ -6,10 +6,11 @@ from typing import Any  # noqa: F401
 from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor, TableauDashboardUtils
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS
+
+import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
+    TableauGraphQLApiExtractor
 
 from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
@@ -28,6 +29,17 @@ class TableauDashboardLastModifiedExtractor(Extractor):
     top-level project in which these workbooks preside is the dashboard group. The metadata it gathers is:
         Dashboard last modified timestamp (Workbook last modified timestamp)
     """
+
+    API_VERSION = const.API_VERSION
+    TABLEAU_HOST = const.TABLEAU_HOST
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -103,7 +115,7 @@ class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
-                          if workbook['projectName'] not in self._conf.get_list(EXCLUDED_PROJECTS)]
+                          if workbook['projectName'] not in self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
             data = {

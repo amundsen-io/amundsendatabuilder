@@ -6,10 +6,11 @@ from typing import Any  # noqa: F401
 from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor, TableauDashboardUtils
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS
+
+import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
+    TableauGraphQLApiExtractor
 
 from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
@@ -29,6 +30,17 @@ class TableauDashboardQueryExtractor(Extractor):
     This extractor iterates through one query at a time, yielding a new relationship for every downstream
     workbook that uses the query.
     """
+
+    API_VERSION = const.API_VERSION
+    TABLEAU_HOST = const.TABLEAU_HOST
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -99,13 +111,14 @@ class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
 
         for query in response['customSQLTables']:
             for workbook in query['downstreamWorkbooks']:
-                if workbook['projectName'] not in self._conf.get_list(EXCLUDED_PROJECTS):
-                    data = {
-                        'dashboard_group_id': workbook['projectName'],
-                        'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
-                        'query_name': query['name'],
-                        'query_id': query['id'],
-                        'query_text': query['query'],
-                        'cluster': self._conf.get_string('cluster')
-                    }
+                if workbook['projectName'] not in self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS):
+                    data = {}
+
+                    data['dashboard_group_id'] = html.escape(str(workbook['projectName']))
+                    data['dashboard_id'] = html.escape(str(workbook['name']))
+                    data['query_name'] = query['name']
+                    data['query_id'] = query['id']
+                    data['query_text'] = query['query']
+                    data['cluster'] = self._conf.get_string('cluster')
+
                     yield data

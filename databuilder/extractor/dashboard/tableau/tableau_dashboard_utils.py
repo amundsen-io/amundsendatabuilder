@@ -5,18 +5,28 @@ import re
 from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import TABLEAU_HOST,\
-    API_VERSION,\
-    SITE_NAME,\
-    TABLEAU_ACCESS_TOKEN_NAME,\
-    TABLEAU_ACCESS_TOKEN_SECRET
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
+import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 
 class TableauDashboardUtils():
     """
     Provides various utility functions specifc to the Tableau dashboard extractors.
     """
+
+    API_VERSION = const.API_VERSION
+    TABLEAU_HOST = const.TABLEAU_HOST
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
+
+    # matches "&#x123;" or "&amp;" where 123 is some valid HTML escape code
+    HTML_ESCAPE_CHAR_REGEX = r'(\&\#[x\d]+;)|(&amp;)'
 
     @staticmethod
     def sanitize_schema_name(str):
@@ -73,7 +83,18 @@ class TableauGraphQLApiExtractor(Extractor):
     Base class for querying the Tableau Metdata API, which uses a GraphQL schema.
     """
 
-    def init(self, conf, auth_token, query, query_variables={}):
+    API_VERSION = const.API_VERSION
+    TABLEAU_HOST = const.TABLEAU_HOST
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
+
+    def init(self, conf, auth_token, query):
         self._conf = conf
         self._auth_token = auth_token
         self._query = query
@@ -81,7 +102,7 @@ class TableauGraphQLApiExtractor(Extractor):
         self._iterator = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
         self._metadata_url = 'https://{TABLEAU_HOST}/api/metadata/graphql'.format(
-            TABLEAU_HOST=self._conf.get_string(TABLEAU_HOST)
+            TABLEAU_HOST=self._conf.get_string(TableauGraphQLApiExtractor.TABLEAU_HOST)
         )
 
     def execute_query(self):
@@ -139,15 +160,26 @@ class TableauDashboardAuth():
     https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_auth.htm
     """
 
+    API_VERSION = const.API_VERSION
+    TABLEAU_HOST = const.TABLEAU_HOST
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
+
     def __init__(self, conf):
         self.site_id = None
         self._token = None
         self._conf = conf
-        self._site_name = self._conf.get_string(SITE_NAME)
-        self._tableau_host = self._conf.get_string(TABLEAU_HOST)
-        self._api_version = self._conf.get_string(API_VERSION)
-        self._access_token_name = self._conf.get_string(TABLEAU_ACCESS_TOKEN_NAME)
-        self._access_token_secret = self._conf.get_string(TABLEAU_ACCESS_TOKEN_SECRET)
+        self._site_name = self._conf.get_string(TableauDashboardAuth.SITE_NAME)
+        self._tableau_host = self._conf.get_string(TableauDashboardAuth.TABLEAU_HOST)
+        self._api_version = self._conf.get_string(TableauDashboardAuth.API_VERSION)
+        self._access_token_name = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_NAME)
+        self._access_token_secret = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_SECRET)
 
     @property
     def token(self):

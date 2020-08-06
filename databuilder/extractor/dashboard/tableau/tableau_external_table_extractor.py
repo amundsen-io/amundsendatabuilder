@@ -6,8 +6,8 @@ from typing import Any  # noqa: F401
 from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXTERNAL_CLUSTER_NAME,\
-    EXTERNAL_SCHEMA_NAME, EXTERNAL_TABLE_TYPES
+
+import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
 
@@ -107,25 +107,24 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
     def execute(self):
         response = self.execute_query()
 
-        for database in response['databases']:
-            if database['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
-                for downstreamTable in database['tables']:
-                    data = {
-                        'cluster': self._conf.get_string(EXTERNAL_CLUSTER_NAME),
-                        'database': TableauDashboardUtils.sanitize_database_name(
-                            database['connectionType']
-                        ),
-                        'schema': TableauDashboardUtils.sanitize_schema_name(database['name']),
-                        'name': TableauDashboardUtils.sanitize_table_name(downstreamTable['name']),
-                        'description': database['description']
-                    }
+        for table in response['databases']:
+            if table['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
+                for downstreamTable in table['tables']:
+                    data = {}
+                    data['cluster'] = self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_CLUSTER_NAME)
+                    data['database'] = TableauDashboardUtils.sanitize_database_name(
+                        html.escape(table['connectionType'])
+                    )
+                    data['schema'] = TableauDashboardUtils.sanitize_schema_name(html.escape(table['name']))
+                    data['name'] = TableauDashboardUtils.sanitize_table_name(html.escape(downstreamTable['name']))
+                    data['description'] = html.escape(table['description'])
+
                     yield data
             else:
-                data = {
-                    'cluster': self._conf.get_string(EXTERNAL_CLUSTER_NAME),
-                    'database': TableauDashboardUtils.sanitize_database_name(database['connectionType']),
-                    'schema': self._conf.get_string(EXTERNAL_SCHEMA_NAME),
-                    'name': TableauDashboardUtils.sanitize_table_name(database['name']),
-                    'description': database['description']
-                }
+                data = {}
+                data['cluster'] = self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_CLUSTER_NAME)
+                data['database'] = TableauDashboardUtils.sanitize_database_name(table['connectionType'])
+                data['schema'] = self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_SCHEMA_NAME)
+                data['name'] = TableauDashboardUtils.sanitize_table_name(table['name'])
+                data['description'] = html.escape(table['description'])
                 yield data

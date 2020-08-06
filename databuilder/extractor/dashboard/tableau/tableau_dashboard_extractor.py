@@ -7,7 +7,8 @@ from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_constants import EXCLUDED_PROJECTS, TABLEAU_HOST
+
+import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
 
@@ -29,6 +30,17 @@ class TableauDashboardExtractor(Extractor):
         Dashboard group name (Workbook top-level folder name)
     As with all the Tableau extractors, uses the Metadata API: https://help.tableau.com/current/api/metadata_api/en-us/index.html
     """
+
+    API_VERSION = const.API_VERSION
+    TABLEAU_HOST = const.TABLEAU_HOST
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -105,7 +117,7 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
-                          if workbook['projectName'] not in self._conf.get_list(EXCLUDED_PROJECTS)]
+                          if workbook['projectName'] not in self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
             data = {
