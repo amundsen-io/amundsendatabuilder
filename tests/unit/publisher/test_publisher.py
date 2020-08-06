@@ -11,7 +11,6 @@ from databuilder.publisher.base_publisher import Publisher, NoopPublisher
 class TestPublisher(unittest.TestCase):
 
     def testCallback(self) -> None:
-
         publisher = NoopPublisher()
         callback = MagicMock()
         publisher.register_call_back(callback)
@@ -20,7 +19,6 @@ class TestPublisher(unittest.TestCase):
         self.assertTrue(callback.on_success.called)
 
     def testFailureCallback(self) -> None:
-
         publisher = FailedPublisher()
         callback = MagicMock()
         publisher.register_call_back(callback)
@@ -34,7 +32,6 @@ class TestPublisher(unittest.TestCase):
 
 
 class FailedPublisher(Publisher):
-
     def __init__(self) -> None:
         super(FailedPublisher, self).__init__()
 

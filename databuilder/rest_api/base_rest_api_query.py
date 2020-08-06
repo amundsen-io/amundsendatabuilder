@@ -50,7 +50,5 @@ class EmptyRestApiQuerySeed(RestApiQuerySeed):
     Sometimes there simply isn't a record to seed with.
     """
 
-    def __init__(self):
-        # type: () -> None
-
+    def __init__(self) -> None:
         super(EmptyRestApiQuerySeed, self).__init__([{'empty_rest_api_query_seed': 1}])

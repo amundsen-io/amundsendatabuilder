@@ -27,8 +27,7 @@ class ModeDashboardQueriesExtractor(Extractor):
 
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
@@ -66,26 +65,22 @@ class ModeDashboardQueriesExtractor(Extractor):
 
         self._transformer = ChainedTransformer(transformers=transformers)
 
-    def extract(self):
-        # type: () -> Any
-
+    def extract(self) -> Any:
         record = self._extractor.extract()
         if not record:
             return None
 
         return self._transformer.transform(record=record)
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.mode_dashboard_query'
 
-    def _build_restapi_query(self):
+    def _build_restapi_query(self) -> RestApiQuery:
         """
         Build REST API Query. To get Mode Dashboard last execution, it needs to call three APIs (spaces API, reports
         API, and queries API) joining together.
         :return: A RestApiQuery that provides Mode Dashboard execution (run)
         """
-        # type: () -> RestApiQuery
 
         spaces_query = ModeDashboardUtils.get_spaces_query_api(conf=self._conf)
         params = ModeDashboardUtils.get_auth_params(conf=self._conf)

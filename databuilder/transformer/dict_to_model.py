@@ -20,14 +20,12 @@ class DictToModel(Transformer):
     """
 
     def init(self, conf: ConfigTree) -> None:
-
         model_class = conf.get_string(MODEL_CLASS)
         module_name, class_name = model_class.rsplit(".", 1)
         mod = importlib.import_module(module_name)
         self._model_class = getattr(mod, class_name)
 
     def transform(self, record: Dict[str, Any]) -> Dict[str, Any]:
-
         return self._model_class(**record)
 
     def get_scope(self) -> str:

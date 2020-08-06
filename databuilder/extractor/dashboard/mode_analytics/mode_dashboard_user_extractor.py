@@ -27,8 +27,7 @@ class ModeDashboardUserExtractor(Extractor):
     An Extractor that extracts all Mode Dashboard user and add mode_user_id attribute to User model.
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
@@ -56,26 +55,22 @@ class ModeDashboardUserExtractor(Extractor):
 
         self._transformer = ChainedTransformer(transformers=transformers)
 
-    def extract(self):
-        # type: () -> Any
-
+    def extract(self) -> Any:
         record = self._extractor.extract()
         if not record:
             return None
 
         return self._transformer.transform(record=record)
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.mode_dashboard_owner'
 
-    def _build_restapi_query(self):
+    def _build_restapi_query(self) -> RestApiQuery:
         """
         Build REST API Query. To get Mode Dashboard owner, it needs to call three APIs (spaces API, reports
         API, and user API) joining together.
         :return: A RestApiQuery that provides Mode Dashboard owner
         """
-        # type: () -> RestApiQuery
 
         # Seed query record for next query api to join with
         seed_record = [{

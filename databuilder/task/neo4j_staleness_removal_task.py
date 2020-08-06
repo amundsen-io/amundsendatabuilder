@@ -63,16 +63,13 @@ class Neo4jStalenessRemovalTask(Task):
 
     """
 
-    def __init__(self):
-        # type: () -> None
+    def __init__(self) -> None:
         pass
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'task.remove_stale_data'
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         conf = Scoped.get_scoped_conf(conf, self.get_scope()) \
             .with_fallback(conf) \
             .with_fallback(DEFAULT_CONFIG)
