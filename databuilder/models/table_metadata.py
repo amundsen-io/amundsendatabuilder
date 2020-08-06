@@ -61,7 +61,7 @@ class TagMetadata(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-
+# TODO: this should inherit from ProgrammaticDescription in amundsen-common
 class DescriptionMetadata:
     DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
     PROGRAMMATIC_DESCRIPTION_NODE_LABEL = 'Programmatic_Description'
@@ -93,7 +93,7 @@ class DescriptionMetadata:
 
     @staticmethod
     def create_description_metadata(text: Union[None,str],
-                                    source: str = DEFAULT_SOURCE) -> ProgrammaticDescription:
+                                    source: str = DEFAULT_SOURCE) -> 'DescriptionMetadata':
 
         # We do not want to create a node if there is no description text!
         if text is None:

@@ -57,6 +57,22 @@ class TestSerialize(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
+class Actor(object):
+    LABEL = 'Actor'
+    KEY_FORMAT = 'actor://{}'
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+class City(object):
+    LABEL = 'City'
+    KEY_FORMAT = 'city://{}'
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
 class Movie(Neo4jCsvSerializable):
     LABEL = 'Movie'
     KEY_FORMAT = 'movie://{}'
@@ -129,22 +145,6 @@ class Movie(Neo4jCsvSerializable):
                            Movie.CITY_MOVIE_RELATION_TYPE
                            })
         return result
-
-
-class Actor(object):
-    LABEL = 'Actor'
-    KEY_FORMAT = 'actor://{}'
-
-    def __init__(self, name: str) -> None:
-        self.name = name
-
-
-class City(object):
-    LABEL = 'City'
-    KEY_FORMAT = 'city://{}'
-
-    def __init__(self, name: str) -> None:
-        self.name = name
 
 
 if __name__ == '__main__':
