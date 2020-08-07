@@ -4,7 +4,7 @@
 import abc
 
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import textwrap
 
 LOGGER = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class RelationPreprocessor(object, metaclass=abc.ABCMeta):
                           start_key: str,
                           end_key: str,
                           relation: str,
-                          reverse_relation: str) -> Tuple[str, Dict[str, str]]:
+                          reverse_relation: str) -> Optional[Tuple[str, Dict[str, str]]]:
         """
         Provides a Cypher statement that will be executed before publishing relations.
         :param start_label:
@@ -52,6 +52,7 @@ class RelationPreprocessor(object, metaclass=abc.ABCMeta):
                                                end_key=end_key,
                                                relation=relation,
                                                reverse_relation=reverse_relation)
+        return None
 
     @abc.abstractmethod
     def preprocess_cypher_impl(self,
@@ -88,7 +89,7 @@ class RelationPreprocessor(object, metaclass=abc.ABCMeta):
         :param reverse_relation:
         :return: bool. True if it needs preprocessing, otherwise False.
         """
-        True
+        return True
 
     @abc.abstractmethod
     def is_perform_preprocess(self) -> bool:

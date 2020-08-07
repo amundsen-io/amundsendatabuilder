@@ -14,9 +14,9 @@ class TestSchemaDescription(unittest.TestCase):
                              schema='schema_name',
                              description='foo')
 
-        self.assertDictEqual(schema.create_next_node(),
+        self.assertDictEqual(schema.create_next_node() or {},
                              {'name': 'schema_name', 'KEY': 'db://cluster.schema', 'LABEL': 'Schema'})
-        self.assertDictEqual(schema.create_next_node(),
+        self.assertDictEqual(schema.create_next_node() or {},
                              {'description_source': 'description', 'description': 'foo',
                               'KEY': 'db://cluster.schema/_description', 'LABEL': 'Description'})
         self.assertIsNone(schema.create_next_node())
@@ -26,7 +26,7 @@ class TestSchemaDescription(unittest.TestCase):
         schema = SchemaModel(schema_key='db://cluster.schema',
                              schema='schema_name')
 
-        self.assertDictEqual(schema.create_next_node(),
+        self.assertDictEqual(schema.create_next_node() or {},
                              {'name': 'schema_name', 'KEY': 'db://cluster.schema', 'LABEL': 'Schema'})
         self.assertIsNone(schema.create_next_node())
 
@@ -37,9 +37,9 @@ class TestSchemaDescription(unittest.TestCase):
                              description='foo',
                              description_source='bar')
 
-        self.assertDictEqual(schema.create_next_node(),
+        self.assertDictEqual(schema.create_next_node() or {},
                              {'name': 'schema_name', 'KEY': 'db://cluster.schema', 'LABEL': 'Schema'})
-        self.assertDictEqual(schema.create_next_node(),
+        self.assertDictEqual(schema.create_next_node() or {},
                              {'description_source': 'bar', 'description': 'foo',
                               'KEY': 'db://cluster.schema/_bar_description', 'LABEL': 'Programmatic_Description'})
         self.assertIsNone(schema.create_next_node())

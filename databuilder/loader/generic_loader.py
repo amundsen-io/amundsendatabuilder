@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 CALLBACK_FUNCTION = 'callback_function'
 
 
-def log_call_back(record):
+def log_call_back(record: Optional[Any]) -> None:
     """
     A Sample callback function. Implement any function follows this function's signature to fit your needs.
     :param record:

@@ -4,6 +4,7 @@
 import abc
 
 from pyhocon import ConfigTree  # noqa: F401
+from typing import List
 
 from databuilder import Scoped
 from databuilder.callback import call_back
@@ -31,7 +32,7 @@ class Publisher(Scoped):
     def init(self, conf: ConfigTree) -> None:
         pass
 
-    def publish(self):
+    def publish(self) -> None:
         try:
             self.publish_impl()
         except Exception as e:

@@ -4,6 +4,7 @@
 import unittest
 
 from pyhocon import ConfigFactory
+from typing import Any
 
 from databuilder.transformer.regex_str_replace_transformer import RegexStrReplaceTransformer, \
     REGEX_REPLACE_TUPLE_LIST, ATTRIBUTE_NAME
@@ -63,7 +64,7 @@ class TestRegexReplacement(unittest.TestCase):
 
 
 class Foo(object):
-    def __init__(self, val: str) -> None:
+    def __init__(self, val: Any) -> None:
         self.val = val
 
 

@@ -112,8 +112,7 @@ class KafkaSourceExtractor(Extractor, Callback):
                     # Users need to figure out how to rewind the consumer offset
                     raise Exception('Encounter exception when transform the record')
 
-    def on_success(self):
-        # Type: () -> None
+    def on_success(self) -> None:
         """
         Commit the offset
         once:
@@ -129,13 +128,11 @@ class KafkaSourceExtractor(Extractor, Callback):
             self.consumer.commit(asynchronous=False)
             self.consumer.close()
 
-    def on_failure(self):
-        # Type: () -> None
+    def on_failure(self) -> None:
         if self.consumer:
             self.consumer.close()
 
-    def consume(self):
-        # Type: () -> Any
+    def consume(self) -> Any:
         """
         Consume messages from a give list of topic
 

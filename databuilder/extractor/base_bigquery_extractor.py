@@ -68,7 +68,7 @@ class BaseBigQueryExtractor(Extractor):
         except StopIteration:
             return None
 
-    def _is_sharded_table(self, table_id):
+    def _is_sharded_table(self, table_id: str) -> bool:
         suffix = table_id[-BaseBigQueryExtractor.DATE_LENGTH:]
         return suffix.isdigit()
 

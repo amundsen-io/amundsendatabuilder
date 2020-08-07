@@ -4,8 +4,9 @@
 import unittest
 
 from mock import MagicMock
+from typings import List
 
-from databuilder.callback import call_back
+from databuilder.callback.call_back import Callback, notify_callbacks
 
 
 class TestCallBack(unittest.TestCase):
@@ -13,9 +14,9 @@ class TestCallBack(unittest.TestCase):
     def test_success_notify(self) -> None:
         callback1 = MagicMock()
         callback2 = MagicMock()
-        callbacks = [callback1, callback2]
+        callbacks: List[Callback] = [callback1, callback2]
 
-        call_back.notify_callbacks(callbacks, is_success=True)
+        notify_callbacks(callbacks, is_success=True)
 
         self.assertTrue(callback1.on_success.called)
         self.assertTrue(not callback1.on_failure.called)
@@ -25,9 +26,9 @@ class TestCallBack(unittest.TestCase):
     def test_failure_notify(self) -> None:
         callback1 = MagicMock()
         callback2 = MagicMock()
-        callbacks = [callback1, callback2]
+        callbacks: List[Callback] = [callback1, callback2]
 
-        call_back.notify_callbacks(callbacks, is_success=False)
+        notify_callbacks(callbacks, is_success=False)
 
         self.assertTrue(not callback1.on_success.called)
         self.assertTrue(callback1.on_failure.called)
@@ -39,10 +40,10 @@ class TestCallBack(unittest.TestCase):
         callback2 = MagicMock()
         callback2.on_success.side_effect = Exception('Boom')
         callback3 = MagicMock()
-        callbacks = [callback1, callback2, callback3]
+        callbacks: List[Callback] = [callback1, callback2, callback3]
 
         try:
-            call_back.notify_callbacks(callbacks, is_success=True)
+            notify_callbacks(callbacks, is_success=True)
             self.assertTrue(False)
         except Exception:
             self.assertTrue(True)
