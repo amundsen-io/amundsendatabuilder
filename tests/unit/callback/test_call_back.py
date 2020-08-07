@@ -4,7 +4,7 @@
 import unittest
 
 from mock import MagicMock
-from typings import List
+from typing import List
 
 from databuilder.callback.call_back import Callback, notify_callbacks
 

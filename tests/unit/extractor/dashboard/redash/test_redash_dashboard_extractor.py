@@ -51,7 +51,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
                             'visualization': {
                                 'query': {
                                     'data_source_id': 1,
-                                    'id': 1234,
+                                    'id': '1234',
                                     'name': 'Test Query',
                                     'query': 'SELECT id FROM users'
                                 }
