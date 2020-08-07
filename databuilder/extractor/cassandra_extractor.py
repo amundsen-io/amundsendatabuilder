@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from cassandra.cluster import Cluster
+import cassandra.metadata
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Iterator, Union, Dict, Any  # noqa: F401
+from typing import Iterator, Union, Dict, Any, List  # noqa: F401
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
@@ -35,7 +36,7 @@ class CassandraExtractor(Extractor):
         FILTER_FUNCTION_KEY: None
     })
 
-    def init(self, conf):
+    def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(CassandraExtractor.DEFAULT_CONFIG)
         self._cluster = '{}'.format(conf.get_string(CassandraExtractor.CLUSTER_KEY))
         self._filter = conf.get(CassandraExtractor.FILTER_FUNCTION_KEY)
@@ -90,11 +91,11 @@ class CassandraExtractor(Extractor):
                     columns
                 )
 
-    def _get_keyspaces(self):
+    def _get_keyspaces(self) -> Dict[str, cassandra.metadata.KeyspaceMetadata]:
         return self._client.metadata.keyspaces
 
-    def _get_tables(self, keyspace):
+    def _get_tables(self, keyspace: str) -> Dict[str, cassandra.metadata.TableMetadata]:
         return self._client.metadata.keyspaces[keyspace].tables
 
-    def _get_columns(self, keyspace, table):
+    def _get_columns(self, keyspace: str, table: str) -> Dict[str, cassandra.metadata.ColumnMetadata]:
         return self._client.metadata.keyspaces[keyspace].tables[table].columns
