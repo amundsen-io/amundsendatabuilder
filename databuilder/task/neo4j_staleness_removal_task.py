@@ -7,9 +7,8 @@ import time
 
 from neo4j import GraphDatabase  # noqa: F401
 import neo4j
-from pyhocon import ConfigFactory  # noqa: F401
-from pyhocon import ConfigTree  # noqa: F401
-from typing import Dict, Iterable, Any  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
+from typing import Dict, Iterable, Any, List  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
@@ -121,7 +120,7 @@ class Neo4jStalenessRemovalTask(Task):
         self._validate_node_staleness_pct()
         self._validate_relation_staleness_pct()
 
-    def _delete_stale_nodes(self):
+    def _delete_stale_nodes(self) -> None:
         statement = textwrap.dedent("""
         MATCH (n:{{type}})
         WHERE {}
@@ -131,7 +130,9 @@ class Neo4jStalenessRemovalTask(Task):
         """)
         self._batch_delete(statement=self._decorate_staleness(statement), targets=self.target_nodes)
 
-    def _decorate_staleness(self, statement):
+    def _decorate_staleness(self,
+                            statement: str
+                            ) -> str:
         """
         Append where clause to the Cypher statement depends on which field to be used to expire stale data.
         :param statement:
@@ -146,7 +147,7 @@ class Neo4jStalenessRemovalTask(Task):
         n.published_tag <> ${marker}
         OR NOT EXISTS(n.published_tag)""".format(marker=MARKER_VAR_NAME)))
 
-    def _delete_stale_relations(self):
+    def _delete_stale_relations(self) -> None:
         statement = textwrap.dedent("""
         MATCH ()-[n:{{type}}]-()
         WHERE {}
@@ -156,7 +157,10 @@ class Neo4jStalenessRemovalTask(Task):
         """)
         self._batch_delete(statement=self._decorate_staleness(statement), targets=self.target_relations)
 
-    def _batch_delete(self, statement, targets):
+    def _batch_delete(self,
+                      statement: str,
+                      targets: Iterable[str]
+                      ) -> None:
         """
         Performing huge amount of deletion could degrade Neo4j performance. Therefore, it's taking batch deletion here.
         :param statement:
@@ -247,8 +251,11 @@ class Neo4jStalenessRemovalTask(Task):
                                      stale_records=stale_records,
                                      types=self.target_relations)
 
-    def _execute_cypher_query(self, statement, param_dict={}, dry_run=False):
-        # type: (str, Dict[str, Any]) -> Iterable[Dict[str, Any]]
+    def _execute_cypher_query(self,
+                              statement: str,
+                              param_dict: Dict[str, Any]={},
+                              dry_run: bool=False
+                              ) -> Iterable[Dict[str, Any]]:
         LOGGER.info('Executing Cypher query: {statement} with params {params}: '.format(statement=statement,
                                                                                         params=param_dict))
 

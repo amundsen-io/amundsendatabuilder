@@ -1,7 +1,7 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Union, Dict, Any, Iterator  # noqa: F401
+from typing import Union, Dict, Any, Iterable, List  # noqa: F401
 
 from databuilder.models.neo4j_csv_serde import (
     Neo4jCsvSerializable, RELATION_START_KEY, RELATION_END_KEY,
@@ -71,7 +71,7 @@ class ColumnUsageModel(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def create_relation(self) -> Iterator[Any]:
+    def create_relation(self) -> Iterable[Any]:
         return [{
             RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
             RELATION_END_LABEL: User.USER_NODE_LABEL,
@@ -82,7 +82,7 @@ class ColumnUsageModel(Neo4jCsvSerializable):
             ColumnUsageModel.READ_RELATION_COUNT: self.read_count
         }]
 
-    def _get_table_key(self: ColumnReader) -> str:
+    def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
                                                      cluster=self.cluster,
                                                      schema=self.schema,

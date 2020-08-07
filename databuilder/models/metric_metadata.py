@@ -108,9 +108,6 @@ class MetricMetadata(Neo4jCsvSerializable):
     def _get_metric_description_key(self) -> str:
         return MetricMetadata.METRIC_DESCRIPTION_FORMAT.format(name=self.name)
 
-    def _get_metric_expression_key(self) -> str:
-        return MetricMetadata.METRIC_EXPRESSION_KEY_FORMAT.format(name=self.name)
-
     def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
@@ -145,7 +142,8 @@ class MetricMetadata(Neo4jCsvSerializable):
                    NODE_KEY: self._get_metric_type_key(),
                    'name': self.type}
 
-        others = []
+        # FIXME: this logic is wrong and does nothing presently
+        others: List[Any] = []
 
         for node_tuple in others:
             if node_tuple not in MetricMetadata.serialized_nodes:
@@ -208,7 +206,8 @@ class MetricMetadata(Neo4jCsvSerializable):
                 RELATION_REVERSE_TYPE: MetricMetadata.METRIC_TYPE_METRIC_RELATION_TYPE
             }
 
-        others = []
+        # FIXME: this logic is wrong and does nothing presently
+        others: List[Any] = []
 
         for rel_tuple in others:
             if rel_tuple not in MetricMetadata.serialized_rels:

@@ -12,11 +12,12 @@ from databuilder.models.table_metadata import DescriptionMetadata
 class SchemaModel(Neo4jCsvSerializable):
 
     def __init__(self,
-                 schema_key,
-                 schema,
-                 description=None,
-                 description_source=None,
-                 **kwargs):
+                 schema_key: str,
+                 schema: str,
+                 description: str=None,
+                 description_source: str=None,
+                 **kwargs: Any
+                 ) -> None:
         self._schema_key = schema_key
         self._schema = schema
         self._description = DescriptionMetadata.create_description_metadata(text=description,
@@ -47,8 +48,9 @@ class SchemaModel(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _get_description_node_key(self):
-        return '{}/{}'.format(self._schema_key, self._description.get_description_id())
+    def _get_description_node_key(self) -> str:
+        desc = self._description.get_description_id() if self._description is not None else ''
+        return '{}/{}'.format(self._schema_key, desc)
 
     def _create_relation_iterator(self) -> Iterator[Dict[str, Any]]:
         if self._description:

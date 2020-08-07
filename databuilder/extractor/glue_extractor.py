@@ -4,7 +4,7 @@
 import boto3
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Iterator, Union, Dict, Any  # noqa: F401
+from typing import Iterator, Union, Dict, Any, List  # noqa: F401
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
@@ -19,7 +19,7 @@ class GlueExtractor(Extractor):
     FILTER_KEY = 'filters'
     DEFAULT_CONFIG = ConfigFactory.from_dict({CLUSTER_KEY: 'gold', FILTER_KEY: None})
 
-    def init(self, conf):
+    def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(GlueExtractor.DEFAULT_CONFIG)
         self._cluster = '{}'.format(conf.get_string(GlueExtractor.CLUSTER_KEY))
         self._filters = conf.get(GlueExtractor.FILTER_KEY)
@@ -73,7 +73,7 @@ class GlueExtractor(Extractor):
         tables = self._search_tables()
         return iter(tables)
 
-    def _search_tables(self):
+    def _search_tables(self) -> List[Dict[str, Any]]:
         tables = []
         kwargs = {}
         if self._filters is not None:

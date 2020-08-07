@@ -3,7 +3,7 @@
 
 import logging
 import importlib
-from typing import Iterator, Any  # noqa: F401
+from typing import Any, Iterator, Dict, Optional  # noqa: F401
 
 from pyhocon import ConfigTree  # noqa: F401
 
@@ -31,7 +31,7 @@ class RestAPIExtractor(Extractor):
     def init(self, conf: ConfigTree) -> None:
 
         self._restapi_query: BaseRestApiQuery = conf.get(REST_API_QUERY)
-        self._iterator: Iterator[Dict[str, Any]] = None
+        self._iterator: Optional[Iterator[Dict[str, Any]]] = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
         LOGGER.info('static record: {}'.format(self._static_dict))
 

@@ -4,7 +4,7 @@
 import copy
 from collections import namedtuple
 
-from typing import Any, Dict, Iterable, Iterator, List, Set, Union  # noqa: F401
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union  # noqa: F401
 
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.neo4j_csv_serde import (
@@ -33,7 +33,7 @@ class TagMetadata(Neo4jCsvSerializable):
         self._name = name
         self._tag_type = tag_type
         self._nodes = iter([self.create_tag_node(self._name, self._tag_type)])
-        self._relations = iter([])
+        self._relations: Iterator[Dict[str, Any]] = iter([])
 
     @staticmethod
     def get_tag_key(name: str) -> str:
@@ -42,19 +42,21 @@ class TagMetadata(Neo4jCsvSerializable):
         return TagMetadata.TAG_KEY_FORMAT.format(tag=name)
 
     @staticmethod
-    def create_tag_node(name, tag_type=DEFAULT_TYPE):
+    def create_tag_node(name: str,
+                        tag_type: str =DEFAULT_TYPE
+                        ) -> Dict[str, str]:
         return {NODE_LABEL: TagMetadata.TAG_NODE_LABEL,
                 NODE_KEY: TagMetadata.get_tag_key(name),
                 TagMetadata.TAG_TYPE: tag_type}
 
-    def create_next_node(self) -> Union[Dict[str, Any], None]:
+    def create_next_node(self) -> Optional[Dict[str, Any]]:
         # return the string representation of the data
         try:
             return next(self._nodes)
         except StopIteration:
             return None
 
-    def create_next_relation(self) -> Union[Dict[str, Any], None]:
+    def create_next_relation(self) -> Optional[Dict[str, Any]]:
         # We don't emit any relations for Tag ingestion
         try:
             return next(self._relations)
@@ -76,7 +78,7 @@ class DescriptionMetadata:
     DEFAULT_SOURCE = "description"
 
     def __init__(self,
-                 text: Union[None, str],
+                 text: Optional[str],
                  source: str = DEFAULT_SOURCE
                  ):
         """
@@ -93,8 +95,8 @@ class DescriptionMetadata:
 
     @staticmethod
     def create_description_metadata(text: Union[None,str],
-                                    source: str = DEFAULT_SOURCE) -> 'DescriptionMetadata':
-
+                                    source: Optional[str] = DEFAULT_SOURCE
+                                    ) -> Optional['DescriptionMetadata']:
         # We do not want to create a node if there is no description text!
         if text is None:
             return None
@@ -113,17 +115,21 @@ class DescriptionMetadata:
     def __repr__(self) -> str:
         return 'DescriptionMetadata({!r}, {!r})'.format(self._source, self._text)
 
-    def get_node_dict(self, node_key):
-        # (str) -> Dict
+    def get_node_dict(self,
+                      node_key: str
+                      ) -> Dict[str, str]:
         return {
             NODE_LABEL: self._label,
             NODE_KEY: node_key,
             DescriptionMetadata.DESCRIPTION_SOURCE: self._source,
-            DescriptionMetadata.DESCRIPTION_TEXT: self._text,
+            DescriptionMetadata.DESCRIPTION_TEXT: self._text or '',
         }
 
-    def get_relation(self, start_node, start_key, end_key):
-        # (str, str) => Dict
+    def get_relation(self,
+                     start_node: str,
+                     start_key: str,
+                     end_key: str
+                     ) -> Dict[str, str]:
         return {
             RELATION_START_LABEL: start_node,
             RELATION_END_LABEL: self._label,
@@ -233,7 +239,7 @@ class TableMetadata(Neo4jCsvSerializable):
                  is_view: bool = False,
                  tags: Union[List, str] = None,
                  description_source: Union[str, None] = None,
-                 **kwargs: Dict
+                 **kwargs: Any
                  ) -> None:
         """
         :param database:
@@ -254,7 +260,7 @@ class TableMetadata(Neo4jCsvSerializable):
         self.description = DescriptionMetadata.create_description_metadata(text=description, source=description_source)
         self.columns = columns if columns else []
         self.is_view = is_view
-        self.attrs = None
+        self.attrs: Optional[Dict[str, Any]] = None
 
         self.tags = TableMetadata.format_tags(tags)
 
@@ -319,11 +325,14 @@ class TableMetadata(Neo4jCsvSerializable):
                                                                description_id=description.get_description_id())
 
     @staticmethod
-    def format_tags(tags):
+    def format_tags(tags: Union[List, str, None]) -> List:
+        if tags is None:
+           tags = []
         if isinstance(tags, str):
             tags = list(filter(None, tags.split(',')))
         if isinstance(tags, list):
             tags = [tag.lower().strip() for tag in tags]
+
         return tags
 
     def create_next_node(self) -> Union[Dict[str, Any], None]:

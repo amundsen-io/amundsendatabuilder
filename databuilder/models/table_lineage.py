@@ -12,7 +12,6 @@ from databuilder.models.table_metadata import TableMetadata
 
 
 class TableLineage(Neo4jCsvSerializable):
-    # type: (...) -> None
     """
     Table Lineage Model. It won't create nodes but create upstream/downstream rels.
     """
@@ -22,11 +21,11 @@ class TableLineage(Neo4jCsvSerializable):
     DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'
 
     def __init__(self,
-                 db_name,  # type: str
-                 schema,  # type: str
-                 table_name,  # type: str
-                 cluster,  # type: str
-                 downstream_deps=None,  # type: List
+                 db_name: str,
+                 schema: str,
+                 table_name: str,
+                 cluster: str,
+                 downstream_deps: List=None,
                  ) -> None:
         self.db = db_name.lower()
         self.schema = schema.lower()
@@ -35,7 +34,7 @@ class TableLineage(Neo4jCsvSerializable):
         self.cluster = cluster.lower() if cluster else 'gold'
         # a list of downstream dependencies, each of which will follow
         # the same key
-        self.downstream_deps = downstream_deps
+        self.downstream_deps = downstream_deps or []
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
 
@@ -52,7 +51,12 @@ class TableLineage(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def get_table_model_key(self, db, cluster, schema, table) -> str:
+    def get_table_model_key(self,
+                            db: str,
+                            cluster: str,
+                            schema: str,
+                            table: str
+                            ) -> str:
         return '{db}://{cluster}.{schema}/{table}'.format(db=db,
                                                           cluster=cluster,
                                                           schema=schema,

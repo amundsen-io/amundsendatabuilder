@@ -73,7 +73,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
                  created_timestamp: Optional[int] = None,
                  dashboard_group_url: Optional[str] = None,
                  dashboard_url: Optional[str] = None,
-                 **kwargs
+                 **kwargs: Any
                  ) -> None:
 
         self.dashboard_group = dashboard_group
@@ -88,8 +88,8 @@ class DashboardMetadata(Neo4jCsvSerializable):
         self.created_timestamp = created_timestamp
         self.dashboard_group_url = dashboard_group_url
         self.dashboard_url = dashboard_url
-        self._processed_cluster = set()
-        self._processed_dashboard_group = set()
+        self._processed_cluster: Set[str] = set()
+        self._processed_dashboard_group: Set[str] = set()
         self._node_iterator = self._create_next_node()
         self._relation_iterator = self._create_next_relation()
 
@@ -133,12 +133,6 @@ class DashboardMetadata(Neo4jCsvSerializable):
                                                                    cluster=self.cluster,
                                                                    product=self.product)
 
-    def _get_dashboard_last_reload_time_key(self) -> str:
-        return DashboardMetadata.DASHBOARD_LAST_RELOAD_TIME_FORMAT.format(dashboard_group=self.dashboard_group,
-                                                                          dashboard_name=self.dashboard_id,
-                                                                          cluster=self.cluster,
-                                                                          product=self.product)
-
     def create_next_node(self) -> Union[Dict[str, Any], None]:
         try:
             return next(self._node_iterator)
@@ -156,7 +150,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
             }
 
         # Dashboard node
-        dashboard_node = {
+        dashboard_node: Dict[str, Any] = {
             NODE_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
             NODE_KEY: self._get_dashboard_key(),
             DashboardMetadata.DASHBOARD_NAME: self.dashboard_name,

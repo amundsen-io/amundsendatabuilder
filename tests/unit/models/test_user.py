@@ -74,7 +74,7 @@ class TestUser(unittest.TestCase):
         test_user = User(email='test@email.com',
                          foo='bar')
 
-        self.assertDictEqual(test_user.create_next_node(),
+        self.assertDictEqual(test_user.create_next_node() or {},
                              {'KEY': 'test@email.com', 'LABEL': 'User', 'email': 'test@email.com',
                               'is_active:UNQUOTED': True, 'first_name': '', 'last_name': '', 'full_name': '',
                               'github_username': '', 'team_name': '', 'employee_type': '', 'slack_id': '',
@@ -82,8 +82,8 @@ class TestUser(unittest.TestCase):
 
         test_user2 = User(email='test@email.com',
                           foo='bar',
-                          is_active=None,
+                          is_active=False,
                           do_not_update_empty_attribute=True)
 
-        self.assertDictEqual(test_user2.create_next_node(),
+        self.assertDictEqual(test_user2.create_next_node() or {},
                              {'KEY': 'test@email.com', 'LABEL': 'User', 'email': 'test@email.com', 'foo': 'bar'})

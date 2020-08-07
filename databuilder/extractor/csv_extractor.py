@@ -83,7 +83,12 @@ class CsvTableColumnExtractor(Extractor):
         self.column_file_location = conf.get_string(CsvTableColumnExtractor.COLUMN_FILE_LOCATION)
         self._load_csv()
 
-    def _get_key(self, db, cluster, schema, tbl):
+    def _get_key(self,
+                 db: str,
+                 cluster: str,
+                 schema: str,
+                 tbl: str
+                 ) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=db,
                                                      cluster=cluster,
                                                      schema=schema,
@@ -102,8 +107,8 @@ class CsvTableColumnExtractor(Extractor):
             db = column_dict['database']
             cluster = column_dict['cluster']
             schema = column_dict['schema']
-            table = column_dict['table_name']
-            id = self._get_key(db, cluster, schema, table)
+            table_name = column_dict['table_name']
+            id = self._get_key(db, cluster, schema, table_name)
             column = ColumnMetadata(
                 name=column_dict['name'],
                 description=column_dict['description'],
@@ -121,8 +126,8 @@ class CsvTableColumnExtractor(Extractor):
             db = table_dict['database']
             cluster = table_dict['cluster']
             schema = table_dict['schema']
-            table = table_dict['name']
-            id = self._get_key(db, cluster, schema, table)
+            table_name = table_dict['name']
+            id = self._get_key(db, cluster, schema, table_name)
             columns = parsed_columns[id]
             if columns is None:
                 columns = []
@@ -132,7 +137,9 @@ class CsvTableColumnExtractor(Extractor):
                                   name=table_dict['name'],
                                   description=table_dict['description'],
                                   columns=columns,
-                                  is_view=table_dict['is_view'],
+                                  # TODO: this possibly should parse stringified booleans;
+                                  # right now it only will be false for empty strings
+                                  is_view=bool(table_dict['is_view']),
                                   tags=table_dict['tags']
                                   )
             results.append(table)
