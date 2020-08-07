@@ -6,5 +6,6 @@ TABLEAU_ACCESS_TOKEN_SECRET = 'tableau_personal_access_token_secret'
 EXCLUDED_PROJECTS = 'excluded_projects'
 EXTERNAL_CLUSTER_NAME = "external_cluster_name"
 EXTERNAL_SCHEMA_NAME = "external_schema_name"
+EXTERNAL_TABLE_TYPES = "external_table_types"
 CLUSTER = "cluster"
 DATABASE = "database"

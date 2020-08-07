@@ -10,7 +10,7 @@ from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor
+    TableauGraphQLApiExtractor, TableauDashboardUtils
 
 from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
@@ -38,6 +38,7 @@ class TableauDashboardLastModifiedExtractor(Extractor):
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
 

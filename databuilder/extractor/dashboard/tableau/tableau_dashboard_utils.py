@@ -25,9 +25,6 @@ class TableauDashboardUtils():
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
 
-    # matches "&#x123;" or "&amp;" where 123 is some valid HTML escape code
-    HTML_ESCAPE_CHAR_REGEX = r'(\&\#[x\d]+;)|(&amp;)'
-
     @staticmethod
     def sanitize_schema_name(str):
         """
@@ -91,10 +88,11 @@ class TableauGraphQLApiExtractor(Extractor):
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
 
-    def init(self, conf, auth_token, query):
+    def init(self, conf, auth_token, query, query_variables={}):
         self._conf = conf
         self._auth_token = auth_token
         self._query = query

@@ -10,7 +10,7 @@ from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor
+    TableauGraphQLApiExtractor, TableauDashboardUtils
 
 from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
@@ -39,6 +39,7 @@ class TableauDashboardQueryExtractor(Extractor):
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
 
@@ -112,13 +113,12 @@ class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
         for query in response['customSQLTables']:
             for workbook in query['downstreamWorkbooks']:
                 if workbook['projectName'] not in self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS):
-                    data = {}
-
-                    data['dashboard_group_id'] = html.escape(str(workbook['projectName']))
-                    data['dashboard_id'] = html.escape(str(workbook['name']))
-                    data['query_name'] = query['name']
-                    data['query_id'] = query['id']
-                    data['query_text'] = query['query']
-                    data['cluster'] = self._conf.get_string('cluster')
-
+                    data = {
+                        'dashboard_group_id': workbook['projectName'],
+                        'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
+                        'query_name': query['name'],
+                        'query_id': query['id'],
+                        'query_text': query['query'],
+                        'cluster': self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER)
+                    }
                     yield data

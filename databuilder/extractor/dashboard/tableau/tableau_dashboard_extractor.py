@@ -39,6 +39,7 @@ class TableauDashboardExtractor(Extractor):
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+    EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
 
@@ -126,11 +127,11 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
                 'description': workbook.get('description', ''),
                 'created_timestamp': workbook['createdAt'],
                 'dashboard_group_url': 'https://{}/#/projects/{}'.format(
-                    self._conf.get(TABLEAU_HOST),
+                    self._conf.get(TableauGraphQLApiExtractor.TABLEAU_HOST),
                     workbook['projectVizportalUrlId']
                 ),
                 'dashboard_url': 'https://{}/#/workbooks/{}/views'.format(
-                    self._conf.get(TABLEAU_HOST),
+                    self._conf.get(TableauGraphQLApiExtractor.TABLEAU_HOST),
                     workbook['vizportalUrlId']
                 ),
                 'cluster': self._conf.get_string('cluster')
