@@ -29,13 +29,12 @@ class TableauDashboardUtils():
     def sanitize_schema_name(str):
         """
         Sanitizes a given string so that it can safely be used as a table's schema.
-        Replaces behaves as follows:
+        Sanitization behaves as follows:
             - all spaces and periods are replaced by underscores
             - any [], (), -, &, and ? characters are deleted
         """
         # type: (str) -> str
-        # this indentation looks silly, but otherwise the linter complains
-        # there's probably a better way to do this
+        # this indentation looks a little odd, but otherwise the linter complains
         return re.sub(r' ', '_',
                       re.sub(r'\.', '_',
                              re.sub(r'(\[|\]|\(|\)|\-|\&|\?)', '', str)))
@@ -44,7 +43,7 @@ class TableauDashboardUtils():
     def sanitize_database_name(str):
         """
         Sanitizes a given string so that it can safely be used as a table's database.
-        Replaces behaves as follows:
+        Sanitization behaves as follows:
             - all hyphens are deleted
         """
         # type: (str) -> str
@@ -54,9 +53,9 @@ class TableauDashboardUtils():
     def sanitize_table_name(str):
         """
         Sanitizes a given string so that it can safely be used as a table name.
-        Mimics the current behavior of sanitize_workbook_name, but this is purely coincidental.
-        As more breaking characters/patterns are found, each should be updated to reflect this.
-        Replaces behaves as follows:
+        Replicates the current behavior of sanitize_workbook_name, but this is purely coincidental.
+        As more breaking characters/patterns are found, each method should be updated to reflect the specifics.
+        Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
         # type: (str) -> str
@@ -67,8 +66,8 @@ class TableauDashboardUtils():
         """
         Sanitizes a given string so that it can safely be used as a workbook ID.
         Mimics the current behavior of sanitize_table_name for now, but is purely coincidental.
-        As more breaking characters/patterns are found, each should be updated to reflect this.
-        Replaces behaves as follows:
+        As more breaking characters/patterns are found, each method should be updated to reflect the specifics.
+        Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
         # type: (str) -> str
@@ -127,8 +126,8 @@ class TableauGraphQLApiExtractor(Extractor):
 
     def execute(self):
         """
-        Should be overriden by any extractor using this class. This should the result and yield all the
-        metadata to be consumed by the transformers.
+        Must be overriden by any extractor using this class. This should parse the result and yield each entity's
+        metadata one by one. 
         """
         pass
 
@@ -209,7 +208,7 @@ class TableauDashboardAuth():
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
-        # verify = False is needed bypass occasional (valid) self-signed cert errors. TODO: actually fix it
+        # verify = False is needed bypass occasional (valid) self-signed cert errors. TODO: actually fix it!!
         params = {
             "headers": headers,
             "verify": False

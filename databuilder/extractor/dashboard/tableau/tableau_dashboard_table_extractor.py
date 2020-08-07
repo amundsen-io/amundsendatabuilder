@@ -18,6 +18,8 @@ from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 
+from databuilder.models.table_metadata import TableMetadata
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -26,7 +28,7 @@ class TableauDashboardTableExtractor(Extractor):
     Extracts metadata about the tables associated with Tableau workbooks.
     It can handle both "regular" database tables as well as "external" tables
     (see TableauExternalTableExtractor for more info on external tables).
-    Assumes that the nodes for both the dashboard and the table have already been created.
+    Assumes that all the nodes for both the dashboards and the tables have already been created.
     """
 
     API_VERSION = const.API_VERSION
@@ -121,18 +123,17 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
             }
 
             for table in workbook['upstreamTables']:
-                table_id_format = "{database}://{cluster}.{schema}/{table}"
 
                 # external tables have no schema, so they must be parsed differently
                 # see TableauExternalTableExtractor for more specifics
                 if table['schema'] != "":
                     cluster, database = self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER), self._conf.get_string(TableauGraphQLApiExtractor.DATABASE)
 
-                    # Tableau sometimes incorrectly assigns the "schema" value incorrectly
+                    # Tableau sometimes incorrectly assigns the "schema" value
                     # based on how the datasource connection is used in a workbook.
-                    # It will hide the REAL schema in the table name, like "real_schema.real_table",
-                    # with a "schema" value of "fake_schema". In every case discovered so far, the "schema"
-                    # value is incorrect, so when this happens, the "inner" schema is used instead.
+                    # It will hide the real schema inside the table name, like "real_schema.real_table",
+                    # and set the "schema" value to "wrong_schema". In every case discovered so far, the schema
+                    # key is incorrect, so the "inner" schema from the table name is used instead.
                     if "." in table['name']:
                         schema, name = table['name'].split(".")
                     else:
@@ -146,11 +147,11 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     schema = TableauDashboardUtils.sanitize_schema_name(table['database']['name'])
                     name = TableauDashboardUtils.sanitize_table_name(table['name'])
 
-                table_id = table_id_format.format(
-                    database=database,
+                table_id = TableMetadata.TABLE_KEY_FORMAT(
+                    db=database,
                     cluster=cluster,
                     schema=schema,
-                    table=name,
+                    tbl=name,
                 )
                 data['table_ids'].append(table_id)
 

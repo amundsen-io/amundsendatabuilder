@@ -40,10 +40,10 @@ class TableauDashboardExternalTableExtractor(Extractor):
     contain a wider range of characters, all inputs are transformed to remove any problematic
     occurences before they are inserted: see the sanitize methods TableauDashboardUtils for specifics.
 
-    A more concrete example: if one had a Google Sheet titled "Growth by Region" with 2 subsheets called
+    A more concrete example: if one had a Google Sheet titled "Growth by Region & County" with 2 subsheets called
     "FY19 Report" and "FY20 Report", two tables would be generated with the following keys:
-    googlesheets://external.growth_by_region/FY_19_Report
-    googlesheets://external.growth_by_region/FY_20_Report
+    googlesheets://external.growth_by_region_county/FY_19_Report
+    googlesheets://external.growth_by_region_county/FY_20_Report
     """
 
     API_VERSION = const.API_VERSION
