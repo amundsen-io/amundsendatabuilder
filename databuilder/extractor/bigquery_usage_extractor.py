@@ -8,7 +8,7 @@ import re
 from time import sleep
 
 from pyhocon import ConfigTree  # noqa: F401
-from typing import Dict, Optional  # noqa: F401
+from typing import Any, Iterator, Dict, Optional, Tuple  # noqa: F401
 
 from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor
 
@@ -25,7 +25,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
     for referencedTables in the response.
     """
     TIMESTAMP_KEY = 'timestamp'
-    _DEFAULT_SCOPES = ('https://www.googleapis.com/auth/cloud-platform',)
+    _DEFAULT_SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
     EMAIL_PATTERN = 'email_pattern'
     DELAY_TIME = 'delay_time'
 
@@ -38,7 +38,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
         self.email_pattern = conf.get_string(BigQueryTableUsageExtractor.EMAIL_PATTERN, None)
         self.delay_time = conf.get_int(BigQueryTableUsageExtractor.DELAY_TIME, 100)
 
-        self.table_usage_counts = {}
+        self.table_usage_counts: Dict[TableColumnUsageTuple, int] = {}
         self._count_usage()
         self.iter = iter(self.table_usage_counts)
 
@@ -49,10 +49,12 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
             if count % self.pagesize == 0:
                 LOGGER.info('Aggregated {} records'.format(count))
 
+            if entry is None:
+                continue
+
             try:
                 job = entry['protoPayload']['serviceData']['jobCompletedEvent']['job']
             except Exception:
-                # Skip the record if the record missing certain fields
                 continue
             if job['jobStatus']['state'] != 'DONE':
                 # This job seems not to have finished yet, so we ignore it.
@@ -93,7 +95,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
                 new_count = self.table_usage_counts.get(key, 0) + 1
                 self.table_usage_counts[key] = new_count
 
-    def _retrieve_records(self) -> Optional[Dict]:
+    def _retrieve_records(self) -> Iterator[Optional[Dict]]:
         """
         Extracts bigquery log data by looking at the principalEmail in the
         authenticationInfo block and referencedTables in the jobStatistics.
@@ -113,14 +115,14 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
             for entry in page['entries']:
                 yield(entry)
 
-    def extract(self) -> Optional[tuple]:
+    def extract(self) -> Optional[Tuple[Any, int]]:
         try:
             key = next(self.iter)
             return key, self.table_usage_counts[key]
         except StopIteration:
             return None
 
-    def _page_over_results(self, body: Dict) -> Optional[Dict]:
+    def _page_over_results(self, body: Dict) -> Iterator[Dict]:
         response = self.logging_service.entries().list(body=body).execute(
             num_retries=BigQueryTableUsageExtractor.NUM_RETRIES)
         while response:
