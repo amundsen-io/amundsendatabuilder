@@ -247,7 +247,6 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
             conf = ConfigFactory.from_dict(config_dict)
             extractor = HiveTableMetadataExtractor()
             extractor.init(conf)
-            print (extractor.sql_stmt)
             self.assertTrue('select sth for test' in extractor.sql_stmt)
 
 
