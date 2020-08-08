@@ -230,10 +230,10 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
             extractor.init(self.conf)
             self.assertTrue(self.where_clause_suffix in extractor.sql_stmt)
 
-    def test_sql_statement_with_sql(self):
+    def test_sql_statement_with_default_sql(self):
         # type: () -> None
         """
-        Test Extraction by providing sql
+        Test Extraction by providing a default sql
         :return:
         """
         with patch.object(SQLAlchemyExtractor, '_get_connection'):
