@@ -70,9 +70,7 @@ class HiveTableMetadataExtractor(Extractor):
         default_sql = HiveTableMetadataExtractor.DEFAULT_SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY))
 
-        self.sql_stmt = conf.get_string(HiveTableMetadataExtractor.EXTRACT_SQL.format(
-            where_clause_suffix=conf.get_string(HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY)
-        ), default=default_sql)
+        self.sql_stmt = conf.get_string(HiveTableMetadataExtractor.EXTRACT_SQL, default=default_sql)
 
         LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
 
