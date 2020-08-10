@@ -26,12 +26,10 @@ class HttpFailureSkipOnStatus(BaseFailureHandler):
     def can_skip_failure(self,
                          exception: Exception,
                          ) -> bool:
-
-        if isinstance(exception, HTTPError):
-            try:
-                status_code: int = getattr(getattr(exception, 'response'), 'status_code')
-                return status_code in self._status_codes_to_skip
-            except AttributeError:
-                pass
+        try:
+            status_code: int = getattr(getattr(exception, 'response'), 'status_code')
+            return status_code in self._status_codes_to_skip
+        except AttributeError:
+            pass
 
         return False
