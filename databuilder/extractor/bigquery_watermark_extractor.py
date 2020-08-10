@@ -28,11 +28,6 @@ class BigQueryWatermarkExtractor(BaseBigQueryExtractor):
     def get_scope(self) -> str:
         return 'extractor.bigquery_watermarks'
 
-    def _iterate_over_tables(self) -> Iterator[Watermark]:
-        for dataset in self._retrieve_datasets():
-            for entry in self._retrieve_tables(dataset):
-                yield(entry)
-
     def _retrieve_tables(self,
                          dataset: DatasetRef
                          ) -> Iterator[Watermark]:

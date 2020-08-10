@@ -74,6 +74,16 @@ class BaseBigQueryExtractor(Extractor):
         suffix = table_id[-BaseBigQueryExtractor.DATE_LENGTH:]
         return suffix.isdigit()
 
+    def _iterate_over_tables(self) -> Any:
+        for dataset in self._retrieve_datasets():
+            for entry in self._retrieve_tables(dataset):
+                yield entry
+
+    # TRICKY: this function has different return types between different subclasses,
+    # so type as Any. Should probably refactor to remove this unclear sharing.
+    def _retrieve_tables(self, dataset: DatasetRef) -> Any:
+        pass
+
     def _retrieve_datasets(self) -> List[DatasetRef]:
         datasets = []
         for page in self._page_dataset_list_results():
