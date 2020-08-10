@@ -18,19 +18,21 @@ class TestDashboardOwner(unittest.TestCase):
                                          product='product_id', should_create_user_node=True)
 
         actual = dashboard_usage.create_next_node()
-        expected: Dict[str, Any] = {'is_active:UNQUOTED': True,
-                    'last_name': '',
-                    'full_name': '',
-                    'employee_type': '',
-                    'first_name': '',
-                    'updated_at': 0,
-                    'LABEL': 'User',
-                    'slack_id': '',
-                    'KEY': 'foo@bar.com',
-                    'github_username': '',
-                    'team_name': '',
-                    'email': 'foo@bar.com',
-                    'role_name': ''}
+        expected: Dict[str, Any] = {
+            'is_active:UNQUOTED': True,
+            'last_name': '',
+            'full_name': '',
+            'employee_type': '',
+            'first_name': '',
+            'updated_at': 0,
+            'LABEL': 'User',
+            'slack_id': '',
+            'KEY': 'foo@bar.com',
+            'github_username': '',
+            'team_name': '',
+            'email': 'foo@bar.com',
+            'role_name': ''
+        }
 
         assert actual is not None
         self.assertDictEqual(expected, actual)
@@ -50,13 +52,15 @@ class TestDashboardOwner(unittest.TestCase):
                                          product='product_id')
 
         actual = dashboard_usage.create_next_relation()
-        expected: Dict[str, Any] = {'read_count:UNQUOTED': 123,
-                    RELATION_END_KEY: 'foo@bar.com',
-                    RELATION_START_LABEL: 'Dashboard',
-                    RELATION_END_LABEL: 'User',
-                    RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
-                    RELATION_TYPE: 'READ_BY',
-                    RELATION_REVERSE_TYPE: 'READ'}
+        expected: Dict[str, Any] = {
+            'read_count:UNQUOTED': 123,
+            RELATION_END_KEY: 'foo@bar.com',
+            RELATION_START_LABEL: 'Dashboard',
+            RELATION_END_LABEL: 'User',
+            RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+            RELATION_TYPE: 'READ_BY',
+            RELATION_REVERSE_TYPE: 'READ'
+        }
 
         assert actual is not None
         self.assertDictEqual(expected, actual)

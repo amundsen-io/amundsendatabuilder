@@ -20,10 +20,12 @@ class TestDashboardLastModifiedTimestamp(unittest.TestCase):
                                                                  dashboard_group_id='dashboard_group_id')
 
         actual = dashboard_last_modified.create_next_node()
-        expected: Dict[str, Any] = {'timestamp': 123456789,
-                    'name': 'last_updated_timestamp',
-                    'KEY': 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id/_last_modified_timestamp',
-                    'LABEL': 'Timestamp'}
+        expected: Dict[str, Any] = {
+            'timestamp': 123456789,
+            'name': 'last_updated_timestamp',
+            'KEY': 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id/_last_modified_timestamp',
+            'LABEL': 'Timestamp'
+        }
 
         assert actual is not None
         self.assertDictEqual(actual, expected)

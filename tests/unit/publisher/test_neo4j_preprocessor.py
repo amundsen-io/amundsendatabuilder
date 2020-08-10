@@ -15,7 +15,7 @@ class TestNeo4jPreprocessor(unittest.TestCase):
 
         self.assertTrue(not preprocessor.is_perform_preprocess())
 
-    def testDeleteRelationPreprocessor(self)  -> None:  # noqa: W293
+    def testDeleteRelationPreprocessor(self) -> None:  # noqa: W293
         preprocessor = DeleteRelationPreprocessor()
 
         self.assertTrue(preprocessor.is_perform_preprocess())

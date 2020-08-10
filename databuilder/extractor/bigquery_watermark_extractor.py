@@ -10,8 +10,7 @@ import textwrap
 from pyhocon import ConfigTree  # noqa: F401
 from typing import Any, Dict, Iterator, List, Tuple, Union  # noqa: F401
 
-from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor, \
-    DatasetRef, TableKey
+from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor, DatasetRef
 from databuilder.models.watermark import Watermark
 
 PartitionInfo = namedtuple('PartitionInfo', ['partition_id', 'epoch_created'])

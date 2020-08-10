@@ -3,8 +3,7 @@
 
 import abc
 
-from requests.exceptions import HTTPError
-from typing import Iterable, Union, List, Dict, Any, Optional  # noqa: F401
+from typing import Iterable
 
 
 class BaseFailureHandler(object, metaclass=abc.ABCMeta):
