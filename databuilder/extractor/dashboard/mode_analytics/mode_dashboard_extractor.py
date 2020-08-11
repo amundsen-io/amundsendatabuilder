@@ -111,5 +111,7 @@ class ModeDashboardExtractor(Extractor):
         json_path = '_embedded.reports[*].[token,name,description,created_at]'
         field_names = ['dashboard_id', 'dashboard_name', 'description', 'created_timestamp']
         reports_query = ModePaginatedRestApiQuery(query_to_join=spaces_query, url=reports_url_template, params=params,
-                                                  json_path=json_path, field_names=field_names, skip_no_result=True)
+                                                  json_path=json_path, field_names=field_names, skip_no_result=True,
+                                                  can_skip_failure=lambda exception: isinstance(exception, KeyError),
+                                                  )
         return reports_query

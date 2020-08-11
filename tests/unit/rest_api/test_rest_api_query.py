@@ -56,6 +56,20 @@ class TestRestApiQuery(unittest.TestCase):
             for actual in query.execute():
                 self.assertDictEqual(expected.pop(0), actual)
 
+    def test_rest_api_query_preprocessing_key_error(self):
+        seed_record = [{}]
+        seed_query = RestApiQuerySeed(seed_record=seed_record)
+
+        json_path = 'foo.[name,hobby]'
+        field_names = ['name_field', 'hobby']
+
+        query = RestApiQuery(query_to_join=seed_query, url='foobar-{not_exist}', params={},
+                             json_path=json_path, field_names=field_names,
+                             can_skip_failure=lambda exception: isinstance(exception, KeyError))
+
+        for _ in query.execute():
+            pass
+
     def test_rest_api_query_multiple_fields(self):
 
         seed_record = [{'foo1': 'bar1'},

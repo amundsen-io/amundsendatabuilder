@@ -141,11 +141,11 @@ class RestApiQuery(BaseRestApiQuery):
             while first_try or self._more_pages:
                 first_try = False
 
-                url = self._preprocess_url(record=record_dict)
-
                 try:
+                    url = self._preprocess_url(record=record_dict)
                     response = self._send_request(url=url)
                 except Exception as e:
+                    LOGGER.exception('Failed to process record: {}'.format(record_dict))
                     if self._can_skip_failure and self._can_skip_failure(exception=e):
                         continue
                     raise e
