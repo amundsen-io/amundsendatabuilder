@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_constants import ORGANIZATION, MODE_ACCESS_TOKEN, \
-    MODE_PASSWORD_TOKEN
+    MODE_PASSWORD_TOKEN, MODE_AUTH_TOKEN
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, STATIC_RECORD_DICT
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
 from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
@@ -52,6 +52,21 @@ class ModeDashboardUtils(object):
                                         )
                   }
         return params
+
+    @staticmethod
+    def get_auth_headers(conf: ConfigTree) -> dict:
+        """
+        The Mode Discovery API set token in header for AUTH
+
+        :param conf:
+        :return:
+        """
+        headers = {
+            'Authorization': conf.get_string(MODE_AUTH_TOKEN),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        return headers
 
     @staticmethod
     def create_mode_rest_api_extractor(restapi_query,  # type: BaseRestApiQuery

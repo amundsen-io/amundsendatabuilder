@@ -4,3 +4,6 @@
 ORGANIZATION = 'organization'
 MODE_ACCESS_TOKEN = 'mode_user_token'
 MODE_PASSWORD_TOKEN = 'mode_password_token'
+
+# Mode signature token to access discovery API: id:key:secret from token API
+MODE_AUTH_TOKEN = 'mode_auth_token'

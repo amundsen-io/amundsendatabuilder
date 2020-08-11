@@ -129,6 +129,9 @@ class RestApiQuery(BaseRestApiQuery):
         self._field_names = field_names
         self._json_path_contains_or = json_path_contains_or
         self._can_skip_failure = can_skip_failure
+
+        # Batch Discovery API require to set token in header
+        self._headers = kwargs.get('headers')
         self._more_pages = False
 
     def execute(self):  # noqa: C901
@@ -204,7 +207,11 @@ class RestApiQuery(BaseRestApiQuery):
         :return:
         """
         LOGGER.info('Calling URL {}'.format(url))
-        response = requests.get(url, **self._params)
+        if self._headers:
+            # If header is set, use header, otherwise fallback basic auth
+            response = requests.get(url, headers=self._headers)
+        else:
+            response = requests.get(url, **self._params)
         response.raise_for_status()
         return response
 
