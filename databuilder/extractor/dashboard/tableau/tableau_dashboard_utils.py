@@ -13,17 +13,6 @@ class TableauDashboardUtils:
     Provides various utility functions specifc to the Tableau dashboard extractors.
     """
 
-    API_VERSION = const.API_VERSION
-    TABLEAU_HOST = const.TABLEAU_HOST
-    SITE_NAME = const.SITE_NAME
-    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
-    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
-
     @staticmethod
     def sanitize_schema_name(str):
         # type: (str) -> str
@@ -161,11 +150,6 @@ class TableauDashboardAuth:
     SITE_NAME = const.SITE_NAME
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
 
     def __init__(self, conf):
         self._token = None

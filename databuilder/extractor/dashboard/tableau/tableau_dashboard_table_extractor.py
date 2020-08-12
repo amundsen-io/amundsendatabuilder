@@ -33,10 +33,6 @@ class TableauDashboardTableExtractor(Extractor):
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -114,7 +110,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
             data = {
                 'dashboard_group_id': workbook['projectName'],
                 'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
-                'cluster': self._conf.get_string("cluster"),
+                'cluster': self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER),
                 'table_ids': []
             }
 

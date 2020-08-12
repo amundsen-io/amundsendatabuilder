@@ -32,11 +32,6 @@ class TableauDashboardLastModifiedExtractor(Extractor):
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
-    EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -119,6 +114,6 @@ class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
                 'dashboard_group_id': workbook['projectName'],
                 'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
                 'last_modified_timestamp': workbook['updatedAt'],
-                'cluster': self._conf.get_string('cluster')
+                'cluster': self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER)
             }
             yield data

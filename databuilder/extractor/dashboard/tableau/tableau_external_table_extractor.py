@@ -51,8 +51,6 @@ class TableauDashboardExternalTableExtractor(Extractor):
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
     EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -69,7 +67,7 @@ class TableauDashboardExternalTableExtractor(Extractor):
             }
           }
         }"""
-        self.query_variables = {'externalTableTypes': self._conf.get_list(const.EXTERNAL_TABLE_TYPES)}
+        self.query_variables = {'externalTableTypes': self._conf.get_list(TableauDashboardExternalTableExtractor.EXTERNAL_TABLE_TYPES)}
         self._extractor = self._build_extractor()
 
         transformers = []
