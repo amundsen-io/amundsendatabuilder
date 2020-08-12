@@ -2,6 +2,8 @@ import json
 import requests
 import re
 
+from pyhocon.exceptions import ConfigMissingException
+
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
@@ -78,23 +80,29 @@ class TableauGraphQLApiExtractor(Extractor):
     EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
+    QUERY = 'query'
+    QUERY_VARIABLES = 'query_variables'
 
-    def init(self, conf, auth_token, query, query_variables={}):
+    def init(self, conf):
         self._conf = conf
-        self._auth_token = auth_token
-        self._query = query
-        self._query_variables = query_variables
+        self._auth_token = self._conf.get(TableauDashboardAuth.AUTH).token
+        self._query = self._conf.get(TableauGraphQLApiExtractor.QUERY)
         self._iterator = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
         self._metadata_url = 'https://{TABLEAU_HOST}/api/metadata/graphql'.format(
             TABLEAU_HOST=self._conf.get_string(TableauGraphQLApiExtractor.TABLEAU_HOST)
         )
 
+        try:
+            self._query_variables = self._conf.get(TableauGraphQLApiExtractor.QUERY_VARIABLES)
+        except ConfigMissingException:
+            self._query_variables = {}
+
     def execute_query(self):
+        # type: () -> dict
         """
         Executes the extractor's given query and returns the data from the results.
         """
-        # type: () -> dict
         query_payload = json.dumps({
             'query': self._query,
             'variables': self._query_variables
@@ -150,6 +158,7 @@ class TableauDashboardAuth:
     SITE_NAME = const.SITE_NAME
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    AUTH = 'auth'
 
     def __init__(self, conf):
         self._token = None

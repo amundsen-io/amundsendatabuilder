@@ -87,11 +87,13 @@ class TableauDashboardTableExtractor(Extractor):
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({STATIC_RECORD_DICT: {'product': 'tableau'}
+                  .with_fallback(ConfigFactory.from_dict({TableauDashboardAuth.AUTH: self._auth,
+                                                          TableauGraphQLApiExtractor.QUERY: self.query,
+                                                          STATIC_RECORD_DICT: {'product': 'tableau'}
                                                           }
                                                          )
                                  )
-        extractor.init(conf=tableau_extractor_conf, auth_token=self._auth.token, query=self.query)
+        extractor.init(conf=tableau_extractor_conf)
         return extractor
 
 
@@ -139,6 +141,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     schema = TableauDashboardUtils.sanitize_schema_name(table['database']['name'])
                     name = TableauDashboardUtils.sanitize_table_name(table['name'])
 
+                print(database, cluster, schema, name)
                 table_id = TableMetadata.TABLE_KEY_FORMAT(
                     db=database,
                     cluster=cluster,

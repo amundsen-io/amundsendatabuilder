@@ -100,11 +100,13 @@ class TableauDashboardExternalTableExtractor(Extractor):
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({}))
-        extractor.init(conf=tableau_extractor_conf,
-                       auth_token=self._auth.token,
-                       query=self.query,
-                       query_variables=self.query_variables)
+                  .with_fallback(ConfigFactory.from_dict({TableauDashboardAuth.AUTH: self._auth,
+                                                          TableauGraphQLApiExtractor.QUERY_VARIABLES: self.query_variables,
+                                                          TableauGraphQLApiExtractor.QUERY: self.query
+                                                          }
+                                                         )
+                                 )
+        extractor.init(conf=tableau_extractor_conf)
         return extractor
 
 
