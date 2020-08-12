@@ -31,7 +31,7 @@ pytest-mock>=1.1,<2.0
 # PEP 484
 # License: PSF
 # Upstream url: https://github.com/python/typing
-typing>=3.6.4
+typing>=3.6.4,<3.7; python_version < '3.7'
 
 # Python client for ElasticSearch
 # License: Apache Software License
