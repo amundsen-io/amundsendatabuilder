@@ -2,14 +2,13 @@ import json
 import requests
 import re
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 
-class TableauDashboardUtils():
+
+class TableauDashboardUtils:
     """
     Provides various utility functions specifc to the Tableau dashboard extractors.
     """
@@ -27,13 +26,13 @@ class TableauDashboardUtils():
 
     @staticmethod
     def sanitize_schema_name(str):
+        # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a table's schema.
         Sanitization behaves as follows:
             - all spaces and periods are replaced by underscores
             - any [], (), -, &, and ? characters are deleted
         """
-        # type: (str) -> str
         # this indentation looks a little odd, but otherwise the linter complains
         return re.sub(r' ', '_',
                       re.sub(r'\.', '_',
@@ -41,13 +40,13 @@ class TableauDashboardUtils():
 
     @staticmethod
     def sanitize_database_name(str):
+        # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a table's database.
         Sanitization behaves as follows:
             - all hyphens are deleted
         """
-        # type: (str) -> str
-        return re.sub(r"-", "", str)
+        return re.sub(r'-', '', str)
 
     @staticmethod
     def sanitize_table_name(str):
@@ -63,6 +62,7 @@ class TableauDashboardUtils():
 
     @staticmethod
     def sanitize_workbook_name(str):
+        # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a workbook ID.
         Mimics the current behavior of sanitize_table_name for now, but is purely coincidental.
@@ -70,7 +70,6 @@ class TableauDashboardUtils():
         Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
-        # type: (str) -> str
         return re.sub(r'(\/|\')', '', str)
 
 
@@ -108,17 +107,17 @@ class TableauGraphQLApiExtractor(Extractor):
         """
         # type: () -> dict
         query_payload = json.dumps({
-            "query": self._query,
-            "variables": self._query_variables
+            'query': self._query,
+            'variables': self._query_variables
         })
         headers = {
-            "Content-Type": "application/json",
-            "X-Tableau-Auth": self._auth_token
+            'Content-Type': 'application/json',
+            'X-Tableau-Auth': self._auth_token
         }
         params = {
-            "data": query_payload,
-            "headers": headers,
-            "verify": False
+            'data': query_payload,
+            'headers': headers,
+            'verify': False
         }
 
         response = requests.post(url=self._metadata_url, **params)
@@ -137,7 +136,7 @@ class TableauGraphQLApiExtractor(Extractor):
         static record values if needed.
         """
         if not self._iterator:
-                self._iterator = self.execute()
+            self._iterator = self.execute()
 
         try:
             record = next(self._iterator)
@@ -150,7 +149,7 @@ class TableauGraphQLApiExtractor(Extractor):
         return record
 
 
-class TableauDashboardAuth():
+class TableauDashboardAuth:
     """
     Attempts to authenticate agains the Tableau REST API using the provided personal access token credentials.
     When successful, it will create a valid token that must be used on all subsequent requests.
@@ -169,7 +168,6 @@ class TableauDashboardAuth():
     DATABASE = const.DATABASE
 
     def __init__(self, conf):
-        self.site_id = None
         self._token = None
         self._conf = conf
         self._site_name = self._conf.get_string(TableauDashboardAuth.SITE_NAME)
@@ -196,11 +194,11 @@ class TableauDashboardAuth():
             api_version=self._api_version
         )
         payload = json.dumps({
-            "credentials": {
-                "personalAccessTokenName": self._access_token_name,
-                "personalAccessTokenSecret": self._access_token_secret,
-                "site": {
-                    "contentUrl": self._site_name
+            'credentials': {
+                'personalAccessTokenName': self._access_token_name,
+                'personalAccessTokenSecret': self._access_token_secret,
+                'site': {
+                    'contentUrl': self._site_name
                 }
             }
         })
@@ -210,11 +208,9 @@ class TableauDashboardAuth():
         }
         # verify = False is needed bypass occasional (valid) self-signed cert errors. TODO: actually fix it!!
         params = {
-            "headers": headers,
-            "verify": False
+            'headers': headers,
+            'verify': False
         }
 
         response_json = requests.post(url=self._auth_url, data=payload, **params).json()
-        self.site_id = response_json['credentials']['site']['id']
-
         return response_json['credentials']['token']

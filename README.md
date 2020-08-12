@@ -794,10 +794,10 @@ refer to your Tableau instance for the exact formatting of each connection type 
 Excel spreadsheets, Salesforce connections, and Google Sheets connections are all classified as
 "databases" in terms of Tableau's Metadata API, with their "subsheets" forming their "tables" when
 present. However, these tables are not assigned a schema, this extractor chooses to use the name
-parent sheet as the schema, and assign a new table to each subsheet. The connection type is
+of the parent sheet as the schema, and assign a new table to each subsheet. The connection type is
 always used as the database, and for text files, the schema is set using the `external_schema_name`
 config option. Since these external tables are usually named for human consumption only and often
-contain a wider range of characters, all inputs are sanitize to remove any problematic
+contain a wider range of characters, all inputs are sanitized to remove any problematic
 occurences before they are inserted: see the `sanitize` methods `TableauDashboardUtils` for specifics.
 
 A more concrete example: if one had a Google Sheet titled "Growth by Region" with 2 subsheets called

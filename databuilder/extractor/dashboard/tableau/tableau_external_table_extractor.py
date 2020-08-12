@@ -1,7 +1,6 @@
 import logging
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 
@@ -10,9 +9,6 @@ from databuilder.extractor.base_extractor import Extractor
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
-
-from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
-from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -73,7 +69,7 @@ class TableauDashboardExternalTableExtractor(Extractor):
             }
           }
         }"""
-        self.query_variables = {"externalTableTypes": self._conf.get_list(const.EXTERNAL_TABLE_TYPES)}
+        self.query_variables = {'externalTableTypes': self._conf.get_list(const.EXTERNAL_TABLE_TYPES)}
         self._extractor = self._build_extractor()
 
         transformers = []
@@ -115,7 +111,10 @@ class TableauDashboardExternalTableExtractor(Extractor):
 
 
 class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
-    """docstring for TableauDashboardMetadataExtractor"""
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the TableMetadata model.
+    """
     def execute(self):
         response = self.execute_query()
 

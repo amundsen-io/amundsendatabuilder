@@ -1,7 +1,6 @@
 import logging
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 
@@ -92,11 +91,11 @@ class TableauDashboardExtractor(Extractor):
         return 'extractor.tableau_dashboard_metadata'
 
     def _build_extractor(self):
+        # type: ( -> TableauGraphQLApiMetadataExtractor
         """
         Builds a TableauGraphQLApiMetadataExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLApiMetadataExtractor that provides core dashboard metadata.
         """
-        # type: () -> TableauGraphQLApiMetadataExtractor
         extractor = TableauGraphQLApiMetadataExtractor()
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
@@ -134,6 +133,6 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
                     self._conf.get(TableauGraphQLApiExtractor.TABLEAU_HOST),
                     workbook['vizportalUrlId']
                 ),
-                'cluster': self._conf.get_string('cluster')
+                'cluster': self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER)
             }
             yield data

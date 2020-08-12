@@ -1,7 +1,6 @@
 import logging
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 
@@ -11,9 +10,6 @@ from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
-
-from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
-from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS

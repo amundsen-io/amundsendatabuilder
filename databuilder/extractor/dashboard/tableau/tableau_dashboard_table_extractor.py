@@ -1,7 +1,6 @@
 import logging
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 
@@ -11,9 +10,6 @@ from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
     TableauGraphQLApiExtractor, TableauDashboardUtils
-
-from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
-from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -126,7 +122,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
 
                 # external tables have no schema, so they must be parsed differently
                 # see TableauExternalTableExtractor for more specifics
-                if table['schema'] != "":
+                if table['schema'] != '':
                     cluster, database = self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER), self._conf.get_string(TableauGraphQLApiExtractor.DATABASE)
 
                     # Tableau sometimes incorrectly assigns the "schema" value
@@ -134,8 +130,8 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     # It will hide the real schema inside the table name, like "real_schema.real_table",
                     # and set the "schema" value to "wrong_schema". In every case discovered so far, the schema
                     # key is incorrect, so the "inner" schema from the table name is used instead.
-                    if "." in table['name']:
-                        schema, name = table['name'].split(".")
+                    if '.' in table['name']:
+                        schema, name = table['name'].split('.')
                     else:
                         schema, name = table['schema'], table['name']
                     schema, name = TableauDashboardUtils.sanitize_schema_name(schema), TableauDashboardUtils.sanitize_table_name(name)
