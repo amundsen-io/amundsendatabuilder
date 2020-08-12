@@ -141,8 +141,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     schema = TableauDashboardUtils.sanitize_schema_name(table['database']['name'])
                     name = TableauDashboardUtils.sanitize_table_name(table['name'])
 
-                print(database, cluster, schema, name)
-                table_id = TableMetadata.TABLE_KEY_FORMAT(
+                table_id = TableMetadata.TABLE_KEY_FORMAT.format(
                     db=database,
                     cluster=cluster,
                     schema=schema,
