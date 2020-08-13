@@ -56,7 +56,6 @@ class TableauDashboardExternalTableExtractor(Extractor):
         # type: (ConfigTree) -> None
 
         self._conf = conf
-        self._auth = TableauDashboardAuth(self._conf)
         self.query = """query externalTables($externalTableTypes: [String]) {
           databases (filter: {connectionTypeWithin: $externalTableTypes}) {
             name
@@ -100,8 +99,7 @@ class TableauDashboardExternalTableExtractor(Extractor):
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({TableauDashboardAuth.AUTH: self._auth,
-                                                          TableauGraphQLApiExtractor.QUERY_VARIABLES: self.query_variables,
+                  .with_fallback(ConfigFactory.from_dict({TableauGraphQLApiExtractor.QUERY_VARIABLES: self.query_variables,
                                                           TableauGraphQLApiExtractor.QUERY: self.query
                                                           }
                                                          )

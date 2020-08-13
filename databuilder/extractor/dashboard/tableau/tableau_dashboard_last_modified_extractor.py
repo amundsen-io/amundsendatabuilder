@@ -37,7 +37,6 @@ class TableauDashboardLastModifiedExtractor(Extractor):
         # type: (ConfigTree) -> None
 
         self._conf = conf
-        self._auth = TableauDashboardAuth(self._conf)
         self.query = """query {
             workbooks {
                 id
@@ -90,8 +89,7 @@ class TableauDashboardLastModifiedExtractor(Extractor):
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({TableauDashboardAuth.AUTH: self._auth,
-                                                          TableauGraphQLApiExtractor.QUERY: self.query,
+                  .with_fallback(ConfigFactory.from_dict({TableauGraphQLApiExtractor.QUERY: self.query,
                                                           STATIC_RECORD_DICT: {'product': 'tableau'}
                                                           }
                                                          )

@@ -85,7 +85,7 @@ class TableauGraphQLApiExtractor(Extractor):
 
     def init(self, conf):
         self._conf = conf
-        self._auth_token = self._conf.get(TableauDashboardAuth.AUTH).token
+        self._auth_token = TableauDashboardAuth(self._conf).token
         self._query = self._conf.get(TableauGraphQLApiExtractor.QUERY)
         self._iterator = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
