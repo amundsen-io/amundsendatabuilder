@@ -92,11 +92,7 @@ class TableauGraphQLApiExtractor(Extractor):
         self._metadata_url = 'https://{TABLEAU_HOST}/api/metadata/graphql'.format(
             TABLEAU_HOST=self._conf.get_string(TableauGraphQLApiExtractor.TABLEAU_HOST)
         )
-
-        try:
-            self._query_variables = self._conf.get(TableauGraphQLApiExtractor.QUERY_VARIABLES)
-        except ConfigMissingException:
-            self._query_variables = {}
+        self._query_variables = self._conf.get(TableauGraphQLApiExtractor.QUERY_VARIABLES, {})
 
     def execute_query(self):
         # type: () -> dict
