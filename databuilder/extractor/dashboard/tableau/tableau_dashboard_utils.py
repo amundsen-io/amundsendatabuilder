@@ -80,6 +80,7 @@ class TableauGraphQLApiExtractor(Extractor):
     EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
     CLUSTER = const.CLUSTER
     DATABASE = const.DATABASE
+    VERIFY_REQUEST = const.VERIFY_REQUEST
     QUERY = 'query'
     QUERY_VARIABLES = 'query_variables'
 
@@ -93,6 +94,7 @@ class TableauGraphQLApiExtractor(Extractor):
             TABLEAU_HOST=self._conf.get_string(TableauGraphQLApiExtractor.TABLEAU_HOST)
         )
         self._query_variables = self._conf.get(TableauGraphQLApiExtractor.QUERY_VARIABLES, {})
+        self._verify_request = self._conf.get(TableauGraphQLApiExtractor.VERIFY_REQUEST, True)
 
     def execute_query(self):
         # type: () -> dict
@@ -110,7 +112,7 @@ class TableauGraphQLApiExtractor(Extractor):
         params = {
             'data': query_payload,
             'headers': headers,
-            'verify': False
+            'verify': self._verify_request
         }
 
         response = requests.post(url=self._metadata_url, **params)
@@ -155,6 +157,7 @@ class TableauDashboardAuth:
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     AUTH = 'auth'
+    VERIFY_REQUEST = const.VERIFY_REQUEST
 
     def __init__(self, conf):
         self._token = None
@@ -164,6 +167,7 @@ class TableauDashboardAuth:
         self._api_version = self._conf.get_string(TableauDashboardAuth.API_VERSION)
         self._access_token_name = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_NAME)
         self._access_token_secret = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_SECRET)
+        self._verify_request = self._conf.get(TableauDashboardAuth.VERIFY_REQUEST, True)
 
     @property
     def token(self):
@@ -198,7 +202,7 @@ class TableauDashboardAuth:
         # verify = False is needed bypass occasional (valid) self-signed cert errors. TODO: actually fix it!!
         params = {
             'headers': headers,
-            'verify': False
+            'verify': self._verify_request
         }
 
         response_json = requests.post(url=self._auth_url, data=payload, **params).json()

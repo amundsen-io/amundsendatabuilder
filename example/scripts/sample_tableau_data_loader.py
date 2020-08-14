@@ -78,7 +78,7 @@ neo4j_password = 'test'
 LOGGER = logging.getLogger(__name__)
 
 tableau_host = ""
-tableau_api_version = ""
+tableau_api_version = 0
 tableau_site_name = ""
 tableau_personal_access_token_name = ""
 tableau_personal_access_token_secret = ""
@@ -86,8 +86,9 @@ tableau_excluded_projects = []
 tableau_dashboard_cluster = ""
 tableau_dashboard_database = ""
 tableau_external_table_cluster = ""
-tableau_external_table_database = ""
+tableau_external_table_schema = ""
 tableau_external_table_types = []
+tableau_verify_request = True
 
 common_tableau_config = {
     'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
@@ -320,6 +321,7 @@ def run_tableau_metadata_job():
         'extractor.tableau_dashboard_metadata.database': tableau_dashboard_database,
         'extractor.tableau_dashboard_metadata.transformer.timestamp_str_to_epoch.timestamp_format':
             "%Y-%m-%dT%H:%M:%SZ",
+        'extractor.tableau_dashboard_metadata.verify_request': tableau_verify_request,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -358,6 +360,7 @@ def run_tableau_last_modified_job():
         'extractor.tableau_dashboard_last_modified.database': tableau_dashboard_database,
         'extractor.tableau_dashboard_last_modified.transformer.timestamp_str_to_epoch.timestamp_format':
             "%Y-%m-%dT%H:%M:%SZ",
+        'extractor.tableau_dashboard_last_modified.verify_request': tableau_verify_request,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -396,6 +399,7 @@ def run_tableau_query_job():
         'extractor.tableau_dashboard_query.database': tableau_dashboard_database,
         'extractor.tableau_dashboard_query.transformer.timestamp_str_to_epoch.timestamp_format':
             "%Y-%m-%dT%H:%M:%SZ",
+        'extractor.tableau_dashboard_query.verify_request': tableau_verify_request,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -435,6 +439,7 @@ def run_tableau_table_job():
         'extractor.tableau_dashboard_table.external_cluster_name': tableau_external_table_cluster,
         'extractor.tableau_dashboard_table.external_schema_name': tableau_external_table_schema,
         'extractor.tableau_dashboard_table.transformer.timestamp_str_to_epoch.timestamp_format': "%Y-%m-%dT%H:%M:%SZ",
+        'extractor.tableau_dashboard_table.verify_request': tableau_verify_request,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
@@ -474,6 +479,7 @@ def run_tableau_external_table_job():
         'extractor.tableau_external_table.external_cluster_name': tableau_external_table_cluster,
         'extractor.tableau_external_table.external_schema_name': tableau_external_table_schema,
         'extractor.tableau_external_table.external_table_types': tableau_external_table_types,
+        'extractor.tableau_external_table.verify_request': tableau_verify_request,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
