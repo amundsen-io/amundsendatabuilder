@@ -1,14 +1,15 @@
 import logging
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
+from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 
 from databuilder.extractor.base_extractor import Extractor
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor, TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
+    TableauDashboardUtils
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -66,7 +67,8 @@ class TableauDashboardExternalTableExtractor(Extractor):
             }
           }
         }"""
-        self.query_variables = {'externalTableTypes': self._conf.get_list(TableauDashboardExternalTableExtractor.EXTERNAL_TABLE_TYPES)}
+        self.query_variables = {
+            'externalTableTypes': self._conf.get_list(TableauDashboardExternalTableExtractor.EXTERNAL_TABLE_TYPES)}
         self._extractor = self._build_extractor()
 
         transformers = []
@@ -94,16 +96,18 @@ class TableauDashboardExternalTableExtractor(Extractor):
 
     def _build_extractor(self):
         """
+        Builds a TableauGraphQLExternalTableExtractor. All data required can be retrieved with a single GraphQL call.
+        :return: A TableauGraphQLExternalTableExtractor that creates external table metadata entities.
         """
         extractor = TableauGraphQLExternalTableExtractor()
+
+        config_dict = {
+            TableauGraphQLApiExtractor.QUERY_VARIABLES: self.query_variables,
+            TableauGraphQLApiExtractor.QUERY: self.query}
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
                   .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({TableauGraphQLApiExtractor.QUERY_VARIABLES: self.query_variables,
-                                                          TableauGraphQLApiExtractor.QUERY: self.query
-                                                          }
-                                                         )
-                                 )
+                  .with_fallback(ConfigFactory.from_dict(config_dict))
         extractor.init(conf=tableau_extractor_conf)
         return extractor
 

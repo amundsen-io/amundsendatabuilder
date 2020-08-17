@@ -1,6 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
+from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 
@@ -8,8 +9,8 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor, TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
+    TableauDashboardUtils
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -80,11 +81,11 @@ class TableauDashboardLastModifiedExtractor(Extractor):
         return 'extractor.tableau_dashboard_last_modified'
 
     def _build_extractor(self):
+        # type: () -> TableauGraphQLApiLastModifiedExtractor
         """
         Builds a TableauGraphQLApiExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLApiLastModifiedExtractor that provides dashboard update metadata.
         """
-        # type: () -> TableauGraphQLApiLastModifiedExtractor
         extractor = TableauGraphQLApiLastModifiedExtractor()
         tableau_extractor_conf = \
             Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
@@ -107,7 +108,8 @@ class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
-                          if workbook['projectName'] not in self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
+                          if workbook['projectName'] not in
+                          self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
             data = {

@@ -1,6 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
+from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 
@@ -8,8 +9,8 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor, TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
+    TableauDashboardUtils
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -78,6 +79,7 @@ class TableauDashboardTableExtractor(Extractor):
         return 'extractor.tableau_dashboard_table'
 
     def _build_extractor(self):
+        # type: () -> TableauGraphQLDashboardTableExtractor
         """
         Builds a TableauGraphQLDashboardTableExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLDashboardTableExtractor that creates dashboard <> table relationships.
@@ -104,7 +106,8 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
-                          if workbook['projectName'] not in self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
+                          if workbook['projectName'] not in
+                          self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
             data = {
@@ -119,7 +122,8 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                 # external tables have no schema, so they must be parsed differently
                 # see TableauExternalTableExtractor for more specifics
                 if table['schema'] != '':
-                    cluster, database = self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER), self._conf.get_string(TableauGraphQLApiExtractor.DATABASE)
+                    cluster = self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER)
+                    database = self._conf.get_string(TableauGraphQLApiExtractor.DATABASE)
 
                     # Tableau sometimes incorrectly assigns the "schema" value
                     # based on how the datasource connection is used in a workbook.
@@ -130,7 +134,8 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                         schema, name = table['name'].split('.')
                     else:
                         schema, name = table['schema'], table['name']
-                    schema, name = TableauDashboardUtils.sanitize_schema_name(schema), TableauDashboardUtils.sanitize_table_name(name)
+                    schema = TableauDashboardUtils.sanitize_schema_name(schema)
+                    name = TableauDashboardUtils.sanitize_table_name(name)
                 else:
                     cluster = self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_CLUSTER_NAME)
                     database = TableauDashboardUtils.sanitize_database_name(

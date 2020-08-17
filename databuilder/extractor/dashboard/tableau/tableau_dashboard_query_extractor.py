@@ -1,6 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
+from typing import Any  # noqa: F401
 
 from databuilder import Scoped
 
@@ -8,8 +9,8 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth,\
-    TableauGraphQLApiExtractor, TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
+    TableauDashboardUtils
 
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -76,6 +77,7 @@ class TableauDashboardQueryExtractor(Extractor):
         return 'extractor.tableau_dashboard_query'
 
     def _build_extractor(self):
+        # type: () -> TableauGraphQLApiQueryExtractor
         """
         Builds a TableauGraphQLApiQueryExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLApiQueryExtractor that provides dashboard query metadata.

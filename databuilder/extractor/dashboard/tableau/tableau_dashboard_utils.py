@@ -2,8 +2,6 @@ import json
 import requests
 import re
 
-from pyhocon.exceptions import ConfigMissingException
-
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
@@ -16,7 +14,7 @@ class TableauDashboardUtils:
     """
 
     @staticmethod
-    def sanitize_schema_name(str):
+    def sanitize_schema_name(schema_name):
         # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a table's schema.
@@ -27,20 +25,21 @@ class TableauDashboardUtils:
         # this indentation looks a little odd, but otherwise the linter complains
         return re.sub(r' ', '_',
                       re.sub(r'\.', '_',
-                             re.sub(r'(\[|\]|\(|\)|\-|\&|\?)', '', str)))
+                             re.sub(r'(\[|\]|\(|\)|\-|\&|\?)', '', schema_name)))
 
     @staticmethod
-    def sanitize_database_name(str):
+    def sanitize_database_name(database_name):
         # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a table's database.
         Sanitization behaves as follows:
             - all hyphens are deleted
         """
-        return re.sub(r'-', '', str)
+        return re.sub(r'-', '', database_name)
 
     @staticmethod
-    def sanitize_table_name(str):
+    def sanitize_table_name(table_name):
+        # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a table name.
         Replicates the current behavior of sanitize_workbook_name, but this is purely coincidental.
@@ -48,11 +47,10 @@ class TableauDashboardUtils:
         Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
-        # type: (str) -> str
-        return re.sub(r'(\/|\')', '', str)
+        return re.sub(r'(\/|\')', '', table_name)
 
     @staticmethod
-    def sanitize_workbook_name(str):
+    def sanitize_workbook_name(workbook_name):
         # type: (str) -> str
         """
         Sanitizes a given string so that it can safely be used as a workbook ID.
@@ -61,7 +59,7 @@ class TableauDashboardUtils:
         Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
-        return re.sub(r'(\/|\')', '', str)
+        return re.sub(r'(\/|\')', '', workbook_name)
 
 
 class TableauGraphQLApiExtractor(Extractor):
@@ -121,7 +119,7 @@ class TableauGraphQLApiExtractor(Extractor):
     def execute(self):
         """
         Must be overriden by any extractor using this class. This should parse the result and yield each entity's
-        metadata one by one. 
+        metadata one by one.
         """
         pass
 
