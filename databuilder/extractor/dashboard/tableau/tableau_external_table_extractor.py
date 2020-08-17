@@ -44,14 +44,16 @@ class TableauDashboardExternalTableExtractor(Extractor):
     """
 
     API_VERSION = const.API_VERSION
-    TABLEAU_HOST = const.TABLEAU_HOST
-    SITE_NAME = const.SITE_NAME
-    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
-    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    CLUSTER = const.CLUSTER
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
     EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_HOST = const.TABLEAU_HOST
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    VERIFY_REQUEST = const.VERIFY_REQUEST
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -117,6 +119,10 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
     Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
     that fills the TableMetadata model.
     """
+
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+
     def execute(self):
         response = self.execute_query()
 
@@ -124,7 +130,7 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
             if table['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
                 for downstreamTable in table['tables']:
                     data = {
-                        'cluster': self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_CLUSTER_NAME),
+                        'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
                         'database': TableauDashboardUtils.sanitize_database_name(
                             table['connectionType']
                         ),
@@ -135,9 +141,9 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
                     yield data
             else:
                 data = {
-                    'cluster': self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_CLUSTER_NAME),
+                    'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
                     'database': TableauDashboardUtils.sanitize_database_name(table['connectionType']),
-                    'schema': self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_SCHEMA_NAME),
+                    'schema': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_SCHEMA_NAME),
                     'name': TableauDashboardUtils.sanitize_table_name(table['name']),
                     'description': table['description']
                 }

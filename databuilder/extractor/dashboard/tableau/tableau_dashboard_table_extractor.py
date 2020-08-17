@@ -29,11 +29,15 @@ class TableauDashboardTableExtractor(Extractor):
     """
 
     API_VERSION = const.API_VERSION
-    TABLEAU_HOST = const.TABLEAU_HOST
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
     SITE_NAME = const.SITE_NAME
+    TABLEAU_HOST = const.TABLEAU_HOST
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    VERIFY_REQUEST = const.VERIFY_REQUEST
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -102,18 +106,24 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
     Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
     that fills the DashboardTable model. Allows workbooks to be exlcuded based on their project.
     """
+
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+
     def execute(self):
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
                           if workbook['projectName'] not in
-                          self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
+                          self._conf.get_list(TableauGraphQLDashboardTableExtractor.EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
             data = {
                 'dashboard_group_id': workbook['projectName'],
                 'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
-                'cluster': self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER),
+                'cluster': self._conf.get_string(TableauGraphQLDashboardTableExtractor.CLUSTER),
                 'table_ids': []
             }
 
@@ -122,8 +132,8 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                 # external tables have no schema, so they must be parsed differently
                 # see TableauExternalTableExtractor for more specifics
                 if table['schema'] != '':
-                    cluster = self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER)
-                    database = self._conf.get_string(TableauGraphQLApiExtractor.DATABASE)
+                    cluster = self._conf.get_string(TableauGraphQLDashboardTableExtractor.CLUSTER)
+                    database = self._conf.get_string(TableauGraphQLDashboardTableExtractor.DATABASE)
 
                     # Tableau sometimes incorrectly assigns the "schema" value
                     # based on how the datasource connection is used in a workbook.
@@ -137,7 +147,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     schema = TableauDashboardUtils.sanitize_schema_name(schema)
                     name = TableauDashboardUtils.sanitize_table_name(name)
                 else:
-                    cluster = self._conf.get_string(TableauGraphQLApiExtractor.EXTERNAL_CLUSTER_NAME)
+                    cluster = self._conf.get_string(TableauGraphQLDashboardTableExtractor.EXTERNAL_CLUSTER_NAME)
                     database = TableauDashboardUtils.sanitize_database_name(
                         table['database']['connectionType']
                     )

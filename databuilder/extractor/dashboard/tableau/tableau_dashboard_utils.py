@@ -67,20 +67,10 @@ class TableauGraphQLApiExtractor(Extractor):
     Base class for querying the Tableau Metdata API, which uses a GraphQL schema.
     """
 
-    API_VERSION = const.API_VERSION
-    TABLEAU_HOST = const.TABLEAU_HOST
-    SITE_NAME = const.SITE_NAME
-    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
-    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
-    EXTERNAL_TABLE_TYPES = const.EXTERNAL_TABLE_TYPES
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
-    VERIFY_REQUEST = const.VERIFY_REQUEST
     QUERY = 'query'
     QUERY_VARIABLES = 'query_variables'
+    TABLEAU_HOST = const.TABLEAU_HOST
+    VERIFY_REQUEST = 'verify_request'
 
     def init(self, conf):
         self._conf = conf
@@ -150,21 +140,20 @@ class TableauDashboardAuth:
     """
 
     API_VERSION = const.API_VERSION
-    TABLEAU_HOST = const.TABLEAU_HOST
     SITE_NAME = const.SITE_NAME
+    TABLEAU_HOST = const.TABLEAU_HOST
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    AUTH = 'auth'
     VERIFY_REQUEST = const.VERIFY_REQUEST
 
     def __init__(self, conf):
         self._token = None
         self._conf = conf
-        self._site_name = self._conf.get_string(TableauDashboardAuth.SITE_NAME)
-        self._tableau_host = self._conf.get_string(TableauDashboardAuth.TABLEAU_HOST)
-        self._api_version = self._conf.get_string(TableauDashboardAuth.API_VERSION)
         self._access_token_name = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_NAME)
         self._access_token_secret = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_SECRET)
+        self._api_version = self._conf.get_string(TableauDashboardAuth.API_VERSION)
+        self._site_name = self._conf.get_string(TableauDashboardAuth.SITE_NAME)
+        self._tableau_host = self._conf.get_string(TableauDashboardAuth.TABLEAU_HOST)
         self._verify_request = self._conf.get(TableauDashboardAuth.VERIFY_REQUEST, True)
 
     @property

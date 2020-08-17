@@ -32,11 +32,13 @@ class TableauDashboardExtractor(Extractor):
     """
 
     API_VERSION = const.API_VERSION
-    TABLEAU_HOST = const.TABLEAU_HOST
+    CLUSTER = const.CLUSTER
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     SITE_NAME = const.SITE_NAME
+    TABLEAU_HOST = const.TABLEAU_HOST
     TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    VERIFY_REQUEST = const.VERIFY_REQUEST
 
     def init(self, conf):
         # type: (ConfigTree) -> None
@@ -109,12 +111,17 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
     Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
     that fills the DashboardMetadata model. Allows workbooks to be exlcuded based on their project.
     """
+
+    CLUSTER = const.CLUSTER
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    TABLEAU_HOST = const.TABLEAU_HOST
+
     def execute(self):
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
                           if workbook['projectName'] not in
-                          self._conf.get_list(TableauGraphQLApiExtractor.EXCLUDED_PROJECTS)]
+                          self._conf.get_list(TableauGraphQLApiMetadataExtractor.EXCLUDED_PROJECTS)]
 
         for workbook in workbooks_data:
             data = {
@@ -123,13 +130,13 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
                 'description': workbook.get('description', ''),
                 'created_timestamp': workbook['createdAt'],
                 'dashboard_group_url': 'https://{}/#/projects/{}'.format(
-                    self._conf.get(TableauGraphQLApiExtractor.TABLEAU_HOST),
+                    self._conf.get(TableauGraphQLApiMetadataExtractor.TABLEAU_HOST),
                     workbook['projectVizportalUrlId']
                 ),
                 'dashboard_url': 'https://{}/#/workbooks/{}/views'.format(
-                    self._conf.get(TableauGraphQLApiExtractor.TABLEAU_HOST),
+                    self._conf.get(TableauGraphQLApiMetadataExtractor.TABLEAU_HOST),
                     workbook['vizportalUrlId']
                 ),
-                'cluster': self._conf.get_string(TableauGraphQLApiExtractor.CLUSTER)
+                'cluster': self._conf.get_string(TableauGraphQLApiMetadataExtractor.CLUSTER)
             }
             yield data
