@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from pyhocon import ConfigTree
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 from databuilder.transformer.base_transformer import Transformer
 from databuilder.models.table_column_usage import ColumnReader, TableColumnUsage

@@ -5,7 +5,7 @@ from cassandra.cluster import Cluster
 import cassandra.metadata
 
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, Union, Dict, Any, List
+from typing import Iterator, Union, Dict
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata

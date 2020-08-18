@@ -3,7 +3,7 @@
 
 import importlib
 import time
-from typing import Iterable, Any
+from typing import Any
 
 from pyhocon import ConfigTree
 

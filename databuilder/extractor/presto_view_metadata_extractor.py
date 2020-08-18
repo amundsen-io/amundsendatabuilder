@@ -6,7 +6,7 @@ import json
 import logging
 
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, Union, Dict, Any, List
+from typing import Iterator, List, Union
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor

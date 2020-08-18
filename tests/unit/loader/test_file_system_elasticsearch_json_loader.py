@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from pyhocon import ConfigFactory
-from typing import Any, List
+from typing import List
 
 from databuilder import Scoped
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader

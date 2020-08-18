@@ -8,7 +8,7 @@ import time
 from neo4j import GraphDatabase
 import neo4j
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Dict, Iterable, Any, List
+from typing import Any, Dict, Iterable
 
 from databuilder import Scoped
 from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
