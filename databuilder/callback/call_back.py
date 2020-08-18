@@ -4,7 +4,7 @@
 import abc
 import logging
 
-from typing import List, Optional  # noqa: F401
+from typing import List, Optional
 
 LOGGER = logging.getLogger(__name__)
 

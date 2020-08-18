@@ -5,14 +5,14 @@ import logging
 import textwrap
 import time
 
-from neo4j import GraphDatabase  # noqa: F401
+from neo4j import GraphDatabase
 import neo4j
-from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Dict, Iterable, Any, List  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree
+from typing import Dict, Iterable, Any, List
 
 from databuilder import Scoped
 from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
-from databuilder.task.base_task import Task  # noqa: F401
+from databuilder.task.base_task import Task
 
 # A end point for Neo4j e.g: bolt://localhost:9999
 NEO4J_END_POINT_KEY = 'neo4j_endpoint'

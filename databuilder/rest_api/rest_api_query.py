@@ -7,7 +7,7 @@ import logging
 import requests
 from jsonpath_rw import parse
 from retrying import retry
-from typing import List, Dict, Any, Union, Iterator, Callable  # noqa: F401
+from typing import List, Dict, Any, Union, Iterator, Callable
 
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
 

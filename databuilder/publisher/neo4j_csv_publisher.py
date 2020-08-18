@@ -11,12 +11,12 @@ from os import listdir
 from os.path import isfile, join
 from string import Template
 
-from neo4j import GraphDatabase, Transaction  # noqa: F401
+from neo4j import GraphDatabase, Transaction
 import neo4j
 from neo4j.exceptions import CypherError
-from pyhocon import ConfigFactory  # noqa: F401
-from pyhocon import ConfigTree  # noqa: F401
-from typing import Set, List  # noqa: F401
+from pyhocon import ConfigFactory
+from pyhocon import ConfigTree
+from typing import Set, List
 
 from databuilder.publisher.base_publisher import Publisher
 from databuilder.publisher.neo4j_preprocessor import NoopRelationPreprocessor
