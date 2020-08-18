@@ -41,7 +41,7 @@ class TestSqlAlchemyExtractor(unittest.TestCase):
         Test Extraction from single result from query
         """
         extractor = SQLAlchemyExtractor()
-        extractor.results = [('test_result'), ]
+        extractor.results = [('test_result')]
         extractor.init(Scoped.get_scoped_conf(conf=self.conf,
                                               scope=extractor.get_scope()))
         results = extractor.extract()

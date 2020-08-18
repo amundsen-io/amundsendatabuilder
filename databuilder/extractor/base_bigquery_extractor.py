@@ -28,7 +28,7 @@ class BaseBigQueryExtractor(Extractor):
     CRED_KEY = 'project_cred'
     PAGE_SIZE_KEY = 'page_size'
     FILTER_KEY = 'filter'
-    _DEFAULT_SCOPES = ['https://www.googleapis.com/auth/bigquery.readonly', ]
+    _DEFAULT_SCOPES = ['https://www.googleapis.com/auth/bigquery.readonly']
     DEFAULT_PAGE_SIZE = 300
     NUM_RETRIES = 3
     DATE_LENGTH = 8
