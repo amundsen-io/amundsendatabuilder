@@ -9,7 +9,7 @@ from pytz import UTC
 
 from mock import patch, MagicMock
 from pyhocon import ConfigFactory
-from typing import Any, Dict  # noqa: F401
+from typing import Any, Iterable, Iterator, Dict, Optional, TypeVar  # noqa: F401
 
 from databuilder.extractor.hive_table_last_updated_extractor import HiveTableLastUpdatedExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -18,11 +18,14 @@ from databuilder.filesystem.filesystem import FileSystem
 from databuilder.filesystem.metadata import FileMetadata
 
 
-def null_iterator(items):
+T = TypeVar('T')
+
+
+def null_iterator(items: Iterable[T]) -> Iterator[Optional[T]]:
     """
-        Returns an infinite iterator that returns the items from items,
-        then infinite Nones. Required because Extractor.extract is expected
-        to return None when it is exhausted, not terminate.
+    Returns an infinite iterator that returns the items from items,
+    then infinite Nones. Required because Extractor.extract is expected
+    to return None when it is exhausted, not terminate.
     """
     return itertools.chain(iter(items), itertools.repeat(None))
 
