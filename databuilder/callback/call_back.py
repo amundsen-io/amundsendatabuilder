@@ -48,7 +48,7 @@ def notify_callbacks(callbacks: List[Callback], is_success: bool) -> None:
 
     LOGGER.info('Notifying callbacks')
 
-    last_exception = None  # type: Optional[Exception]
+    last_exception: Optional[Exception] = None
     for callback in callbacks:
         try:
             if is_success:

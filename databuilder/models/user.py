@@ -153,8 +153,7 @@ class User(Neo4jCsvSerializable):
 
         return [result_node]
 
-    def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+    def create_relation(self) -> List[Dict[str, Any]]:
         if self.manager_email:
             # only create the relation if the manager exists
             return [{

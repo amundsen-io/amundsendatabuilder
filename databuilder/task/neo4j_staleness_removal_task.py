@@ -182,9 +182,11 @@ class Neo4jStalenessRemovalTask(Task):
                     break
             LOGGER.info('Deleted {} stale data of {}'.format(total_count, t))
 
-    def _validate_staleness_pct(self, total_records, stale_records, types):
-        # type: (Iterable[Dict[str, Any]], Iterable[Dict[str, Any]], Iterable[str]) -> None
-
+    def _validate_staleness_pct(self,
+                                total_records: Iterable[Dict[str, Any]],
+                                stale_records: Iterable[Dict[str, Any]],
+                                types: Iterable[str]
+                                ) -> None:
         total_count_dict = {record['type']: int(record['count']) for record in total_records}
 
         for record in stale_records:
@@ -204,9 +206,7 @@ class Neo4jStalenessRemovalTask(Task):
                 raise Exception('Staleness percentage of {} is {} %. Stopping due to over threshold {} %'
                                 .format(type_str, stale_pct, threshold))
 
-    def _validate_node_staleness_pct(self):
-        # type: () -> None
-
+    def _validate_node_staleness_pct(self) -> None:
         total_nodes_statement = textwrap.dedent("""
         MATCH (n)
         WITH DISTINCT labels(n) as node, count(*) as count
@@ -229,8 +229,7 @@ class Neo4jStalenessRemovalTask(Task):
                                      stale_records=stale_records,
                                      types=self.target_nodes)
 
-    def _validate_relation_staleness_pct(self):
-        # type: () -> None
+    def _validate_relation_staleness_pct(self) -> None:
         total_relations_statement = textwrap.dedent("""
         MATCH ()-[r]-()
         RETURN type(r) as type, count(*) as count;

@@ -225,8 +225,7 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
             extractor.init(self.conf)
             self.assertTrue(self.where_clause_suffix in extractor.sql_stmt)
 
-    def test_hive_sql_statement_with_custom_sql(self):
-        # type: () -> None
+    def test_hive_sql_statement_with_custom_sql(self) -> None:
         """
         Test Extraction by providing a custom sql
         :return:
