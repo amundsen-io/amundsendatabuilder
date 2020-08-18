@@ -9,44 +9,45 @@ from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_table_extractor import TableauDashboardTableExtractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth, TableauDashboardUtils, TableauGraphQLApiExtractor
-from databuilder.models.dashboard.dashboard_last_modified import DashboardLastModifiedTimestamp
-from databuilder.models.dashboard.dashboard_table import DashboardTable
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils \
+    import TableauDashboardAuth, TableauGraphQLApiExtractor
 
 
 logging.basicConfig(level=logging.INFO)
 
 
-def mock_query(*args, **kwargs):
+def mock_query(*_args, **_kwargs):
     return {
         'workbooks': [
-          {
-            "name": "Test Workbook",
-            "projectName": "Test Project",
-            "upstreamTables": [
-              {
-                "name": "test_table_1",
-                "schema": "test_schema_1",
-                "database": {
-                  "name": "test_database_1",
-                  "connectionType": "redshift"
-                }
-              },
-              {
-                "name": "test_table_2",
-                "schema": "test_schema_2",
-                "database": {
-                  "name": "test_database_2",
-                  "connectionType": "redshift"
-                }
-              }
-            ]
-          }
+            {
+                'name': 'Test Workbook',
+                'projectName': 'Test Project',
+                'upstreamTables': [
+                    {
+                        'name': 'test_table_1',
+                        'schema': 'test_schema_1',
+                        'database': {
+                            'name': 'test_database_1',
+                            'connectionType': 'redshift'
+                        }
+                    },
+                    {
+                        'name': 'test_table_2',
+                        'schema': 'test_schema_2',
+                        'database': {
+                            'name': 'test_database_2',
+                            'connectionType': 'redshift'
+                        }
+                    }
+                ]
+            }
         ]
-      }
+    }
 
-def mock_token(*args, **kwargs):
+
+def mock_token(*_args, **_kwargs):
     return '123-abc'
+
 
 class TestTableauDashboardTable(unittest.TestCase):
 
@@ -78,7 +79,10 @@ class TestTableauDashboardTable(unittest.TestCase):
         self.assertEqual(record._dashboard_group_id, 'Test Project')
         self.assertEqual(record._product, 'tableau')
         self.assertEqual(record._cluster, 'tableau_dashboard_cluster')
-        self.assertEqual(record._table_ids, ['tableau_dashboard_database://tableau_dashboard_cluster.test_schema_1/test_table_1','tableau_dashboard_database://tableau_dashboard_cluster.test_schema_2/test_table_2'])
+        self.assertEqual(record._table_ids, [
+            'tableau_dashboard_database://tableau_dashboard_cluster.test_schema_1/test_table_1',
+            'tableau_dashboard_database://tableau_dashboard_cluster.test_schema_2/test_table_2'])
+
 
 if __name__ == '__main__':
     unittest.main()

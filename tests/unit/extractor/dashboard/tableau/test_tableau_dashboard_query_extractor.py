@@ -9,35 +9,34 @@ from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_query_extractor import TableauDashboardQueryExtractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth, TableauDashboardUtils, TableauGraphQLApiExtractor
-from databuilder.models.dashboard.dashboard_last_modified import DashboardLastModifiedTimestamp
-from databuilder.models.dashboard.dashboard_owner import DashboardOwner
-from databuilder.models.dashboard.dashboard_query import DashboardQuery
-from databuilder.models.dashboard.dashboard_table import DashboardTable
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils \
+    import TableauDashboardAuth, TableauGraphQLApiExtractor
 
 
 logging.basicConfig(level=logging.INFO)
 
 
-def mock_query(*args, **kwargs):
+def mock_query(*_args, **_kwargs):
     return {
         'customSQLTables': [
-          {
-            'id': 'fake-query-id',
-            'name': 'Test Query',
-            'query': 'SELECT * FROM foo',
-            'downstreamWorkbooks': [
-                {
-                    'name': 'Test Workbook',
-                    'projectName': 'Test Project'
-                }
-            ]
-          }
+            {
+                'id': 'fake-query-id',
+                'name': 'Test Query',
+                'query': 'SELECT * FROM foo',
+                'downstreamWorkbooks': [
+                    {
+                        'name': 'Test Workbook',
+                        'projectName': 'Test Project'
+                    }
+                ]
+            }
         ]
-      }
+    }
 
-def mock_token(*args, **kwargs):
+
+def mock_token(*_args, **_kwargs):
     return '123-abc'
+
 
 class TestTableauDashboardQuery(unittest.TestCase):
 
@@ -69,6 +68,7 @@ class TestTableauDashboardQuery(unittest.TestCase):
         self.assertEqual(record._query_text, 'SELECT * FROM foo')
         self.assertEqual(record._dashboard_id, 'Test Workbook')
         self.assertEqual(record._dashboard_group_id, 'Test Project')
+
 
 if __name__ == '__main__':
     unittest.main()

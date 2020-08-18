@@ -9,33 +9,32 @@ from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_extractor import TableauDashboardExtractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth, TableauDashboardUtils, TableauGraphQLApiExtractor
-from databuilder.models.dashboard.dashboard_last_modified import DashboardLastModifiedTimestamp
-from databuilder.models.dashboard.dashboard_owner import DashboardOwner
-from databuilder.models.dashboard.dashboard_query import DashboardQuery
-from databuilder.models.dashboard.dashboard_table import DashboardTable
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils \
+    import TableauDashboardAuth, TableauGraphQLApiExtractor
 
 
 logging.basicConfig(level=logging.INFO)
 
 
-def mock_query(*args, **kwargs):
+def mock_query(*_args, **_kwargs):
     return {
         'workbooks': [
-          {
-            'id': 'fake-id',
-            'name': 'Test Workbook',
-            'createdAt': '2020-04-08T05:32:01Z',
-            'description': '',
-            'projectName': 'Test Project',
-            'projectVizportalUrlId': 123,
-            'vizportalUrlId': 456
-          }
+            {
+                'id': 'fake-id',
+                'name': 'Test Workbook',
+                'createdAt': '2020-04-08T05:32:01Z',
+                'description': '',
+                'projectName': 'Test Project',
+                'projectVizportalUrlId': 123,
+                'vizportalUrlId': 456
+            }
         ]
-      }
+    }
 
-def mock_token(*args, **kwargs):
+
+def mock_token(*_args, **_kwargs):
     return '123-abc'
+
 
 class TestTableauDashboardExtractor(unittest.TestCase):
 
@@ -70,6 +69,7 @@ class TestTableauDashboardExtractor(unittest.TestCase):
         self.assertEqual(record.product, 'tableau')
         self.assertEqual(record.cluster, 'tableau_dashboard_cluster')
         self.assertEqual(record.created_timestamp, 1586323921)
+
 
 if __name__ == '__main__':
     unittest.main()

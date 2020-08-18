@@ -8,28 +8,31 @@ from mock import patch
 from pyhocon import ConfigFactory  # noqa: F401
 
 from databuilder import Scoped
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor import TableauDashboardLastModifiedExtractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauDashboardAuth, TableauDashboardUtils, TableauGraphQLApiExtractor
-from databuilder.models.dashboard.dashboard_last_modified import DashboardLastModifiedTimestamp
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor \
+    import TableauDashboardLastModifiedExtractor
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils \
+    import TableauDashboardAuth, TableauGraphQLApiExtractor
 
 
 logging.basicConfig(level=logging.INFO)
 
 
-def mock_query(*args, **kwargs):
+def mock_query(*_args, **_kwargs):
     return {
         'workbooks': [
-          {
-            "id": "fake-workbook-id",
-            "name": "Test Workbook",
-            "projectName": "Test Project",
-            "updatedAt": "2020-08-04T20:16:05Z"
-          }
+            {
+                'id': 'fake-workbook-id',
+                'name': 'Test Workbook',
+                'projectName': 'Test Project',
+                'updatedAt': '2020-08-04T20:16:05Z'
+            }
         ]
-      }
+    }
 
-def mock_token(*args, **kwargs):
+
+def mock_token(*_args, **_kwargs):
     return '123-abc'
+
 
 class TestTableauDashboardLastModified(unittest.TestCase):
 
@@ -62,6 +65,7 @@ class TestTableauDashboardLastModified(unittest.TestCase):
         self.assertEqual(record._product, 'tableau')
         self.assertEqual(record._cluster, 'tableau_dashboard_cluster')
         self.assertEqual(record._last_modified_timestamp, 1596572165)
+
 
 if __name__ == '__main__':
     unittest.main()
