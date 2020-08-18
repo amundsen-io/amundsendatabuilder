@@ -1,7 +1,7 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
     NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
@@ -32,7 +32,7 @@ class Watermark(Neo4jCsvSerializable):
         self.database = database.lower()
         self.schema = schema.lower()
         self.table = table_name.lower()
-        self.parts: List[str] = []
+        self.parts: List[Tuple[str, str]] = []
 
         if '=' not in part_name:
             raise Exception('Only partition table has high watermark')
