@@ -3,9 +3,10 @@
 
 import logging
 import unittest
+from typing import Any, Dict
 
 from mock import patch
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor \
@@ -17,7 +18,7 @@ from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils \
 logging.basicConfig(level=logging.INFO)
 
 
-def mock_query(*_args, **_kwargs):
+def mock_query(*_args: Any, **_kwargs: Any) -> Dict[str, Any]:
     return {
         'workbooks': [
             {
@@ -30,7 +31,7 @@ def mock_query(*_args, **_kwargs):
     }
 
 
-def mock_token(*_args, **_kwargs):
+def mock_token(*_args: Any, **_kwargs: Any) -> str:
     return '123-abc'
 
 
@@ -38,7 +39,7 @@ class TestTableauDashboardLastModified(unittest.TestCase):
 
     @patch.object(TableauDashboardAuth, '_authenticate', mock_token)
     @patch.object(TableauGraphQLApiExtractor, 'execute_query', mock_query)
-    def test_dashboard_last_modified_extractor(self):
+    def test_dashboard_last_modified_extractor(self) -> None:
 
         config = ConfigFactory.from_dict({
             'extractor.tableau_dashboard_last_modified.tableau_host': 'tableau_host',
