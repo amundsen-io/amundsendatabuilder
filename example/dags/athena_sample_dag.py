@@ -172,4 +172,5 @@ with DAG('amundsen_databuilder', default_args=default_args, **dag_args) as dag:
         python_callable=create_es_publisher_sample_job
     )
 
+    # elastic search update run after table metadata has been updated
     athena_table_extract_job >> athena_es_publisher_job
