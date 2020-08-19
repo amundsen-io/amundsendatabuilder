@@ -1,7 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree
+from typing import Any, Dict, Iterator, List
 
 from databuilder import Scoped
 
@@ -13,10 +13,37 @@ from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import Tabl
     TableauDashboardUtils
 
 from databuilder.transformer.base_transformer import ChainedTransformer
+from databuilder.transformer.base_transformer import Transformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
 
 LOGGER = logging.getLogger(__name__)
+
+
+class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the DashboardLastModifiedTimestamp model. Allows workbooks to be exlcuded based on their project.
+    """
+
+    CLUSTER = const.CLUSTER
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        response = self.execute_query()
+
+        workbooks_data = [workbook for workbook in response['workbooks']
+                          if workbook['projectName'] not in
+                          self._conf.get_list(TableauGraphQLApiLastModifiedExtractor.EXCLUDED_PROJECTS)]
+
+        for workbook in workbooks_data:
+            data = {
+                'dashboard_group_id': workbook['projectName'],
+                'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
+                'last_modified_timestamp': workbook['updatedAt'],
+                'cluster': self._conf.get_string(TableauGraphQLApiLastModifiedExtractor.CLUSTER)
+            }
+            yield data
 
 
 class TableauDashboardLastModifiedExtractor(Extractor):
@@ -36,9 +63,7 @@ class TableauDashboardLastModifiedExtractor(Extractor):
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     VERIFY_REQUEST = const.VERIFY_REQUEST
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
-
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
         self.query = """query {
             workbooks {
@@ -51,7 +76,7 @@ class TableauDashboardLastModifiedExtractor(Extractor):
 
         self._extractor = self._build_extractor()
 
-        transformers = []
+        transformers: List[Transformer] = []
         timestamp_str_to_epoch_transformer = TimestampStringToEpoch()
         timestamp_str_to_epoch_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope()).with_fallback(
@@ -68,22 +93,17 @@ class TableauDashboardLastModifiedExtractor(Extractor):
 
         self._transformer = ChainedTransformer(transformers=transformers)
 
-    def extract(self):
-        # type: () -> Any
-
+    def extract(self) -> Any:
         record = self._extractor.extract()
         if not record:
             return None
 
         return self._transformer.transform(record=record)
 
-    def get_scope(self):
-        # type: () -> str
-
+    def get_scope(self) -> str:
         return 'extractor.tableau_dashboard_last_modified'
 
-    def _build_extractor(self):
-        # type: () -> TableauGraphQLApiLastModifiedExtractor
+    def _build_extractor(self) -> TableauGraphQLApiLastModifiedExtractor:
         """
         Builds a TableauGraphQLApiExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLApiLastModifiedExtractor that provides dashboard update metadata.
@@ -99,29 +119,3 @@ class TableauDashboardLastModifiedExtractor(Extractor):
                                  )
         extractor.init(conf=tableau_extractor_conf)
         return extractor
-
-
-class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
-    """
-    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
-    that fills the DashboardLastModifiedTimestamp model. Allows workbooks to be exlcuded based on their project.
-    """
-
-    CLUSTER = const.CLUSTER
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-
-    def execute(self):
-        response = self.execute_query()
-
-        workbooks_data = [workbook for workbook in response['workbooks']
-                          if workbook['projectName'] not in
-                          self._conf.get_list(TableauGraphQLApiLastModifiedExtractor.EXCLUDED_PROJECTS)]
-
-        for workbook in workbooks_data:
-            data = {
-                'dashboard_group_id': workbook['projectName'],
-                'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
-                'last_modified_timestamp': workbook['updatedAt'],
-                'cluster': self._conf.get_string(TableauGraphQLApiLastModifiedExtractor.CLUSTER)
-            }
-            yield data

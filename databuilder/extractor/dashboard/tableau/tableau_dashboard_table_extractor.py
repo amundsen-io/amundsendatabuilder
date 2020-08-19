@@ -1,7 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree
+from typing import Any, Dict, Iterator
 
 from databuilder import Scoped
 
@@ -20,87 +20,6 @@ from databuilder.models.table_metadata import TableMetadata
 LOGGER = logging.getLogger(__name__)
 
 
-class TableauDashboardTableExtractor(Extractor):
-    """
-    Extracts metadata about the tables associated with Tableau workbooks.
-    It can handle both "regular" database tables as well as "external" tables
-    (see TableauExternalTableExtractor for more info on external tables).
-    Assumes that all the nodes for both the dashboards and the tables have already been created.
-    """
-
-    API_VERSION = const.API_VERSION
-    CLUSTER = const.CLUSTER
-    DATABASE = const.DATABASE
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    SITE_NAME = const.SITE_NAME
-    TABLEAU_HOST = const.TABLEAU_HOST
-    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
-    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
-    VERIFY_REQUEST = const.VERIFY_REQUEST
-
-    def init(self, conf):
-        # type: (ConfigTree) -> None
-
-        self._conf = conf
-        self.query = """query {
-          workbooks {
-            name
-            projectName
-            upstreamTables {
-              name
-              schema
-              database {
-                name
-                connectionType
-              }
-            }
-          }
-        }"""
-        self._extractor = self._build_extractor()
-
-        transformers = []
-        dict_to_model_transformer = DictToModel()
-        dict_to_model_transformer.init(
-            conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_table.DashboardTable'})))
-        transformers.append(dict_to_model_transformer)
-        self._transformer = ChainedTransformer(transformers=transformers)
-
-    def extract(self):
-        # type: () -> Any
-
-        record = self._extractor.extract()
-        if not record:
-            return None
-
-        return self._transformer.transform(record=record)
-
-    def get_scope(self):
-        # type: () -> str
-
-        return 'extractor.tableau_dashboard_table'
-
-    def _build_extractor(self):
-        # type: () -> TableauGraphQLDashboardTableExtractor
-        """
-        Builds a TableauGraphQLDashboardTableExtractor. All data required can be retrieved with a single GraphQL call.
-        :return: A TableauGraphQLDashboardTableExtractor that creates dashboard <> table relationships.
-        """
-        extractor = TableauGraphQLDashboardTableExtractor()
-        tableau_extractor_conf = \
-            Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
-                  .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({TableauGraphQLApiExtractor.QUERY: self.query,
-                                                          STATIC_RECORD_DICT: {'product': 'tableau'}
-                                                          }
-                                                         )
-                                 )
-        extractor.init(conf=tableau_extractor_conf)
-        return extractor
-
-
 class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
     """
     Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
@@ -112,7 +31,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
     EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
 
-    def execute(self):
+    def execute(self) -> Iterator[Dict[str, Any]]:
         response = self.execute_query()
 
         workbooks_data = [workbook for workbook in response['workbooks']
@@ -163,3 +82,77 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                 data['table_ids'].append(table_id)
 
             yield data
+
+
+class TableauDashboardTableExtractor(Extractor):
+    """
+    Extracts metadata about the tables associated with Tableau workbooks.
+    It can handle both "regular" database tables as well as "external" tables
+    (see TableauExternalTableExtractor for more info on external tables).
+    Assumes that all the nodes for both the dashboards and the tables have already been created.
+    """
+
+    API_VERSION = const.API_VERSION
+    CLUSTER = const.CLUSTER
+    DATABASE = const.DATABASE
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    SITE_NAME = const.SITE_NAME
+    TABLEAU_HOST = const.TABLEAU_HOST
+    TABLEAU_ACCESS_TOKEN_NAME = const.TABLEAU_ACCESS_TOKEN_NAME
+    TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
+    VERIFY_REQUEST = const.VERIFY_REQUEST
+
+    def init(self, conf: ConfigTree) -> None:
+        self._conf = conf
+        self.query = """query {
+          workbooks {
+            name
+            projectName
+            upstreamTables {
+              name
+              schema
+              database {
+                name
+                connectionType
+              }
+            }
+          }
+        }"""
+        self._extractor = self._build_extractor()
+
+        transformers = []
+        dict_to_model_transformer = DictToModel()
+        dict_to_model_transformer.init(
+            conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
+                ConfigFactory.from_dict(
+                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_table.DashboardTable'})))
+        transformers.append(dict_to_model_transformer)
+        self._transformer = ChainedTransformer(transformers=transformers)
+
+    def extract(self) -> Any:
+        record = self._extractor.extract()
+        if not record:
+            return None
+
+        return self._transformer.transform(record=record)
+
+    def get_scope(self) -> str:
+        return 'extractor.tableau_dashboard_table'
+
+    def _build_extractor(self) -> TableauGraphQLDashboardTableExtractor:
+        """
+        Builds a TableauGraphQLDashboardTableExtractor. All data required can be retrieved with a single GraphQL call.
+        :return: A TableauGraphQLDashboardTableExtractor that creates dashboard <> table relationships.
+        """
+        extractor = TableauGraphQLDashboardTableExtractor()
+        tableau_extractor_conf = \
+            Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
+                  .with_fallback(self._conf)\
+                  .with_fallback(ConfigFactory.from_dict({TableauGraphQLApiExtractor.QUERY: self.query,
+                                                          STATIC_RECORD_DICT: {'product': 'tableau'}
+                                                          }
+                                                         )
+                                 )
+        extractor.init(conf=tableau_extractor_conf)
+        return extractor

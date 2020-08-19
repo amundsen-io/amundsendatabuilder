@@ -1,7 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree
+from typing import Any, Dict, Iterator
 
 from databuilder import Scoped
 
@@ -16,6 +16,33 @@ from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 
 LOGGER = logging.getLogger(__name__)
+
+
+class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the DashboardQuery model. Allows workbooks to be exlcuded based on their project.
+    """
+
+    CLUSTER = const.CLUSTER
+    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        response = self.execute_query()
+
+        for query in response['customSQLTables']:
+            for workbook in query['downstreamWorkbooks']:
+                if workbook['projectName'] not in \
+                        self._conf.get_list(TableauGraphQLApiQueryExtractor.EXCLUDED_PROJECTS):
+                    data = {
+                        'dashboard_group_id': workbook['projectName'],
+                        'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
+                        'query_name': query['name'],
+                        'query_id': query['id'],
+                        'query_text': query['query'],
+                        'cluster': self._conf.get_string(TableauGraphQLApiQueryExtractor.CLUSTER)
+                    }
+                    yield data
 
 
 class TableauDashboardQueryExtractor(Extractor):
@@ -37,9 +64,7 @@ class TableauDashboardQueryExtractor(Extractor):
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     VERIFY_REQUEST = const.VERIFY_REQUEST
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
-
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
         self.query = """query {
           customSQLTables {
@@ -64,22 +89,17 @@ class TableauDashboardQueryExtractor(Extractor):
         transformers.append(dict_to_model_transformer)
         self._transformer = ChainedTransformer(transformers=transformers)
 
-    def extract(self):
-        # type: () -> Any
-
+    def extract(self) -> Any:
         record = self._extractor.extract()
         if not record:
             return None
 
         return self._transformer.transform(record=record)
 
-    def get_scope(self):
-        # type: () -> str
-
+    def get_scope(self) -> str:
         return 'extractor.tableau_dashboard_query'
 
-    def _build_extractor(self):
-        # type: () -> TableauGraphQLApiQueryExtractor
+    def _build_extractor(self) -> TableauGraphQLApiQueryExtractor:
         """
         Builds a TableauGraphQLApiQueryExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLApiQueryExtractor that provides dashboard query metadata.
@@ -95,30 +115,3 @@ class TableauDashboardQueryExtractor(Extractor):
                                  )
         extractor.init(conf=tableau_extractor_conf)
         return extractor
-
-
-class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
-    """
-    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
-    that fills the DashboardQuery model. Allows workbooks to be exlcuded based on their project.
-    """
-
-    CLUSTER = const.CLUSTER
-    EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
-
-    def execute(self):
-        response = self.execute_query()
-
-        for query in response['customSQLTables']:
-            for workbook in query['downstreamWorkbooks']:
-                if workbook['projectName'] not in \
-                        self._conf.get_list(TableauGraphQLApiQueryExtractor.EXCLUDED_PROJECTS):
-                    data = {
-                        'dashboard_group_id': workbook['projectName'],
-                        'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
-                        'query_name': query['name'],
-                        'query_id': query['id'],
-                        'query_text': query['query'],
-                        'cluster': self._conf.get_string(TableauGraphQLApiQueryExtractor.CLUSTER)
-                    }
-                    yield data

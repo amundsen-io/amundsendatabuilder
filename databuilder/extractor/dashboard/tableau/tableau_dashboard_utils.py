@@ -1,7 +1,9 @@
 import json
 import requests
 import re
+from typing import Any, Dict, Iterator, Optional
 
+from pyhocon import ConfigTree
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
@@ -14,8 +16,7 @@ class TableauDashboardUtils:
     """
 
     @staticmethod
-    def sanitize_schema_name(schema_name):
-        # type: (str) -> str
+    def sanitize_schema_name(schema_name: str) -> str:
         """
         Sanitizes a given string so that it can safely be used as a table's schema.
         Sanitization behaves as follows:
@@ -28,8 +29,7 @@ class TableauDashboardUtils:
                              re.sub(r'(\[|\]|\(|\)|\-|\&|\?)', '', schema_name)))
 
     @staticmethod
-    def sanitize_database_name(database_name):
-        # type: (str) -> str
+    def sanitize_database_name(database_name: str) -> str:
         """
         Sanitizes a given string so that it can safely be used as a table's database.
         Sanitization behaves as follows:
@@ -38,8 +38,7 @@ class TableauDashboardUtils:
         return re.sub(r'-', '', database_name)
 
     @staticmethod
-    def sanitize_table_name(table_name):
-        # type: (str) -> str
+    def sanitize_table_name(table_name: str) -> str:
         """
         Sanitizes a given string so that it can safely be used as a table name.
         Replicates the current behavior of sanitize_workbook_name, but this is purely coincidental.
@@ -50,8 +49,7 @@ class TableauDashboardUtils:
         return re.sub(r'(\/|\')', '', table_name)
 
     @staticmethod
-    def sanitize_workbook_name(workbook_name):
-        # type: (str) -> str
+    def sanitize_workbook_name(workbook_name: str) -> str:
         """
         Sanitizes a given string so that it can safely be used as a workbook ID.
         Mimics the current behavior of sanitize_table_name for now, but is purely coincidental.
@@ -72,11 +70,11 @@ class TableauGraphQLApiExtractor(Extractor):
     TABLEAU_HOST = const.TABLEAU_HOST
     VERIFY_REQUEST = 'verify_request'
 
-    def init(self, conf):
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
         self._auth_token = TableauDashboardAuth(self._conf).token
         self._query = self._conf.get(TableauGraphQLApiExtractor.QUERY)
-        self._iterator = None
+        self._iterator: Optional[Iterator[Dict[str, Any]]] = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
         self._metadata_url = 'https://{TABLEAU_HOST}/api/metadata/graphql'.format(
             TABLEAU_HOST=self._conf.get_string(TableauGraphQLApiExtractor.TABLEAU_HOST)
@@ -84,8 +82,7 @@ class TableauGraphQLApiExtractor(Extractor):
         self._query_variables = self._conf.get(TableauGraphQLApiExtractor.QUERY_VARIABLES, {})
         self._verify_request = self._conf.get(TableauGraphQLApiExtractor.VERIFY_REQUEST, True)
 
-    def execute_query(self):
-        # type: () -> dict
+    def execute_query(self) -> Dict[str, Any]:
         """
         Executes the extractor's given query and returns the data from the results.
         """
@@ -106,14 +103,14 @@ class TableauGraphQLApiExtractor(Extractor):
         response = requests.post(url=self._metadata_url, **params)
         return response.json()['data']
 
-    def execute(self):
+    def execute(self) -> Iterator[Dict[str, Any]]:
         """
         Must be overriden by any extractor using this class. This should parse the result and yield each entity's
         metadata one by one.
         """
         pass
 
-    def extract(self):
+    def extract(self) -> Any:
         """
         Fetch one result at a time from the generator created by self.execute(), updating using the
         static record values if needed.
@@ -146,8 +143,8 @@ class TableauDashboardAuth:
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     VERIFY_REQUEST = const.VERIFY_REQUEST
 
-    def __init__(self, conf):
-        self._token = None
+    def __init__(self, conf: ConfigTree) -> None:
+        self._token: Optional[str] = None
         self._conf = conf
         self._access_token_name = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_NAME)
         self._access_token_secret = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_SECRET)
@@ -157,12 +154,12 @@ class TableauDashboardAuth:
         self._verify_request = self._conf.get(TableauDashboardAuth.VERIFY_REQUEST, True)
 
     @property
-    def token(self):
+    def token(self) -> Optional[str]:
         if not self._token:
             self._token = self._authenticate()
         return self._token
 
-    def _authenticate(self):
+    def _authenticate(self) -> str:
         """
         Queries the auth/signin endpoint for the given Tableau instance using a personal access token.
         The API version differs with your version of Tableau.

@@ -1,7 +1,7 @@
 import logging
 
-from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigFactory, ConfigTree
+from typing import Any, Dict, Iterator
 
 from databuilder import Scoped
 
@@ -15,6 +15,42 @@ from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 
 LOGGER = logging.getLogger(__name__)
+
+
+class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
+    """
+    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
+    that fills the TableMetadata model.
+    """
+
+    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
+    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
+
+    def execute(self) -> Iterator[Dict[str, Any]]:
+        response = self.execute_query()
+
+        for table in response['databases']:
+            if table['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
+                for downstreamTable in table['tables']:
+                    data = {
+                        'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
+                        'database': TableauDashboardUtils.sanitize_database_name(
+                            table['connectionType']
+                        ),
+                        'schema': TableauDashboardUtils.sanitize_schema_name(table['name']),
+                        'name': TableauDashboardUtils.sanitize_table_name(downstreamTable['name']),
+                        'description': table['description']
+                    }
+                    yield data
+            else:
+                data = {
+                    'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
+                    'database': TableauDashboardUtils.sanitize_database_name(table['connectionType']),
+                    'schema': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_SCHEMA_NAME),
+                    'name': TableauDashboardUtils.sanitize_table_name(table['name']),
+                    'description': table['description']
+                }
+                yield data
 
 
 class TableauDashboardExternalTableExtractor(Extractor):
@@ -55,9 +91,7 @@ class TableauDashboardExternalTableExtractor(Extractor):
     TABLEAU_ACCESS_TOKEN_SECRET = const.TABLEAU_ACCESS_TOKEN_SECRET
     VERIFY_REQUEST = const.VERIFY_REQUEST
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
-
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
         self.query = """query externalTables($externalTableTypes: [String]) {
           databases (filter: {connectionTypeWithin: $externalTableTypes}) {
@@ -82,21 +116,17 @@ class TableauDashboardExternalTableExtractor(Extractor):
         transformers.append(dict_to_model_transformer)
         self._transformer = ChainedTransformer(transformers=transformers)
 
-    def extract(self):
-        # type: () -> Any
-
+    def extract(self) -> Any:
         record = self._extractor.extract()
         if not record:
             return None
 
         return self._transformer.transform(record=record)
 
-    def get_scope(self):
-        # type: () -> str
-
+    def get_scope(self) -> str:
         return 'extractor.tableau_external_table'
 
-    def _build_extractor(self):
+    def _build_extractor(self) -> TableauGraphQLExternalTableExtractor:
         """
         Builds a TableauGraphQLExternalTableExtractor. All data required can be retrieved with a single GraphQL call.
         :return: A TableauGraphQLExternalTableExtractor that creates external table metadata entities.
@@ -112,39 +142,3 @@ class TableauDashboardExternalTableExtractor(Extractor):
                   .with_fallback(ConfigFactory.from_dict(config_dict))
         extractor.init(conf=tableau_extractor_conf)
         return extractor
-
-
-class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
-    """
-    Implements the extraction-time logic for parsing the GraphQL result and transforming into a dict
-    that fills the TableMetadata model.
-    """
-
-    EXTERNAL_CLUSTER_NAME = const.EXTERNAL_CLUSTER_NAME
-    EXTERNAL_SCHEMA_NAME = const.EXTERNAL_SCHEMA_NAME
-
-    def execute(self):
-        response = self.execute_query()
-
-        for table in response['databases']:
-            if table['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
-                for downstreamTable in table['tables']:
-                    data = {
-                        'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
-                        'database': TableauDashboardUtils.sanitize_database_name(
-                            table['connectionType']
-                        ),
-                        'schema': TableauDashboardUtils.sanitize_schema_name(table['name']),
-                        'name': TableauDashboardUtils.sanitize_table_name(downstreamTable['name']),
-                        'description': table['description']
-                    }
-                    yield data
-            else:
-                data = {
-                    'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
-                    'database': TableauDashboardUtils.sanitize_database_name(table['connectionType']),
-                    'schema': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_SCHEMA_NAME),
-                    'name': TableauDashboardUtils.sanitize_table_name(table['name']),
-                    'description': table['description']
-                }
-                yield data
