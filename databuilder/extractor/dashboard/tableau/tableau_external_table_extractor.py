@@ -1,16 +1,13 @@
 import logging
-
-from pyhocon import ConfigFactory, ConfigTree
 from typing import Any, Dict, Iterator
 
-from databuilder import Scoped
-
-from databuilder.extractor.base_extractor import Extractor
+from pyhocon import ConfigFactory, ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
+from databuilder import Scoped
+from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
     TableauDashboardUtils
-
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 

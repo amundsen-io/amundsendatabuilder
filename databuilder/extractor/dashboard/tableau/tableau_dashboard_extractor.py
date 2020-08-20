@@ -1,21 +1,19 @@
 import logging
-
-from pyhocon import ConfigFactory, ConfigTree
 from typing import Any, Dict, Iterator, List
 
-from databuilder import Scoped
-
-from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
+from pyhocon import ConfigFactory, ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
+from databuilder import Scoped
+from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
     TableauDashboardUtils
-
+from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.base_transformer import Transformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
+
 
 LOGGER = logging.getLogger(__name__)
 

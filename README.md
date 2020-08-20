@@ -667,7 +667,7 @@ The included `TableauDashboardExtractor` provides support for extracting basic m
 
 If you wish to exclude top-level projects from being loaded, specify their names in the `tableau_excluded_projects` list and workbooks from any of those projects will not be indexed.
 
-Tableau's concept of "owners" does not map cleanly into Amundsen's understanding of owners, as the owner of a Tableau workbook is simply whoever updated it last, even if they made a very small change. This can prove problematic in determining the true point of contact for a wokrbook, so it's simply omitted for now. Similarly, the hierachy of `dashboard/query/chart` in Amundsen does not map into Tableau, where `charts` have only an optional relation to queries and vice versa. For these reasons, there are not extractors for either entity.
+Tableau's concept of "owners" does not map cleanly into Amundsen's understanding of owners, as the owner of a Tableau workbook is simply whoever updated it last, even if they made a very small change. This can prove problematic in determining the true point of contact for a workbook, so it's simply omitted for now. Similarly, the hierachy of `dashboard/query/chart` in Amundsen does not map into Tableau, where `charts` have only an optional relation to queries and vice versa. For these reasons, there are not extractors for either entity.
 
 The Tableau Metadata API also does not support usage or execution statistics, so there are no extractors for these entities either.
 
@@ -780,7 +780,7 @@ job.launch()
 
 ### [TableauExternalTableExtractor](./databuilder/extractor/dashboard/tableau/tableau_external_table_extractor.py)
 
-The included `TableauExternalExtractor` provides support for extracting external table entities referenced by Tableau workbooks. In this context, "external" tables are "tables" that are not from a typical database, and are loaded using some other data format, like CSV files.
+The included `TableauExternalTableExtractor` provides support for extracting external table entities referenced by Tableau workbooks. In this context, "external" tables are "tables" that are not from a typical database, and are loaded using some other data format, like CSV files.
 This extractor has been tested with the following types of external tables; feel free to add others, but it's recommended
 to test them in a non-production instance first to be safe.
 - Excel spreadsheets

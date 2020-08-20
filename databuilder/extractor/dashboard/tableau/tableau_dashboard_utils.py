@@ -4,10 +4,10 @@ import re
 from typing import Any, Dict, Iterator, Optional
 
 from pyhocon import ConfigTree
-from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
+from databuilder.extractor.base_extractor import Extractor
+from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 
 
 class TableauDashboardUtils:
