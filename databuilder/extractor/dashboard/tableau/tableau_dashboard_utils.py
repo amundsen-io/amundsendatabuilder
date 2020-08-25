@@ -95,13 +95,12 @@ class TableauGraphQLApiExtractor(Extractor):
             'X-Tableau-Auth': self._auth_token
         }
         params = {
-            'data': query_payload,
             'headers': headers
         }
         if self._verify_request is not None:
             params['verify'] = self._verify_request
 
-        response = requests.post(url=self._metadata_url, **params)
+        response = requests.post(url=self._metadata_url, data=query_payload, **params)
         return response.json()['data']
 
     def execute(self) -> Iterator[Dict[str, Any]]:
@@ -171,7 +170,7 @@ class TableauDashboardAuth:
             api_base_url=self._api_base_url,
             api_version=self._api_version
         )
-        import logging; logging.info(self._auth_url)
+
         payload = json.dumps({
             'credentials': {
                 'personalAccessTokenName': self._access_token_name,
