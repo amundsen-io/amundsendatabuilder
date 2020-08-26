@@ -66,6 +66,7 @@ class TableauDashboardExtractor(Extractor):
     Uses the Metadata API: https://help.tableau.com/current/api/metadata_api/en-us/index.html
     """
 
+    API_BASE_URL = const.API_BASE_URL
     API_VERSION = const.API_VERSION
     CLUSTER = const.CLUSTER
     EXCLUDED_PROJECTS = const.EXCLUDED_PROJECTS
