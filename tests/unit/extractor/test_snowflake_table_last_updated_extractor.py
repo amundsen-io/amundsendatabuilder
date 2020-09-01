@@ -14,8 +14,6 @@ from databuilder.models.table_last_updated import TableLastUpdated
 
 class TestSnowflakeTableLastUpdatedExtractor(unittest.TestCase):
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
-
         config_dict = {
             'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
                 'TEST_CONNECTION',
@@ -39,7 +37,7 @@ class TestSnowflakeTableLastUpdatedExtractor(unittest.TestCase):
             extractor.init(self.conf)
 
             results = extractor.extract()
-            self.assertEqual(results, None)
+            self.assertIsNone(results)
 
     def test_extraction_with_single_result(self) -> None:
         """
@@ -121,15 +119,13 @@ class TestSnowflakeTableLastUpdatedExtractor(unittest.TestCase):
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
             self.assertIsNone(extractor.extract())
-            self.assertIsNone(extractor.extract())
 
 
 class TestSnowflakeTableLastUpdatedExtractorWithWhereClause(unittest.TestCase):
     """
-    Test 'where_cluser' config key in extractor
+    Test 'where_clause' config key in extractor
     """
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
         self.where_clause_suffix = """
         where table_schema in ('public') and table_name = 'movies'
         """
@@ -156,7 +152,6 @@ class TestSnowflakeTableLastUpdatedExtractorClusterKeyNoTableCatalog(unittest.Te
     Test with 'USE_CATALOG_AS_CLUSTER_NAME' is false and 'CLUSTER_KEY' is specified
     """
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
         self.cluster_key = "not_master"
 
         config_dict = {
@@ -182,7 +177,6 @@ class TestSnowflakeTableLastUpdatedExtractorDefaultSnowflakeDatabaseKey(unittest
     Test with SNOWFLAKE_DATABASE_KEY config specified
     """
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
         self.snowflake_database_key = "not_prod"
 
         config_dict = {
@@ -207,7 +201,6 @@ class TestSnowflakeTableLastUpdatedExtractorDefaultDatabaseKey(unittest.TestCase
     Test with DATABASE_KEY config specified
     """
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
         self.database_key = 'not_snowflake'
 
         config_dict = {
@@ -259,8 +252,6 @@ class TestSnowflakeTableLastUpdatedExtractorNoClusterKeyNoTableCatalog(unittest.
     Test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is NOT specified
     """
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
-
         config_dict = {
             'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
                 'TEST_CONNECTION',
@@ -283,7 +274,6 @@ class TestSnowflakeTableLastUpdatedExtractorTableCatalogEnabled(unittest.TestCas
     Test when USE_CATALOG_AS_CLUSTER_NAME is true (CLUSTER_KEY should be ignored)
     """
     def setUp(self) -> None:
-        logging.basicConfig(level=logging.INFO)
         self.cluster_key = "not_master"
 
         config_dict = {
