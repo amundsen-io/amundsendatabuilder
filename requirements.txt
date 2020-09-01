@@ -59,3 +59,5 @@ httplib2>=0.18.0
 unidecode
 
 requests==2.23.0,<3.0
+
+psycopg2-binary==2.8.5
