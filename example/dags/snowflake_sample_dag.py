@@ -80,12 +80,12 @@ def connection_string():
     # specify a warehouse to connect to.
     warehouse = 'yourwarehouse'
     return 'snowflake://{user}:{password}@{account}/{database}?warehouse={warehouse}'.format(
-            user=user,
-            password=password,
-            account=account,
-            database=SNOWFLAKE_DATABASE,
-            warehouse=warehouse,
-        )
+        user=user,
+        password=password,
+        account=account,
+        database=SNOWFLAKE_DATABASE,
+        warehouse=warehouse,
+    )
     return "snowflake://%s:%s@%s" % (user, password, account, warehouse)
 
 
