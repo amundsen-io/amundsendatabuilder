@@ -8,7 +8,6 @@ This is a example script which demo how to load data into neo4j without using Ai
 import logging
 import os
 from pyhocon import ConfigFactory
-from urllib.parse import unquote_plus
 import uuid
 import sys
 
