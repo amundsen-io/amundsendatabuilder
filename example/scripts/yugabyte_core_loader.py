@@ -32,7 +32,7 @@ parser = argparse.ArgumentParser(description='Index data in a yugabyte SQL datab
 ### Yugabyte Info
 parser.add_argument('--hostname', '-H', type=str, dest='hostname', default=DEV_HOST,
                     help='Hostname of the yugabyte SQL server')
-parser.add_argument('--port', '-p', type=int, dest='port', required=True,
+parser.add_argument('--port', '-p', type=int, dest='port', default=5433,
                     help='Port of the yugabyte SQL server')
 parser.add_argument('--database', '--db', '-d', type=str, dest='db', required=True,
                     help='DB in the yugabyte SQL server')
