@@ -69,7 +69,7 @@ SUPPORTED_SCHEMAS = ['public']
 SUPPORTED_SCHEMA_SQL_IN_CLAUSE = "('{schemas}')".format(schemas="', '".join(SUPPORTED_SCHEMAS))
 
 # SNOWFLAKE CONFIGs
-SNOWFLAKE_DATABASE_KEY = 'YOUR_SNOWFLAKE_DB_NAME'
+SNOWFLAKE_DATABASE = 'YOUR_SNOWFLAKE_DB_NAME'
 
 
 # todo: connection string needs to change
@@ -77,7 +77,16 @@ def connection_string():
     user = 'username'
     password = 'password'
     account = 'YourSnowflakeAccountHere'
-    return "snowflake://%s:%s@%s" % (user, password, account)
+    # specify a warehouse to connect to.
+    warehouse = 'yourwarehouse'
+    return 'snowflake://{user}:{password}@{account}/{database}?warehouse={warehouse}'.format(
+            user=user,
+            password=password,
+            account=account,
+            database=SNOWFLAKE_DATABASE,
+            warehouse=warehouse,
+        )
+    return "snowflake://%s:%s@%s" % (user, password, account, warehouse)
 
 
 def create_snowflake_table_metadata_job():
@@ -99,7 +108,7 @@ def create_snowflake_table_metadata_job():
         'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
             connection_string(),
         'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY):
-            SNOWFLAKE_DATABASE_KEY,
+            SNOWFLAKE_DATABASE,
         'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY):
             where_clause_suffix,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH):

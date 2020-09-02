@@ -31,7 +31,7 @@ LOGGER.setLevel(logging.INFO)
 # Disable snowflake logging
 logging.getLogger("snowflake.connector.network").disabled = True
 
-SNOWFLAKE_DATABASE_KEY = 'YourSnowflakeDbName'
+SNOWFLAKE_DATABASE = 'YourSnowflakeDbName'
 
 # set env NEO4J_HOST to override localhost
 NEO4J_ENDPOINT = 'bolt://{}:7687'.format(os.getenv('NEO4J_HOST', 'localhost'))
@@ -59,7 +59,16 @@ def connection_string():
     user = 'username'
     password = 'password'
     account = 'YourSnowflakeAccountHere'
-    return "snowflake://%s:%s@%s" % (user, unquote_plus(password), account)
+    # specify a warehouse to connect to.
+    warehouse = 'yourwarehouse'
+    return 'snowflake://{user}:{password}@{account}/{database}?warehouse={warehouse}'.format(
+        user=user,
+        password=password,
+        account=account,
+        database=SNOWFLAKE_DATABASE,
+        warehouse=warehouse,
+    )
+    return "snowflake://%s:%s@%s" % (user, password, account, warehouse)
 
 
 def create_sample_snowflake_job():
@@ -82,7 +91,7 @@ def create_sample_snowflake_job():
 
     job_config = ConfigFactory.from_dict({
         'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): connection_string(),
-        'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY): SNOWFLAKE_DATABASE_KEY,
+        'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY): SNOWFLAKE_DATABASE,
         'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH): node_files_folder,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH): relationship_files_folder,
