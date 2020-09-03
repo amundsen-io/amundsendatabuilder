@@ -86,7 +86,6 @@ def connection_string():
         database=SNOWFLAKE_DATABASE,
         warehouse=warehouse,
     )
-    return "snowflake://%s:%s@%s" % (user, password, account, warehouse)
 
 
 def create_snowflake_table_metadata_job():
