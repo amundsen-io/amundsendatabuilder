@@ -21,6 +21,7 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
         snowflake-connector-python
         snowflake-sqlalchemy
     """
+    # https://docs.snowflake.com/en/sql-reference/info-schema/views.html#columns
     # 'last_altered' column in 'TABLES` metadata view under 'INFORMATION_SCHEMA' contains last time when the table was
     # updated (both DML and DDL update). Below query fetches that column for each table.
     SQL_STATEMENT = """
@@ -28,7 +29,7 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
             lower({cluster_source}) AS cluster,
             lower(t.table_schema) AS schema,
             lower(t.table_name) AS table_name,
-            DATE_PART(EPOCH, t.last_altered) AS last_updated_time
+            NVL(DATE_PART(EPOCH, t.last_altered), 0) AS last_updated_time
         FROM
             {database}.INFORMATION_SCHEMA.TABLES t
         {where_clause_suffix};
