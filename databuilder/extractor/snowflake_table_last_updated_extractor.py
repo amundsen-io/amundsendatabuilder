@@ -29,7 +29,7 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
             lower({cluster_source}) AS cluster,
             lower(t.table_schema) AS schema,
             lower(t.table_name) AS table_name,
-            NVL(DATE_PART(EPOCH, t.last_altered), 0) AS last_updated_time
+            DATE_PART(EPOCH, t.last_altered) AS last_updated_time
         FROM
             {database}.INFORMATION_SCHEMA.TABLES t
         {where_clause_suffix};
