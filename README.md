@@ -299,7 +299,7 @@ to `WhateverNameOfYourDb`.
 By default, the Snowflake schema is set to `INFORMATION_SCHEMA`. To override this, set `SCHEMA_KEY`
 to `WhateverNameOfYourSchema`. Note that `ACCOUNT_USAGE` is a separate schema
 which allows users to query a wider set of data at the cost of latency.
-Differenes are defined [here](https://docs.snowflake.com/en/sql-reference/account-usage.html#differences-between-account-usage-and-information-schema)
+Differences are defined [here](https://docs.snowflake.com/en/sql-reference/account-usage.html#differences-between-account-usage-and-information-schema)
 
 The `where_clause_suffix` below should define which schemas you'd like to query (see [the sample dag](https://github.com/amundsen-io/amundsendatabuilder/blob/master/example/scripts/sample_snowflake_data_loader.py) for an example).
 
