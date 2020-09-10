@@ -69,11 +69,13 @@ SUPPORTED_SCHEMAS = ['public']
 SUPPORTED_SCHEMA_SQL_IN_CLAUSE = "('{schemas}')".format(schemas="', '".join(SUPPORTED_SCHEMAS))
 
 # SNOWFLAKE CONFIGs
-SNOWFLAKE_DATABASE = 'YOUR_SNOWFLAKE_DB_NAME'
+SNOWFLAKE_DATABASE_KEY = 'YOUR_SNOWFLAKE_DB_NAME'
 
 
 # todo: connection string needs to change
 def connection_string():
+    # Refer this doc: https://docs.snowflake.com/en/user-guide/sqlalchemy.html#connection-parameters
+    # for supported connection parameters and configurations
     user = 'username'
     password = 'password'
     account = 'YourSnowflakeAccountHere'
@@ -83,7 +85,7 @@ def connection_string():
         user=user,
         password=password,
         account=account,
-        database=SNOWFLAKE_DATABASE,
+        database=SNOWFLAKE_DATABASE_KEY,
         warehouse=warehouse,
     )
 
@@ -107,7 +109,7 @@ def create_snowflake_table_metadata_job():
         'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
             connection_string(),
         'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY):
-            SNOWFLAKE_DATABASE,
+            SNOWFLAKE_DATABASE_KEY,
         'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY):
             where_clause_suffix,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH):
