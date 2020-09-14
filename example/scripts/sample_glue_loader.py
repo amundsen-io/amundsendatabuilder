@@ -27,7 +27,7 @@ NEO4j_USERNAME = 'neo4j'
 NEO4j_PASSWORD = 'test'
 GLUE_CLUSTER_KEY = 'test_cluster_key'
 
-es = Elasticsearch([{'host': '127.0.0.1'},])
+es = Elasticsearch([{'host': '127.0.0.1'}, ])
 
 
 def create_glue_extractor_job():
@@ -56,7 +56,7 @@ def create_glue_extractor_job():
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD):
             NEO4j_PASSWORD,
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.JOB_PUBLISH_TAG):
-            '{}'.format(int(datetime.utcnow().timestamp()))
+            str(int(datetime.utcnow().timestamp()))
     })
 
     return DefaultJob(conf=job_config,
@@ -123,4 +123,3 @@ if __name__ == "__main__":
 
     es_job = create_es_publisher_job()
     es_job.launch()
-
