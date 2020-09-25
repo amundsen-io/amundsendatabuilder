@@ -6,6 +6,8 @@ from collections import namedtuple
 
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union
 
+from amundsen_common.models.table import ProgrammaticDescription
+
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.neo4j_csv_serde import (
     Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
@@ -65,7 +67,7 @@ class TagMetadata(Neo4jCsvSerializable):
 
 
 # TODO: this should inherit from ProgrammaticDescription in amundsen-common
-class DescriptionMetadata:
+class DescriptionMetadata(ProgrammaticDescription):
     DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
     PROGRAMMATIC_DESCRIPTION_NODE_LABEL = 'Programmatic_Description'
     DESCRIPTION_KEY_FORMAT = '{description}'
