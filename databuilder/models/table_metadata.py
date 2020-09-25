@@ -66,7 +66,6 @@ class TagMetadata(Neo4jCsvSerializable):
             return None
 
 
-# TODO: this should inherit from ProgrammaticDescription in amundsen-common
 class DescriptionMetadata(ProgrammaticDescription):
     DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
     PROGRAMMATIC_DESCRIPTION_NODE_LABEL = 'Programmatic_Description'
