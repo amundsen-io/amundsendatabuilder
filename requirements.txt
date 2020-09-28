@@ -61,3 +61,5 @@ unidecode
 requests==2.23.0,<3.0
 
 psycopg2-binary==2.8.5
+
+boto3==1.9.66
