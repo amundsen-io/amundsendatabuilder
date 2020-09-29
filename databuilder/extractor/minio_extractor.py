@@ -14,25 +14,6 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 class MinioExtractor(Extractor):
 
-    s3 = boto3.client('s3',
-                      endpoint_url='http://dev-master:9000/',
-                      aws_access_key_id='myaccesskey',
-                      aws_secret_access_key='mysecretkey',
-                      region_name='us-east-1')
-
-    r = s3.select_object_content(
-        Bucket='dev-raw-data',
-        Key='sacramento-real-estate-transactions/data.csv',
-        ExpressionType='SQL',
-        Expression="select * from s3object",
-        InputSerialization={
-            'CSV': {
-                "FileHeaderInfo": "None",
-            },
-        },
-        OutputSerialization={'CSV': {}},
-    )
-
     """
     An Extractor that extracts records via CSV.
     """
@@ -42,62 +23,70 @@ class MinioExtractor(Extractor):
         :param conf:
         """
         self.conf = conf
-        self.previously_called = False
-        # self.file_location = conf.get_string(MinioExtractor.FILE_LOCATION)
+        self._extract_iter = None
 
-        # model_class = conf.get('model_class', None)
-        # if model_class:
-        #     module_name, class_name = model_class.rsplit(".", 1)
-        #     mod = importlib.import_module(module_name)
-        #     self.model_class = getattr(mod, class_name)
-        # self._load_csv()
+        self.client = boto3.client('s3',
+                          endpoint_url='http://dev-master:9000/',
+                          aws_access_key_id='myaccesskey',
+                          aws_secret_access_key='mysecretkey',
+                          region_name='us-east-1')
 
-    def _load_csv(self) -> None:
-        """
-        Create an iterator to execute sql.
-        """
-        if not hasattr(self, 'results'):
-            with open(self.file_location, 'r') as fin:
-                self.results = [dict(i) for i in csv.DictReader(fin)]
-
-        if hasattr(self, 'model_class'):
-            results = [self.model_class(**result)
-                       for result in self.results]
-        else:
-            results = self.results
-        self.iter = iter(results)
+    def get_s3_keys(self, bucket):
+        """Get a list of keys in an S3 bucket."""
+        keys = []
+        resp = self.client.list_objects_v2(Bucket=bucket)
+        for obj in resp['Contents']:
+            if obj['Key'].split('/')[-1] == 'data.csv':
+                keys.append(obj['Key'])
+        return iter(keys)
 
     def extract(self) -> Any:
 
-        if self.previously_called is True:
+        if not self._extract_iter:
+            self._extract_iter = self.get_s3_keys('dev-raw-data')
+        try:
+            name = next(self._extract_iter)
+
+            r = self.client.select_object_content(
+                Bucket='dev-raw-data',
+                Key=name,
+                ExpressionType='SQL',
+                Expression="select * from s3object",
+                InputSerialization={
+                    'CSV': {
+                        "FileHeaderInfo": "None",
+                    },
+                },
+                OutputSerialization={'CSV': {}},
+            )
+
+
+            for event in r['Payload']:
+                if 'Records' in event:
+                    columns = event['Records']['Payload'].decode("utf-8").partition('\n')[0].split(",")
+
+            colMetadatalist = []
+            for i in range(len(columns)):
+                col = ColumnMetadata(name= columns[i],
+                                     description= None,
+                                     col_type= 'str',
+                                     sort_order= i)
+                colMetadatalist.append(col)
+
+            table = TableMetadata(database='minio',
+                                  cluster='dev-raw-data',
+                                  schema='minio',
+                                  name=name.split('/',1)[0],
+                                  description='',
+                                  columns=colMetadatalist,
+                                  # TODO: this possibly should parse stringified booleans;
+                                  # right now it only will be false for empty strings
+                                  is_view=True,
+                                  tags='real-estate'
+                                  )
+            return table
+        except StopIteration:
             return None
-
-        self.r = MinioExtractor.r
-        for event in self.r['Payload']:
-            if 'Records' in event:
-                columns = event['Records']['Payload'].decode("utf-8").partition('\n')[0].split(",")
-
-        colMetadatalist = []
-        for i in range(len(columns)):
-            col = ColumnMetadata(name= columns[i],
-                                 description= None,
-                                 col_type= 'str',
-                                 sort_order= i)
-            colMetadatalist.append(col)
-
-        table = TableMetadata(database='minio',
-                              cluster='dev-raw-data',
-                              schema='minio',
-                              name='sacramento-real-estate-transactions',
-                              description='sacramento-real-estate-transactions',
-                              columns=colMetadatalist,
-                              # TODO: this possibly should parse stringified booleans;
-                              # right now it only will be false for empty strings
-                              is_view=True,
-                              tags='real-estate'
-                              )
-        self.previously_called = True
-        return table
 
     def get_scope(self) -> str:
         return 'extractor.minio.csv'
