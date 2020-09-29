@@ -17,6 +17,53 @@ DESCRIPTION_NODE_LABEL_VAL = 'Description'
 DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
 
 
+class BadgeMetadata(Neo4jCsvSerializable):
+    BADGE_NODE_LABEL = 'Badge'
+    BADGE_KEY_FORMAT = '{badge}'
+    BADGE_CATEGORY = 'category'
+    DEFAULT_TYPE = 'default'
+    BADGE_TYPE = 'badge'
+    DASHBOARD_TYPE = 'dashboard'
+    METRIC_TYPE = 'metric'
+
+    def __init__(self,
+                 name: str,
+                 category: str,
+                 ):
+        self._name = name
+        self._category = category
+        self._nodes = iter([self.create_badge_node(self._name, self._category)])
+        self._relations: Iterator[Dict[str, Any]] = iter([])
+
+    @staticmethod
+    def get_badge_key(name: str) -> str:
+        if not name:
+            return ''
+        return BadgeMetadata.BADGE_KEY_FORMAT.format(badge=name)
+
+    @staticmethod
+    def create_badge_node(name: str,
+                          category: str
+                         ) -> Dict[str, str]:
+        return {NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
+                NODE_KEY: BadgeMetadata.get_badge_key(name),
+                BadgeMetadata.BADGE_CATEGORY: category}
+
+    def create_next_node(self) -> Optional[Dict[str, Any]]:
+        # return the string representation of the data
+        try:
+            return next(self._nodes)
+        except StopIteration:
+            return None
+
+    def create_next_relation(self) -> Optional[Dict[str, Any]]:
+        # We don't emit any relations for Tag ingestion
+        try:
+            return next(self._relations)
+        except StopIteration:
+            return None
+
+
 class TagMetadata(Neo4jCsvSerializable):
     TAG_NODE_LABEL = 'Tag'
     TAG_KEY_FORMAT = '{tag}'
@@ -57,7 +104,7 @@ class TagMetadata(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self) -> Optional[Dict[str, Any]]:
-        # We don't emit any relations for Tag ingestion
+        # We don't emit any relations for Badge ingestion
         try:
             return next(self._relations)
         except StopIteration:
@@ -150,16 +197,16 @@ class ColumnMetadata:
     COLUMN_DESCRIPTION = 'description'
     COLUMN_DESCRIPTION_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}/{description_id}'
 
-    # Relation between column and tag
-    COL_TAG_RELATION_TYPE = 'TAGGED_BY'
-    TAG_COL_RELATION_TYPE = 'TAG'
+    # Relation between column and badge
+    COL_BADGE_RELATION_TYPE = 'HAS_BADGE'
+    BADGE_COL_RELATION_TYPE = 'BADGE_FOR'
 
     def __init__(self,
                  name: str,
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 tags: Union[List[str], None] = None
+                 badges: Union[List[str], None] = None
                  ) -> None:
         """
         TODO: Add stats
@@ -173,7 +220,7 @@ class ColumnMetadata:
                                                                            text=description)
         self.type = col_type
         self.sort_order = sort_order
-        self.tags = tags
+        self.badges = badges
 
     def __repr__(self) -> str:
         return 'ColumnMetadata({!r}, {!r}, {!r}, {!r})'.format(self.name,
@@ -450,15 +497,15 @@ class TableMetadata(Neo4jCsvSerializable):
                                                    self._get_col_key(col),
                                                    self._get_col_description_key(col, col.description))
 
-            if col.tags:
-                for tag in col.tags:
+            if col.badges:
+                for badge in col.badges:
                     yield {
                         RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-                        RELATION_END_LABEL: TagMetadata.TAG_NODE_LABEL,
+                        RELATION_END_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
                         RELATION_START_KEY: self._get_table_key(),
-                        RELATION_END_KEY: TagMetadata.get_tag_key(tag),
-                        RELATION_TYPE: ColumnMetadata.COL_TAG_RELATION_TYPE,
-                        RELATION_REVERSE_TYPE: ColumnMetadata.TAG_COL_RELATION_TYPE,
+                        RELATION_END_KEY: BadgeMetadata.get_badge_key(badge),
+                        RELATION_TYPE: ColumnMetadata.COL_BADGE_RELATION_TYPE,
+                        RELATION_REVERSE_TYPE: ColumnMetadata.BADGE_COL_RELATION_TYPE,
                     }
 
         others = [
