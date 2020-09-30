@@ -195,8 +195,7 @@ class TestTableMetadata(unittest.TestCase):
         self.assertEqual(actual[2].get('LABEL'), 'Tag')
         self.assertEqual(actual[2].get('KEY'), 'tag1')
         self.assertEqual(actual[3].get('KEY'), 'tag2')
-        self.assertEqual(actual[6].get('KEY'), 'col-tag1')
-        self.assertEqual(actual[7].get('KEY'), 'col-tag2')
+
 
         relation_row = self.table_metadata4.next_relation()
         actual = []
@@ -211,16 +210,37 @@ class TestTableMetadata(unittest.TestCase):
         expected_tab_tag_rel2 = {'END_KEY': 'tag2', 'START_LABEL': 'Table',
                                  'END_LABEL': 'Tag', 'START_KEY': 'hive://gold.test_schema4/test_table4',
                                  'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
-        expected_col_tag_rel1 = {'END_KEY': 'col-tag1', 'START_LABEL': 'Table',
-                                 'END_LABEL': 'Tag',
+        
+        
+    def test_col_badge_field(self) -> None:
+        self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
+            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-badge1', 'col-badge2'])],
+            is_view=False, tags=['tag1', 'tag2'], attr1='uri', attr2='attr2')
+
+        node_row = self.table_metadata4.next_node()
+        actual = []
+        while node_row:
+            actual.append(node_row)
+            node_row = self.table_metadata4.next_node()
+
+        self.assertEqual(actual[6].get('KEY'), 'col-tag1')
+        self.assertEqual(actual[7].get('KEY'), 'col-tag2')
+
+        relation_row = self.table_metadata4.next_relation()
+        actual = []
+        while relation_row:
+            actual.append(relation_row)
+            relation_row = self.table_metadata4.next_relation()
+
+        expected_col_tag_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Table',
+                                 'END_LABEL': 'Badge',
                                  'START_KEY': 'hive://gold.test_schema4/test_table4',
-                                 'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
-        expected_col_tag_rel2 = {'END_KEY': 'col-tag2', 'START_LABEL': 'Table',
-                                 'END_LABEL': 'Tag',
+                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+        expected_col_tag_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Table',
+                                 'END_LABEL': 'Badge',
                                  'START_KEY': 'hive://gold.test_schema4/test_table4',
-                                 'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
-        self.assertEqual(actual[2], expected_tab_tag_rel1)
-        self.assertEqual(actual[3], expected_tab_tag_rel2)
+                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+
         self.assertEqual(actual[6], expected_col_tag_rel1)
         self.assertEqual(actual[7], expected_col_tag_rel2)
 
