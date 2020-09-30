@@ -224,8 +224,8 @@ class TestTableMetadata(unittest.TestCase):
             actual.append(node_row)
             node_row = self.table_metadata4.next_node()
 
-        self.assertEqual(actual[6].get('KEY'), 'col-tag1')
-        self.assertEqual(actual[7].get('KEY'), 'col-tag2')
+        self.assertEqual(actual[6].get('KEY'), 'col-badge1')
+        self.assertEqual(actual[7].get('KEY'), 'col-badge2')
 
         relation_row = self.table_metadata4.next_relation()
         actual = []
