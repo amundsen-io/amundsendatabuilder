@@ -422,11 +422,11 @@ class TableMetadata(Neo4jCsvSerializable):
                 node_key = self._get_col_description_key(col, col.description)
                 yield col.description.get_node_dict(node_key)
 
-            if col.tags:
-                for tag in col.tags:
-                    yield {NODE_LABEL: TagMetadata.TAG_NODE_LABEL,
-                           NODE_KEY: TagMetadata.get_tag_key(tag),
-                           TagMetadata.TAG_TYPE: 'default'}
+            if col.badges:
+                for badge in col.badges:
+                    yield {NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
+                           NODE_KEY: BadgeMetadata.get_badge_key(badge),
+                           BadgeMetadata.BADGE_CATEGORY: 'default'} # TODO @allisonsuarez change
 
         # Database, cluster, schema
         others = [NodeTuple(key=self._get_database_key(),
