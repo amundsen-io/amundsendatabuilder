@@ -196,7 +196,6 @@ class TestTableMetadata(unittest.TestCase):
         self.assertEqual(actual[2].get('KEY'), 'tag1')
         self.assertEqual(actual[3].get('KEY'), 'tag2')
 
-
         relation_row = self.table_metadata4.next_relation()
         actual = []
         while relation_row:
@@ -210,8 +209,10 @@ class TestTableMetadata(unittest.TestCase):
         expected_tab_tag_rel2 = {'END_KEY': 'tag2', 'START_LABEL': 'Table',
                                  'END_LABEL': 'Tag', 'START_KEY': 'hive://gold.test_schema4/test_table4',
                                  'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
-        
-        
+
+        self.assertEqual(actual[2], expected_tab_tag_rel1)
+        self.assertEqual(actual[3], expected_tab_tag_rel2)
+
     def test_col_badge_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-badge1', 'col-badge2'])],
