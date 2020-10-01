@@ -102,7 +102,7 @@ class HiveTableMetadataExtractor(Extractor):
             for row in group:
                 last_row = row
                 column = None
-                if row['is_partition_col']:
+                if last_row['is_partition_col'] == 1:
                     # create a badge to indicate partition column
                     badge = {'category': 'column', 'badge_name': 'partition column'}
                     column = ColumnMetadata(row['col_name'], row['col_description'],
