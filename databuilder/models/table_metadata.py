@@ -206,7 +206,7 @@ class ColumnMetadata:
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 badges: Union[List[str], None] = None
+                 badges: List[str] = None
                  ) -> None:
         """
         TODO: Add stats
