@@ -98,11 +98,11 @@ class HiveTableMetadataExtractor(Extractor):
         """
         for key, group in groupby(self._get_raw_extract_iter(), self._get_table_key):
             columns = []
-
+            
             for row in group:
                 last_row = row
                 column = None
-                if last_row['is_partition_col'] == 1:
+                if row['is_partition_col'] == 1:
                     # create a badge to indicate partition column
                     badge = {'category': 'column', 'badge_name': 'partition column'}
                     column = ColumnMetadata(row['col_name'], row['col_description'],

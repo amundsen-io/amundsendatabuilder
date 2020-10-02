@@ -18,7 +18,7 @@ class TestTableMetadata(unittest.TestCase):
             ColumnMetadata('is_active', None, 'boolean', 2),
             ColumnMetadata('source', 'description of source', 'varchar', 3),
             ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
-            ColumnMetadata('ds', None, 'varchar', 5)])
+            ColumnMetadata('ds', None, 'varchar', 5, )])
 
         self.table_metadata2 = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test_table1', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0),
@@ -55,7 +55,8 @@ class TestTableMetadata(unittest.TestCase):
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at/_description', 'LABEL': 'Description',
              'description_source': 'description'},
             {'sort_order:UNQUOTED': 5, 'type': 'varchar', 'name': 'ds',
-             'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'}
+             'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'},
+            {'KEY': 'partition column', 'LABEL': 'Badge', 'name': 'partition column', 'category': 'column'}
         ]
 
         self.expected_nodes = copy.deepcopy(self.expected_nodes_deduped)
@@ -95,7 +96,9 @@ class TestTableMetadata(unittest.TestCase):
              'END_LABEL': 'Description', 'START_KEY': 'hive://gold.test_schema1/test_table1/etl_created_at',
              'TYPE': 'DESCRIPTION', 'REVERSE_TYPE': 'DESCRIPTION_OF'},
             {'END_KEY': 'hive://gold.test_schema1/test_table1/ds', 'START_LABEL': 'Table', 'END_LABEL': 'Column',
-             'START_KEY': 'hive://gold.test_schema1/test_table1', 'TYPE': 'COLUMN', 'REVERSE_TYPE': 'COLUMN_OF'}
+             'START_KEY': 'hive://gold.test_schema1/test_table1', 'TYPE': 'COLUMN', 'REVERSE_TYPE': 'COLUMN_OF'},
+            {'END_KEY': 'partition column', 'START_LABEL': 'Column', 'END_LABEL': 'Badge',
+             'START_KEY': 'hive://gold.test_schema1/test_table1/ds', 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
         ]
 
         self.expected_rels = copy.deepcopy(self.expected_rels_deduped)
@@ -110,7 +113,12 @@ class TestTableMetadata(unittest.TestCase):
         while node_row:
             actual.append(node_row)
             node_row = self.table_metadata.next_node()
+        
         for i in range(0, len(self.expected_nodes)):
+            print ("ACTUAL" +str(i))
+            print (actual[i])
+            print ("EXPECTED")
+            print (self.expected_nodes[i])
             self.assertEqual(actual[i], self.expected_nodes[i])
 
         relation_row = self.table_metadata.next_relation()

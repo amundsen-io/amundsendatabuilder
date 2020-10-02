@@ -20,9 +20,7 @@ DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
 class BadgeMetadata(Neo4jCsvSerializable):
     BADGE_NODE_LABEL = 'Badge'
     BADGE_KEY_FORMAT = '{badge}'
-    BADGE_CATEGORY = 'category'
-    DEFAULT_TYPE = 'default'
-    BADGE_TYPE = 'badge'
+    BADGE_CATEGORY = 'column'
     DASHBOARD_TYPE = 'dashboard'
     METRIC_TYPE = 'metric'
 
@@ -206,7 +204,7 @@ class ColumnMetadata:
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 badges: List[str] = None
+                 badges: List[BadgeMetadata] = None
                  ) -> None:
         """
         TODO: Add stats
@@ -223,10 +221,11 @@ class ColumnMetadata:
         self.badges = badges
 
     def __repr__(self) -> str:
-        return 'ColumnMetadata({!r}, {!r}, {!r}, {!r})'.format(self.name,
+        return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,
                                                                self.description,
                                                                self.type,
-                                                               self.sort_order)
+                                                               self.sort_order,
+                                                               self.badges)
 
 
 # Tuples for de-dupe purpose on Database, Cluster, Schema. See TableMetadata docstring for more information
@@ -426,7 +425,7 @@ class TableMetadata(Neo4jCsvSerializable):
                 for badge in col.badges:
                     yield {NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
                            NODE_KEY: BadgeMetadata.get_badge_key(badge),
-                           BadgeMetadata.BADGE_CATEGORY: 'default'}  # TODO @allisonsuarez change
+                           BadgeMetadata.BADGE_CATEGORY: 'column'}  # TODO @allisonsuarez change
 
         # Database, cluster, schema
         others = [NodeTuple(key=self._get_database_key(),
