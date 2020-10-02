@@ -45,7 +45,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
 
     @staticmethod
     def create_badge_node(name: str,
-                          category: str
+                          category: str = 'column',
                           ) -> Dict[str, str]:
         return {NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
                 NODE_KEY: BadgeMetadata.get_badge_key(name),
@@ -363,7 +363,8 @@ class TableMetadata(Neo4jCsvSerializable):
                                                        cluster=self.cluster,
                                                        schema=self.schema,
                                                        tbl=self.name,
-                                                       col=col.name)
+                                                       col=col.name,
+                                                       badges=col.badges)
 
     def _get_col_description_key(self,
                                  col: ColumnMetadata,
@@ -427,7 +428,7 @@ class TableMetadata(Neo4jCsvSerializable):
 
             if col.badges:
                 for badge in col.badges:
-                    yield BadgeMetadata.create_badge_node()
+                    yield BadgeMetadata.create_badge_node(badge._name)
 
         # Database, cluster, schema
         others = [NodeTuple(key=self._get_database_key(),
