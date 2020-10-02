@@ -427,9 +427,7 @@ class TableMetadata(Neo4jCsvSerializable):
 
             if col.badges:
                 for badge in col.badges:
-                    yield {NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
-                           NODE_KEY: BadgeMetadata.get_badge_key(badge),
-                           BadgeMetadata.BADGE_CATEGORY: 'column'}  # TODO @allisonsuarez change
+                    yield BadgeMetadata.create_badge_node()
 
         # Database, cluster, schema
         others = [NodeTuple(key=self._get_database_key(),
@@ -503,9 +501,9 @@ class TableMetadata(Neo4jCsvSerializable):
             if col.badges:
                 for badge in col.badges:
                     yield {
-                        RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
+                        RELATION_START_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
                         RELATION_END_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
-                        RELATION_START_KEY: self._get_table_key(),
+                        RELATION_START_KEY: self._get_col_key(col),
                         RELATION_END_KEY: BadgeMetadata.get_badge_key(badge),
                         RELATION_TYPE: ColumnMetadata.COL_BADGE_RELATION_TYPE,
                         RELATION_REVERSE_TYPE: ColumnMetadata.BADGE_COL_RELATION_TYPE,

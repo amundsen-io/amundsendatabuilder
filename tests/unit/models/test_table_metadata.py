@@ -241,17 +241,17 @@ class TestTableMetadata(unittest.TestCase):
             actual.append(relation_row)
             relation_row = self.table_metadata4.next_relation()
 
-        expected_col_tag_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Table',
+        expected_col_badge_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Table',
                                  'END_LABEL': 'Badge',
                                  'START_KEY': 'hive://gold.test_schema4/test_table4',
                                  'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
-        expected_col_tag_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Table',
+        expected_col_badge_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Table',
                                  'END_LABEL': 'Badge',
                                  'START_KEY': 'hive://gold.test_schema4/test_table4',
                                  'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
 
-        self.assertEqual(actual[6], expected_col_tag_rel1)
-        self.assertEqual(actual[7], expected_col_tag_rel2)
+        self.assertEqual(actual[6], expected_col_badge_rel1)
+        self.assertEqual(actual[7], expected_col_badge_rel2)
 
     def test_tags_populated_from_str(self) -> None:
         self.table_metadata5 = TableMetadata('hive', 'gold', 'test_schema5', 'test_table5', 'test_table5', [
