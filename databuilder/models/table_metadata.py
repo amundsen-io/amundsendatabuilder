@@ -59,7 +59,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self) -> Optional[Dict[str, Any]]:
-        # We don't emit any relations for Tag ingestion
+        # We don't emit any relations for Badge ingestion
         try:
             return next(self._relations)
         except StopIteration:
@@ -106,7 +106,7 @@ class TagMetadata(Neo4jCsvSerializable):
             return None
 
     def create_next_relation(self) -> Optional[Dict[str, Any]]:
-        # We don't emit any relations for Badge ingestion
+        # We don't emit any relations for Tag ingestion
         try:
             return next(self._relations)
         except StopIteration:
