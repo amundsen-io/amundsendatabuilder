@@ -10,7 +10,7 @@ from typing import Iterator, Union, Dict, Any
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import TableMetadata, ColumnMetadata, BadgeMetadata
 from itertools import groupby
 
 
@@ -104,7 +104,7 @@ class HiveTableMetadataExtractor(Extractor):
                 column = None
                 if row['is_partition_col'] == 1:
                     # create a badge to indicate partition column
-                    badge = {'category': 'column', 'badge_name': 'partition column'}
+                    badge = BadgeMetadata(name='partition column', category='column')
                     column = ColumnMetadata(row['col_name'], row['col_description'],
                                             row['col_type'], row['col_sort_order'], [badge])
                 else:

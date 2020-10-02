@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from databuilder.extractor.hive_table_metadata_extractor import HiveTableMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import TableMetadata, ColumnMetadata, BadgeMetadata
 
 
 class TestHiveTableMetadataExtractor(unittest.TestCase):
@@ -90,7 +90,7 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             expected = TableMetadata('hive', 'gold', 'test_schema', 'test_table', 'a table for testing',
                                      [ColumnMetadata('col_id1', 'description of id1', 'bigint', 0, []),
                                       ColumnMetadata('col_id2', 'description of id2', 'bigint', 1, []),
-                                      ColumnMetadata('is_active', None, 'boolean', 2, [{'category': 'column', 'badge_name': 'partition column'}]),
+                                      ColumnMetadata('is_active', None, 'boolean', 2, [BadgeMetadata('partition column', 'column')]),
                                       ColumnMetadata('source', 'description of source', 'varchar', 3, []),
                                       ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4, []),
                                       ColumnMetadata('ds', None, 'varchar', 5, [])],
@@ -186,25 +186,25 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             extractor.init(self.conf)
 
             expected = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test table 1',
-                                     [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0),
-                                      ColumnMetadata('col_id2', 'description of col_id2', 'bigint', 1),
-                                      ColumnMetadata('is_active', None, 'boolean', 2),
-                                      ColumnMetadata('source', 'description of source', 'varchar', 3),
-                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
-                                      ColumnMetadata('ds', None, 'varchar', 5)],
+                                     [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0, [BadgeMetadata('partition column', 'column')]),
+                                      ColumnMetadata('col_id2', 'description of col_id2', 'bigint', 1, []),
+                                      ColumnMetadata('is_active', None, 'boolean', 2, []),
+                                      ColumnMetadata('source', 'description of source', 'varchar', 3, []),
+                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4, []),
+                                      ColumnMetadata('ds', None, 'varchar', 5, [])],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
             expected = TableMetadata('hive', 'gold', 'test_schema1', 'test_table2', 'test table 2',
-                                     [ColumnMetadata('col_name', 'description of col_name', 'varchar', 0),
-                                      ColumnMetadata('col_name2', 'description of col_name2', 'varchar', 1)],
+                                     [ColumnMetadata('col_name', 'description of col_name', 'varchar', 0, []),
+                                      ColumnMetadata('col_name2', 'description of col_name2', 'varchar', 1, [])],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
             expected = TableMetadata('hive', 'gold', 'test_schema2', 'test_table3', 'test table 3',
-                                     [ColumnMetadata('col_id3', 'description of col_id3', 'varchar', 0),
+                                     [ColumnMetadata('col_id3', 'description of col_id3', 'varchar', 0, []),
                                       ColumnMetadata('col_name3', 'description of col_name3',
-                                                     'varchar', 1)],
+                                                     'varchar', 1, [])],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 

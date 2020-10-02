@@ -33,6 +33,10 @@ class BadgeMetadata(Neo4jCsvSerializable):
         self._nodes = iter([self.create_badge_node(self._name, self._category)])
         self._relations: Iterator[Dict[str, Any]] = iter([])
 
+    def __repr__(self) -> str:
+        return 'BadgeMetadata({!r}, {!r})'.format(self._name,
+                                                  self._category)
+
     @staticmethod
     def get_badge_key(name: str) -> str:
         if not name:
