@@ -16,7 +16,7 @@ requirements = [
     "elasticsearch>=6.2.0,<7.0",
     "pyhocon>=0.3.42",
     "unidecode",
-    "amundsen-common>=0.3.6,<1.0"
+    "amundsen-common>=0.5.4,<1.0"
 ]
 
 kafka = ['confluent-kafka==1.0.0']
