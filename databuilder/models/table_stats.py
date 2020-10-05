@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union  # noqa: F401
+from typing import List, Union  # noqa: F401
 
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.table_metadata import ColumnMetadata
@@ -88,7 +88,7 @@ class TableColumnStats(GraphSerializable):
             key=self.get_table_stat_model_key(),
             label=TableColumnStats.LABEL,
             attributes={
-                'stat_val:UNQUOTED': self.stat_val,
+                'stat_val': self.stat_val,
                 'stat_name': self.stat_name,
                 'start_epoch': self.start_epoch,
                 'end_epoch': self.end_epoch,
