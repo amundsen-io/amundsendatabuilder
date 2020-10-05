@@ -9,6 +9,6 @@ GraphRelationship = namedtuple(
         'end_key',
         'type',
         'reverse_type',
-        'relationship_attributes'
+        'attributes'
     ]
 )

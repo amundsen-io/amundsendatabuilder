@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, NODE_LABEL
+from databuilder.models.graph_serializable import GraphSerializable, NODE_KEY, NODE_LABEL
 
 
-class Neo4jESLastUpdated(Neo4jCsvSerializable):
+class Neo4jESLastUpdated(GraphSerializable):
     # type: (...) -> None
     """
     Data model to keep track the last updated timestamp for

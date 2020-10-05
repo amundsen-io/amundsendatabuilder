@@ -3,8 +3,8 @@ import logging
 from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable)
+from databuilder.models.graph_serializable import (
+    GraphSerializable)
 from databuilder.models.owner_constants import OWNER_OF_OBJECT_RELATION_TYPE, OWNER_RELATION_TYPE
 from databuilder.models.user import User
 
@@ -14,7 +14,7 @@ from databuilder.models.graph_relationship import GraphRelationship
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardOwner(Neo4jCsvSerializable):
+class DashboardOwner(GraphSerializable):
     """
     A model that encapsulate Dashboard's owner.
     Note that it does not create new user as it has insufficient information about user but it builds relation

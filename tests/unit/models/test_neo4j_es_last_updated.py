@@ -1,7 +1,7 @@
 import unittest
 from databuilder.models.neo4j_es_last_updated import Neo4jESLastUpdated
 
-from databuilder.models.neo4j_csv_serde import NODE_KEY, \
+from databuilder.models.graph_serializable import NODE_KEY, \
     NODE_LABEL
 
 

@@ -4,8 +4,8 @@ from typing import Iterable, Any, Union, Iterator, Dict, Set  # noqa: F401
 
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
+from databuilder.models.graph_serializable import (
+    GraphSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
 
 from databuilder.models.graph_node import GraphNode
@@ -16,7 +16,7 @@ NodeTuple = namedtuple('KeyName', ['key', 'name', 'label'])
 RelTuple = namedtuple('RelKeys', ['start_label', 'end_label', 'start_key', 'end_key', 'type', 'reverse_type'])
 
 
-class MetricMetadata(Neo4jCsvSerializable):
+class MetricMetadata(GraphSerializable):
     """
     Table metadata that contains columns. It implements Neo4jCsvSerializable so that it can be serialized to produce
     Table, Column and relation of those along with relationship with table and schema. Additionally, it will create

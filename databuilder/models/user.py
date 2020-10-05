@@ -1,13 +1,13 @@
 import copy
 from typing import Union, Dict, List  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
 
-class User(Neo4jCsvSerializable):
+class User(GraphSerializable):
     # type: (...) -> None
     """
     User model. This model doesn't define any relationship.

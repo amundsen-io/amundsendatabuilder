@@ -1,12 +1,12 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.owner_constants import OWNER_RELATION_TYPE, OWNER_OF_OBJECT_RELATION_TYPE
 from databuilder.models.user import User
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
-class TableOwner(Neo4jCsvSerializable):
+class TableOwner(GraphSerializable):
     # type: (...) -> None
     """
     Hive table owner model.

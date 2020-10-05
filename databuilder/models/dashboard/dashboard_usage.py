@@ -3,8 +3,8 @@ import logging
 from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
+from databuilder.models.graph_serializable import (
+    GraphSerializable, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
 from databuilder.models.usage.usage_constants import (
     READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
@@ -16,7 +16,7 @@ from databuilder.models.graph_relationship import GraphRelationship
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardUsage(Neo4jCsvSerializable):
+class DashboardUsage(GraphSerializable):
     """
     A model that encapsulate Dashboard usage between Dashboard and User
     """

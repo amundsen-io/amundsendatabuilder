@@ -2,7 +2,7 @@ from typing import Dict, Any
 
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_node import GraphNode
-from databuilder.models.neo4j_csv_serde import (
+from databuilder.models.graph_serializable import (
     NODE_LABEL,
     NODE_KEY,
     RELATION_END_KEY,
@@ -14,7 +14,7 @@ from databuilder.models.neo4j_csv_serde import (
 )
 
 
-def convert_node(node):
+def serialize_node(node):
     # type: (GraphNode) -> Dict[str, Any]
     node_dict = {
         NODE_LABEL: node.label,
@@ -25,7 +25,7 @@ def convert_node(node):
     return node_dict
 
 
-def convert_relationship(relationship):
+def serialize_relationship(relationship):
     # type: (GraphRelationship) -> Dict[str, Any]
 
     return {

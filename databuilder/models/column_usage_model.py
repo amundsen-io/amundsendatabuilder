@@ -1,6 +1,6 @@
 from typing import Union, Dict, Any, Iterator  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.usage.usage_constants import (
     READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
 )
@@ -10,7 +10,7 @@ from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
 
-class ColumnUsageModel(Neo4jCsvSerializable):
+class ColumnUsageModel(GraphSerializable):
 
     """
     A model represents user <--> column graph model

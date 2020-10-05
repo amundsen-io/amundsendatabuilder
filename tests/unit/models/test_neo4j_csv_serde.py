@@ -2,11 +2,11 @@ import unittest
 
 from typing import Union, Dict, Any, Iterable  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import (  # noqa: F401
+from databuilder.models.graph_serializable import (  # noqa: F401
     NODE_KEY, NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL,
     RELATION_END_KEY, RELATION_END_LABEL, RELATION_TYPE,
     RELATION_REVERSE_TYPE)
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 
 
 class TestSerialize(unittest.TestCase):
@@ -55,7 +55,7 @@ class TestSerialize(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
-class Movie(Neo4jCsvSerializable):
+class Movie(GraphSerializable):
     LABEL = 'Movie'
     KEY_FORMAT = 'movie://{}'
     MOVIE_ACTOR_RELATION_TYPE = 'ACTOR'

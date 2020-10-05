@@ -4,8 +4,8 @@ import re
 from typing import Optional, Dict, Any, List, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable)
+from databuilder.models.graph_serializable import (
+    GraphSerializable)
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -13,7 +13,7 @@ from databuilder.models.graph_relationship import GraphRelationship
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardTable(Neo4jCsvSerializable):
+class DashboardTable(GraphSerializable):
     """
     A model that link Dashboard with the tables used in various charts of the dashboard.
     Note that it does not create new dashboard, table as it has insufficient information but it builds relation

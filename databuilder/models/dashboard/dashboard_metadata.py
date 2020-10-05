@@ -3,8 +3,8 @@ from collections import namedtuple
 from typing import Any, Union, Iterator, Dict, Set, Optional  # noqa: F401
 
 from databuilder.models.cluster import cluster_constants
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
+from databuilder.models.graph_serializable import (
+    GraphSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
@@ -13,7 +13,7 @@ from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
 
-class DashboardMetadata(Neo4jCsvSerializable):
+class DashboardMetadata(GraphSerializable):
     """
     Dashboard metadata that contains dashboard group name, dashboardgroup description, dashboard description,
     along with tags, owner userid and lastreloadtime.

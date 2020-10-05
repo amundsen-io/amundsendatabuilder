@@ -1,13 +1,13 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
 
-class Application(Neo4jCsvSerializable):
+class Application(GraphSerializable):
     """
     Application-table matching model (Airflow task and table)
     """
@@ -92,9 +92,9 @@ class Application(Neo4jCsvSerializable):
             task_id=self.task
         )
         application_node = GraphNode(
-            id=self.get_application_model_key(),
+            key=self.get_application_model_key(),
             label=Application.APPLICATION_LABEL,
-            node_attributes={
+            attributes={
                 Application.APPLICATION_URL_NAME: self.application_url,
                 Application.APPLICATION_NAME: Application.APPLICATION_TYPE,
                 Application.APPLICATION_DESCRIPTION: application_description,
@@ -117,7 +117,8 @@ class Application(Neo4jCsvSerializable):
             end_key=self.get_application_model_key(),
             end_label=Application.APPLICATION_LABEL,
             type=Application.TABLE_APPLICATION_RELATION_TYPE,
-            reverse_type=Application.APPLICATION_TABLE_RELATION_TYPE
+            reverse_type=Application.APPLICATION_TABLE_RELATION_TYPE,
+            attributes={}
         )
         results = [graph_relationship]
         return results

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Union  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.timestamp import timestamp_constants
@@ -8,7 +8,7 @@ from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
 
-class TableLastUpdated(Neo4jCsvSerializable):
+class TableLastUpdated(GraphSerializable):
     # constants
     LAST_UPDATED_NODE_LABEL = timestamp_constants.NODE_LABEL
     LAST_UPDATED_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/timestamp'

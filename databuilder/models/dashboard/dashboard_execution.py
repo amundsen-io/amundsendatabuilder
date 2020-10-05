@@ -3,7 +3,7 @@ import logging
 from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (Neo4jCsvSerializable)
+from databuilder.models.graph_serializable import (GraphSerializable)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -11,7 +11,7 @@ from databuilder.models.graph_relationship import GraphRelationship
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardExecution(Neo4jCsvSerializable):
+class DashboardExecution(GraphSerializable):
     """
     A model that encapsulate Dashboard's execution timestamp in epoch and execution state
     """

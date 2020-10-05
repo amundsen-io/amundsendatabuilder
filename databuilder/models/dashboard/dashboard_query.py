@@ -3,8 +3,8 @@ import logging
 from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable)
+from databuilder.models.graph_serializable import (
+    GraphSerializable)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -12,7 +12,7 @@ from databuilder.models.graph_relationship import GraphRelationship
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardQuery(Neo4jCsvSerializable):
+class DashboardQuery(GraphSerializable):
     """
     A model that encapsulate Dashboard's query name
     """

@@ -3,7 +3,7 @@ from databuilder.models.user import User
 from databuilder.models.table_owner import TableOwner
 
 
-from databuilder.models.neo4j_csv_serde import NODE_KEY, NODE_LABEL, \
+from databuilder.models.graph_serializable import NODE_KEY, NODE_LABEL, \
     RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 

@@ -5,7 +5,7 @@ from six import string_types
 from typing import Iterable, Any, Union, Iterator, Dict, Set  # noqa: F401
 
 from databuilder.models.cluster import cluster_constants
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 from databuilder.models.schema import schema_constant
 
@@ -16,7 +16,7 @@ DESCRIPTION_NODE_LABEL_VAL = 'Description'
 DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
 
 
-class TagMetadata(Neo4jCsvSerializable):
+class TagMetadata(GraphSerializable):
     TAG_NODE_LABEL = 'Tag'
     TAG_KEY_FORMAT = '{tag}'
     TAG_TYPE = 'tag_type'
@@ -190,7 +190,7 @@ class ColumnMetadata:
                                                                self.sort_order)
 
 
-class TableMetadata(Neo4jCsvSerializable):
+class TableMetadata(GraphSerializable):
     """
     Table metadata that contains columns. It implements Neo4jCsvSerializable so that it can be serialized to produce
     Table, Column and relation of those along with relationship with table and schema. Additionally, it will create

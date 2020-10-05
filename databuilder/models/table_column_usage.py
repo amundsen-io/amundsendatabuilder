@@ -1,7 +1,7 @@
 from typing import Iterable, Union, Dict, Any, Iterator  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable
+from databuilder.models.graph_serializable import (
+    GraphSerializable
 )
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
@@ -39,7 +39,7 @@ ColumnReader(database={!r}, cluster={!r}, schema={!r}, table={!r}, column={!r}, 
             .format(self.database, self.cluster, self.schema, self.table, self.column, self.user_email, self.read_count)
 
 
-class TableColumnUsage(Neo4jCsvSerializable):
+class TableColumnUsage(GraphSerializable):
     """
     A model represents user <--> column graph model
     Currently it only support to serialize to table level

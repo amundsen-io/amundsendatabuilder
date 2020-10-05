@@ -1,13 +1,13 @@
 from typing import Dict, Any, Union, Iterator  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import (Neo4jCsvSerializable)
+from databuilder.models.graph_serializable import (GraphSerializable)
 from databuilder.models.schema.schema_constant import SCHEMA_NODE_LABEL, SCHEMA_NAME_ATTR
 from databuilder.models.table_metadata import DescriptionMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
 
-class SchemaModel(Neo4jCsvSerializable):
+class SchemaModel(GraphSerializable):
 
     def __init__(self,
                  schema_key,

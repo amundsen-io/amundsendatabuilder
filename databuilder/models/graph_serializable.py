@@ -15,21 +15,15 @@ RELATION_END_KEY = 'END_KEY'
 RELATION_END_LABEL = 'END_LABEL'
 RELATION_TYPE = 'TYPE'
 RELATION_REVERSE_TYPE = 'REVERSE_TYPE'
-RELATION_REQUIRED_HEADERS = {RELATION_START_KEY, RELATION_START_LABEL,
-                             RELATION_END_KEY, RELATION_END_LABEL,
-                             RELATION_TYPE, RELATION_REVERSE_TYPE}
-
-LABELS = {NODE_LABEL, RELATION_START_LABEL, RELATION_END_LABEL}
-TYPES = {RELATION_TYPE, RELATION_REVERSE_TYPE}
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Neo4jCsvSerializable(object):
+class GraphSerializable(object):
     """
     A Serializable abstract class asks subclass to implement next node or
     next relation in dict form so that it can be serialized to CSV file.
 
-    Any model class that needs to be pushed to Neo4j should inherit this class.
+    Any model class that needs to be pushed to a graph database should inherit this class.
     """
     def __init__(self):
         # type: () -> None
@@ -39,16 +33,10 @@ class Neo4jCsvSerializable(object):
     def create_next_node(self):
         # type: () -> Union[GraphNode, None]
         """
-        Creates dict where keys represent header in CSV and value represents
-        row in CSV file. Should the class could have different types of
-        nodes that it needs to serialize, it just needs to provide dict with
-        different header -- the one who consumes this class figures it out and
-        serialize to different file.
+        Creates GraphNode the process that consumes this class takes the output
+        serializes to the desired graph database.
 
-        Node is Neo4j's term of Vertex in Graph. More information on
-        https://neo4j.com/docs/developer-manual/current/introduction/
-        graphdb-concepts/
-        :return: a dict or None if no more record to serialize
+        :return: a GraphNode or None if no more records to serialize
         """
         raise NotImplementedError
 
@@ -56,29 +44,15 @@ class Neo4jCsvSerializable(object):
     def create_next_relation(self):
         # type: () -> Union[GraphRelationship, None]
         """
-        Creates dict where keys represent header in CSV and value represents
-        row in CSV file. Should the class could have different types of
-        relations that it needs to serialize, it just needs to provide dict
-        with different header -- the one who consumes this class figures it
-        out and serialize to different file.
+        Creates GraphRelationship the process that consumes this class takes the output
+        serializes to the desired graph database.
 
-        Relationship is Neo4j's term of Edge in Graph. More information on
-        https://neo4j.com/docs/developer-manual/current/introduction/
-        graphdb-concepts/
-        :return: a dict or None if no more record to serialize
+        :return: a GraphRelationship or None if no more record to serialize
         """
         raise NotImplementedError
 
     def next_node(self):
         # type: () -> Union[GraphNode, None]
-        """
-        Provides node(vertex) in dict form.
-        Note that subsequent call can create different header (dict.keys())
-        which implicitly mean that it needs to be serialized in different
-        CSV file (as CSV is in fixed header)
-        :return: Non-nested dict where key is CSV header and each value
-        is a column
-        """
         node_dict = self.create_next_node()
         if not node_dict:
             return None
@@ -88,14 +62,6 @@ class Neo4jCsvSerializable(object):
 
     def next_relation(self):
         # type: () -> Union[GraphRelationship, None]
-        """
-        Provides relation(edge) in dict form.
-        Note that subsequent call can create different header (dict.keys())
-        which implicitly mean that it needs to be serialized in different
-        CSV file (as CSV is in fixed header)
-        :return: Non-nested dict where key is CSV header and each value
-        is a column
-        """
         relation_dict = self.create_next_relation()
         if not relation_dict:
             return None
