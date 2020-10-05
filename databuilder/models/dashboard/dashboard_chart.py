@@ -1,6 +1,6 @@
 import logging
 
-from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
+from typing import Optional, Union, Iterator  # noqa: F401
 
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
 from databuilder.models.graph_serializable import (
@@ -70,9 +70,9 @@ class DashboardChart(GraphSerializable):
             node_attributes['url'] = self._chart_url
 
         node = GraphNode(
-            id=self._get_chart_node_key(),
+            key=self._get_chart_node_key(),
             label=DashboardChart.DASHBOARD_CHART_LABEL,
-            node_attributes=node_attributes
+            attributes=node_attributes
         )
         yield node
 
@@ -97,7 +97,8 @@ class DashboardChart(GraphSerializable):
             end_label=DashboardChart.DASHBOARD_CHART_LABEL,
             end_key=self._get_chart_node_key(),
             type=DashboardChart.CHART_RELATION_TYPE,
-            reverse_type=DashboardChart.CHART_REVERSE_RELATION_TYPE
+            reverse_type=DashboardChart.CHART_REVERSE_RELATION_TYPE,
+            attributes={}
         )
         yield relationship
 

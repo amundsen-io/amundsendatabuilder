@@ -70,9 +70,9 @@ class TableOwner(GraphSerializable):
         for owner in self.owners:
             if owner:
                 node = GraphNode(
-                    id=self.get_owner_model_key(owner),
+                    key=self.get_owner_model_key(owner),
                     label=User.USER_NODE_LABEL,
-                    node_attributes={
+                    attributes={
                         User.USER_NODE_EMAIL: owner
                     }
                 )
@@ -93,7 +93,8 @@ class TableOwner(GraphSerializable):
                 end_key=self.get_metadata_model_key(),
                 end_label='Table',
                 type=TableOwner.OWNER_TABLE_RELATION_TYPE,
-                reverse_type=TableOwner.TABLE_OWNER_RELATION_TYPE
+                reverse_type=TableOwner.TABLE_OWNER_RELATION_TYPE,
+                attributes={}
             )
             results.append(relationship)
 

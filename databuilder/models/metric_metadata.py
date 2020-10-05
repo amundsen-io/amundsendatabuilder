@@ -1,12 +1,12 @@
 from collections import namedtuple
 
-from typing import Iterable, Any, Union, Iterator, Dict, Set  # noqa: F401
+from typing import Union, Iterator, Set, List  # noqa: F401
 
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
 from databuilder.models.graph_serializable import (
-    GraphSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+    GraphSerializable
+)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -64,15 +64,16 @@ class MetricMetadata(GraphSerializable):
     serialized_nodes = set()  # type: Set[GraphNode]
     serialized_rels = set()  # type: Set[GraphRelationship]
 
-    def __init__(self,
-                 dashboard_group,  # type: str
-                 dashboard_name,  # type: str
-                 name,  # type: Union[str, None]
-                 expression,   # type: str
-                 description,   # type: str
-                 type,   # type: str
-                 tags,   # type: List
-                 ):
+    def __init__(
+            self,
+            dashboard_group,  # type: str
+            dashboard_name,  # type: str
+            name,  # type: Union[str, None]
+            expression,   # type: str
+            description,   # type: str
+            type,   # type: str
+            tags,   # type: List
+        ):
         # type: (...) -> None
 
         self.dashboard_group = dashboard_group
@@ -130,9 +131,9 @@ class MetricMetadata(GraphSerializable):
 
         # Metric node
         metric_node = GraphNode(
-            id=self._get_metric_key(),
+            key=self._get_metric_key(),
             label=MetricMetadata.METRIC_NODE_LABEL,
-            node_attributes={
+            attributes={
                 MetricMetadata.METRIC_NAME: self.name,
                 MetricMetadata.METRIC_EXPRESSION_VALUE: self.expression
             }
@@ -142,9 +143,9 @@ class MetricMetadata(GraphSerializable):
         # Description node
         if self.description:
             description_node = GraphNode(
-                id=self._get_metric_description_key(),
+                key=self._get_metric_description_key(),
                 label=MetricMetadata.DESCRIPTION_NODE_LABEL,
-                node_attributes={
+                attributes={
                     MetricMetadata.METRIC_DESCRIPTION: self.description
                 }
             )
@@ -154,9 +155,9 @@ class MetricMetadata(GraphSerializable):
         if self.tags:
             for tag in self.tags:
                 tag_node = GraphNode(
-                    id=TagMetadata.get_tag_key(tag),
+                    key=TagMetadata.get_tag_key(tag),
                     label=TagMetadata.TAG_NODE_LABEL,
-                    node_attributes={
+                    attributes={
                         TagMetadata.TAG_TYPE: 'metric'
                     }
                 )
@@ -165,9 +166,9 @@ class MetricMetadata(GraphSerializable):
         # Metric type node
         if self.type:
             type_node = GraphNode(
-                id=self._get_metric_type_key(),
+                key=self._get_metric_type_key(),
                 label=MetricMetadata.METRIC_TYPE_NODE_LABEL,
-                node_attributes={
+                attributes={
                     'name': self.type
                 }
             )
@@ -197,7 +198,8 @@ class MetricMetadata(GraphSerializable):
             end_label=MetricMetadata.DASHBOARD_NODE_LABEL,
             end_key=self._get_dashboard_key(),
             type=MetricMetadata.METRIC_DASHBOARD_RELATION_TYPE,
-            reverse_type=MetricMetadata.DASHBOARD_METRIC_RELATION_TYPE
+            reverse_type=MetricMetadata.DASHBOARD_METRIC_RELATION_TYPE,
+            attributes={}
         )
         yield dashboard_metric_relation
 
@@ -209,7 +211,8 @@ class MetricMetadata(GraphSerializable):
                 end_label=MetricMetadata.DESCRIPTION_NODE_LABEL,
                 end_key=self._get_metric_description_key(),
                 type=MetricMetadata.METRIC_DESCRIPTION_RELATION_TYPE,
-                reverse_type=MetricMetadata.DESCRIPTION_METRIC_RELATION_TYPE
+                reverse_type=MetricMetadata.DESCRIPTION_METRIC_RELATION_TYPE,
+                attributes={}
             )
             yield metric_description_relation
 
@@ -222,7 +225,8 @@ class MetricMetadata(GraphSerializable):
                     end_label=TagMetadata.TAG_NODE_LABEL,
                     end_key=TagMetadata.get_tag_key(tag),
                     type=MetricMetadata.METRIC_TAG_RELATION_TYPE,
-                    reverse_type=MetricMetadata.TAG_METRIC_RELATION_TYPE
+                    reverse_type=MetricMetadata.TAG_METRIC_RELATION_TYPE,
+                    attributes={}
                 )
                 yield tag_relation
 
@@ -234,7 +238,8 @@ class MetricMetadata(GraphSerializable):
                 end_label=MetricMetadata.METRIC_TYPE_NODE_LABEL,
                 end_key=self._get_metric_type_key(),
                 type=MetricMetadata.METRIC_METRIC_TYPE_RELATION_TYPE,
-                reverse_type=MetricMetadata.METRIC_TYPE_METRIC_RELATION_TYPE
+                reverse_type=MetricMetadata.METRIC_TYPE_METRIC_RELATION_TYPE,
+                attributes={}
             )
             yield type_relation
 

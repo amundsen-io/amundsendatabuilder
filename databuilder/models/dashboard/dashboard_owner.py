@@ -64,7 +64,8 @@ class DashboardOwner(GraphSerializable):
             ),
             end_key=User.get_user_model_key(email=self._email),
             type=OWNER_RELATION_TYPE,
-            reverse_type=OWNER_OF_OBJECT_RELATION_TYPE
+            reverse_type=OWNER_OF_OBJECT_RELATION_TYPE,
+            attributes={}
         )
         yield relationship
 

@@ -98,7 +98,7 @@ class TableColumnUsage(GraphSerializable):
                 end_key=self._get_user_key(col_reader.user_email),
                 type=TableColumnUsage.TABLE_USER_RELATION_TYPE,
                 reverse_type=TableColumnUsage.USER_TABLE_RELATION_TYPE,
-                relationship_attributes={
+                attributes={
                     TableColumnUsage.READ_RELATION_COUNT: col_reader.read_count
                 }
             )

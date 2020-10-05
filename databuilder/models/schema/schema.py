@@ -33,9 +33,9 @@ class SchemaModel(GraphSerializable):
     def _create_node_iterator(self):
         # type: () -> Iterator[GraphNode]
         node = GraphNode(
-            id=self._schema_key,
+            key=self._schema_key,
             label=SCHEMA_NODE_LABEL,
-            node_attributes={
+            attributes={
                 SCHEMA_NAME_ATTR: self._schema,
             }
         )

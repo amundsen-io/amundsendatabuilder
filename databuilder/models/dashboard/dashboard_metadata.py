@@ -157,9 +157,9 @@ class DashboardMetadata(GraphSerializable):
         if not self._get_cluster_key() in self._processed_cluster:
             self._processed_cluster.add(self._get_cluster_key())
             cluster_node = GraphNode(
-                id=self._get_cluster_key(),
+                key=self._get_cluster_key(),
                 label=cluster_constants.CLUSTER_NODE_LABEL,
-                node_attributes={
+                attributes={
                     cluster_constants.CLUSTER_NAME_PROP_KEY: self.cluster
                 }
             )
@@ -176,9 +176,9 @@ class DashboardMetadata(GraphSerializable):
             dashboard_node_attributes[DashboardMetadata.DASHBOARD_URL] = self.dashboard_url
 
         dashboard_node = GraphNode(
-            id=self._get_dashboard_key(),
+            key=self._get_dashboard_key(),
             label=DashboardMetadata.DASHBOARD_NODE_LABEL,
-            node_attributes=dashboard_node_attributes
+            attributes=dashboard_node_attributes
         )
 
         yield dashboard_node
@@ -194,9 +194,9 @@ class DashboardMetadata(GraphSerializable):
                 dashboard_group_node_attributes[DashboardMetadata.DASHBOARD_GROUP_URL] = self.dashboard_group_url
 
             dashboard_group_node = GraphNode(
-                id=self._get_dashboard_group_key(),
+                key=self._get_dashboard_group_key(),
                 label=DashboardMetadata.DASHBOARD_GROUP_NODE_LABEL,
-                node_attributes=dashboard_group_node_attributes
+                attributes=dashboard_group_node_attributes
             )
 
             yield dashboard_group_node
@@ -204,9 +204,9 @@ class DashboardMetadata(GraphSerializable):
         # Dashboard group description
         if self.dashboard_group_description:
             dashboard_group_description_node = GraphNode(
-                id=self._get_dashboard_group_description_key(),
+                key=self._get_dashboard_group_description_key(),
                 label=DashboardMetadata.DASHBOARD_DESCRIPTION_NODE_LABEL,
-                node_attributes={
+                attributes={
                     DashboardMetadata.DASHBOARD_DESCRIPTION: self.dashboard_group_description
                 }
             )
@@ -215,9 +215,9 @@ class DashboardMetadata(GraphSerializable):
         # Dashboard description node
         if self.description:
             dashboard_description_node = GraphNode(
-                id=self._get_dashboard_description_key(),
+                key=self._get_dashboard_description_key(),
                 label=DashboardMetadata.DASHBOARD_DESCRIPTION_NODE_LABEL,
-                node_attributes={
+                attributes={
                     DashboardMetadata.DASHBOARD_DESCRIPTION: self.description
                 }
             )
@@ -227,9 +227,9 @@ class DashboardMetadata(GraphSerializable):
         if self.tags:
             for tag in self.tags:
                 dashboard_tag_node = GraphNode(
-                    id=TagMetadata.get_tag_key(tag),
+                    key=TagMetadata.get_tag_key(tag),
                     label=TagMetadata.TAG_NODE_LABEL,
-                    node_attributes={
+                    attributes={
                         TagMetadata.TAG_TYPE: 'dashboard'
                     }
                 )
@@ -252,7 +252,8 @@ class DashboardMetadata(GraphSerializable):
             end_label=DashboardMetadata.DASHBOARD_GROUP_NODE_LABEL,
             end_key=self._get_dashboard_group_key(),
             type=DashboardMetadata.CLUSTER_DASHBOARD_GROUP_RELATION_TYPE,
-            reverse_type=DashboardMetadata.DASHBOARD_GROUP_CLUSTER_RELATION_TYPE
+            reverse_type=DashboardMetadata.DASHBOARD_GROUP_CLUSTER_RELATION_TYPE,
+            attributes={}
         )
         yield cluster_dashboard_group_relationship
 
@@ -264,7 +265,8 @@ class DashboardMetadata(GraphSerializable):
                 end_label=DashboardMetadata.DASHBOARD_DESCRIPTION_NODE_LABEL,
                 end_key=self._get_dashboard_group_description_key(),
                 type=DashboardMetadata.DASHBOARD_DESCRIPTION_RELATION_TYPE,
-                reverse_type=DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE
+                reverse_type=DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE,
+                attributes={}
             )
             yield dashboard_group_description_relationship
 
@@ -275,7 +277,8 @@ class DashboardMetadata(GraphSerializable):
             start_key=self._get_dashboard_key(),
             end_key=self._get_dashboard_group_key(),
             type=DashboardMetadata.DASHBOARD_DASHBOARD_GROUP_RELATION_TYPE,
-            reverse_type=DashboardMetadata.DASHBOARD_GROUP_DASHBOARD_RELATION_TYPE
+            reverse_type=DashboardMetadata.DASHBOARD_GROUP_DASHBOARD_RELATION_TYPE,
+            attributes={}
         )
         yield dashboard_group_dashboard_relationship
 
@@ -287,7 +290,8 @@ class DashboardMetadata(GraphSerializable):
                 start_key=self._get_dashboard_key(),
                 end_key=self._get_dashboard_description_key(),
                 type=DashboardMetadata.DASHBOARD_DESCRIPTION_RELATION_TYPE,
-                reverse_type=DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE
+                reverse_type=DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE,
+                attributes={}
             )
             yield dashboard_description_relationship
 
@@ -300,6 +304,7 @@ class DashboardMetadata(GraphSerializable):
                     start_key=self._get_dashboard_key(),
                     end_key=TagMetadata.get_tag_key(tag),
                     type=DashboardMetadata.DASHBOARD_TAG_RELATION_TYPE,
-                    reverse_type=DashboardMetadata.TAG_DASHBOARD_RELATION_TYPE
+                    reverse_type=DashboardMetadata.TAG_DASHBOARD_RELATION_TYPE,
+                    attributes={}
                 )
                 yield dashboard_tag_relationship

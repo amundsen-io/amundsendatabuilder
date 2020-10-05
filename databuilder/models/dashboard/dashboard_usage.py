@@ -84,7 +84,8 @@ class DashboardUsage(GraphSerializable):
             reverse_type=READ_RELATION_TYPE,
             relationship_attributes={
                 READ_RELATION_COUNT_PROPERTY: self._view_count
-            }
+            },
+            attributes={}
         )
         yield relationship
 

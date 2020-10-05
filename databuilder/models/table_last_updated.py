@@ -81,9 +81,9 @@ class TableLastUpdated(GraphSerializable):
         results = []
 
         node = GraphNode(
-            id=self.get_last_updated_model_key(),
+            key=self.get_last_updated_model_key(),
             label=TableLastUpdated.LAST_UPDATED_NODE_LABEL,
-            node_attributes={
+            attributes={
                 TableLastUpdated.TIMESTAMP_PROPERTY: self.last_updated_time,
                 timestamp_constants.TIMESTAMP_PROPERTY: self.last_updated_time,
                 TableLastUpdated.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name
@@ -106,7 +106,8 @@ class TableLastUpdated(GraphSerializable):
             end_label=TableLastUpdated.LAST_UPDATED_NODE_LABEL,
             end_key=self.get_last_updated_model_key(),
             type=TableLastUpdated.TABLE_LASTUPDATED_RELATION_TYPE,
-            reverse_type=TableLastUpdated.LASTUPDATED_TABLE_RELATION_TYPE
+            reverse_type=TableLastUpdated.LASTUPDATED_TABLE_RELATION_TYPE,
+            attributes={}
         )
         results = [relationship]
 

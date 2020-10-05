@@ -54,9 +54,9 @@ class DashboardExecution(GraphSerializable):
     def _create_node_iterator(self):  # noqa: C901
         # type: () -> Iterator[GraphNode]
         node = GraphNode(
-            id=self._get_last_execution_node_key(),
+            key=self._get_last_execution_node_key(),
             label=DashboardExecution.DASHBOARD_EXECUTION_LABEL,
-            node_attributes={
+            attributes={
                 'timestamp': self._execution_timestamp,
                 'state': self._execution_state
             }
@@ -83,7 +83,8 @@ class DashboardExecution(GraphSerializable):
             end_label=DashboardExecution.DASHBOARD_EXECUTION_LABEL,
             end_key=self._get_last_execution_node_key(),
             type=DashboardExecution.DASHBOARD_EXECUTION_RELATION_TYPE,
-            reverse_type=DashboardExecution.EXECUTION_DASHBOARD_RELATION_TYPE
+            reverse_type=DashboardExecution.EXECUTION_DASHBOARD_RELATION_TYPE,
+            attributes={}
         )
         yield relationship
 

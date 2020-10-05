@@ -84,9 +84,9 @@ class Watermark(GraphSerializable):
         results = []
         for part in self.parts:
             part_node = GraphNode(
-                id=self.get_watermark_model_key(),
+                key=self.get_watermark_model_key(),
                 label=Watermark.LABEL,
-                node_attributes={
+                attributes={
                     'partition_key': part[0],
                     'partition_value': part[1],
                     'create_time': self.create_time
@@ -107,7 +107,8 @@ class Watermark(GraphSerializable):
             end_key=self.get_metadata_model_key(),
             end_label='Table',
             type=Watermark.WATERMARK_TABLE_RELATION_TYPE,
-            reverse_type=Watermark.TABLE_WATERMARK_RELATION_TYPE
+            reverse_type=Watermark.TABLE_WATERMARK_RELATION_TYPE,
+            attributes={}
         )
         results = [relation]
         return results

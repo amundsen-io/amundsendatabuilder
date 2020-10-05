@@ -1,8 +1,7 @@
 import copy
-from collections import namedtuple
 from six import string_types
 
-from typing import Iterable, Any, Union, Iterator, Dict, Set  # noqa: F401
+from typing import Iterable, Any, Union, Iterator, Dict, Set, List  # noqa: F401
 
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.graph_serializable import GraphSerializable
@@ -44,9 +43,9 @@ class TagMetadata(GraphSerializable):
     @staticmethod
     def create_tag_node(name, tag_type=DEFAULT_TYPE):
         node = GraphNode(
-            id=TagMetadata.get_tag_key(name),
+            key=TagMetadata.get_tag_key(name),
             label=TagMetadata.TAG_NODE_LABEL,
-            node_attributes={
+            attributes={
                 TagMetadata.TAG_TYPE: tag_type
             }
         )
@@ -135,14 +134,15 @@ class DescriptionMetadata:
         return node
 
     def get_relation(self, start_node, start_key, end_key):
-        # type: (str, str) -> GraphRelationship
+        # type: (str, str, str) -> GraphRelationship
         relationship = GraphRelationship(
             start_label=start_node,
             start_key=start_key,
             end_label=self._label,
             end_key=end_key,
             type=DescriptionMetadata.DESCRIPTION_RELATION_TYPE,
-            reverse_type=DescriptionMetadata.INVERSE_DESCRIPTION_RELATION_TYPE
+            reverse_type=DescriptionMetadata.INVERSE_DESCRIPTION_RELATION_TYPE,
+            attributes={}
         )
         return relationship
 
@@ -362,9 +362,9 @@ class TableMetadata(GraphSerializable):
                     table_attributes[k] = v
 
         table_node = GraphNode(
-            id=self._get_table_key(),
+            key=self._get_table_key(),
             label=TableMetadata.TABLE_NODE_LABEL,
-            node_attributes=table_attributes
+            attributes=table_attributes
         )
         yield table_node
 
@@ -379,9 +379,9 @@ class TableMetadata(GraphSerializable):
 
         for col in self.columns:
             column_node = GraphNode(
-                id=self._get_col_key(col),
+                key=self._get_col_key(col),
                 label=ColumnMetadata.COLUMN_NODE_LABEL,
-                node_attributes={
+                attributes={
                     ColumnMetadata.COLUMN_NAME: col.name,
                     ColumnMetadata.COLUMN_TYPE: col.type,
                     ColumnMetadata.COLUMN_ORDER: col.sort_order
@@ -396,9 +396,9 @@ class TableMetadata(GraphSerializable):
             if col.tags:
                 for tag in col.tags:
                     tag_node = GraphNode(
-                        id=TagMetadata.get_tag_key(tag),
+                        key=TagMetadata.get_tag_key(tag),
                         label=TagMetadata.TAG_NODE_LABEL,
-                        node_attributes={
+                        attributes={
                             TagMetadata.TAG_TYPE: 'default'
                         }
                     )
@@ -407,23 +407,23 @@ class TableMetadata(GraphSerializable):
         # Database, cluster, schema
         others = [
             GraphNode(
-                id=self._get_database_key(),
+                key=self._get_database_key(),
                 label=TableMetadata.DATABASE_NODE_LABEL,
-                node_attributes={
+                attributes={
                     'name': self.database
                 }
             ),
             GraphNode(
-                id=self._get_database_key(),
+                key=self._get_database_key(),
                 label=TableMetadata.CLUSTER_NODE_LABEL,
-                node_attributes={
+                attributes={
                     'name': self.cluster
                 }
             ),
             GraphNode(
-                id=self._get_database_key(),
+                key=self._get_database_key(),
                 label=TableMetadata.SCHEMA_NODE_LABEL,
-                node_attributes={
+                attributes={
                     'name': self.schema
                 }
             )
@@ -450,7 +450,8 @@ class TableMetadata(GraphSerializable):
             end_key=self._get_table_key(),
             end_label=TableMetadata.TABLE_NODE_LABEL,
             type=TableMetadata.SCHEMA_TABLE_RELATION_TYPE,
-            reverse_type=TableMetadata.TABLE_SCHEMA_RELATION_TYPE
+            reverse_type=TableMetadata.TABLE_SCHEMA_RELATION_TYPE,
+            attributes={}
         )
         yield schema_table_relationship
 
@@ -467,7 +468,8 @@ class TableMetadata(GraphSerializable):
                     end_label=TagMetadata.TAG_NODE_LABEL,
                     end_key=TagMetadata.get_tag_key(tag),
                     type=TableMetadata.TABLE_TAG_RELATION_TYPE,
-                    reverse_type=TableMetadata.TAG_TABLE_RELATION_TYPE
+                    reverse_type=TableMetadata.TAG_TABLE_RELATION_TYPE,
+                    attributes={}
                 )
                 yield tag_relationship
 
@@ -478,7 +480,8 @@ class TableMetadata(GraphSerializable):
                 end_label=ColumnMetadata.COLUMN_NODE_LABEL,
                 end_key=self._get_col_key(col),
                 type=TableMetadata.TABLE_COL_RELATION_TYPE,
-                reverse_type=TableMetadata.COL_TABLE_RELATION_TYPE
+                reverse_type=TableMetadata.COL_TABLE_RELATION_TYPE,
+                attributes={}
             )
             yield column_relationship
 
@@ -498,6 +501,7 @@ class TableMetadata(GraphSerializable):
                         end_key=TagMetadata.get_tag_key(tag),
                         type=ColumnMetadata.COL_TAG_RELATION_TYPE,
                         reverse_type=ColumnMetadata.TAG_COL_RELATION_TYPE,
+                        attributes={}
                     )
                     yield tag_column_relationship
 
@@ -508,7 +512,8 @@ class TableMetadata(GraphSerializable):
                 start_key=self._get_database_key(),
                 end_key=self._get_cluster_key(),
                 type=TableMetadata.DATABASE_CLUSTER_RELATION_TYPE,
-                reverse_type=TableMetadata.CLUSTER_DATABASE_RELATION_TYPE
+                reverse_type=TableMetadata.CLUSTER_DATABASE_RELATION_TYPE,
+                attributes={}
             ),
             GraphRelationship(
                 start_label=TableMetadata.CLUSTER_NODE_LABEL,
@@ -516,7 +521,8 @@ class TableMetadata(GraphSerializable):
                 start_key=self._get_cluster_key(),
                 end_key=self._get_schema_key(),
                 type=TableMetadata.CLUSTER_SCHEMA_RELATION_TYPE,
-                reverse_type=TableMetadata.SCHEMA_CLUSTER_RELATION_TYPE
+                reverse_type=TableMetadata.SCHEMA_CLUSTER_RELATION_TYPE,
+                attributes={}
             )
         ]
 

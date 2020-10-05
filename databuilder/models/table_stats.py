@@ -85,9 +85,9 @@ class TableColumnStats(GraphSerializable):
         :return:
         """
         node = GraphNode(
-            id=self.get_table_stat_model_key(),
+            key=self.get_table_stat_model_key(),
             label=TableColumnStats.LABEL,
-            node_attributes={
+            attributes={
                 'stat_val:UNQUOTED': self.stat_val,
                 'stat_name': self.stat_name,
                 'start_epoch': self.start_epoch,
@@ -109,7 +109,8 @@ class TableColumnStats(GraphSerializable):
             end_key=self.get_col_key(),
             end_label=ColumnMetadata.COLUMN_NODE_LABEL,
             type=TableColumnStats.STAT_Column_RELATION_TYPE,
-            reverse_type=TableColumnStats.Column_STAT_RELATION_TYPE
+            reverse_type=TableColumnStats.Column_STAT_RELATION_TYPE,
+            attributes={}
         )
         results = [relationship]
         return results

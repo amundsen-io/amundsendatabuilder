@@ -72,7 +72,8 @@ class DashboardTable(GraphSerializable):
                         tbl=m.group(4)
                     ),
                     type=DashboardTable.DASHBOARD_TABLE_RELATION_TYPE,
-                    reverse_type=DashboardTable.TABLE_DASHBOARD_RELATION_TYPE
+                    reverse_type=DashboardTable.TABLE_DASHBOARD_RELATION_TYPE,
+                    attributes={}
                 )
                 yield relationship
 

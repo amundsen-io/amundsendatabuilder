@@ -73,9 +73,9 @@ class TableSource(GraphSerializable):
         :return:
         """
         node = GraphNode(
-            id=self.get_source_model_key(),
+            key=self.get_source_model_key(),
             label=TableSource.LABEL,
-            node_attributes={
+            attributes={
                 'source': self.source,
                 'source_type': self.source_type
             }
@@ -95,7 +95,8 @@ class TableSource(GraphSerializable):
             end_label=TableMetadata.TABLE_NODE_LABEL,
             end_key=self.get_metadata_model_key(),
             type=TableSource.SOURCE_TABLE_RELATION_TYPE,
-            reverse_type=TableSource.TABLE_SOURCE_RELATION_TYPE
+            reverse_type=TableSource.TABLE_SOURCE_RELATION_TYPE,
+            attributes={}
         )
         results = [relationship]
         return results

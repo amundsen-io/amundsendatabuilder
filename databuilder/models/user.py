@@ -153,9 +153,9 @@ class User(GraphSerializable):
                     del node_attributes[k]
 
         node = GraphNode(
-            id=User.get_user_model_key(email=self.email),
+            key=User.get_user_model_key(email=self.email),
             label=User.USER_NODE_LABEL,
-            node_attributes=node_attributes
+            attributes=node_attributes
         )
 
         return [node]
@@ -170,7 +170,8 @@ class User(GraphSerializable):
                 end_label=User.USER_NODE_LABEL,
                 end_key=self.get_user_model_key(email=self.manager_email),
                 type=User.USER_MANAGER_RELATION_TYPE,
-                reverse_type=User.MANAGER_USER_RELATION_TYPE
+                reverse_type=User.MANAGER_USER_RELATION_TYPE,
+                attributes={}
             )
             return [relationship]
         return []

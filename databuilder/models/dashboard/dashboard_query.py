@@ -65,9 +65,9 @@ class DashboardQuery(GraphSerializable):
             node_attributes['query_text'] = self._query_tex
 
         node = GraphNode(
-            id=self._get_query_node_key(),
+            key=self._get_query_node_key(),
             label=DashboardQuery.DASHBOARD_QUERY_LABEL,
-            node_attributes=node_attributes
+            attributes=node_attributes
         )
 
         yield node
@@ -92,7 +92,8 @@ class DashboardQuery(GraphSerializable):
             ),
             end_key=self._get_query_node_key(),
             type=DashboardQuery.DASHBOARD_QUERY_RELATION_TYPE,
-            reverse_type=DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE
+            reverse_type=DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE,
+            attributes={}
         )
         yield relationship
 
