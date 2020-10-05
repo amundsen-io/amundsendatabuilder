@@ -1,6 +1,4 @@
-import six
-
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_node import GraphNode
@@ -51,7 +49,7 @@ def convert_node(node):
         NEPTUNE_HEADER_LABEL: node.label
     }
 
-    for attr_key, attr_value in node.node_attributes.items():
+    for attr_key, attr_value in node.attributes.items():
         neptune_value_type = _get_neptune_type_for_value(attr_value)
         doc_key = "{key_name:neptune_value_type".format(
             key_name=attr_key,
@@ -65,13 +63,14 @@ def convert_node(node):
 
 def _get_neptune_type_for_value(value):
     # type: (Any) -> Optional[str]
-    if isinstance(value, six.string_types):
+    if isinstance(value, str):
         return "String"
-    elif isinstance(value, six.integer_types):
-        return "Long"
     elif isinstance(value, bool):
         return "Bool"
+    elif isinstance(value, int):
+        return "Long"
     elif isinstance(value, float):
         return "Double"
 
     return None
+
