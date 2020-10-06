@@ -208,7 +208,7 @@ class ColumnMetadata:
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 badges: List[BadgeMetadata] = None
+                 badges: List[str, None] = None
                  ) -> None:
         """
         TODO: Add stats
@@ -428,7 +428,7 @@ class TableMetadata(Neo4jCsvSerializable):
 
             if col.badges:
                 for badge in col.badges:
-                    yield BadgeMetadata.create_badge_node(badge._name)
+                    yield BadgeMetadata.create_badge_node(badge)
 
         # Database, cluster, schema
         others = [NodeTuple(key=self._get_database_key(),
