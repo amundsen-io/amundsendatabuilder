@@ -20,7 +20,7 @@ DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
 class BadgeMetadata(Neo4jCsvSerializable):
     BADGE_NODE_LABEL = 'Badge'
     BADGE_KEY_FORMAT = '{badge}'
-    BADGE_CATEGORY = 'column'
+    BADGE_CATEGORY = 'category'
     DASHBOARD_TYPE = 'dashboard'
     METRIC_TYPE = 'metric'
 
@@ -30,7 +30,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
                  ):
         self._name = name
         self._category = category
-        self._nodes = iter([self.create_badge_node(self._name, self._category)])
+        self._nodes = iter([self.create_badge_node(self._name)])
         self._relations: Iterator[Dict[str, Any]] = iter([])
 
     def __repr__(self) -> str:
