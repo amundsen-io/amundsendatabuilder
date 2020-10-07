@@ -110,6 +110,10 @@ class TestTableMetadata(unittest.TestCase):
         while node_row:
             actual.append(node_row)
             node_row = self.table_metadata.next_node()
+        print("ACTUAL")
+        for x in actual: print(x)
+        print("EXPECTED")
+        for x in self.expected_nodes: print(x)
         for i in range(0, len(self.expected_nodes)):
             self.assertEqual(actual[i], self.expected_nodes[i])
 
