@@ -226,10 +226,10 @@ class ColumnMetadata:
 
     def __repr__(self) -> str:
         return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,
-                                                               self.description,
-                                                               self.type,
-                                                               self.sort_order,
-                                                               self.badges)
+                                                                     self.description,
+                                                                     self.type,
+                                                                     self.sort_order,
+                                                                     self.badges)
 
 
 # Tuples for de-dupe purpose on Database, Cluster, Schema. See TableMetadata docstring for more information

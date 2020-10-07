@@ -10,7 +10,7 @@ from typing import Iterator, Union, Dict, Any
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata, BadgeMetadata
+from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
 
@@ -98,7 +98,7 @@ class HiveTableMetadataExtractor(Extractor):
         """
         for key, group in groupby(self._get_raw_extract_iter(), self._get_table_key):
             columns = []
-            
+
             for row in group:
                 last_row = row
                 column = None

@@ -113,12 +113,12 @@ class TestTableMetadata(unittest.TestCase):
         while node_row:
             actual.append(node_row)
             node_row = self.table_metadata.next_node()
-        
+
         for i in range(0, len(self.expected_nodes)):
-            print ("ACTUAL" +str(i))
-            print (actual[i])
-            print ("EXPECTED")
-            print (self.expected_nodes[i])
+            print("ACTUAL" + str(i))
+            print(actual[i])
+            print("EXPECTED")
+            print(self.expected_nodes[i])
             self.assertEqual(actual[i], self.expected_nodes[i])
 
         relation_row = self.table_metadata.next_relation()
@@ -241,14 +241,14 @@ class TestTableMetadata(unittest.TestCase):
             actual.append(relation_row)
             relation_row = self.table_metadata4.next_relation()
 
-        expected_col_badge_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Table',
-                                 'END_LABEL': 'Badge',
-                                 'START_KEY': 'hive://gold.test_schema4/test_table4',
-                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
-        expected_col_badge_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Table',
-                                 'END_LABEL': 'Badge',
-                                 'START_KEY': 'hive://gold.test_schema4/test_table4',
-                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+        expected_col_badge_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Column',
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema4/test_table4/ds',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+        expected_col_badge_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Column',
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema4/test_table4/ds',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
 
         self.assertEqual(actual[6], expected_col_badge_rel1)
         self.assertEqual(actual[7], expected_col_badge_rel2)

@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from databuilder.extractor.hive_table_metadata_extractor import HiveTableMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata, BadgeMetadata
+from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 
 class TestHiveTableMetadataExtractor(unittest.TestCase):
@@ -90,9 +90,10 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             expected = TableMetadata('hive', 'gold', 'test_schema', 'test_table', 'a table for testing',
                                      [ColumnMetadata('col_id1', 'description of id1', 'bigint', 0, []),
                                       ColumnMetadata('col_id2', 'description of id2', 'bigint', 1, []),
-                                      ColumnMetadata('is_active', None, 'boolean', 2, [BadgeMetadata('partition column', 'column')]),
+                                      ColumnMetadata('is_active', None, 'boolean', 2, ['partition column']),
                                       ColumnMetadata('source', 'description of source', 'varchar', 3, []),
-                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4, []),
+                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp',
+                                                     4, []),
                                       ColumnMetadata('ds', None, 'varchar', 5, [])],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), actual.__repr__())
@@ -186,11 +187,13 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             extractor.init(self.conf)
 
             expected = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test table 1',
-                                     [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0, [BadgeMetadata('partition column', 'column')]),
+                                     [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0,
+                                                     ['partition column']),
                                       ColumnMetadata('col_id2', 'description of col_id2', 'bigint', 1, []),
                                       ColumnMetadata('is_active', None, 'boolean', 2, []),
                                       ColumnMetadata('source', 'description of source', 'varchar', 3, []),
-                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4, []),
+                                      ColumnMetadata('etl_created_at', 'description of etl_created_at',
+                                                     'timestamp', 4, []),
                                       ColumnMetadata('ds', None, 'varchar', 5, [])],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
