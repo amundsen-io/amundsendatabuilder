@@ -18,7 +18,7 @@ class TestTableMetadata(unittest.TestCase):
             ColumnMetadata('is_active', None, 'boolean', 2),
             ColumnMetadata('source', 'description of source', 'varchar', 3),
             ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
-            ColumnMetadata('ds', None, 'varchar', 5, )])
+            ColumnMetadata('ds', None, 'varchar', 5)])
 
         self.table_metadata2 = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test_table1', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0),
@@ -55,8 +55,7 @@ class TestTableMetadata(unittest.TestCase):
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at/_description', 'LABEL': 'Description',
              'description_source': 'description'},
             {'sort_order:UNQUOTED': 5, 'type': 'varchar', 'name': 'ds',
-             'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'},
-            {'KEY': 'partition column', 'LABEL': 'Badge', 'name': 'partition column', 'category': 'column'}
+             'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'}
         ]
 
         self.expected_nodes = copy.deepcopy(self.expected_nodes_deduped)
@@ -96,9 +95,7 @@ class TestTableMetadata(unittest.TestCase):
              'END_LABEL': 'Description', 'START_KEY': 'hive://gold.test_schema1/test_table1/etl_created_at',
              'TYPE': 'DESCRIPTION', 'REVERSE_TYPE': 'DESCRIPTION_OF'},
             {'END_KEY': 'hive://gold.test_schema1/test_table1/ds', 'START_LABEL': 'Table', 'END_LABEL': 'Column',
-             'START_KEY': 'hive://gold.test_schema1/test_table1', 'TYPE': 'COLUMN', 'REVERSE_TYPE': 'COLUMN_OF'},
-            {'END_KEY': 'partition column', 'START_LABEL': 'Column', 'END_LABEL': 'Badge',
-             'START_KEY': 'hive://gold.test_schema1/test_table1/ds', 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+             'START_KEY': 'hive://gold.test_schema1/test_table1', 'TYPE': 'COLUMN', 'REVERSE_TYPE': 'COLUMN_OF'}
         ]
 
         self.expected_rels = copy.deepcopy(self.expected_rels_deduped)
@@ -113,12 +110,7 @@ class TestTableMetadata(unittest.TestCase):
         while node_row:
             actual.append(node_row)
             node_row = self.table_metadata.next_node()
-
         for i in range(0, len(self.expected_nodes)):
-            print("ACTUAL" + str(i))
-            print(actual[i])
-            print("EXPECTED")
-            print(self.expected_nodes[i])
             self.assertEqual(actual[i], self.expected_nodes[i])
 
         relation_row = self.table_metadata.next_relation()
@@ -127,8 +119,6 @@ class TestTableMetadata(unittest.TestCase):
             actual.append(relation_row)
             relation_row = self.table_metadata.next_relation()
         for i in range(0, len(self.expected_rels)):
-            print(self.expected_rels[i])
-            print(actual[i])
             self.assertEqual(actual[i], self.expected_rels[i])
 
         # 2nd record should not show already serialized database, cluster, and schema
@@ -188,7 +178,7 @@ class TestTableMetadata(unittest.TestCase):
 
     def test_tags_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
-            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-tag1', 'col-tag2'])],
+            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0)],
             is_view=False, tags=['tag1', 'tag2'], attr1='uri', attr2='attr2')
 
         node_row = self.table_metadata4.next_node()
@@ -220,11 +210,11 @@ class TestTableMetadata(unittest.TestCase):
 
         self.assertEqual(actual[2], expected_tab_tag_rel1)
         self.assertEqual(actual[3], expected_tab_tag_rel2)
-
+    
     def test_col_badge_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-badge1', 'col-badge2'])],
-            is_view=False, tags=['tag1', 'tag2'], attr1='uri', attr2='attr2')
+            is_view=False, attr1='uri', attr2='attr2')
 
         node_row = self.table_metadata4.next_node()
         actual = []
@@ -232,8 +222,8 @@ class TestTableMetadata(unittest.TestCase):
             actual.append(node_row)
             node_row = self.table_metadata4.next_node()
 
-        self.assertEqual(actual[6].get('KEY'), 'col-badge1')
-        self.assertEqual(actual[7].get('KEY'), 'col-badge2')
+        self.assertEqual(actual[4].get('KEY'), 'col-badge1')
+        self.assertEqual(actual[5].get('KEY'), 'col-badge2')
 
         relation_row = self.table_metadata4.next_relation()
         actual = []
@@ -242,16 +232,16 @@ class TestTableMetadata(unittest.TestCase):
             relation_row = self.table_metadata4.next_relation()
 
         expected_col_badge_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Column',
-                                   'END_LABEL': 'Badge',
-                                   'START_KEY': 'hive://gold.test_schema4/test_table4/ds',
-                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+                                 'END_LABEL': 'Badge',
+                                 'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
+                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
         expected_col_badge_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Column',
-                                   'END_LABEL': 'Badge',
-                                   'START_KEY': 'hive://gold.test_schema4/test_table4/ds',
-                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+                                 'END_LABEL': 'Badge',
+                                 'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
+                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
 
-        self.assertEqual(actual[6], expected_col_badge_rel1)
-        self.assertEqual(actual[7], expected_col_badge_rel2)
+        self.assertEqual(actual[4], expected_col_badge_rel1)
+        self.assertEqual(actual[5], expected_col_badge_rel2)
 
     def test_tags_populated_from_str(self) -> None:
         self.table_metadata5 = TableMetadata('hive', 'gold', 'test_schema5', 'test_table5', 'test_table5', [
