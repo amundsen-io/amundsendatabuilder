@@ -212,7 +212,7 @@ class TestTableMetadata(unittest.TestCase):
 
         self.assertEqual(actual[2], expected_tab_tag_rel1)
         self.assertEqual(actual[3], expected_tab_tag_rel2)
-    
+
     def test_col_badge_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-badge1', 'col-badge2'])],
@@ -234,13 +234,13 @@ class TestTableMetadata(unittest.TestCase):
             relation_row = self.table_metadata4.next_relation()
 
         expected_col_badge_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Column',
-                                 'END_LABEL': 'Badge',
-                                 'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
-                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
         expected_col_badge_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Column',
-                                 'END_LABEL': 'Badge',
-                                 'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
-                                 'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
 
         self.assertEqual(actual[4], expected_col_badge_rel1)
         self.assertEqual(actual[5], expected_col_badge_rel2)
