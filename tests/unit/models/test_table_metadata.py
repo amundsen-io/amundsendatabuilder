@@ -10,6 +10,8 @@ from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 class TestTableMetadata(unittest.TestCase):
     def setUp(self) -> None:
         super(TestTableMetadata, self).setUp()
+        TableMetadata.serialized_nodes = set()
+        TableMetadata.serialized_rels = set()
 
     def test_serialize(self) -> None:
         self.table_metadata = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test_table1', [
