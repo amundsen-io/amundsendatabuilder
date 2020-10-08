@@ -108,6 +108,7 @@ class TestTableMetadata(unittest.TestCase):
         node_row = self.table_metadata.next_node()
         actual = []
         while node_row:
+            # print("NODE ROW: "+str(node_row))
             actual.append(node_row)
             node_row = self.table_metadata.next_node()
         print("ACTUAL")
