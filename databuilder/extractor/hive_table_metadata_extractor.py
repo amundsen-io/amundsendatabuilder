@@ -108,7 +108,7 @@ class HiveTableMetadataExtractor(Extractor):
                                             row['col_type'], row['col_sort_order'], ['partition column'])
                 else:
                     column = ColumnMetadata(row['col_name'], row['col_description'],
-                                            row['col_type'], row['col_sort_order'], [])
+                                            row['col_type'], row['col_sort_order'])
                 columns.append(column)
             is_view = last_row['is_view'] == 1
             yield TableMetadata('hive', self._cluster,
