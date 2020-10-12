@@ -88,13 +88,13 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             extractor.init(self.conf)
             actual = extractor.extract()
             expected = TableMetadata('hive', 'gold', 'test_schema', 'test_table', 'a table for testing',
-                                     [ColumnMetadata('col_id1', 'description of id1', 'bigint', 0, []),
-                                      ColumnMetadata('col_id2', 'description of id2', 'bigint', 1, []),
+                                     [ColumnMetadata('col_id1', 'description of id1', 'bigint', 0),
+                                      ColumnMetadata('col_id2', 'description of id2', 'bigint', 1),
                                       ColumnMetadata('is_active', None, 'boolean', 2, ['partition column']),
-                                      ColumnMetadata('source', 'description of source', 'varchar', 3, []),
+                                      ColumnMetadata('source', 'description of source', 'varchar', 3),
                                       ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp',
-                                                     4, []),
-                                      ColumnMetadata('ds', None, 'varchar', 5, [])],
+                                                     4),
+                                      ColumnMetadata('ds', None, 'varchar', 5)],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
