@@ -1,27 +1,29 @@
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
+from pyhocon import ConfigTree, ConfigFactory
 from requests.auth import HTTPBasicAuth
+from typing import Any, Dict
 
 from databuilder import Scoped
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_constants import ORGANIZATION, MODE_ACCESS_TOKEN, \
-    MODE_PASSWORD_TOKEN
+    MODE_PASSWORD_TOKEN, MODE_BEARER_TOKEN
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, STATIC_RECORD_DICT
-from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery  # noqa: F401
+from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
 from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
-from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
+from databuilder.rest_api.rest_api_query import RestApiQuery
 
 
 class ModeDashboardUtils(object):
 
     @staticmethod
-    def get_spaces_query_api(conf,  # type: ConfigTree
-                             ):
+    def get_spaces_query_api(conf: ConfigTree) -> BaseRestApiQuery:
         """
         Provides RestApiQuerySeed where it will provides iterator of dictionaries as records where dictionary keys are
          organization, dashboard_group_id, dashboard_group and dashboard_group_description
         :param conf:
         :return:
         """
-        # type: (...) -> BaseRestApiQuery
 
         # https://mode.com/developer/api-reference/management/spaces/#listSpaces
         spaces_url_template = 'https://app.mode.com/api/{organization}/spaces?filter=all'
@@ -42,18 +44,27 @@ class ModeDashboardUtils(object):
         return spaces_query
 
     @staticmethod
-    def get_auth_params(conf,  # type: ConfigTree
-                        ):
-        params = {'auth': HTTPBasicAuth(conf.get_string(MODE_ACCESS_TOKEN),
-                                        conf.get_string(MODE_PASSWORD_TOKEN)
-                                        )
-                  }
+    def get_auth_params(conf: ConfigTree, discover_auth: bool = False) -> Dict[str, Any]:
+        if discover_auth:
+            # Mode discovery API needs custom token set in header
+            # https://mode.com/developer/discovery-api/introduction/
+            params = {
+                "headers": {
+                    "Authorization": conf.get_string(MODE_BEARER_TOKEN),
+                }
+            }  # type: Dict[str, Any]
+        else:
+            params = {
+                'auth': HTTPBasicAuth(conf.get_string(MODE_ACCESS_TOKEN),
+                                      conf.get_string(MODE_PASSWORD_TOKEN)
+                                      )
+            }
         return params
 
     @staticmethod
-    def create_mode_rest_api_extractor(restapi_query,  # type: BaseRestApiQuery
-                                       conf,  # type: ConfigTree
-                                       ):
+    def create_mode_rest_api_extractor(restapi_query: BaseRestApiQuery,
+                                       conf: ConfigTree
+                                       ) -> RestAPIExtractor:
         """
         Creates RestAPIExtractor. Note that RestAPIExtractor is already initialized
         :param restapi_query:

@@ -1,9 +1,12 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 import unittest
 
 from mock import patch, MagicMock
 from pyhocon import ConfigFactory
-from typing import Any, Dict  # noqa: F401
+from typing import Any, Dict
 
 from databuilder.extractor.snowflake_metadata_extractor import SnowflakeMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -11,8 +14,7 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 
 class TestSnowflakeMetadataExtractor(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
@@ -27,8 +29,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_extraction_with_empty_query_result(self):
-        # type: () -> None
+    def test_extraction_with_empty_query_result(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -39,8 +40,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
             results = extractor.extract()
             self.assertEqual(results, None)
 
-    def test_extraction_with_single_result(self):
-        # type: () -> None
+    def test_extraction_with_single_result(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -102,8 +102,7 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
 
-    def test_extraction_with_multiple_result(self):
-        # type: () -> None
+    def test_extraction_with_multiple_result(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -223,15 +222,15 @@ class TestSnowflakeMetadataExtractor(unittest.TestCase):
             self.assertIsNone(extractor.extract())
             self.assertIsNone(extractor.extract())
 
-    def _union(self, target, extra):
-        # type: (Dict[Any, Any], Dict[Any, Any]) -> Dict[Any, Any]
+    def _union(self,
+               target: Dict[Any, Any],
+               extra: Dict[Any, Any]) -> Dict[Any, Any]:
         target.update(extra)
         return target
 
 
 class TestSnowflakeMetadataExtractorWithWhereClause(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.where_clause_suffix = """
         where table_schema in ('public') and table_name = 'movies'
@@ -244,8 +243,7 @@ class TestSnowflakeMetadataExtractorWithWhereClause(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -257,8 +255,7 @@ class TestSnowflakeMetadataExtractorWithWhereClause(unittest.TestCase):
 
 class TestSnowflakeMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is specified
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.cluster_key = "not_master"
 
@@ -270,8 +267,7 @@ class TestSnowflakeMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -283,8 +279,7 @@ class TestSnowflakeMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
 
 class TestSnowflakeMetadataExtractorDefaultSnowflakeDatabaseKey(unittest.TestCase):
     # test when SNOWFLAKE_DATABASE_KEY is specified
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.snowflake_database_key = "not_prod"
 
@@ -295,8 +290,7 @@ class TestSnowflakeMetadataExtractorDefaultSnowflakeDatabaseKey(unittest.TestCas
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -308,8 +302,7 @@ class TestSnowflakeMetadataExtractorDefaultSnowflakeDatabaseKey(unittest.TestCas
 
 class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
     # test when DATABASE_KEY is specified
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.database_key = 'not_snowflake'
 
@@ -320,8 +313,7 @@ class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -330,8 +322,7 @@ class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
             extractor.init(self.conf)
             self.assertFalse(self.database_key in extractor.sql_stmt)
 
-    def test_extraction_with_database_specified(self):
-        # type: () -> None
+    def test_extraction_with_database_specified(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -364,8 +355,7 @@ class TestSnowflakeMetadataExtractorDefaultDatabaseKey(unittest.TestCase):
 
 class TestSnowflakeMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is NOT specified
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
@@ -375,8 +365,7 @@ class TestSnowflakeMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -388,8 +377,7 @@ class TestSnowflakeMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase
 
 class TestSnowflakeMetadataExtractorTableCatalogEnabled(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is true (CLUSTER_KEY should be ignored)
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.cluster_key = "not_master"
 
@@ -401,8 +389,7 @@ class TestSnowflakeMetadataExtractorTableCatalogEnabled(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """

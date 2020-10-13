@@ -1,9 +1,12 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 import unittest
 
 from mock import patch, MagicMock
 from pyhocon import ConfigFactory
-from typing import Any, Dict  # noqa: F401
+from typing import Any, Dict
 
 from databuilder.extractor.hive_table_metadata_extractor import HiveTableMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -11,8 +14,7 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 
 class TestHiveTableMetadataExtractor(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
@@ -21,8 +23,7 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_extraction_with_empty_query_result(self):
-        # type: () -> None
+    def test_extraction_with_empty_query_result(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -33,8 +34,7 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             results = extractor.extract()
             self.assertEqual(results, None)
 
-    def test_extraction_with_single_result(self):
-        # type: () -> None
+    def test_extraction_with_single_result(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -92,8 +92,7 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
 
-    def test_extraction_with_multiple_result(self):
-        # type: () -> None
+    def test_extraction_with_multiple_result(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -196,15 +195,15 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             self.assertIsNone(extractor.extract())
             self.assertIsNone(extractor.extract())
 
-    def _union(self, target, extra):
-        # type: (Dict[Any, Any], Dict[Any, Any]) -> Dict[Any, Any]
+    def _union(self,
+               target: Dict[Any, Any],
+               extra: Dict[Any, Any]) -> Dict[Any, Any]:
         target.update(extra)
         return target
 
 
 class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.where_clause_suffix = """
         AND d.NAME IN ('test_schema1', 'test_schema2')
@@ -217,8 +216,7 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -226,6 +224,24 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
             extractor = HiveTableMetadataExtractor()
             extractor.init(self.conf)
             self.assertTrue(self.where_clause_suffix in extractor.sql_stmt)
+
+    def test_hive_sql_statement_with_custom_sql(self) -> None:
+        """
+        Test Extraction by providing a custom sql
+        :return:
+        """
+        with patch.object(SQLAlchemyExtractor, '_get_connection'):
+            config_dict = {
+                HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY: self.where_clause_suffix,
+                'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
+                    'TEST_CONNECTION',
+                HiveTableMetadataExtractor.EXTRACT_SQL:
+                    'select sth for test {where_clause_suffix}'
+            }
+            conf = ConfigFactory.from_dict(config_dict)
+            extractor = HiveTableMetadataExtractor()
+            extractor.init(conf)
+            self.assertTrue('select sth for test' in extractor.sql_stmt)
 
 
 if __name__ == '__main__':

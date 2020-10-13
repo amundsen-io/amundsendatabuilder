@@ -1,14 +1,16 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import copy
-from typing import Union, Dict, Any  # noqa: F401
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
+from typing import Any, List, Optional
+
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
-class User(Neo4jCsvSerializable):
-    # type: (...) -> None
+class User(GraphSerializable):
     """
     User model. This model doesn't define any relationship.
     """
@@ -23,7 +25,7 @@ class User(Neo4jCsvSerializable):
     USER_NODE_EMPLOYEE_TYPE = 'employee_type'
     USER_NODE_MANAGER_EMAIL = 'manager_email'
     USER_NODE_SLACK_ID = 'slack_id'
-    USER_NODE_IS_ACTIVE = 'is_active{}'.format(UNQUOTED_SUFFIX)  # bool value needs to be unquoted when publish to neo4j
+    USER_NODE_IS_ACTIVE = 'is_active'  # bool value needs to be unquoted when publish to neo4j
     USER_NODE_UPDATED_AT = 'updated_at'
     USER_NODE_ROLE_NAME = 'role_name'
 
@@ -31,22 +33,21 @@ class User(Neo4jCsvSerializable):
     MANAGER_USER_RELATION_TYPE = 'MANAGE'
 
     def __init__(self,
-                 email,  # type: str
-                 first_name='',  # type: str
-                 last_name='',  # type: str
-                 name='',  # type: str
-                 github_username='',  # type: str
-                 team_name='',  # type: str
-                 employee_type='',  # type: str
-                 manager_email='',  # type: str
-                 slack_id='',  # type: str
-                 is_active=True,  # type: bool
-                 updated_at=0,  # type: int
-                 role_name='',  # type: str
-                 do_not_update_empty_attribute=False,  # type: bool
-                 **kwargs  # type: Dict
-                 ):
-        # type: (...) -> None
+                 email: str,
+                 first_name: str = '',
+                 last_name: str = '',
+                 name: str = '',
+                 github_username: str = '',
+                 team_name: str = '',
+                 employee_type: str = '',
+                 manager_email: str = '',
+                 slack_id: str = '',
+                 is_active: bool = True,
+                 updated_at: int = 0,
+                 role_name: str = '',
+                 do_not_update_empty_attribute: bool = False,
+                 **kwargs: Any
+                 ) -> None:
         """
         This class models user node for Amundsen people.
 
@@ -90,16 +91,14 @@ class User(Neo4jCsvSerializable):
         self._node_iter = iter(self.create_nodes())
         self._rel_iter = iter(self.create_relation())
 
-    def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Optional[GraphNode]:
         # return the string representation of the data
         try:
             return next(self._node_iter)
         except StopIteration:
             return None
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Optional[GraphRelationship]:
         """
         :return:
         """
@@ -110,67 +109,71 @@ class User(Neo4jCsvSerializable):
 
     @classmethod
     def get_user_model_key(cls,
-                           email=None):
-        # type: (...) -> str
+                           email: str=None
+                           ) -> str:
         if not email:
             return ''
         return User.USER_NODE_KEY_FORMAT.format(email=email)
 
-    def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+    def create_nodes(self) -> List[GraphNode]:
         """
         Create a list of Neo4j node records
         :return:
         """
-        result_node = {
-            NODE_KEY: User.get_user_model_key(email=self.email),
-            NODE_LABEL: User.USER_NODE_LABEL,
+
+        node_attributes = {
             User.USER_NODE_EMAIL: self.email,
             User.USER_NODE_IS_ACTIVE: self.is_active,
         }
 
-        result_node[User.USER_NODE_FIRST_NAME] = self.first_name if self.first_name else ''
-        result_node[User.USER_NODE_LAST_NAME] = self.last_name if self.last_name else ''
-        result_node[User.USER_NODE_FULL_NAME] = self.name if self.name else ''
-        result_node[User.USER_NODE_GITHUB_NAME] = self.github_username if self.github_username else ''
-        result_node[User.USER_NODE_TEAM] = self.team_name if self.team_name else ''
-        result_node[User.USER_NODE_EMPLOYEE_TYPE] = self.employee_type if self.employee_type else ''
-        result_node[User.USER_NODE_SLACK_ID] = self.slack_id if self.slack_id else ''
-        result_node[User.USER_NODE_ROLE_NAME] = self.role_name if self.role_name else ''
+        node_attributes[User.USER_NODE_FIRST_NAME] = self.first_name if self.first_name else ''
+        node_attributes[User.USER_NODE_LAST_NAME] = self.last_name if self.last_name else ''
+        node_attributes[User.USER_NODE_FULL_NAME] = self.name if self.name else ''
+        node_attributes[User.USER_NODE_GITHUB_NAME] = self.github_username if self.github_username else ''
+        node_attributes[User.USER_NODE_TEAM] = self.team_name if self.team_name else ''
+        node_attributes[User.USER_NODE_EMPLOYEE_TYPE] = self.employee_type if self.employee_type else ''
+        node_attributes[User.USER_NODE_SLACK_ID] = self.slack_id if self.slack_id else ''
+        node_attributes[User.USER_NODE_ROLE_NAME] = self.role_name if self.role_name else ''
 
         if self.updated_at:
-            result_node[User.USER_NODE_UPDATED_AT] = self.updated_at
+            node_attributes[User.USER_NODE_UPDATED_AT] = self.updated_at
         elif not self.do_not_update_empty_attribute:
-            result_node[User.USER_NODE_UPDATED_AT] = 0
+            node_attributes[User.USER_NODE_UPDATED_AT] = 0
 
         if self.attrs:
             for k, v in self.attrs.items():
-                if k not in result_node:
-                    result_node[k] = v
+                if k not in node_attributes:
+                    node_attributes[k] = v
 
         if self.do_not_update_empty_attribute:
-            for k, v in list(result_node.items()):
+            for k, v in list(node_attributes.items()):
                 if not v:
-                    del result_node[k]
+                    del node_attributes[k]
 
-        return [result_node]
+        node = GraphNode(
+            key=User.get_user_model_key(email=self.email),
+            label=User.USER_NODE_LABEL,
+            attributes=node_attributes
+        )
 
-    def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+        return [node]
+
+    def create_relation(self) -> List[GraphRelationship]:
         if self.manager_email:
             # only create the relation if the manager exists
-            return [{
-                RELATION_START_KEY: User.get_user_model_key(email=self.email),
-                RELATION_START_LABEL: User.USER_NODE_LABEL,
-                RELATION_END_KEY: self.get_user_model_key(email=self.manager_email),
-                RELATION_END_LABEL: User.USER_NODE_LABEL,
-                RELATION_TYPE: User.USER_MANAGER_RELATION_TYPE,
-                RELATION_REVERSE_TYPE: User.MANAGER_USER_RELATION_TYPE
-            }]
+            relationship = GraphRelationship(
+                start_key=User.get_user_model_key(email=self.email),
+                start_label=User.USER_NODE_LABEL,
+                end_label=User.USER_NODE_LABEL,
+                end_key=self.get_user_model_key(email=self.manager_email),
+                type=User.USER_MANAGER_RELATION_TYPE,
+                reverse_type=User.MANAGER_USER_RELATION_TYPE,
+                attributes={}
+            )
+            return [relationship]
         return []
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'User({!r}, {!r}, {!r}, {!r}, {!r}, ' \
                '{!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.first_name,
                                                                   self.last_name,

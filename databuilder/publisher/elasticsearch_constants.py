@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import textwrap
 
 # Documentation: https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
@@ -62,7 +65,13 @@ TABLE_ELASTICSEARCH_INDEX_MAPPING = textwrap.dedent(
               "type": "keyword"
             },
             "cluster": {
-              "type": "text"
+              "type": "text",
+              "analyzer": "simple",
+              "fields": {
+                "raw": {
+                  "type": "keyword"
+                }
+              }
             },
             "database": {
               "type": "text",

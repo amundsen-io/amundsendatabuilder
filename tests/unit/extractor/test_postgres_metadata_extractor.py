@@ -1,9 +1,12 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 import unittest
 
 from mock import patch, MagicMock
 from pyhocon import ConfigFactory
-from typing import Any, Dict  # noqa: F401
+from typing import Any, Dict
 
 from databuilder.extractor.postgres_metadata_extractor import PostgresMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
@@ -11,24 +14,19 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 
 class TestPostgresMetadataExtractor(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
             'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
             'TEST_CONNECTION',
-            'extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.CLUSTER_KEY):
-            'MY_CLUSTER',
-            'extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME):
-            False,
-            'extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.DATABASE_KEY):
-            'postgres'
+            PostgresMetadataExtractor.CLUSTER_KEY: 'MY_CLUSTER',
+            PostgresMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME: False,
+            PostgresMetadataExtractor.DATABASE_KEY: 'postgres'
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_extraction_with_empty_query_result(self):
-        # type: () -> None
+    def test_extraction_with_empty_query_result(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -39,8 +37,7 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
             results = extractor.extract()
             self.assertEqual(results, None)
 
-    def test_extraction_with_single_result(self):
-        # type: () -> None
+    def test_extraction_with_single_result(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -50,7 +47,7 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
                      'name': 'test_table',
                      'description': 'a table for testing',
                      'cluster':
-                     self.conf['extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.CLUSTER_KEY)]
+                     self.conf[PostgresMetadataExtractor.CLUSTER_KEY]
                      }
 
             sql_execute.return_value = [
@@ -100,8 +97,7 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
 
-    def test_extraction_with_multiple_result(self):
-        # type: () -> None
+    def test_extraction_with_multiple_result(self) -> None:
         with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
             connection = MagicMock()
             mock_connection.return_value = connection
@@ -111,21 +107,21 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
                      'name': 'test_table1',
                      'description': 'test table 1',
                      'cluster':
-                     self.conf['extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.CLUSTER_KEY)]
+                     self.conf[PostgresMetadataExtractor.CLUSTER_KEY]
                      }
 
             table1 = {'schema': 'test_schema1',
                       'name': 'test_table2',
                       'description': 'test table 2',
                       'cluster':
-                      self.conf['extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.CLUSTER_KEY)]
+                      self.conf[PostgresMetadataExtractor.CLUSTER_KEY]
                       }
 
             table2 = {'schema': 'test_schema2',
                       'name': 'test_table3',
                       'description': 'test table 3',
                       'cluster':
-                      self.conf['extractor.postgres_metadata.{}'.format(PostgresMetadataExtractor.CLUSTER_KEY)]
+                      self.conf[PostgresMetadataExtractor.CLUSTER_KEY]
                       }
 
             sql_execute.return_value = [
@@ -185,8 +181,7 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
             extractor.init(self.conf)
 
             expected = TableMetadata('postgres',
-                                     self.conf['extractor.postgres_metadata.{}'.format(
-                                         PostgresMetadataExtractor.CLUSTER_KEY)],
+                                     self.conf[PostgresMetadataExtractor.CLUSTER_KEY],
                                      'test_schema1', 'test_table1', 'test table 1',
                                      [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0),
                                       ColumnMetadata('col_id2', 'description of col_id2', 'bigint', 1),
@@ -197,16 +192,14 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
             expected = TableMetadata('postgres',
-                                     self.conf['extractor.postgres_metadata.{}'.format(
-                                         PostgresMetadataExtractor.CLUSTER_KEY)],
+                                     self.conf[PostgresMetadataExtractor.CLUSTER_KEY],
                                      'test_schema1', 'test_table2', 'test table 2',
                                      [ColumnMetadata('col_name', 'description of col_name', 'varchar', 0),
                                       ColumnMetadata('col_name2', 'description of col_name2', 'varchar', 1)])
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
 
             expected = TableMetadata('postgres',
-                                     self.conf['extractor.postgres_metadata.{}'.format(
-                                         PostgresMetadataExtractor.CLUSTER_KEY)],
+                                     self.conf[PostgresMetadataExtractor.CLUSTER_KEY],
                                      'test_schema2', 'test_table3', 'test table 3',
                                      [ColumnMetadata('col_id3', 'description of col_id3', 'varchar', 0),
                                       ColumnMetadata('col_name3', 'description of col_name3',
@@ -216,15 +209,15 @@ class TestPostgresMetadataExtractor(unittest.TestCase):
             self.assertIsNone(extractor.extract())
             self.assertIsNone(extractor.extract())
 
-    def _union(self, target, extra):
-        # type: (Dict[Any, Any], Dict[Any, Any]) -> Dict[Any, Any]
+    def _union(self,
+               target: Dict[Any, Any],
+               extra: Dict[Any, Any]) -> Dict[Any, Any]:
         target.update(extra)
         return target
 
 
 class TestPostgresMetadataExtractorWithWhereClause(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.where_clause_suffix = """
         where table_schema in ('public') and table_name = 'movies'
@@ -237,8 +230,7 @@ class TestPostgresMetadataExtractorWithWhereClause(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -250,8 +242,7 @@ class TestPostgresMetadataExtractorWithWhereClause(unittest.TestCase):
 
 class TestPostgresMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is specified
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.cluster_key = "not_master"
 
@@ -263,8 +254,7 @@ class TestPostgresMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -276,8 +266,7 @@ class TestPostgresMetadataExtractorClusterKeyNoTableCatalog(unittest.TestCase):
 
 class TestPostgresMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is false and CLUSTER_KEY is NOT specified
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
@@ -287,8 +276,7 @@ class TestPostgresMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase)
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """
@@ -300,8 +288,7 @@ class TestPostgresMetadataExtractorNoClusterKeyNoTableCatalog(unittest.TestCase)
 
 class TestPostgresMetadataExtractorTableCatalogEnabled(unittest.TestCase):
     # test when USE_CATALOG_AS_CLUSTER_NAME is true (CLUSTER_KEY should be ignored)
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
         self.cluster_key = "not_master"
 
@@ -313,8 +300,7 @@ class TestPostgresMetadataExtractorTableCatalogEnabled(unittest.TestCase):
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_sql_statement(self):
-        # type: () -> None
+    def test_sql_statement(self) -> None:
         """
         Test Extraction with empty result from query
         """

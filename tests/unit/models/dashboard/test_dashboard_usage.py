@@ -1,38 +1,46 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
+from typing import Any, Dict
+
 from databuilder.models.dashboard.dashboard_usage import DashboardUsage
-from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
+from databuilder.models.graph_serializable import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.serializers import neo4_serializer
 
 
 class TestDashboardOwner(unittest.TestCase):
 
-    def test_dashboard_usage_user_nodes(self):
-        # type: () -> None
+    def test_dashboard_usage_user_nodes(self) -> None:
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123, cluster='cluster_id',
                                          product='product_id', should_create_user_node=True)
 
         actual = dashboard_usage.create_next_node()
-        expected = {'is_active:UNQUOTED': True,
-                    'last_name': '',
-                    'full_name': '',
-                    'employee_type': '',
-                    'first_name': '',
-                    'updated_at': 0,
-                    'LABEL': 'User',
-                    'slack_id': '',
-                    'KEY': 'foo@bar.com',
-                    'github_username': '',
-                    'team_name': '',
-                    'email': 'foo@bar.com',
-                    'role_name': ''}
+        actual_serialized = neo4_serializer.serialize_node(actual)
+        expected: Dict[str, Any] = {
+            'is_active:UNQUOTED': True,
+            'last_name': '',
+            'full_name': '',
+            'employee_type': '',
+            'first_name': '',
+            'updated_at:UNQUOTED': 0,
+            'LABEL': 'User',
+            'slack_id': '',
+            'KEY': 'foo@bar.com',
+            'github_username': '',
+            'team_name': '',
+            'email': 'foo@bar.com',
+            'role_name': ''
+        }
 
-        self.assertDictEqual(expected, actual)
+        assert actual is not None
+        self.assertDictEqual(expected, actual_serialized)
         self.assertIsNone(dashboard_usage.create_next_node())
 
-    def test_dashboard_usage_no_user_nodes(self):
-        # type: () -> None
+    def test_dashboard_usage_no_user_nodes(self) -> None:
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123,
                                          should_create_user_node=False, cluster='cluster_id',
@@ -40,20 +48,23 @@ class TestDashboardOwner(unittest.TestCase):
 
         self.assertIsNone(dashboard_usage.create_next_node())
 
-    def test_dashboard_owner_relations(self):
-        # type: () -> None
+    def test_dashboard_owner_relations(self) -> None:
         dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
                                          email='foo@bar.com', view_count=123, cluster='cluster_id',
                                          product='product_id')
 
         actual = dashboard_usage.create_next_relation()
-        expected = {'read_count:UNQUOTED': 123,
-                    RELATION_END_KEY: 'foo@bar.com',
-                    RELATION_START_LABEL: 'Dashboard',
-                    RELATION_END_LABEL: 'User',
-                    RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
-                    RELATION_TYPE: 'READ_BY',
-                    RELATION_REVERSE_TYPE: 'READ'}
+        actual_serialized = neo4_serializer.serialize_relationship(actual)
+        expected: Dict[str, Any] = {
+            'read_count:UNQUOTED': 123,
+            RELATION_END_KEY: 'foo@bar.com',
+            RELATION_START_LABEL: 'Dashboard',
+            RELATION_END_LABEL: 'User',
+            RELATION_START_KEY: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+            RELATION_TYPE: 'READ_BY',
+            RELATION_REVERSE_TYPE: 'READ'
+        }
 
-        self.assertDictEqual(expected, actual)
+        assert actual is not None
+        self.assertDictEqual(expected, actual_serialized)
         self.assertIsNone(dashboard_usage.create_next_relation())

@@ -1,10 +1,13 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import copy
 import logging
 
 import requests
 from jsonpath_rw import parse
 from retrying import retry
-from typing import List, Dict, Any, Union, Iterator, Callable  # noqa: F401
+from typing import List, Dict, Any, Union, Iterator, Callable
 
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
 
@@ -48,20 +51,18 @@ class RestApiQuery(BaseRestApiQuery):
     """
 
     def __init__(self,
-                 query_to_join,  # type: BaseRestApiQuery
-                 url,  # type: str
-                 params,  # type: Dict[str, Any]
-                 json_path,  # type: str
-                 field_names,  # type: List[str]
-                 fail_no_result=False,  # type: bool
-                 skip_no_result=False,  # type: bool
-                 json_path_contains_or=False,  # type: bool
-                 can_skip_failure=None,  # type: Callable,
-                 **kwargs  # type: Any
-                 ):
-        # type: (...) -> None
+                 query_to_join: BaseRestApiQuery,
+                 url: str,
+                 params: Dict[str, Any],
+                 json_path: str,
+                 field_names: List[str],
+                 fail_no_result: bool=False,
+                 skip_no_result: bool=False,
+                 json_path_contains_or: bool=False,
+                 can_skip_failure: Callable=None,
+                 **kwargs: Any
+                 ) -> None:
         """
-
         :param query_to_join: Previous query to JOIN. RestApiQuerySeed can be used for the first query
         :param url: URL string. It will use <str>.format operation using record that comes from previous query to
         substitute any variable that URL has.
@@ -128,8 +129,7 @@ class RestApiQuery(BaseRestApiQuery):
         self._can_skip_failure = can_skip_failure
         self._more_pages = False
 
-    def execute(self):  # noqa: C901
-        # type: () -> Iterator[Dict[str, Any]]
+    def execute(self) -> Iterator[Dict[str, Any]]:  # noqa: C901
         self._authenticate()
 
         for record_dict in self._inner_rest_api_query.execute():
@@ -147,13 +147,13 @@ class RestApiQuery(BaseRestApiQuery):
                         continue
                     raise e
 
-                response_json = response.json()  # type: Union[List[Any], Dict[str, Any]]
+                response_json: Union[List[Any], Dict[str, Any]] = response.json()
 
                 # value extraction via JSON Path
-                result_list = [match.value for match in self._jsonpath_expr.find(response_json)]  # type: List[Any]
+                result_list: List[Any] = [match.value for match in self._jsonpath_expr.find(response_json)]
 
                 if not result_list:
-                    log_msg = 'No result from URL: {url}  , JSONPATH: {json_path} , response payload: {response}' \
+                    log_msg = 'No result from URL: {url}, JSONPATH: {json_path} , response payload: {response}' \
                         .format(url=self._url, json_path=self._json_path, response=response_json)
                     LOGGER.info(log_msg)
 
@@ -172,6 +172,9 @@ class RestApiQuery(BaseRestApiQuery):
                                                                 json_path_contains_or=self._json_path_contains_or)
 
                 for sub_record in sub_records:
+                    if not sub_record or len(sub_record) != len(self._field_names):
+                        # skip the record
+                        continue
                     record_dict = copy.deepcopy(record_dict)
                     for field_name in self._field_names:
                         record_dict[field_name] = sub_record.pop(0)
@@ -179,10 +182,7 @@ class RestApiQuery(BaseRestApiQuery):
 
                 self._post_process(response)
 
-    def _preprocess_url(self,
-                        record,  # type: Dict[str, Any]
-                        ):
-        # type: (...) -> str
+    def _preprocess_url(self, record: Dict[str, Any]) -> str:
         """
         Performs variable substitution using a dict comes as a record from previous query.
         :param record:
@@ -191,10 +191,7 @@ class RestApiQuery(BaseRestApiQuery):
         return self._url.format(**record)
 
     @retry(stop_max_attempt_number=5, wait_exponential_multiplier=1000, wait_exponential_max=10000)
-    def _send_request(self,
-                      url  # type: str
-                      ):
-        # type: (...) -> requests.Response
+    def _send_request(self, url: str) -> requests.Response:
         """
         Performs HTTP GET operation with retry on failure.
         :param url:
@@ -207,10 +204,10 @@ class RestApiQuery(BaseRestApiQuery):
 
     @classmethod
     def _compute_sub_records(cls,
-                             result_list,  # type: List
-                             field_names,  # type: List[str]
-                             json_path_contains_or=False,  # type: bool
-                             ):
+                             result_list: List[Any],
+                             field_names: List[str],
+                             json_path_contains_or: bool=False,
+                             ) -> List[List[Any]]:
         """
         The behavior of JSONPATH is different when it's extracting multiple fields using AND(,) vs OR(|)
         If it uses AND(,), first n records will be first record. If it uses OR(|), it will list first field of all
@@ -235,7 +232,6 @@ class RestApiQuery(BaseRestApiQuery):
         :param json_path_contains_or:
         :return:
         """
-        # type: (...) -> List[List[Any]]
 
         if not field_names:
             raise Exception('Field names should not be empty')
@@ -251,18 +247,14 @@ class RestApiQuery(BaseRestApiQuery):
 
         return result
 
-    def _post_process(self,
-                      response,  # type: requests.Response
-                      ):
-        # type: (...) -> None
+    def _post_process(self, response: requests.Response) -> None:
         """
         Extension point for post-processing such thing as pagination
         :return:
         """
         pass
 
-    def _authenticate(self):
-        # type: (...) -> None
+    def _authenticate(self) -> None:
         """
         Extension point to support other authentication mechanism such as Oauth.
         Subclass this class and implement authentication process.

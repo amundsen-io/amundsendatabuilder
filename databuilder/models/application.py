@@ -1,14 +1,16 @@
-from typing import Any, Dict, List, Union  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from typing import List, Union
+
+from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
-class Application(Neo4jCsvSerializable):
+
+class Application(GraphSerializable):
     """
     Application-table matching model (Airflow task and table)
     """
@@ -26,16 +28,15 @@ class Application(Neo4jCsvSerializable):
     TABLE_APPLICATION_RELATION_TYPE = 'DERIVED_FROM'
 
     def __init__(self,
-                 task_id,  # type: str
-                 dag_id,  # type: str,
-                 application_url_template,  # type: str
-                 db_name='hive',  # type: str
-                 cluster='gold',  # type: str
-                 schema='',  # type: str
-                 table_name='',  # type: str
-                 exec_date='',  # type: str
-                 ):
-        # type: (...) -> None
+                 task_id: str,
+                 dag_id: str,
+                 application_url_template: str,
+                 db_name: str = 'hive',
+                 cluster: str = 'gold',
+                 schema: str = '',
+                 table_name: str = '',
+                 exec_date: str = '',
+                 ) -> None:
         self.task = task_id
 
         # todo: need to modify this hack
@@ -47,38 +48,33 @@ class Application(Neo4jCsvSerializable):
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
 
-    def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[GraphNode, None]:
         # creates new node
         try:
             return next(self._node_iter)
         except StopIteration:
             return None
 
-    def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
             return next(self._relation_iter)
         except StopIteration:
             return None
 
-    def get_table_model_key(self):
-        # type: (...) -> str
+    def get_table_model_key(self) -> str:
         # returns formatted string for table name
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
                                                      schema=self.schema,
                                                      tbl=self.table,
                                                      cluster=self.cluster)
 
-    def get_application_model_key(self):
-        # type: (...) -> str
+    def get_application_model_key(self) -> str:
         # returns formatting string for application of type dag
         return Application.APPLICATION_KEY_FORMAT.format(cluster=self.cluster,
                                                          dag=self.dag,
                                                          task=self.task)
 
-    def create_nodes(self):
-        # type: () -> List[GraphNode]
+    def create_nodes(self) -> List[GraphNode]:
         """
         Create a list of Neo4j node records
         :return:
@@ -93,9 +89,9 @@ class Application(Neo4jCsvSerializable):
             task_id=self.task
         )
         application_node = GraphNode(
-            id=self.get_application_model_key(),
-            labels=[Application.APPLICATION_LABEL],
-            node_attributes={
+            key=self.get_application_model_key(),
+            label=Application.APPLICATION_LABEL,
+            attributes={
                 Application.APPLICATION_URL_NAME: self.application_url,
                 Application.APPLICATION_NAME: Application.APPLICATION_TYPE,
                 Application.APPLICATION_DESCRIPTION: application_description,
@@ -106,8 +102,7 @@ class Application(Neo4jCsvSerializable):
 
         return results
 
-    def create_relation(self):
-        # type: () -> List[GraphRelationship]
+    def create_relation(self) -> List[GraphRelationship]:
         """
         Create a list of relations between application and table nodes
         :return:
@@ -118,7 +113,8 @@ class Application(Neo4jCsvSerializable):
             end_key=self.get_application_model_key(),
             end_label=Application.APPLICATION_LABEL,
             type=Application.TABLE_APPLICATION_RELATION_TYPE,
-            reverse_type=Application.APPLICATION_TABLE_RELATION_TYPE
+            reverse_type=Application.APPLICATION_TABLE_RELATION_TYPE,
+            attributes={}
         )
         results = [graph_relationship]
         return results

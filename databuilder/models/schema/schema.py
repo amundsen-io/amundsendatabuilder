@@ -1,19 +1,24 @@
-from typing import Dict, Any, Union, Iterator  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
 
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY)
+from typing import Any, Union, Iterator
+
+from databuilder.models.graph_serializable import (GraphSerializable)
 from databuilder.models.schema.schema_constant import SCHEMA_NODE_LABEL, SCHEMA_NAME_ATTR
 from databuilder.models.table_metadata import DescriptionMetadata
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
-class SchemaModel(Neo4jCsvSerializable):
+class SchemaModel(GraphSerializable):
 
     def __init__(self,
-                 schema_key,
-                 schema,
-                 description=None,
-                 description_source=None,
-                 **kwargs):
+                 schema_key: str,
+                 schema: str,
+                 description: str=None,
+                 description_source: str=None,
+                 **kwargs: Any
+                 ) -> None:
         self._schema_key = schema_key
         self._schema = schema
         self._description = DescriptionMetadata.create_description_metadata(text=description,
@@ -22,36 +27,36 @@ class SchemaModel(Neo4jCsvSerializable):
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[GraphNode, None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_node_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            NODE_LABEL: SCHEMA_NODE_LABEL,
-            NODE_KEY: self._schema_key,
-            SCHEMA_NAME_ATTR: self._schema,
-        }
+    def _create_node_iterator(self) -> Iterator[GraphNode]:
+        node = GraphNode(
+            key=self._schema_key,
+            label=SCHEMA_NODE_LABEL,
+            attributes={
+                SCHEMA_NAME_ATTR: self._schema,
+            }
+        )
+        yield node
 
         if self._description:
-            yield self._description.get_node_dict(self._get_description_node_key())
+            yield self._description.get_node(self._get_description_node_key())
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _get_description_node_key(self):
-        return '{}/{}'.format(self._schema_key, self._description.get_description_id())
+    def _get_description_node_key(self) -> str:
+        desc = self._description.get_description_id() if self._description is not None else ''
+        return '{}/{}'.format(self._schema_key, desc)
 
-    def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
         if self._description:
             yield self._description.get_relation(start_node=SCHEMA_NODE_LABEL,
                                                  start_key=self._schema_key,

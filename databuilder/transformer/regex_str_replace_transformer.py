@@ -1,7 +1,9 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
-import six
-from pyhocon import ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigTree
+from typing import Any
 
 from databuilder.transformer.base_transformer import Transformer
 
@@ -21,25 +23,20 @@ class RegexStrReplaceTransformer(Transformer):
 
     Any non-string values will be ignored.
     """
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+
+    def init(self, conf: ConfigTree) -> None:
         self._regex_replace_tuples = conf.get_list(REGEX_REPLACE_TUPLE_LIST)
         self._attribute_name = conf.get_string(ATTRIBUTE_NAME)
 
-    def transform(self, record):
-        # type: (Any) -> Any
+    def transform(self, record: Any) -> Any:
 
         if isinstance(record, dict):
             val = record.get(self._attribute_name)
         else:
             val = getattr(record, self._attribute_name)
 
-        if val is None or not isinstance(val, six.string_types):
+        if val is None or not isinstance(val, str):
             return record
-
-        # Encode unicode string
-        if six.PY2:
-            val = val.encode('utf-8', 'ignore')
 
         for regex_replace_tuple in self._regex_replace_tuples:
             val = val.replace(regex_replace_tuple[0], regex_replace_tuple[1])
@@ -51,6 +48,5 @@ class RegexStrReplaceTransformer(Transformer):
 
         return record
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'transformer.regex_str_replace'

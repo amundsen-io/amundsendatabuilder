@@ -1,8 +1,11 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import csv
 import logging
 
-from pyhocon import ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigTree
+from typing import Any
 
 from databuilder.loader.base_loader import Loader
 
@@ -11,8 +14,8 @@ class FileSystemCSVLoader(Loader):
     """
     Loader class to write csv files to Local FileSystem
     """
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+
+    def init(self, conf: ConfigTree) -> None:
         """
         Initialize file handlers from conf
         :param conf:
@@ -23,8 +26,7 @@ class FileSystemCSVLoader(Loader):
 
         self.file_handler = open(self.file_path, self.file_mode)
 
-    def load(self, record):
-        # type: (Any) -> None
+    def load(self, record: Any) -> None:
         """
         Write record object as csv to file
         :param record:
@@ -41,8 +43,7 @@ class FileSystemCSVLoader(Loader):
         self.writer.writerow(vars(record))
         self.file_handler.flush()
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
         """
         Close file handlers
         :return:
@@ -54,6 +55,5 @@ class FileSystemCSVLoader(Loader):
             logging.warning("Failed trying to close a file handler! %s",
                             str(e))
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return "loader.filesystem.csv"

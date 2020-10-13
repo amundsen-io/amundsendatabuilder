@@ -1,7 +1,10 @@
-import logging
-from typing import Any, Dict  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
 
-from pyhocon import ConfigTree  # noqa: F401
+import logging
+from typing import Any, Dict
+
+from pyhocon import ConfigTree
 
 from databuilder.transformer.base_transformer import Transformer
 
@@ -16,12 +19,10 @@ class RemoveFieldTransformer(Transformer):
 
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         self._field_names = conf.get_list(FIELD_NAMES)
 
-    def transform(self, record):
-        # type: (Dict[str, Any]) -> Dict[str, Any]
+    def transform(self, record: Dict[str, Any]) -> Dict[str, Any]:
 
         for k in self._field_names:
             if k in record:
@@ -29,6 +30,5 @@ class RemoveFieldTransformer(Transformer):
 
         return record
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'transformer.remove_field'

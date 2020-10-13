@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 import unittest
 
@@ -11,7 +14,7 @@ logging.basicConfig(level=logging.INFO)
 
 class TestModePaginatedRestApiQuery(unittest.TestCase):
 
-    def test_pagination(self):
+    def test_pagination(self) -> None:
         seed_record = [{'foo1': 'bar1'},
                        {'foo2': 'bar2'}]
         seed_query = RestApiQuerySeed(seed_record=seed_record)
@@ -27,11 +30,13 @@ class TestModePaginatedRestApiQuery(unittest.TestCase):
                 {'foo': [{'name': 'v3'}]},
                 {'foo': [{'name': 'v4'}, {'name': 'v5'}]},
                 {'foo': [{'name': 'v4'}, {'name': 'v5'}]},
+                {},
+                {}
             ]
 
             query = ModePaginatedRestApiQuery(query_to_join=seed_query, url='foobar', params={},
                                               json_path=json_path, field_names=field_names,
-                                              pagination_json_path='foo[*]',
+                                              skip_no_result=True, pagination_json_path='foo[*]',
                                               max_record_size=2)
 
             expected_list = [
@@ -52,7 +57,7 @@ class TestModePaginatedRestApiQuery(unittest.TestCase):
             ]
             mock_get.assert_has_calls(calls, any_order=True)
 
-    def test_no_pagination(self):
+    def test_no_pagination(self) -> None:
         seed_record = [{'foo1': 'bar1'},
                        {'foo2': 'bar2'},
                        {'foo3': 'bar3'}]

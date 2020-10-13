@@ -1,11 +1,12 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import abc
-import six
 
-from pyhocon import ConfigTree, ConfigFactory  # noqa: F401
+from pyhocon import ConfigTree, ConfigFactory
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Scoped(object):
+class Scoped(object, metaclass=abc.ABCMeta):
     _EMPTY_CONFIG = ConfigFactory.from_dict({})
     """
     An interface for class that works with scoped (nested) config.
@@ -28,8 +29,7 @@ class Scoped(object):
     """
 
     @abc.abstractmethod
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         """
         All scoped instance is expected to be lazily initialized. Means that
         __init__ should not have any heavy operation such as service call.
@@ -45,8 +45,7 @@ class Scoped(object):
         pass
 
     @abc.abstractmethod
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         """
         A scope for the config. Typesafe config supports nested config.
         Scope, string, is used to basically peel off nested config
@@ -54,8 +53,7 @@ class Scoped(object):
         """
         return ''
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
         """
         Anything that needs to be cleaned up after the use of the instance.
         :return: None
@@ -63,8 +61,7 @@ class Scoped(object):
         pass
 
     @classmethod
-    def get_scoped_conf(cls, conf, scope):
-        # type: (ConfigTree, str) -> ConfigTree
+    def get_scoped_conf(cls, conf: ConfigTree, scope: str) -> ConfigTree:
         """
         Convenient method to provide scoped method.
 

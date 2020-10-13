@@ -1,9 +1,12 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 from datetime import datetime
 
-from pyhocon import ConfigFactory  # noqa: F401
-from pyhocon import ConfigTree  # noqa: F401
-from typing import Any, Dict  # noqa: F401
+from pyhocon import ConfigFactory
+from pyhocon import ConfigTree
+from typing import Any, Dict
 
 from databuilder.transformer.base_transformer import Transformer
 
@@ -19,24 +22,27 @@ class TimestampStringToEpoch(Transformer):
     """
     Transforms string timestamp into epoch
     """
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf.with_fallback(DEFAULT_CONFIG)
         self._timestamp_format = self._conf.get_string(TIMESTAMP_FORMAT)
         self._field_name = self._conf.get_string(FIELD_NAME)
 
-    def transform(self, record):
-        # type: (Dict[str, Any]) -> Dict[str, Any]
+    def transform(self, record: Dict[str, Any]) -> Dict[str, Any]:
         timestamp_str = record.get(self._field_name, '')
 
         if not timestamp_str:
             return record
 
-        utc_dt = datetime.strptime(timestamp_str, self._timestamp_format)
+        try:
+            utc_dt = datetime.strptime(timestamp_str, self._timestamp_format)
+        except ValueError:
+            # if the timestamp_str doesn't match format, no conversion, return initial result
+            record[self._field_name] = 0
+            return record
 
         record[self._field_name] = int((utc_dt - datetime(1970, 1, 1)).total_seconds())
         return record
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'transformer.timestamp_str_to_epoch'

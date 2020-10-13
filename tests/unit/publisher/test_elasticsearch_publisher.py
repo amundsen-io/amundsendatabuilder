@@ -1,6 +1,8 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import json
 from mock import MagicMock, mock_open, patch
-import six
 import unittest
 
 from pyhocon import ConfigFactory
@@ -11,8 +13,7 @@ from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 
 class TestElasticsearchPublisher(unittest.TestCase):
 
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         self.test_file_path = 'test_publisher_file.json'
         self.test_file_mode = 'r'
 
@@ -30,15 +31,11 @@ class TestElasticsearchPublisher(unittest.TestCase):
 
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_publish_with_no_data(self):
-        # type: () -> None
+    def test_publish_with_no_data(self) -> None:
         """
         Test Publish functionality with no data
         """
-        target = 'builtins.open'
-        if six.PY2:
-            target = '__builtin__.open'
-        with patch(target, mock_open(read_data='')) as mock_file:
+        with patch('builtins.open', mock_open(read_data='')) as mock_file:
             publisher = ElasticsearchPublisher()
             publisher.init(conf=Scoped.get_scoped_conf(conf=self.conf,
                                                        scope=publisher.get_scope()))
@@ -50,8 +47,7 @@ class TestElasticsearchPublisher(unittest.TestCase):
             # no calls should be made through elasticseach_client when there is no data
             self.assertTrue(self.mock_es_client.call_count == 0)
 
-    def test_publish_with_data_and_no_old_index(self):
-        # type: () -> None
+    def test_publish_with_data_and_no_old_index(self) -> None:
         """
         Test Publish functionality with data but no index in place
         """
@@ -59,10 +55,7 @@ class TestElasticsearchPublisher(unittest.TestCase):
                                 'KEY_DOESNOT_MATTER2': 'NO_VALUE2'})
         self.mock_es_client.indices.get_alias.return_value = {}
 
-        target = 'builtins.open'
-        if six.PY2:
-            target = '__builtin__.open'
-        with patch(target, mock_open(read_data=mock_data)) as mock_file:
+        with patch('builtins.open', mock_open(read_data=mock_data)) as mock_file:
             publisher = ElasticsearchPublisher()
             publisher.init(conf=Scoped.get_scoped_conf(conf=self.conf,
                                                        scope=publisher.get_scope()))
@@ -87,8 +80,7 @@ class TestElasticsearchPublisher(unittest.TestCase):
                 {'actions': [{"add": {"index": self.test_es_new_index, "alias": self.test_es_alias}}]}
             )
 
-    def test_publish_with_data_and_old_index(self):
-        # type: () -> None
+    def test_publish_with_data_and_old_index(self) -> None:
         """
         Test Publish functionality with data and with old_index in place
         """
@@ -96,10 +88,7 @@ class TestElasticsearchPublisher(unittest.TestCase):
                                 'KEY_DOESNOT_MATTER2': 'NO_VALUE2'})
         self.mock_es_client.indices.get_alias.return_value = {'test_old_index': 'DOES_NOT_MATTER'}
 
-        target = 'builtins.open'
-        if six.PY2:
-            target = '__builtin__.open'
-        with patch(target, mock_open(read_data=mock_data)) as mock_file:
+        with patch('builtins.open', mock_open(read_data=mock_data)) as mock_file:
             publisher = ElasticsearchPublisher()
             publisher.init(conf=Scoped.get_scoped_conf(conf=self.conf,
                                                        scope=publisher.get_scope()))

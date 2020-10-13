@@ -1,6 +1,9 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.generic_extractor import GenericExtractor
@@ -8,8 +11,7 @@ from databuilder.extractor.generic_extractor import GenericExtractor
 
 class TestGenericExtractor(unittest.TestCase):
 
-    def test_extraction_with_model_class(self):
-        # type: () -> None
+    def test_extraction_with_model_class(self) -> None:
         """
         Test Extraction using model class
         """
@@ -28,8 +30,7 @@ class TestGenericExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertEquals(result.timestamp, 10000000)
 
-    def test_extraction_without_model_class(self):
-        # type: () -> None
+    def test_extraction_without_model_class(self) -> None:
         """
         Test Extraction using model class
         """

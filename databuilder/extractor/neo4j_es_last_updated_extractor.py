@@ -1,8 +1,11 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import importlib
 import time
-from typing import Iterable, Any  # noqa: F401
+from typing import Any
 
-from pyhocon import ConfigTree  # noqa: F401
+from pyhocon import ConfigTree
 
 from databuilder.extractor.generic_extractor import GenericExtractor
 
@@ -11,8 +14,8 @@ class Neo4jEsLastUpdatedExtractor(GenericExtractor):
     """
     Extractor to extract last updated timestamp for neo4j and Es
     """
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+
+    def init(self, conf: ConfigTree) -> None:
         """
         Receives a list of dictionaries which is used for extraction
         :param conf:
@@ -32,8 +35,7 @@ class Neo4jEsLastUpdatedExtractor(GenericExtractor):
         else:
             raise RuntimeError('model class needs to be provided!')
 
-    def extract(self):
-        # type: () -> Any
+    def extract(self) -> Any:
         """
         Fetch one sql result row, convert to {model_class} if specified before
         returning.
@@ -45,6 +47,5 @@ class Neo4jEsLastUpdatedExtractor(GenericExtractor):
         except StopIteration:
             return None
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.neo4j_es_last_updated'

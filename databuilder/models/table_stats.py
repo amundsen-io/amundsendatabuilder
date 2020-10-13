@@ -1,13 +1,16 @@
-from typing import Any, Dict, List, Union  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+import ast
+from typing import List, Optional
 
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.table_metadata import ColumnMetadata
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
-class TableColumnStats(Neo4jCsvSerializable):
-    # type: (...) -> None
+class TableColumnStats(GraphSerializable):
+
     """
     Hive table stats model.
     Each instance represents one row of hive watermark result.
@@ -19,17 +22,16 @@ class TableColumnStats(Neo4jCsvSerializable):
     Column_STAT_RELATION_TYPE = 'STAT'
 
     def __init__(self,
-                 table_name,  # type: str
-                 col_name,  # type: str
-                 stat_name,  # type: str
-                 stat_val,  # type: str
-                 start_epoch,  # type: str
-                 end_epoch,  # type: str
-                 db='hive',  # type: str
-                 cluster='gold',  # type: str
-                 schema=None  # type: str
-                 ):
-        # type: (...) -> None
+                 table_name: str,
+                 col_name: str,
+                 stat_name: str,
+                 stat_val: str,
+                 start_epoch: str,
+                 end_epoch: str,
+                 db: str = 'hive',
+                 cluster: str = 'gold',
+                 schema: str = None
+                 ) -> None:
         if schema is None:
             self.schema, self.table = table_name.split('.')
         else:
@@ -41,27 +43,29 @@ class TableColumnStats(Neo4jCsvSerializable):
         self.end_epoch = end_epoch
         self.cluster = cluster
         self.stat_name = stat_name
+        try:
+            stat_val = ast.literal_eval(stat_val)
+        except ValueError:
+            stat_val = stat_val
         self.stat_val = stat_val
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
 
-    def create_next_node(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Optional[GraphNode]:
+
         # return the string representation of the data
         try:
             return next(self._node_iter)
         except StopIteration:
             return None
 
-    def create_next_relation(self):
-        # type: (...) -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Optional[GraphRelationship]:
         try:
             return next(self._relation_iter)
         except StopIteration:
             return None
 
-    def get_table_stat_model_key(self):
-        # type: (...) -> str
+    def get_table_stat_model_key(self) -> str:
         return TableColumnStats.KEY_FORMAT.format(db=self.db,
                                                   cluster=self.cluster,
                                                   schema=self.schema,
@@ -69,8 +73,7 @@ class TableColumnStats(Neo4jCsvSerializable):
                                                   col=self.col_name,
                                                   stat_name=self.stat_name)
 
-    def get_col_key(self):
-        # type: (...) -> str
+    def get_col_key(self) -> str:
         # no cluster, schema info from the input
         return ColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.db,
                                                        cluster=self.cluster,
@@ -78,34 +81,37 @@ class TableColumnStats(Neo4jCsvSerializable):
                                                        tbl=self.table,
                                                        col=self.col_name)
 
-    def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+    def create_nodes(self) -> List[GraphNode]:
         """
         Create a list of Neo4j node records
         :return:
         """
-        results = [{
-            NODE_KEY: self.get_table_stat_model_key(),
-            NODE_LABEL: TableColumnStats.LABEL,
-            'stat_val:UNQUOTED': self.stat_val,
-            'stat_name': self.stat_name,
-            'start_epoch': self.start_epoch,
-            'end_epoch': self.end_epoch,
-        }]
+        node = GraphNode(
+            key=self.get_table_stat_model_key(),
+            label=TableColumnStats.LABEL,
+            attributes={
+                'stat_val': self.stat_val,
+                'stat_name': self.stat_name,
+                'start_epoch': self.start_epoch,
+                'end_epoch': self.end_epoch,
+            }
+        )
+        results = [node]
         return results
 
-    def create_relation(self):
-        # type: () -> List[Dict[str, Any]]
+    def create_relation(self) -> List[GraphRelationship]:
         """
         Create a list of relation map between table stat record with original hive table
         :return:
         """
-        results = [{
-            RELATION_START_KEY: self.get_table_stat_model_key(),
-            RELATION_START_LABEL: TableColumnStats.LABEL,
-            RELATION_END_KEY: self.get_col_key(),
-            RELATION_END_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
-            RELATION_TYPE: TableColumnStats.STAT_Column_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: TableColumnStats.Column_STAT_RELATION_TYPE
-        }]
+        relationship = GraphRelationship(
+            start_key=self.get_table_stat_model_key(),
+            start_label=TableColumnStats.LABEL,
+            end_key=self.get_col_key(),
+            end_label=ColumnMetadata.COLUMN_NODE_LABEL,
+            type=TableColumnStats.STAT_Column_RELATION_TYPE,
+            reverse_type=TableColumnStats.Column_STAT_RELATION_TYPE,
+            attributes={}
+        )
+        results = [relationship]
         return results

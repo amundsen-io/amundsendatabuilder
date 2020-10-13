@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
 from databuilder.rest_api.rest_api_failure_handlers import HttpFailureSkipOnStatus
@@ -6,9 +9,7 @@ from mock import MagicMock
 
 class TestHttpFailureSkipOnStatus(unittest.TestCase):
 
-    def testSkip(self):
-        # typ: (...) -> None
-
+    def testSkip(self) -> None:
         failure_handler = HttpFailureSkipOnStatus([404, 400])
 
         exception = MagicMock()

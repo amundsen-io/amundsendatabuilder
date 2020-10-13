@@ -1,4 +1,7 @@
-from typing import List, Optional  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
+from typing import List, Optional, Union
 
 from databuilder.models.elasticsearch_document import ElasticsearchDocument
 
@@ -7,23 +10,23 @@ class DashboardESDocument(ElasticsearchDocument):
     """
     Schema for the ES dashboard ES document
     """
+
     def __init__(self,
-                 group_name,  # type: str
-                 name,  # type: str
-                 description,  # type: Union[str, None]
-                 total_usage,  # type: int
-                 product='',  # type: Optional[str]
-                 cluster='',  # type: Optional[str]
-                 group_description=None,  # type: Optional[str]
-                 query_names=None,  # type:  Union[List[str], None]
-                 group_url=None,  # type: Optional[str]
-                 url=None,  # type: Optional[str]
-                 uri=None,  # type: Optional[str]
-                 last_successful_run_timestamp=None,  # type: Optional[int]
-                 tags=None,  # type: Optional[list[str]]
-                 badges=None,  # type: Optional[list[str]]
-                 ):
-        # type: (...) -> None
+                 group_name: str,
+                 name: str,
+                 description: Union[str, None],
+                 total_usage: int,
+                 product: Optional[str] = '',
+                 cluster: Optional[str] = '',
+                 group_description: Optional[str] = None,
+                 query_names: Union[List[str], None] = None,
+                 group_url: Optional[str] = None,
+                 url: Optional[str] = None,
+                 uri: Optional[str] = None,
+                 last_successful_run_timestamp: Optional[int] = None,
+                 tags: Optional[List[str]] = None,
+                 badges: Optional[List[str]] = None,
+                 ) -> None:
         self.group_name = group_name
         self.name = name
         self.description = description

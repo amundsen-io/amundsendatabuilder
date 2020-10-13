@@ -1,16 +1,21 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 
-from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
+from typing import Optional, Any, Union, Iterator
 
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+from databuilder.models.graph_serializable import (
+    GraphSerializable)
+
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardChart(Neo4jCsvSerializable):
+class DashboardChart(GraphSerializable):
     """
     A model that encapsulate Dashboard's charts
     """
@@ -21,17 +26,17 @@ class DashboardChart(Neo4jCsvSerializable):
     CHART_REVERSE_RELATION_TYPE = 'CHART_OF'
 
     def __init__(self,
-                 dashboard_group_id,  # type: Optional[str]
-                 dashboard_id,  # type: Optional[str]
-                 query_id,  # type: str
-                 chart_id,  # type: str
-                 chart_name=None,  # type: Optional[str]
-                 chart_type=None,  # type: Optional[str]
-                 chart_url=None,  # type: Optional[str]
-                 product='',  # type: Optional[str]
-                 cluster='gold',  # type: str
-                 **kwargs
-                 ):
+                 dashboard_group_id: Optional[str],
+                 dashboard_id: Optional[str],
+                 query_id: str,
+                 chart_id: str,
+                 chart_name: Optional[str] = None,
+                 chart_type: Optional[str] = None,
+                 chart_url: Optional[str] = None,
+                 product: Optional[str] = '',
+                 cluster: str = 'gold',
+                 **kwargs: Any
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._query_id = query_id
@@ -44,57 +49,58 @@ class DashboardChart(Neo4jCsvSerializable):
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[GraphNode, None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_node_iterator(self):  # noqa: C901
-        # type: () -> Iterator[[Dict[str, Any]]]
-        node = {
-            NODE_LABEL: DashboardChart.DASHBOARD_CHART_LABEL,
-            NODE_KEY: self._get_chart_node_key(),
+    def _create_node_iterator(self) -> Iterator[GraphNode]:
+        node_attributes = {
             'id': self._chart_id
         }
 
         if self._chart_name:
-            node['name'] = self._chart_name
+            node_attributes['name'] = self._chart_name
 
         if self._chart_type:
-            node['type'] = self._chart_type
+            node_attributes['type'] = self._chart_type
 
         if self._chart_url:
-            node['url'] = self._chart_url
+            node_attributes['url'] = self._chart_url
 
+        node = GraphNode(
+            key=self._get_chart_node_key(),
+            label=DashboardChart.DASHBOARD_CHART_LABEL,
+            attributes=node_attributes
+        )
         yield node
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            RELATION_START_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
-            RELATION_END_LABEL: DashboardChart.DASHBOARD_CHART_LABEL,
-            RELATION_START_KEY: DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
+        relationship = GraphRelationship(
+            start_label=DashboardQuery.DASHBOARD_QUERY_LABEL,
+            start_key=DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(
                 product=self._product,
                 cluster=self._cluster,
                 dashboard_group_id=self._dashboard_group_id,
                 dashboard_id=self._dashboard_id,
                 query_id=self._query_id
             ),
-            RELATION_END_KEY: self._get_chart_node_key(),
-            RELATION_TYPE: DashboardChart.CHART_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: DashboardChart.CHART_REVERSE_RELATION_TYPE
-        }
+            end_label=DashboardChart.DASHBOARD_CHART_LABEL,
+            end_key=self._get_chart_node_key(),
+            type=DashboardChart.CHART_RELATION_TYPE,
+            reverse_type=DashboardChart.CHART_REVERSE_RELATION_TYPE,
+            attributes={}
+        )
+        yield relationship
 
-    def _get_chart_node_key(self):
+    def _get_chart_node_key(self) -> str:
         return DashboardChart.DASHBOARD_CHART_KEY_FORMAT.format(
             product=self._product,
             cluster=self._cluster,
@@ -104,7 +110,7 @@ class DashboardChart(Neo4jCsvSerializable):
             chart_id=self._chart_id
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardChart({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

@@ -1,7 +1,10 @@
-import importlib
-from typing import Iterable, Any  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
 
-from pyhocon import ConfigTree  # noqa: F401
+import importlib
+from typing import Iterable, Any
+
+from pyhocon import ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
 
@@ -12,15 +15,14 @@ class GenericExtractor(Extractor):
     """
     EXTRACTION_ITEMS = 'extraction_items'
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
+    def init(self, conf: ConfigTree) -> None:
         """
         Receives a list of dictionaries which is used for extraction
         :param conf:
         :return:
         """
         self.conf = conf
-        self.values = conf.get(GenericExtractor.EXTRACTION_ITEMS)  # type: Iterable[Any]
+        self.values: Iterable[Any] = conf.get(GenericExtractor.EXTRACTION_ITEMS)
 
         model_class = conf.get('model_class', None)
         if model_class:
@@ -34,8 +36,7 @@ class GenericExtractor(Extractor):
         else:
             self._iter = iter(self.values)
 
-    def extract(self):
-        # type: () -> Any
+    def extract(self) -> Any:
         """
         Fetch one sql result row, convert to {model_class} if specified before
         returning.
@@ -47,6 +48,5 @@ class GenericExtractor(Extractor):
         except StopIteration:
             return None
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.generic'

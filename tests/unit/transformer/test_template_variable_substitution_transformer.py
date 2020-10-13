@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
 from pyhocon import ConfigFactory
@@ -8,8 +11,7 @@ from databuilder.transformer.template_variable_substitution_transformer import \
 
 class TestTemplateVariableSubstitutionTransformer(unittest.TestCase):
 
-    def test_conversion(self):
-        # type: () -> None
+    def test_conversion(self) -> None:
 
         transformer = TemplateVariableSubstitutionTransformer()
         config = ConfigFactory.from_dict({

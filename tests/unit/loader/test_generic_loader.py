@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
 from mock import MagicMock
@@ -8,8 +11,7 @@ from databuilder.loader.generic_loader import GenericLoader, CALLBACK_FUNCTION
 
 class TestGenericLoader(unittest.TestCase):
 
-    def test_loading(self):
-        # type: () -> None
+    def test_loading(self) -> None:
 
         loader = GenericLoader()
         callback_func = MagicMock()
@@ -22,8 +24,7 @@ class TestGenericLoader(unittest.TestCase):
 
         callback_func.assert_called_once()
 
-    def test_none_loading(self):
-        # type: () -> None
+    def test_none_loading(self) -> None:
 
         loader = GenericLoader()
         callback_func = MagicMock()

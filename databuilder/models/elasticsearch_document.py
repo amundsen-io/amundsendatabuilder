@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import json
 from abc import ABCMeta
 
@@ -9,8 +12,7 @@ class ElasticsearchDocument:
     """
     __metaclass__ = ABCMeta
 
-    def to_json(self):
-        # type: () -> str
+    def to_json(self) -> str:
         """
         Convert object to json
         :return:

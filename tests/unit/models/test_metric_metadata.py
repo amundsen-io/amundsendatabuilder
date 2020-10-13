@@ -1,12 +1,15 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import copy
 import unittest
 
 from databuilder.models.metric_metadata import MetricMetadata
+from databuilder.serializers import neo4_serializer
 
 
 class TestMetricMetadata(unittest.TestCase):
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
 
         self.metric_metadata = MetricMetadata('Product - Jobs.cz',
                                               'Agent',
@@ -101,13 +104,13 @@ class TestMetricMetadata(unittest.TestCase):
 
         self.expected_rels3 = copy.deepcopy(self.expected_rels_deduped3)
 
-    def test_serialize(self):
-        # type: () -> None
+    def test_serialize(self) -> None:
         # First test
         node_row = self.metric_metadata.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            serialized_node = neo4_serializer.serialize_node(node_row)
+            actual.append(serialized_node)
             node_row = self.metric_metadata.next_node()
 
         self.assertEqual(self.expected_nodes, actual)
@@ -115,7 +118,8 @@ class TestMetricMetadata(unittest.TestCase):
         relation_row = self.metric_metadata.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            serialized_relation = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(serialized_relation)
             relation_row = self.metric_metadata.next_relation()
 
         self.assertEqual(self.expected_rels, actual)
@@ -124,7 +128,8 @@ class TestMetricMetadata(unittest.TestCase):
         node_row = self.metric_metadata2.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            serialized_node = neo4_serializer.serialize_node(node_row)
+            actual.append(serialized_node)
             node_row = self.metric_metadata2.next_node()
 
         self.assertEqual(self.expected_nodes_deduped2, actual)
@@ -132,7 +137,8 @@ class TestMetricMetadata(unittest.TestCase):
         relation_row = self.metric_metadata2.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            serialized_relation = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(serialized_relation)
             relation_row = self.metric_metadata2.next_relation()
 
         self.assertEqual(self.expected_rels_deduped2, actual)
@@ -141,7 +147,8 @@ class TestMetricMetadata(unittest.TestCase):
         node_row = self.metric_metadata3.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            serialized_node = neo4_serializer.serialize_node(node_row)
+            actual.append(serialized_node)
             node_row = self.metric_metadata3.next_node()
 
         self.assertEqual(self.expected_nodes_deduped3, actual)
@@ -149,7 +156,8 @@ class TestMetricMetadata(unittest.TestCase):
         relation_row = self.metric_metadata3.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            serialized_relation = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(serialized_relation)
             relation_row = self.metric_metadata3.next_relation()
 
         self.assertEqual(self.expected_rels_deduped3, actual)

@@ -1,9 +1,13 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 from mock import patch, Mock
 import base64
 import tempfile
 import unittest
 
 from pyhocon import ConfigFactory
+from typing import Any
 
 from databuilder import Scoped
 from databuilder.extractor.bigquery_usage_extractor import BigQueryTableUsageExtractor
@@ -127,7 +131,7 @@ FAILURE = {"entries": [
 # An empty dict will be ignored, but putting in nextPageToken causes the test
 # to loop infinitely, so we need a bogus key/value to ensure that we will try
 # to read entries
-NO_ENTRIES = { 'key': 'value' }   # noqa
+NO_ENTRIES = {'key': 'value'}   # noqa
 
 KEYFILE_DATA = """
 ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAieW91ci1wcm9q
@@ -175,21 +179,23 @@ ci1wcm9qZWN0LWhlcmUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iCn0KCgo=
 
 
 class MockLoggingClient():
-    def __init__(self, data):
+    def __init__(self, data: Any) -> None:
         self.data = data
         self.a = Mock()
         self.a.execute.return_value = self.data
         self.b = Mock()
         self.b.list.return_value = self.a
 
-    def entries(self):
+    def entries(self) -> Any:
         return self.b
 
 
+# Patch fallback auth method to avoid actually calling google API
+@patch('google.auth.default', lambda scopes: ['dummy', 'dummy'])
 class TestBigqueryUsageExtractor(unittest.TestCase):
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_basic_extraction(self, mock_build):
+    def test_basic_extraction(self, mock_build: Any) -> None:
         """
         Test Extraction using mock class
         """
@@ -204,6 +210,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         extractor.init(Scoped.get_scoped_conf(conf=conf,
                                               scope=extractor.get_scope()))
         result = extractor.extract()
+        assert result is not None
         self.assertIsInstance(result, tuple)
 
         (key, value) = result
@@ -218,7 +225,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertEqual(value, 1)
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_no_entries(self, mock_build):
+    def test_no_entries(self, mock_build: Any) -> None:
         config_dict = {
             'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
                 'your-project-here',
@@ -233,7 +240,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertIsNone(result)
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_key_path(self, mock_build):
+    def test_key_path(self, mock_build: Any) -> None:
         """
         Test key_path can be used
         """
@@ -263,7 +270,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
             self.assertEqual(creds.service_account_email, 'test-162@your-project-here.iam.gserviceaccount.com')
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_timestamp_pagesize_settings(self, mock_build):
+    def test_timestamp_pagesize_settings(self, mock_build: Any) -> None:
         """
         Test timestamp and pagesize can be set
         """
@@ -293,7 +300,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertEqual(TIMESTAMP in body['filter'], True)
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_failed_jobs_should_not_be_counted(self, mock_build):
+    def test_failed_jobs_should_not_be_counted(self, mock_build: Any) -> None:
 
         config_dict = {
             'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
@@ -311,7 +318,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertIsNone(result)
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_email_filter_not_counted(self, mock_build):
+    def test_email_filter_not_counted(self, mock_build: Any) -> None:
         config_dict = {
             'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
                 'your-project-here',
@@ -328,7 +335,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertIsNone(result)
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
-    def test_email_filter_counted(self, mock_build):
+    def test_email_filter_counted(self, mock_build: Any) -> None:
         config_dict = {
             'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
                 'your-project-here',
@@ -342,6 +349,7 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         extractor.init(Scoped.get_scoped_conf(conf=conf,
                                               scope=extractor.get_scope()))
         result = extractor.extract()
+        assert result is not None
         self.assertIsInstance(result, tuple)
 
         (key, value) = result

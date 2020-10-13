@@ -1,6 +1,9 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.csv_extractor import CsvExtractor
@@ -8,16 +11,14 @@ from databuilder.extractor.csv_extractor import CsvExtractor
 
 class TestCsvExtractor(unittest.TestCase):
 
-    def setUp(self):
-        # type: () -> None
+    def setUp(self) -> None:
         config_dict = {
             'extractor.csv.{}'.format(CsvExtractor.FILE_LOCATION): 'example/sample_data/sample_table.csv',
             'extractor.csv.model_class': 'databuilder.models.table_metadata.TableMetadata',
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    def test_extraction_with_model_class(self):
-        # type: () -> None
+    def test_extraction_with_model_class(self) -> None:
         """
         Test Extraction using model class
         """

@@ -1,6 +1,9 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import unittest
 
-from pyhocon import ConfigFactory  # noqa: F401
+from pyhocon import ConfigFactory
 
 from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY, MODEL_CLASS, \
     STATIC_RECORD_DICT
@@ -10,8 +13,7 @@ from databuilder.rest_api.base_rest_api_query import RestApiQuerySeed
 
 class TestRestAPIExtractor(unittest.TestCase):
 
-    def test_static_data(self):
-        # type: (...) -> None
+    def test_static_data(self) -> None:
 
         conf = ConfigFactory.from_dict(
             {
@@ -27,7 +29,7 @@ class TestRestAPIExtractor(unittest.TestCase):
 
         self.assertDictEqual(expected, record)
 
-    def test_model_construction(self):
+    def test_model_construction(self) -> None:
         conf = ConfigFactory.from_dict(
             {
                 REST_API_QUERY: RestApiQuerySeed(

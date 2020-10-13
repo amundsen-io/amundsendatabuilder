@@ -1,16 +1,21 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 
-from typing import Optional, Dict, Any, Union, Iterator  # noqa: F401
+from typing import Optional, Any, Union, Iterator
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, NODE_LABEL, NODE_KEY, RELATION_START_KEY, RELATION_END_KEY, RELATION_START_LABEL,
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE)
+from databuilder.models.graph_serializable import (
+    GraphSerializable)
+
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardQuery(Neo4jCsvSerializable):
+class DashboardQuery(GraphSerializable):
     """
     A model that encapsulate Dashboard's query name
     """
@@ -21,16 +26,16 @@ class DashboardQuery(Neo4jCsvSerializable):
     QUERY_DASHBOARD_RELATION_TYPE = 'QUERY_OF'
 
     def __init__(self,
-                 dashboard_group_id,  # type: Optional[str]
-                 dashboard_id,  # type: Optional[str]
-                 query_name,  # type: str
-                 query_id=None,  # type: Optional[str]
-                 url='',  # type: Optional[str]
-                 query_text=None,  # type: Optional[str]
-                 product='',  # type: Optional[str]
-                 cluster='gold',  # type: str
-                 **kwargs
-                 ):
+                 dashboard_group_id: Optional[str],
+                 dashboard_id: Optional[str],
+                 query_name: str,
+                 query_id: Optional[str] = None,
+                 url: Optional[str] = '',
+                 query_text: Optional[str] = None,
+                 product: Optional[str] = '',
+                 cluster: str = 'gold',
+                 **kwargs: Any
+                 ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._query_name = query_name
@@ -42,54 +47,56 @@ class DashboardQuery(Neo4jCsvSerializable):
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[GraphNode, None]:
         try:
             return next(self._node_iterator)
         except StopIteration:
             return None
 
-    def _create_node_iterator(self):  # noqa: C901
-        # type: () -> Iterator[[Dict[str, Any]]]
-        node = {
-            NODE_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
-            NODE_KEY: self._get_query_node_key(),
+    def _create_node_iterator(self) -> Iterator[GraphNode]:
+        node_attributes = {
             'id': self._query_id,
             'name': self._query_name,
         }
 
         if self._url:
-            node['url'] = self._url
+            node_attributes['url'] = self._url
 
         if self._query_text:
-            node['query_text'] = self._query_text
+            node_attributes['query_text'] = self._query_text
+
+        node = GraphNode(
+            key=self._get_query_node_key(),
+            label=DashboardQuery.DASHBOARD_QUERY_LABEL,
+            attributes=node_attributes
+        )
 
         yield node
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
             return next(self._relation_iterator)
         except StopIteration:
             return None
 
-    def _create_relation_iterator(self):
-        # type: () -> Iterator[[Dict[str, Any]]]
-        yield {
-            RELATION_START_LABEL: DashboardMetadata.DASHBOARD_NODE_LABEL,
-            RELATION_END_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
-            RELATION_START_KEY: DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
+        relationship = GraphRelationship(
+            start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
+            end_label=DashboardQuery.DASHBOARD_QUERY_LABEL,
+            start_key=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
                 product=self._product,
                 cluster=self._cluster,
                 dashboard_group=self._dashboard_group_id,
                 dashboard_name=self._dashboard_id
             ),
-            RELATION_END_KEY: self._get_query_node_key(),
-            RELATION_TYPE: DashboardQuery.DASHBOARD_QUERY_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE
-        }
+            end_key=self._get_query_node_key(),
+            type=DashboardQuery.DASHBOARD_QUERY_RELATION_TYPE,
+            reverse_type=DashboardQuery.QUERY_DASHBOARD_RELATION_TYPE,
+            attributes={}
+        )
+        yield relationship
 
-    def _get_query_node_key(self):
+    def _get_query_node_key(self) -> str:
         return DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(
             product=self._product,
             cluster=self._cluster,
@@ -98,7 +105,7 @@ class DashboardQuery(Neo4jCsvSerializable):
             query_id=self._query_id
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'DashboardQuery({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
             self._dashboard_group_id,
             self._dashboard_id,

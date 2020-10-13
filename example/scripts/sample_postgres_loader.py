@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 """
 This is a example script which demo how to load data
 into Neo4j and Elasticsearch without using an Airflow DAG.
@@ -76,6 +79,8 @@ def run_postgres_job():
             node_files_folder,
         'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH):
             relationship_files_folder,
+        'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.SHOULD_DELETE_CREATED_DIR):
+            True,
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.NODE_FILES_DIR):
             node_files_folder,
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.RELATION_FILES_DIR):

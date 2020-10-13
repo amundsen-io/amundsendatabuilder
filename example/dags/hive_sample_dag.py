@@ -1,3 +1,6 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 import textwrap
 from datetime import datetime, timedelta
@@ -63,7 +66,8 @@ def connection_string():
 def create_table_wm_job(**kwargs):
     sql = textwrap.dedent("""
         SELECT From_unixtime(A0.create_time) as create_time,
-               C0.NAME as schema,
+               'hive'                        as `database`,
+               C0.NAME                       as `schema`,
                B0.tbl_name as table_name,
                {func}(A0.part_name) as part_name,
                {watermark} as part_type
@@ -159,6 +163,8 @@ def create_table_metadata_databuilder_job():
             neo4j_password,
         'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_CREATE_ONLY_NODES):
             [DESCRIPTION_NODE_LABEL],
+        'publisher.neo4j.job_publish_tag':
+            'some_unique_tag'  # TO-DO unique tag must be added
     })
 
     job = DefaultJob(conf=job_config,
@@ -193,3 +199,7 @@ with DAG('amundsen_databuilder', default_args=default_args, **dag_args) as dag:
                         'watermark_type': '"low_watermark"',
                         'part_regex': '{}'.format('{{ ds }}')}
     )
+
+    # Schedule high and low watermark task after metadata task
+    amundsen_databuilder_table_metadata_job >> amundsen_hwm_job
+    amundsen_databuilder_table_metadata_job >> amundsen_lwm_job

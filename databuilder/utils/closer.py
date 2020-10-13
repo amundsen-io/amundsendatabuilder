@@ -1,6 +1,9 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import atexit
 
-from typing import Callable, List  # noqa: F401
+from typing import Callable, List
 
 
 class Closer(object):
@@ -12,13 +15,12 @@ class Closer(object):
     Order of closing registered closeable callable will be LIFO
     as closeable instance can have dependency each other.
     """
-    def __init__(self):
-        # type: () -> None
-        self._stack = []  # type: List
+
+    def __init__(self) -> None:
+        self._stack: List = []
         atexit.register(self.close)
 
-    def register(self, close_callable):
-        # type: (Callable) -> None
+    def register(self, close_callable: Callable) -> None:
         """
         Register closeable callable.
         :param close_callable:
@@ -30,8 +32,7 @@ class Closer(object):
 
         self._stack.append(close_callable)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
         """
         Execute all closeable callable in LIFO order.
         All registered callable will be guaranteed to be executed. If there

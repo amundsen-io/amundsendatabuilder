@@ -1,17 +1,19 @@
-from typing import Union, Dict, Any, Iterator  # noqa: F401
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
 
-from databuilder.models.neo4j_csv_serde import (
-    Neo4jCsvSerializable, RELATION_START_KEY, RELATION_END_KEY,
-    RELATION_START_LABEL, RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-)
+from typing import Union, Iterable, List
+
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.usage.usage_constants import (
     READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
 )
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 
 
-class ColumnUsageModel(Neo4jCsvSerializable):
+class ColumnUsageModel(GraphSerializable):
 
     """
     A model represents user <--> column graph model
@@ -27,15 +29,14 @@ class ColumnUsageModel(Neo4jCsvSerializable):
     READ_RELATION_COUNT = READ_RELATION_COUNT_PROPERTY
 
     def __init__(self,
-                 database,     # type: str
-                 cluster,      # type: str
-                 schema,  # type: str
-                 table_name,   # type: str
-                 column_name,  # type: str
-                 user_email,   # type: str
-                 read_count,   # type: int
-                 ):
-        # type: (...) -> None
+                 database: str,
+                 cluster: str,
+                 schema: str,
+                 table_name: str,
+                 column_name: str,
+                 user_email: str,
+                 read_count: int,
+                 ) -> None:
         self.database = database
         self.cluster = cluster
         self.schema = schema
@@ -47,16 +48,14 @@ class ColumnUsageModel(Neo4jCsvSerializable):
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
 
-    def create_next_node(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_node(self) -> Union[GraphNode, None]:
 
         try:
             return next(self._node_iter)
         except StopIteration:
             return None
 
-    def create_nodes(self):
-        # type: () -> List[Dict[str, Any]]
+    def create_nodes(self) -> List[GraphNode]:
         """
         Create a list of Neo4j node records
         :return:
@@ -64,39 +63,37 @@ class ColumnUsageModel(Neo4jCsvSerializable):
 
         return User(email=self.user_email).create_nodes()
 
-    def create_next_relation(self):
-        # type: () -> Union[Dict[str, Any], None]
+    def create_next_relation(self) -> Union[GraphRelationship, None]:
 
         try:
             return next(self._relation_iter)
         except StopIteration:
             return None
 
-    def create_relation(self):
-        # type: () -> Iterator[Any]
-        return [{
-            RELATION_START_LABEL: TableMetadata.TABLE_NODE_LABEL,
-            RELATION_END_LABEL: User.USER_NODE_LABEL,
-            RELATION_START_KEY: self._get_table_key(),
-            RELATION_END_KEY: self._get_user_key(self.user_email),
-            RELATION_TYPE: ColumnUsageModel.TABLE_USER_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: ColumnUsageModel.USER_TABLE_RELATION_TYPE,
-            ColumnUsageModel.READ_RELATION_COUNT: self.read_count
-        }]
+    def create_relation(self) -> Iterable[GraphRelationship]:
+        relationship = GraphRelationship(
+            start_key=self._get_table_key(),
+            start_label=TableMetadata.TABLE_NODE_LABEL,
+            end_key=self._get_user_key(self.user_email),
+            end_label=User.USER_NODE_LABEL,
+            type=ColumnUsageModel.TABLE_USER_RELATION_TYPE,
+            reverse_type=ColumnUsageModel.USER_TABLE_RELATION_TYPE,
+            attributes={
+                ColumnUsageModel.READ_RELATION_COUNT: self.read_count
+            }
+        )
+        return [relationship]
 
-    def _get_table_key(self):
-        # type: (ColumnReader) -> str
+    def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
                                                      cluster=self.cluster,
                                                      schema=self.schema,
                                                      tbl=self.table_name)
 
-    def _get_user_key(self, email):
-        # type: (str) -> str
+    def _get_user_key(self, email: str) -> str:
         return User.get_user_model_key(email=email)
 
-    def __repr__(self):
-        # type: () -> str
+    def __repr__(self) -> str:
         return 'TableColumnUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
                                                                                    self.cluster,
                                                                                    self.schema,

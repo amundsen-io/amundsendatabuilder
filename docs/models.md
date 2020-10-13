@@ -179,7 +179,7 @@ Supporting extractor: Currently there's no open sourced extractor for this. In L
 A model that encapsulate Dashboard usage between Dashboard and User
 
 #### Extraction
-You can use [ModeDashboardUsageExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) . However, currently Mode only provides accumulated view count where we need recent view counts (past 30, 60, or 90 days). To get recent view count, in Lyft, we use [ModeDashboardUsageExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) to extract accumulated view count and [GenericLoader](https://github.com/lyft/amundsendatabuilder/blob/master/databuilder/loader/generic_loader.py) to load its record (no publisher here and publisher is not mandatory in DefaultJob) as a event where event materialized as daily snapshot. Once it captures daily accumulated view count, ingest recent view count by querying the datastore. In Lyft, we query via [DBAPIExtractor](../databuilder/extractor/db_api_extractor.py) through Presto.  
+You can use [ModeDashboardUsageExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) . However, currently Mode only provides accumulated view count where we need recent view counts (past 30, 60, or 90 days). To get recent view count, in Lyft, we use [ModeDashboardUsageExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_usage_extractor.py) to extract accumulated view count and [GenericLoader](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/loader/generic_loader.py) to load its record (no publisher here and publisher is not mandatory in DefaultJob) as a event where event materialized as daily snapshot. Once it captures daily accumulated view count, ingest recent view count by querying the datastore. In Lyft, we query via [DBAPIExtractor](../databuilder/extractor/db_api_extractor.py) through Presto.  
 
 
 #### [DashboardLastModifiedTimestamp](../databuilder/models/dashboard/dashboard_last_modified.py)
@@ -191,7 +191,7 @@ A model that encapsulate Dashboard's last modified timestamp in epoch
 [ModeDashboardLastModifiedTimestampExtractor](../databuilder/extractor/dashboard/mode_analytics/mode_dashboard_last_modified_timestamp_extractor.py)   
 
 
-#### [DashboardExecution](../models/dashboard/dashboard_execution.py)
+#### [DashboardExecution](../databuilder/models/dashboard/dashboard_execution.py)
 A model that encapsulate Dashboard's execution timestamp in epoch and execution state. Note that this model supports last_execution and last_successful_execution by using [different identifier](../databuilder/models/dashboard/dashboard_execution.py#L23) in the URI.
 
 #### Extraction

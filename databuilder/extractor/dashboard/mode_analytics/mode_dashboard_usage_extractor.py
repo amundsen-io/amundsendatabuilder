@@ -1,12 +1,15 @@
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 
-from pyhocon import ConfigTree  # noqa: F401
-from typing import Any  # noqa: F401
+from pyhocon import ConfigTree
+from typing import Any
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import ModePaginatedRestApiQuery
-from databuilder.rest_api.rest_api_query import RestApiQuery  # noqa: F401
+from databuilder.rest_api.rest_api_query import RestApiQuery
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,32 +19,25 @@ class ModeDashboardUsageExtractor(Extractor):
     A Extractor that extracts Mode dashboard's accumulated view count
     """
 
-    def init(self, conf):
-        # type: (ConfigTree) -> None
-
+    def init(self, conf: ConfigTree) -> None:
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
         self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(restapi_query=restapi_query,
                                                                             conf=self._conf)
 
-    def extract(self):
-        # type: () -> Any
-
+    def extract(self) -> Any:
         return self._extractor.extract()
 
-    def get_scope(self):
-        # type: () -> str
-
+    def get_scope(self) -> str:
         return 'extractor.mode_dashboard_usage'
 
-    def _build_restapi_query(self):
+    def _build_restapi_query(self) -> RestApiQuery:
         """
         Build REST API Query. To get Mode Dashboard usage, it needs to call two APIs (spaces API and reports
         API) joining together.
         :return: A RestApiQuery that provides Mode Dashboard metadata
         """
-        # type: () -> RestApiQuery
 
         # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
         reports_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
