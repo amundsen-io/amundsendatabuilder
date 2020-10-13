@@ -150,7 +150,7 @@ class DashboardMetadata(GraphSerializable):
             )
             yield cluster_node
 
-        # Dashboard node
+        # Dashboard node attributes
         dashboard_node_attributes: Dict[str, Any] = {
             DashboardMetadata.DASHBOARD_NAME: self.dashboard_name,
         }
@@ -227,7 +227,6 @@ class DashboardMetadata(GraphSerializable):
             return None
 
     def _create_next_relation(self) -> Iterator[GraphRelationship]:
-
         # Cluster <-> Dashboard group
         cluster_dashboard_group_relationship = GraphRelationship(
             start_label=cluster_constants.CLUSTER_NODE_LABEL,

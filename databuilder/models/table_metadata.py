@@ -5,7 +5,6 @@ import copy
 
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union
 
-
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.schema import schema_constant
@@ -340,6 +339,7 @@ class TableMetadata(GraphSerializable):
 
     def _create_next_node(self) -> Iterator[GraphNode]:
         yield self._create_table_node()
+
         if self.description:
             node_key = self._get_table_description_key(self.description)
             yield self.description.get_node(node_key)

@@ -4,7 +4,6 @@
 import re
 from typing import List, Union
 
-
 from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.table_metadata import TableMetadata

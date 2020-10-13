@@ -11,7 +11,6 @@ from databuilder.models.graph_relationship import GraphRelationship
 
 
 class TableSource(GraphSerializable):
-
     """
     Hive table source model.
     """
@@ -65,7 +64,6 @@ class TableSource(GraphSerializable):
                                                           table=self.table)
 
     def create_nodes(self) -> List[GraphNode]:
-
         """
         Create a list of Neo4j node records
         :return:
@@ -82,7 +80,6 @@ class TableSource(GraphSerializable):
         return results
 
     def create_relation(self) -> List[GraphRelationship]:
-
         """
         Create a list of relation map between owner record with original hive table
         :return:

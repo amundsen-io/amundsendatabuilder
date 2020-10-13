@@ -10,7 +10,6 @@ from databuilder.models.graph_relationship import GraphRelationship
 
 
 class TableColumnStats(GraphSerializable):
-
     """
     Hive table stats model.
     Each instance represents one row of hive watermark result.
@@ -52,7 +51,6 @@ class TableColumnStats(GraphSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def create_next_node(self) -> Optional[GraphNode]:
-
         # return the string representation of the data
         try:
             return next(self._node_iter)

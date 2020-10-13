@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-
 from typing import Optional, Any, Union, Iterator
+
 
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
 from databuilder.models.graph_serializable import (

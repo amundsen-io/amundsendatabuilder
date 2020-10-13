@@ -64,7 +64,6 @@ class ColumnUsageModel(GraphSerializable):
         return User(email=self.user_email).create_nodes()
 
     def create_next_relation(self) -> Union[GraphRelationship, None]:
-
         try:
             return next(self._relation_iter)
         except StopIteration:

@@ -3,7 +3,6 @@
 
 from typing import Any, Iterator, List, Union, Set
 
-
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
 from databuilder.models.graph_serializable import (
@@ -112,7 +111,6 @@ class MetricMetadata(GraphSerializable):
             return None
 
     def _create_next_node(self) -> Iterator[GraphNode]:
-
         # Metric node
         metric_node = GraphNode(
             key=self._get_metric_key(),
