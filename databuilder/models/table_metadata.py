@@ -24,6 +24,10 @@ class BadgeMetadata(Neo4jCsvSerializable):
     DASHBOARD_TYPE = 'dashboard'
     METRIC_TYPE = 'metric'
 
+    # Relation between column and badge
+    BADGE_RELATION_TYPE = 'HAS_BADGE'
+    INVERSE_BADGE_RELATION_TYPE = 'BADGE_FOR'
+
     def __init__(self,
                  name: str,
                  category: str,
@@ -50,6 +54,20 @@ class BadgeMetadata(Neo4jCsvSerializable):
         return {NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
                 NODE_KEY: BadgeMetadata.get_badge_key(name),
                 BadgeMetadata.BADGE_CATEGORY: category}
+
+    def create_relation(self,
+                        start_node: str,
+                        start_key: str,
+                        end_key: str
+                        ) -> Dict[str, str]:
+        return {
+            RELATION_START_LABEL: start_node,
+            RELATION_END_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
+            RELATION_START_KEY: start_key,
+            RELATION_END_KEY: end_key,
+            RELATION_TYPE: BadgeMetadata.BADGE_RELATION_TYPE,
+            RELATION_REVERSE_TYPE: BadgeMetadata.INVERSE_BADGE_RELATION_TYPE,
+        }
 
     def create_next_node(self) -> Optional[Dict[str, Any]]:
         # return the string representation of the data
@@ -92,7 +110,7 @@ class TagMetadata(Neo4jCsvSerializable):
 
     @staticmethod
     def create_tag_node(name: str,
-                        tag_type: str =DEFAULT_TYPE
+                        tag_type: str = DEFAULT_TYPE
                         ) -> Dict[str, str]:
         return {NODE_LABEL: TagMetadata.TAG_NODE_LABEL,
                 NODE_KEY: TagMetadata.get_tag_key(name),
@@ -198,10 +216,6 @@ class ColumnMetadata:
     COLUMN_ORDER = 'sort_order{}'.format(UNQUOTED_SUFFIX)  # int value needs to be unquoted when publish to neo4j
     COLUMN_DESCRIPTION = 'description'
     COLUMN_DESCRIPTION_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}/{description_id}'
-
-    # Relation between column and badge
-    COL_BADGE_RELATION_TYPE = 'HAS_BADGE'
-    BADGE_COL_RELATION_TYPE = 'BADGE_FOR'
 
     def __init__(self,
                  name: str,
@@ -501,14 +515,9 @@ class TableMetadata(Neo4jCsvSerializable):
 
             if col.badges:
                 for badge in col.badges:
-                    yield {
-                        RELATION_START_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
-                        RELATION_END_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
-                        RELATION_START_KEY: self._get_col_key(col),
-                        RELATION_END_KEY: BadgeMetadata.get_badge_key(badge),
-                        RELATION_TYPE: ColumnMetadata.COL_BADGE_RELATION_TYPE,
-                        RELATION_REVERSE_TYPE: ColumnMetadata.BADGE_COL_RELATION_TYPE,
-                    }
+                    yield BadgeMetadata.create_relation(ColumnMetadata.COLUMN_NODE_LABEL,
+                                                        self._get_col_key(col),
+                                                        BadgeMetadata.get_badge_key(badge))
 
         others = [
             RelTuple(start_label=TableMetadata.DATABASE_NODE_LABEL,
