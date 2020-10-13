@@ -517,7 +517,7 @@ class TableMetadata(Neo4jCsvSerializable):
                 for badge in col.badges:
                     yield BadgeMetadata.create_relation(ColumnMetadata.COLUMN_NODE_LABEL,
                                                         self._get_col_key(col),
-                                                        BadgeMetadata.get_badge_key(badge))
+                                                        badge)
 
         others = [
             RelTuple(start_label=TableMetadata.DATABASE_NODE_LABEL,
