@@ -21,7 +21,8 @@ class TestBadge(unittest.TestCase):
         super(TestBadge, self).setUp()
         self.badge_metada = BadgeMetadata(db_name='hive',
                                           schema=SCHEMA,
-                                          table_name=TABLE,
+                                          start_label='Column',
+                                          start_key='hive://default.base/test/ds',
                                           cluster=CLUSTER,
                                           badges=[badge1, badge2])
 
@@ -29,21 +30,17 @@ class TestBadge(unittest.TestCase):
         badge_key = self.badge_metada.get_badge_key(badge1.name)
         self.assertEquals(badge_key, badge1.name)
 
-    def test_get_metadata_model_key(self) -> None:
-        metadata = self.badge_metada.get_metadata_model_key()
-        self.assertEquals(metadata, 'hive://default.base/test')
-
     def test_create_nodes(self) -> None:
         nodes = self.badge_metada.create_nodes()
         self.assertEquals(len(nodes), 2)
 
         node1 = {
-            NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge1.name),
+            NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge1.name),
             NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
             BadgeMetadata.BADGE_CATEGORY: badge1.category
         }
         node2 = {
-            NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge2.name),
+            NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge2.name),
             NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
             BadgeMetadata.BADGE_CATEGORY: badge2.category
         }
@@ -55,24 +52,21 @@ class TestBadge(unittest.TestCase):
         relations = self.badge_metada.create_relation()
         self.assertEquals(len(relations), 2)
 
-        start_node = 'Column'
-        start_key = self.badge_metada.get_metadata_model_key() + '/ds'
-
         relation1 = {
-            RELATION_START_LABEL: start_node,
-            RELATION_END_LABEL: self.BADGE_NODE_LABEL,
-            RELATION_START_KEY: start_key,
-            RELATION_END_KEY: self.get_badge_key(badge1.name),
-            RELATION_TYPE: self.BADGE_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: self.INVERSE_BADGE_RELATION_TYPE,
+            RELATION_START_LABEL: self.badge_metada.start_label,
+            RELATION_END_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
+            RELATION_START_KEY: self.badge_metada.start_key,
+            RELATION_END_KEY: BadgeMetadata.get_badge_key(badge1.name),
+            RELATION_TYPE: BadgeMetadata.BADGE_RELATION_TYPE,
+            RELATION_REVERSE_TYPE: BadgeMetadata.INVERSE_BADGE_RELATION_TYPE,
         }
         relation2 = {
-            RELATION_START_LABEL: start_node,
-            RELATION_END_LABEL: self.BADGE_NODE_LABEL,
-            RELATION_START_KEY: start_key,
-            RELATION_END_KEY: self.get_badge_key(badge2.name),
-            RELATION_TYPE: self.BADGE_RELATION_TYPE,
-            RELATION_REVERSE_TYPE: self.INVERSE_BADGE_RELATION_TYPE,
+            RELATION_START_LABEL: self.badge_metada.start_label,
+            RELATION_END_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
+            RELATION_START_KEY: self.badge_metada.start_key,
+            RELATION_END_KEY: BadgeMetadata.get_badge_key(badge2.name),
+            RELATION_TYPE: BadgeMetadata.BADGE_RELATION_TYPE,
+            RELATION_REVERSE_TYPE: BadgeMetadata.INVERSE_BADGE_RELATION_TYPE,
         }
 
         self.assertTrue(relation1 in relations)

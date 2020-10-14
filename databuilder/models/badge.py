@@ -13,6 +13,10 @@ class Badge:
         self.name = name
         self.category = category
 
+    def __repr__(self) -> str:
+        return 'Badge({!r}, {!r})'.format(self.name,
+                                          self.category)
+
 
 class BadgeMetadata(Neo4jCsvSerializable):
     """
@@ -29,7 +33,8 @@ class BadgeMetadata(Neo4jCsvSerializable):
     def __init__(self,
                  db_name: str,
                  schema: str,
-                 table_name: str,
+                 start_label: str,  # Table, Dashboard, Column
+                 start_key: str,
                  badges: Union[List, Badge],
                  cluster: str = 'gold',  # is this what we want as default for badges..?
                  ):
@@ -39,8 +44,10 @@ class BadgeMetadata(Neo4jCsvSerializable):
 
         self.db = db_name.lower()
         self.schema = schema.lower()
-        self.table = table_name.lower()
         self.cluster = cluster.lower()
+
+        self.start_label = start_label
+        self.start_key = start_key
 
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
@@ -65,10 +72,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
         return BadgeMetadata.BADGE_KEY_FORMAT.format(badge=name)
 
     def get_metadata_model_key(self) -> str:
-        return '{db}://{cluster}.{schema}/{table}'.format(db=self.db,
-                                                          cluster=self.cluster,
-                                                          schema=self.schema,
-                                                          table=self.table)
+        return self.start_key
 
     def create_nodes(self) -> List[Dict[str, Any]]:
         """
@@ -85,16 +89,13 @@ class BadgeMetadata(Neo4jCsvSerializable):
                 })
         return results
 
-    def create_relation(self,
-                        start_node: str,
-                        start_key: str,
-                        ) -> Dict[str, str]:
+    def create_relation(self) -> Dict[str, str]:
         results = []
         for badge in self.badges:
             results.append({
-                RELATION_START_LABEL: start_node,
+                RELATION_START_LABEL: self.start_label,
                 RELATION_END_LABEL: self.BADGE_NODE_LABEL,
-                RELATION_START_KEY: start_key,
+                RELATION_START_KEY: self.start_key,
                 RELATION_END_KEY: self.get_badge_key(badge.name),
                 RELATION_TYPE: self.BADGE_RELATION_TYPE,
                 RELATION_REVERSE_TYPE: self.INVERSE_BADGE_RELATION_TYPE,
