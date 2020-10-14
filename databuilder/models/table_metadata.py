@@ -170,7 +170,10 @@ class ColumnMetadata:
                                                                            text=description)
         self.type = col_type
         self.sort_order = sort_order
-        self.badges = [Badge(badge, 'column') for badge in badges]
+        if badges:
+            self.badges = [Badge(badge, 'column') for badge in badges]
+        else:
+            self.badges = []
 
     def __repr__(self) -> str:
         return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,
