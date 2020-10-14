@@ -10,28 +10,30 @@ from databuilder.models.owner_constants import OWNER_RELATION_TYPE, OWNER_OF_OBJ
 from databuilder.models.user import User
 
 
-class TableOwner(Neo4jCsvSerializable):
+class BadgeMetadata(Neo4jCsvSerializable):
     """
-    Hive table owner model.
+    Badge model.
     """
-    OWNER_TABLE_RELATION_TYPE = OWNER_OF_OBJECT_RELATION_TYPE
-    TABLE_OWNER_RELATION_TYPE = OWNER_RELATION_TYPE
+    # Relation between entity and badge
+    BADGE_RELATION_TYPE = 'HAS_BADGE'
+    INVERSE_BADGE_RELATION_TYPE = 'BADGE_FOR'
 
     def __init__(self,
                  db_name: str,
                  schema: str,
                  table_name: str,
-                 owners: Union[List, str],
-                 cluster: str = 'gold',
-                 ) -> None:
+                 name: str,
+                 category: str,
+                 cluster: str = 'gold',  # is this what we want as default for badges..?
+                 ):
+        self._name = name
+        self._category = category
+
         self.db = db_name.lower()
         self.schema = schema.lower()
         self.table = table_name.lower()
-        if isinstance(owners, str):
-            owners = owners.split(',')
-        self.owners = [owner.lower().strip() for owner in owners]
-
         self.cluster = cluster.lower()
+
         self._node_iter = iter(self.create_nodes())
         self._relation_iter = iter(self.create_relation())
 
