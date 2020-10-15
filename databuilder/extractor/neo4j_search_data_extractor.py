@@ -64,7 +64,6 @@ class Neo4jSearchDataExtractor(Extractor):
     DEFAULT_NEO4J_USER_CYPHER_QUERY = textwrap.dedent(
         """
         MATCH (user:User)
-        {publish_tag_filter}
         OPTIONAL MATCH (user)-[read:READ]->(a)
         OPTIONAL MATCH (user)-[own:OWNER_OF]->(b)
         OPTIONAL MATCH (user)-[follow:FOLLOWED_BY]->(c)
