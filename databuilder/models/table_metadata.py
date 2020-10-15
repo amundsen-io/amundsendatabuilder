@@ -173,7 +173,7 @@ class ColumnMetadata:
         if badges:
             self.badges = [Badge(badge, 'column') for badge in badges]
         else:
-            self.badges = None
+            self.badges = []
 
     def __repr__(self) -> str:
         return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,

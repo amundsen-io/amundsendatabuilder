@@ -9,7 +9,7 @@ from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
 
 
 class Badge:
-    def __init__(self, name, category):
+    def __init__(self, name: str, category: str):
         self.name = name
         self.category = category
 
@@ -89,7 +89,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
                 })
         return results
 
-    def create_relation(self) -> Dict[str, str]:
+    def create_relation(self) -> List[Dict[str, Any]]:
         results = []
         for badge in self.badges:
             results.append({
@@ -101,7 +101,3 @@ class BadgeMetadata(Neo4jCsvSerializable):
                 RELATION_REVERSE_TYPE: self.INVERSE_BADGE_RELATION_TYPE,
             })
         return results
-
-    def __repr__(self) -> str:
-        return 'BadgeMetadata({!r}, {!r})'.format(self.name,
-                                                  self.category)
