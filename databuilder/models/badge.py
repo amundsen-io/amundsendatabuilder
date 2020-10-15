@@ -38,8 +38,6 @@ class BadgeMetadata(Neo4jCsvSerializable):
                  badges: List[Badge],
                  cluster: str = 'gold',  # is this what we want as default for badges..?
                  ):
-        # self._name = name
-        # self._category = category
         self.badges = badges
 
         self.db = db_name.lower()

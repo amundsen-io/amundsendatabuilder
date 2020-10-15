@@ -96,10 +96,7 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
                                                      4),
                                       ColumnMetadata('ds', None, 'varchar', 5)],
                                      is_view=False)
-            print("ACTUAL")
-            print(actual)
-            print("EXPECTED")
-            print(expected)
+
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
 
