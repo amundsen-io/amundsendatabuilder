@@ -48,6 +48,31 @@ class TestBadge(unittest.TestCase):
         self.assertTrue(node1 in nodes)
         self.assertTrue(node2 in nodes)
 
+    def test_bad_key_entity_match(self) -> None:
+        column_label = 'Column'
+        table_key = 'hive://default.base/test'
+
+        self.assertRaises(Exception,
+                          BadgeMetadata,
+                          db_name='hive',
+                          schema=SCHEMA,
+                          start_label=column_label,
+                          start_key=table_key,
+                          cluster=CLUSTER,
+                          badges=[badge1, badge2])
+
+    def test_bad_entity_label(self) -> None:
+        user_label = 'User'
+        table_key = 'hive://default.base/test'
+        self.assertRaises(Exception,
+                          BadgeMetadata,
+                          db_name='hive',
+                          schema=SCHEMA,
+                          start_label=user_label,
+                          start_key=table_key,
+                          cluster=CLUSTER,
+                          badges=[badge1, badge2])
+
     def test_create_relation(self) -> None:
         relations = self.badge_metada.create_relation()
         self.assertEquals(len(relations), 2)
