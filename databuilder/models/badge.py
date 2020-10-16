@@ -7,8 +7,6 @@ import re
 from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable, NODE_KEY, \
     NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 
 
 class Badge:
@@ -47,15 +45,15 @@ class BadgeMetadata(Neo4jCsvSerializable):
         self.schema = schema.lower()
         self.cluster = cluster.lower()
 
-        table_key_pattern = re.compile('[a-z]+://[a-z]+.[a-z]+/[a-zA-Z0-9_.-]+')
-        dashboard_key_pattern = re.compile('[a-z]+_dashboard://[a-z]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
-        column_key_pattern = re.compile('[a-z]+://[a-z]+.[a-z]+/[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
+        table_key_pattern = re.compile('[a-z]+://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
+        dashboard_key_pattern = re.compile('[a-z]+_dashboard://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
+        column_key_pattern = re.compile('[a-z]+://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
         map_label_to_key_pattern = {
-            TableMetadata.TABLE_NODE_LABEL: table_key_pattern,
-            DashboardMetadata.DASHBOARD_NODE_LABEL: dashboard_key_pattern,
-            ColumnMetadata.COLUMN_NODE_LABEL: column_key_pattern,
+            'Table': table_key_pattern,
+            'Dashboard': dashboard_key_pattern,
+            'Column': column_key_pattern,
         }
-        if start_label in map_label_to_key_pattern.keys:
+        if start_label in map_label_to_key_pattern.keys():
             self.start_label = start_label
             if map_label_to_key_pattern[start_label].match(start_key):
                 self.start_key = start_key
