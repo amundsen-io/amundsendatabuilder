@@ -66,7 +66,7 @@ class TestWatermark(unittest.TestCase):
 
     def test_get_watermark_model_key(self) -> None:
         watermark = self.watermark.get_watermark_model_key()
-        self.assertEquals(
+        self.assertEqual(
             watermark, '{database}://{cluster}.{schema}/{table}/{part_type}/'
             .format(database=DATABASE,
                     cluster=CLUSTER,
@@ -76,26 +76,26 @@ class TestWatermark(unittest.TestCase):
 
     def test_get_metadata_model_key(self) -> None:
         metadata = self.watermark.get_metadata_model_key()
-        self.assertEquals(metadata, '{database}://{cluster}.{schema}/{table}'
-                          .format(database=DATABASE,
-                                  cluster=CLUSTER,
-                                  schema=SCHEMA,
-                                  table=TABLE))
+        self.assertEqual(metadata, '{database}://{cluster}.{schema}/{table}'
+                         .format(database=DATABASE,
+                                 cluster=CLUSTER,
+                                 schema=SCHEMA,
+                                 table=TABLE))
 
     def test_create_nodes(self) -> None:
         nodes = self.watermark.create_nodes()
-        self.assertEquals(len(nodes), 1)
-        self.assertEquals(nodes[0], self.expected_node_result)
+        self.assertEqual(len(nodes), 1)
+        self.assertEqual(nodes[0], self.expected_node_result)
 
     def test_create_relation(self) -> None:
         relation = self.watermark.create_relation()
-        self.assertEquals(len(relation), 1)
-        self.assertEquals(relation[0], self.expected_relation_result)
+        self.assertEqual(len(relation), 1)
+        self.assertEqual(relation[0], self.expected_relation_result)
 
     def test_create_next_node(self) -> None:
         next_node = self.watermark.create_next_node()
-        self.assertEquals(next_node, self.expected_node_result)
+        self.assertEqual(next_node, self.expected_node_result)
 
     def test_create_next_relation(self) -> None:
         next_relation = self.watermark.create_next_relation()
-        self.assertEquals(next_relation, self.expected_relation_result)
+        self.assertEqual(next_relation, self.expected_relation_result)
