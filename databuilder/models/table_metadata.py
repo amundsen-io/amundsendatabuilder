@@ -259,7 +259,10 @@ class TableMetadata(Neo4jCsvSerializable):
         self.cluster = cluster
         self.schema = schema
         self.name = name
-        self.description = DescriptionMetadata.create_description_metadata(text=description, source=description_source)
+        self.descriptions: List[DescriptionMetadata] = []
+        desc = DescriptionMetadata.create_description_metadata(text=description, source=description_source)
+        if desc is not None:
+            self.descriptions.append(desc)
         self.columns = columns if columns else []
         self.is_view = is_view
         self.attrs: Optional[Dict[str, Any]] = None
@@ -278,7 +281,7 @@ class TableMetadata(Neo4jCsvSerializable):
                                                 self.cluster,
                                                 self.schema,
                                                 self.name,
-                                                self.description,
+                                                self.descriptions,
                                                 self.columns,
                                                 self.is_view,
                                                 self.tags)
@@ -327,6 +330,13 @@ class TableMetadata(Neo4jCsvSerializable):
                                                                col=col.name,
                                                                description_id=description.get_description_id())
 
+    # For backwards compatibility
+    @property
+    def description(self) -> Optional["DescriptionMetadata"]:
+        if len(self.descriptions) > 0:
+            return self.descriptions[0]
+        return None
+
     @staticmethod
     def format_tags(tags: Union[List, str, None]) -> List:
         if tags is None:
@@ -356,9 +366,9 @@ class TableMetadata(Neo4jCsvSerializable):
                     table_node[k] = v
         yield table_node
 
-        if self.description:
-            node_key = self._get_table_description_key(self.description)
-            yield self.description.get_node_dict(node_key)
+        for desc in self.descriptions:
+            node_key = self._get_table_description_key(desc)
+            yield desc.get_node_dict(node_key)
 
         # Create the table tag node
         if self.tags:
@@ -426,10 +436,10 @@ class TableMetadata(Neo4jCsvSerializable):
             RELATION_REVERSE_TYPE: TableMetadata.TABLE_SCHEMA_RELATION_TYPE
         }
 
-        if self.description:
-            yield self.description.get_relation(TableMetadata.TABLE_NODE_LABEL,
-                                                self._get_table_key(),
-                                                self._get_table_description_key(self.description))
+        for desc in self.descriptions:
+            yield desc.get_relation(TableMetadata.TABLE_NODE_LABEL,
+                                    self._get_table_key(),
+                                    self._get_table_description_key(desc))
 
         if self.tags:
             for tag in self.tags:
