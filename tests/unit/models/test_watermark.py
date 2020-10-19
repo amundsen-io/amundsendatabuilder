@@ -33,11 +33,11 @@ class TestWatermark(unittest.TestCase):
         self.expected_node_result = {
             NODE_KEY: '{database}://{cluster}.{schema}/{table}/{part_type}/'
             .format(
-                database=DATABASE.lower(),
-                cluster=CLUSTER.lower(),
-                schema=SCHEMA.lower(),
-                table=TABLE.lower(),
-                part_type=PART_TYPE.lower()),
+                database=DATABASE,
+                cluster=CLUSTER,
+                schema=SCHEMA,
+                table=TABLE,
+                part_type=PART_TYPE),
             NODE_LABEL: 'Watermark',
             'partition_key': 'ds',
             'partition_value': '2017-09-18/feature_id=9',
@@ -47,18 +47,18 @@ class TestWatermark(unittest.TestCase):
         self.expected_relation_result = {
             RELATION_START_KEY: '{database}://{cluster}.{schema}/{table}/{part_type}/'
             .format(
-                database=DATABASE.lower(),
-                cluster=CLUSTER.lower(),
-                schema=SCHEMA.lower(),
-                table=TABLE.lower(),
-                part_type=PART_TYPE.lower()),
+                database=DATABASE,
+                cluster=CLUSTER,
+                schema=SCHEMA,
+                table=TABLE,
+                part_type=PART_TYPE),
             RELATION_START_LABEL: 'Watermark',
             RELATION_END_KEY: '{database}://{cluster}.{schema}/{table}'
             .format(
-                database=DATABASE.lower(),
-                cluster=CLUSTER.lower(),
-                schema=SCHEMA.lower(),
-                table=TABLE.lower()),
+                database=DATABASE,
+                cluster=CLUSTER,
+                schema=SCHEMA,
+                table=TABLE),
             RELATION_END_LABEL: 'Table',
             RELATION_TYPE: 'BELONG_TO_TABLE',
             RELATION_REVERSE_TYPE: 'WATERMARK'
@@ -68,19 +68,19 @@ class TestWatermark(unittest.TestCase):
         watermark = self.watermark.get_watermark_model_key()
         self.assertEquals(
             watermark, '{database}://{cluster}.{schema}/{table}/{part_type}/'
-            .format(database=DATABASE.lower(),
-                    cluster=CLUSTER.lower(),
-                    schema=SCHEMA.lower(),
-                    table=TABLE.lower(),
-                    part_type=PART_TYPE.lower()))
+            .format(database=DATABASE,
+                    cluster=CLUSTER,
+                    schema=SCHEMA,
+                    table=TABLE,
+                    part_type=PART_TYPE))
 
     def test_get_metadata_model_key(self) -> None:
         metadata = self.watermark.get_metadata_model_key()
         self.assertEquals(metadata, '{database}://{cluster}.{schema}/{table}'
-                          .format(database=DATABASE.lower(),
-                                  cluster=CLUSTER.lower(),
-                                  schema=SCHEMA.lower(),
-                                  table=TABLE.lower()))
+                          .format(database=DATABASE,
+                                  cluster=CLUSTER,
+                                  schema=SCHEMA,
+                                  table=TABLE))
 
     def test_create_nodes(self) -> None:
         nodes = self.watermark.create_nodes()

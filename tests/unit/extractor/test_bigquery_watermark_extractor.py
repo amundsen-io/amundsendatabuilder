@@ -137,7 +137,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.table, 'other')
         self.assertEquals(result.cluster, 'your-project-here')
         self.assertEquals(result.create_time, datetime.fromtimestamp(1547512241).strftime('%Y-%m-%d %H:%M:%S'))
-        self.assertEquals(result.parts, [('_partitiontime', '20180802')])
+        self.assertEquals(result.parts, [('_PARTITIONTIME', '20180802')])
 
         result = extractor.extract()
         self.assertEquals(result.part_type, 'high_watermark')
@@ -146,7 +146,7 @@ class TestBigQueryWatermarkExtractor(unittest.TestCase):
         self.assertEquals(result.table, 'other')
         self.assertEquals(result.cluster, 'your-project-here')
         self.assertEquals(result.create_time, datetime.fromtimestamp(1547512241).strftime('%Y-%m-%d %H:%M:%S'))
-        self.assertEquals(result.parts, [('_partitiontime', '20180804')])
+        self.assertEquals(result.parts, [('_PARTITIONTIME', '20180804')])
 
     @patch('databuilder.extractor.base_bigquery_extractor.build')
     def test_table_with_field_partitions(self, mock_build: Any) -> None:
