@@ -53,11 +53,11 @@ class TestApplication(unittest.TestCase):
 
     def test_get_table_model_key(self) -> None:
         table = self.application.get_table_model_key()
-        self.assertEquals(table, 'hive://gold.default/test_table')
+        self.assertEqual(table, 'hive://gold.default/test_table')
 
     def test_get_application_model_key(self) -> None:
         application = self.application.get_application_model_key()
-        self.assertEquals(application, self.expected_node_result[NODE_KEY])
+        self.assertEqual(application, self.expected_node_result[NODE_KEY])
 
     def test_create_nodes(self) -> None:
         nodes = self.application.create_nodes()

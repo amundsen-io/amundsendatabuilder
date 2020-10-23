@@ -49,11 +49,11 @@ class TestTableLastUpdated(unittest.TestCase):
 
     def test_get_table_model_key(self) -> None:
         table = self.tableLastUpdated.get_table_model_key()
-        self.assertEquals(table, 'hive://gold.default/test_table')
+        self.assertEqual(table, 'hive://gold.default/test_table')
 
     def test_get_last_updated_model_key(self) -> None:
         last_updated = self.tableLastUpdated.get_last_updated_model_key()
-        self.assertEquals(last_updated, 'hive://gold.default/test_table/timestamp')
+        self.assertEqual(last_updated, 'hive://gold.default/test_table/timestamp')
 
     def test_create_nodes(self) -> None:
         nodes = self.tableLastUpdated.create_nodes()

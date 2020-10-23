@@ -41,11 +41,11 @@ class TestTableStats(unittest.TestCase):
 
     def test_get_table_stat_model_key(self) -> None:
         table_stats = self.table_stats.get_table_stat_model_key()
-        self.assertEquals(table_stats, 'hive://gold.base/test/col/avg/')
+        self.assertEqual(table_stats, 'hive://gold.base/test/col/avg/')
 
     def test_get_col_key(self) -> None:
         metadata = self.table_stats.get_col_key()
-        self.assertEquals(metadata, 'hive://gold.base/test/col')
+        self.assertEqual(metadata, 'hive://gold.base/test/col')
 
     def test_create_nodes(self) -> None:
         nodes = self.table_stats.create_nodes()

@@ -41,17 +41,17 @@ class TestWatermark(unittest.TestCase):
             part_name=NESTED_PART
         )
         start_key = '{database}://{cluster}.{schema}/{table}/{part_type}/'.format(
-            database=DATABASE.lower(),
-            cluster=CLUSTER.lower(),
-            schema=SCHEMA.lower(),
-            table=TABLE.lower(),
-            part_type=PART_TYPE.lower()
+            database=DATABASE,
+            cluster=CLUSTER,
+            schema=SCHEMA,
+            table=TABLE,
+            part_type=PART_TYPE
         )
         end_key = '{database}://{cluster}.{schema}/{table}'.format(
-            database=DATABASE.lower(),
-            cluster=CLUSTER.lower(),
-            schema=SCHEMA.lower(),
-            table=TABLE.lower()
+            database=DATABASE,
+            cluster=CLUSTER,
+            schema=SCHEMA,
+            table=TABLE
         )
         self.expected_node_result = GraphNode(
             key=start_key,
@@ -92,21 +92,21 @@ class TestWatermark(unittest.TestCase):
 
     def test_get_watermark_model_key(self) -> None:
         watermark = self.watermark.get_watermark_model_key()
-        self.assertEquals(
+        self.assertEqual(
             watermark, '{database}://{cluster}.{schema}/{table}/{part_type}/'
-            .format(database=DATABASE.lower(),
-                    cluster=CLUSTER.lower(),
-                    schema=SCHEMA.lower(),
-                    table=TABLE.lower(),
-                    part_type=PART_TYPE.lower()))
+            .format(database=DATABASE,
+                    cluster=CLUSTER,
+                    schema=SCHEMA,
+                    table=TABLE,
+                    part_type=PART_TYPE))
 
     def test_get_metadata_model_key(self) -> None:
         metadata = self.watermark.get_metadata_model_key()
-        self.assertEquals(metadata, '{database}://{cluster}.{schema}/{table}'
-                          .format(database=DATABASE.lower(),
-                                  cluster=CLUSTER.lower(),
-                                  schema=SCHEMA.lower(),
-                                  table=TABLE.lower()))
+        self.assertEqual(metadata, '{database}://{cluster}.{schema}/{table}'
+                         .format(database=DATABASE,
+                                 cluster=CLUSTER,
+                                 schema=SCHEMA,
+                                 table=TABLE))
 
     def test_create_nodes(self) -> None:
         nodes = self.watermark.create_nodes()

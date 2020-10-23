@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.schema import schema_constant
+from databuilder.models.badge import BadgeMetadata, Badge
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -151,16 +152,12 @@ class ColumnMetadata:
     COLUMN_DESCRIPTION = 'description'
     COLUMN_DESCRIPTION_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}/{description_id}'
 
-    # Relation between column and tag
-    COL_TAG_RELATION_TYPE = 'TAGGED_BY'
-    TAG_COL_RELATION_TYPE = 'TAG'
-
     def __init__(self,
                  name: str,
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 tags: Union[List[str], None] = None
+                 badges: Union[List[str], None] = None
                  ) -> None:
         """
         TODO: Add stats
@@ -174,13 +171,17 @@ class ColumnMetadata:
                                                                            text=description)
         self.type = col_type
         self.sort_order = sort_order
-        self.tags = tags
+        if badges:
+            self.badges = [Badge(badge, 'column') for badge in badges]
+        else:
+            self.badges = []
 
     def __repr__(self) -> str:
-        return 'ColumnMetadata({!r}, {!r}, {!r}, {!r})'.format(self.name,
-                                                               self.description,
-                                                               self.type,
-                                                               self.sort_order)
+        return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,
+                                                                     self.description,
+                                                                     self.type,
+                                                                     self.sort_order,
+                                                                     self.badges)
 
 
 class TableMetadata(GraphSerializable):
@@ -308,7 +309,8 @@ class TableMetadata(GraphSerializable):
                                                        cluster=self.cluster,
                                                        schema=self.schema,
                                                        tbl=self.name,
-                                                       col=col.name)
+                                                       col=col.name,
+                                                       badges=col.badges)
 
     def _get_col_description_key(self,
                                  col: ColumnMetadata,
@@ -365,16 +367,16 @@ class TableMetadata(GraphSerializable):
                 node_key = self._get_col_description_key(col, col.description)
                 yield col.description.get_node(node_key)
 
-            if col.tags:
-                for tag in col.tags:
-                    tag_node = GraphNode(
-                        key=TagMetadata.get_tag_key(tag),
-                        label=TagMetadata.TAG_NODE_LABEL,
-                        attributes={
-                            TagMetadata.TAG_TYPE: 'default'
-                        }
-                    )
-                    yield tag_node
+            if col.badges:
+                badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
+                                               schema=self._get_schema_key(),
+                                               start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                                               start_key=self._get_col_key(col),
+                                               badges=col.badges,
+                                               cluster=self._get_cluster_key())
+                badge_nodes = badge_metadata.create_nodes()
+                for node in badge_nodes:
+                    yield node
 
         # Database, cluster, schema
         others = [
@@ -477,18 +479,16 @@ class TableMetadata(GraphSerializable):
                     self._get_col_description_key(col, col.description)
                 )
 
-            if col.tags:
-                for tag in col.tags:
-                    tag_column_relationship = GraphRelationship(
-                        start_label=TableMetadata.TABLE_NODE_LABEL,
-                        end_label=TagMetadata.TAG_NODE_LABEL,
-                        start_key=self._get_table_key(),
-                        end_key=TagMetadata.get_tag_key(tag),
-                        type=ColumnMetadata.COL_TAG_RELATION_TYPE,
-                        reverse_type=ColumnMetadata.TAG_COL_RELATION_TYPE,
-                        attributes={}
-                    )
-                    yield tag_column_relationship
+            if col.badges:
+                badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
+                                               schema=self._get_schema_key(),
+                                               start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                                               start_key=self._get_col_key(col),
+                                               badges=col.badges,
+                                               cluster=self._get_cluster_key())
+                badge_relations = badge_metadata.create_relation()
+                for relation in badge_relations:
+                    yield relation
 
         others = [
             GraphRelationship(

@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 
-__version__ = '3.3.2'
+__version__ = '4.0.1'
 
 
 requirements = [
@@ -47,11 +47,16 @@ db2 = [
     'ibm-db-sa-py3==0.3.1-1'
 ]
 
+dremio = [
+    'pyodbc==4.0.30'
+]
+
 druid = [
     'pydruid'
 ]
 
-all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery + jsonpath + db2 + druid
+all_deps = requirements + kafka + cassandra + glue + snowflake + athena + \
+    bigquery + jsonpath + db2 + dremio + druid
 
 setup(
     name='amundsen-databuilder',
@@ -75,6 +80,7 @@ setup(
         'bigquery': bigquery,
         'jsonpath': jsonpath,
         'db2': db2,
+        'dremio': dremio,
         'druid': druid,
     },
     classifiers=[
