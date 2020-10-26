@@ -241,6 +241,7 @@ class TableMetadata(Neo4jCsvSerializable):
                  is_view: bool = False,
                  tags: Union[List, str] = None,
                  description_source: Union[str, None] = None,
+                 badges: Union[List[str], None] = None,
                  **kwargs: Any
                  ) -> None:
         """
@@ -265,7 +266,10 @@ class TableMetadata(Neo4jCsvSerializable):
         self.attrs: Optional[Dict[str, Any]] = None
 
         self.tags = TableMetadata.format_tags(tags)
-
+        if badges:
+            self.badges = [Badge(badge, 'table') for badge in badges]
+        else:
+            self.badges = []
         if kwargs:
             self.attrs = copy.deepcopy(kwargs)
 
@@ -281,7 +285,8 @@ class TableMetadata(Neo4jCsvSerializable):
                                                 self.description,
                                                 self.columns,
                                                 self.is_view,
-                                                self.tags)
+                                                self.tags,
+                                                self.badges)
 
     def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
@@ -365,6 +370,17 @@ class TableMetadata(Neo4jCsvSerializable):
             for tag in self.tags:
                 yield TagMetadata.create_tag_node(tag)
 
+        if self.badges:
+            table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
+                                           schema=self._get_schema_key(),
+                                           start_label=TableMetadata.TABLE_NODE_LABEL,
+                                           start_key=self._get_table_key,
+                                           badges=self.badges,
+                                           cluster=self._get_cluster_key())
+            table_badge_nodes = table_badge_metadata.create_next_node()
+            for node in table_badge_nodes:
+                yield node
+
         for col in self.columns:
             yield {
                 NODE_LABEL: ColumnMetadata.COLUMN_NODE_LABEL,
@@ -441,6 +457,20 @@ class TableMetadata(Neo4jCsvSerializable):
                     RELATION_TYPE: TableMetadata.TABLE_TAG_RELATION_TYPE,
                     RELATION_REVERSE_TYPE: TableMetadata.TAG_TABLE_RELATION_TYPE,
                 }
+
+        if self.badges:
+            for badge in self.badges:
+                table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
+                                                     schema=self._get_schema_key(),
+                                                     start_label=TableMetadata.TABLE_NODE_LABEL,
+                                                     start_key=self._get_table_key,
+                                                     badges=self.badges,
+                                                     cluster=self._get_cluster_key())
+                table_badge_relations = table_badge_metadata.create_relation()
+                for relation in table_badge_relations:
+                    yield relation
+
+
 
         for col in self.columns:
             yield {
