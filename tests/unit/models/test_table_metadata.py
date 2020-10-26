@@ -213,6 +213,40 @@ class TestTableMetadata(unittest.TestCase):
         self.assertEqual(actual[2], expected_tab_tag_rel1)
         self.assertEqual(actual[3], expected_tab_tag_rel2)
 
+    def test_table_badge_field(self) -> None:
+        self.table_metadata7 = TableMetadata('hive', 'gold', 'test_schema7', 'test_table7', 'test_table7',
+                                             [ColumnMetadata('test_id1', 'description of test_table7', 'bigint', 0)],
+                                             is_view=False,
+                                             badges=['badge1', 'badge2'])
+
+        node_row = self.table_metadata7.next_node()
+        actual = []
+        while node_row:
+            actual.append(node_row)
+            node_row = self.table_metadata7.next_node()
+
+        self.assertEqual(actual[2].get('KEY'), 'badge1')
+        self.assertEqual(actual[3].get('KEY'), 'badge2')
+
+        expected_table_badge_rel1 = {'END_KEY': 'badge1', 'START_LABEL': 'Table',
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema7/test_table7',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+        expected_table_badge_rel2 = {'END_KEY': 'badge2', 'START_LABEL': 'Table',
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema7/test_table7',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+
+        relation_row = self.table_metadata7.next_relation()
+        actual = []
+        while relation_row:
+            actual.append(relation_row)
+            relation_row = self.table_metadata7.next_relation()
+
+        self.assertEqual(actual[2], expected_table_badge_rel1)
+        self.assertEqual(actual[3], expected_table_badge_rel2)
+
+
     def test_col_badge_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
             ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-badge1', 'col-badge2'])],

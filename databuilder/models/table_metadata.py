@@ -278,7 +278,7 @@ class TableMetadata(Neo4jCsvSerializable):
 
     def __repr__(self) -> str:
         return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
-               '{!r}, {!r}, {!r}, {!r})'.format(self.database,
+               '{!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
                                                 self.cluster,
                                                 self.schema,
                                                 self.name,
@@ -350,7 +350,6 @@ class TableMetadata(Neo4jCsvSerializable):
             return None
 
     def _create_next_node(self) -> Iterator[Any]:  # noqa: C901
-
         table_node = {NODE_LABEL: TableMetadata.TABLE_NODE_LABEL,
                       NODE_KEY: self._get_table_key(),
                       TableMetadata.TABLE_NAME: self.name,
@@ -374,10 +373,10 @@ class TableMetadata(Neo4jCsvSerializable):
             table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
                                            schema=self._get_schema_key(),
                                            start_label=TableMetadata.TABLE_NODE_LABEL,
-                                           start_key=self._get_table_key,
+                                           start_key=self._get_table_key(),
                                            badges=self.badges,
                                            cluster=self._get_cluster_key())
-            table_badge_nodes = table_badge_metadata.create_next_node()
+            table_badge_nodes = table_badge_metadata.create_nodes()
             for node in table_badge_nodes:
                 yield node
 
@@ -463,14 +462,12 @@ class TableMetadata(Neo4jCsvSerializable):
                 table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
                                                      schema=self._get_schema_key(),
                                                      start_label=TableMetadata.TABLE_NODE_LABEL,
-                                                     start_key=self._get_table_key,
+                                                     start_key=self._get_table_key(),
                                                      badges=self.badges,
                                                      cluster=self._get_cluster_key())
                 table_badge_relations = table_badge_metadata.create_relation()
                 for relation in table_badge_relations:
                     yield relation
-
-
 
         for col in self.columns:
             yield {
