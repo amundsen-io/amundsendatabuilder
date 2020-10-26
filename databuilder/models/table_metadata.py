@@ -430,7 +430,7 @@ class TableMetadata(Neo4jCsvSerializable):
         except StopIteration:
             return None
 
-    def _create_next_relation(self) -> Iterator[Any]:
+    def _create_next_relation(self) -> Iterator[Any]:  # noqa: C901
 
         yield {
             RELATION_START_LABEL: TableMetadata.SCHEMA_NODE_LABEL,
@@ -458,16 +458,15 @@ class TableMetadata(Neo4jCsvSerializable):
                 }
 
         if self.badges:
-            for badge in self.badges:
-                table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
-                                                     schema=self._get_schema_key(),
-                                                     start_label=TableMetadata.TABLE_NODE_LABEL,
-                                                     start_key=self._get_table_key(),
-                                                     badges=self.badges,
-                                                     cluster=self._get_cluster_key())
-                table_badge_relations = table_badge_metadata.create_relation()
-                for relation in table_badge_relations:
-                    yield relation
+            table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
+                                                 schema=self._get_schema_key(),
+                                                 start_label=TableMetadata.TABLE_NODE_LABEL,
+                                                 start_key=self._get_table_key(),
+                                                 badges=self.badges,
+                                                 cluster=self._get_cluster_key())
+            table_badge_relations = table_badge_metadata.create_relation()
+            for relation in table_badge_relations:
+                yield relation
 
         for col in self.columns:
             yield {
