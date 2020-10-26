@@ -229,13 +229,13 @@ class TestTableMetadata(unittest.TestCase):
         self.assertEqual(actual[3].get('KEY'), 'badge2')
 
         expected_table_badge_rel1 = {'END_KEY': 'badge1', 'START_LABEL': 'Table',
-                                   'END_LABEL': 'Badge',
-                                   'START_KEY': 'hive://gold.test_schema7/test_table7',
-                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+                                     'END_LABEL': 'Badge',
+                                     'START_KEY': 'hive://gold.test_schema7/test_table7',
+                                     'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
         expected_table_badge_rel2 = {'END_KEY': 'badge2', 'START_LABEL': 'Table',
-                                   'END_LABEL': 'Badge',
-                                   'START_KEY': 'hive://gold.test_schema7/test_table7',
-                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+                                     'END_LABEL': 'Badge',
+                                     'START_KEY': 'hive://gold.test_schema7/test_table7',
+                                     'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
 
         relation_row = self.table_metadata7.next_relation()
         actual = []
@@ -245,7 +245,6 @@ class TestTableMetadata(unittest.TestCase):
 
         self.assertEqual(actual[2], expected_table_badge_rel1)
         self.assertEqual(actual[3], expected_table_badge_rel2)
-
 
     def test_col_badge_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [

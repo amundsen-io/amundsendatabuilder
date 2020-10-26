@@ -277,16 +277,16 @@ class TableMetadata(Neo4jCsvSerializable):
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self) -> str:
-        return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
+        return 'TableMetadata({!r}, {!r}, {!r}, {!r}, ' \
                '{!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                self.cluster,
-                                                self.schema,
-                                                self.name,
-                                                self.description,
-                                                self.columns,
-                                                self.is_view,
-                                                self.tags,
-                                                self.badges)
+                                                      self.cluster,
+                                                      self.schema,
+                                                      self.name,
+                                                      self.description,
+                                                      self.columns,
+                                                      self.is_view,
+                                                      self.tags,
+                                                      self.badges)
 
     def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
@@ -371,11 +371,11 @@ class TableMetadata(Neo4jCsvSerializable):
 
         if self.badges:
             table_badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
-                                           schema=self._get_schema_key(),
-                                           start_label=TableMetadata.TABLE_NODE_LABEL,
-                                           start_key=self._get_table_key(),
-                                           badges=self.badges,
-                                           cluster=self._get_cluster_key())
+                                                 schema=self._get_schema_key(),
+                                                 start_label=TableMetadata.TABLE_NODE_LABEL,
+                                                 start_key=self._get_table_key(),
+                                                 badges=self.badges,
+                                                 cluster=self._get_cluster_key())
             table_badge_nodes = table_badge_metadata.create_nodes()
             for node in table_badge_nodes:
                 yield node
