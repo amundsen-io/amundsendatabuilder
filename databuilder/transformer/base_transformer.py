@@ -4,7 +4,7 @@
 import abc
 
 from pyhocon import ConfigTree
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, List, Iterator, Optional
 
 from databuilder import Scoped
 
@@ -39,7 +39,10 @@ class NoopTransformer(Transformer):
 
 class ChainedTransformer(Transformer):
     """
-    A chained transformer that iterates transformers and transforms a record
+    A chained transformer that iterates transformers and transforms a record.
+    Transfomers implemented using generator functons can yield multiple records,
+    which all get passed to the next transformer.
+    Returning None from a transformer filters the record out.
     """
 
     def __init__(self,
@@ -54,13 +57,21 @@ class ChainedTransformer(Transformer):
                 transformer.init(Scoped.get_scoped_conf(conf, transformer.get_scope()))
 
     def transform(self, record: Any) -> Any:
+        records = [record]
         for t in self.transformers:
-            record = t.transform(record)
-            # Check filtered record
-            if not record:
-                return None
+            new_records: List[Any] = []
+            for r in records:
+                result = t.transform(r)
+                # Get all records if the transformer returns an Iterator.
+                if isinstance(result, Iterator):
+                    new_records += list(result)
 
-        return record
+                # Filter the record if it is None
+                elif result is not None:
+                    new_records.append(result)
+            records = new_records
+
+        yield from records
 
     def get_scope(self) -> str:
         return 'transformer.chained'
