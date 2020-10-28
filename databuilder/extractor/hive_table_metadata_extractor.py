@@ -59,8 +59,8 @@ class HiveTableMetadataExtractor(Extractor):
 
     DEFAULT_POSTGRES_SQL_STATEMENT = """
     SELECT source.* FROM
-    (SELECT t."TBL_ID" as tbl_id, d."NAME" as "schema", t."TBL_NAME" as name, t."TBL_TYPE", tp."PARAM_VALUE" as description,
-           p."PKEY_NAME" as col_name, p."INTEGER_IDX" as col_sort_order,
+    (SELECT t."TBL_ID" as tbl_id, d."NAME" as "schema", t."TBL_NAME" as name, t."TBL_TYPE",
+           tp."PARAM_VALUE" as description, p."PKEY_NAME" as col_name, p."INTEGER_IDX" as col_sort_order,
            p."PKEY_TYPE" as col_type, p."PKEY_COMMENT" as col_description, 1 as "is_partition_col",
            CASE WHEN t."TBL_TYPE" = 'VIRTUAL_VIEW' THEN 1
                 ELSE 0 END as "is_view"
@@ -70,8 +70,8 @@ class HiveTableMetadataExtractor(Extractor):
     LEFT JOIN "TABLE_PARAMS" tp ON (t."TBL_ID" = tp."TBL_ID" AND tp."PARAM_KEY"='comment')
     {where_clause_suffix}
     UNION
-    SELECT t."TBL_ID" as tbl_id, d."NAME" as "schema", t."TBL_NAME" as name, t."TBL_TYPE", tp."PARAM_VALUE" as description,
-           c."COLUMN_NAME" as col_name, c."INTEGER_IDX" as col_sort_order,
+    SELECT t."TBL_ID" as tbl_id, d."NAME" as "schema", t."TBL_NAME" as name, t."TBL_TYPE",
+           tp."PARAM_VALUE" as description, c."COLUMN_NAME" as col_name, c."INTEGER_IDX" as col_sort_order,
            c."TYPE_NAME" as col_type, c."COMMENT" as col_description, 0 as "is_partition_col",
            CASE WHEN t."TBL_TYPE" = 'VIRTUAL_VIEW' THEN 1
                 ELSE 0 END as "is_view"
@@ -106,7 +106,8 @@ class HiveTableMetadataExtractor(Extractor):
 
         LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
 
-        sql_alch_conf = sql_alch_conf.with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+        sql_alch_conf = sql_alch_conf.with_fallback(ConfigFactory.from_dict(
+            {SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None
 
@@ -175,4 +176,3 @@ class HiveTableMetadataExtractor(Extractor):
             return TableKey(schema=row['schema'], table_name=row['name'])
 
         return None
-
