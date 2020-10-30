@@ -19,9 +19,7 @@ badge2 = Badge('badge2', 'column')
 class TestBadge(unittest.TestCase):
     def setUp(self) -> None:
         super(TestBadge, self).setUp()
-        self.badge_metada = BadgeMetadata(db_name='hive',
-                                          schema=SCHEMA,
-                                          start_label='Column',
+        self.badge_metada = BadgeMetadata(start_label='Column',
                                           start_key='hive://default.base/test/ds',
                                           cluster=CLUSTER,
                                           badges=[badge1, badge2])

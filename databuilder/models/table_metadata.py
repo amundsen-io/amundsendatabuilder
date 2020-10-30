@@ -378,9 +378,7 @@ class TableMetadata(Neo4jCsvSerializable):
                 yield col.description.get_node_dict(node_key)
 
             if col.badges:
-                badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
-                                               schema=self._get_schema_key(),
-                                               start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
                                                start_key=self._get_col_key(col),
                                                badges=col.badges,
                                                cluster=self._get_cluster_key())
@@ -457,9 +455,7 @@ class TableMetadata(Neo4jCsvSerializable):
                                                    self._get_col_key(col),
                                                    self._get_col_description_key(col, col.description))
             if col.badges:
-                badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
-                                               schema=self._get_schema_key(),
-                                               start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
                                                start_key=self._get_col_key(col),
                                                badges=col.badges,
                                                cluster=self._get_cluster_key())
