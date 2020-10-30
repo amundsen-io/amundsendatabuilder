@@ -66,13 +66,11 @@ class BadgeMetadata(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def __repr__(self) -> str:
-        return 'BadgeMetadata({!r}, {!r}, {!r}, {!r} ' \
-               '{!r}, {!r})'.format(self.db,
-                                    self.schema,
-                                    self.cluster,
-                                    self.start_label,
-                                    self.start_key,
-                                    self.badges)
+        return 'BadgeMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.db,
+                                                                    self.schema,
+                                                                    self.cluster,
+                                                                    self.start_label,
+                                                                    self.start_key)
 
     def create_next_node(self) -> Optional[Dict[str, Any]]:
         # return the string representation of the data
