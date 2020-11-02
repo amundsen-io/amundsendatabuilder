@@ -64,7 +64,6 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
                 continue
 
             email = entry['protoPayload']['authenticationInfo']['principalEmail']
-            
             # Query results can be cached and if the source tables remain untouched,
             # bigquery will return it from a 24 hour cache result instead. In that
             # case, referencedTables has been observed to be empty:
@@ -73,14 +72,20 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
             refTables = job['jobStatistics'].get('referencedTables', None)
             if refTables:
                 if 'totalTablesProcessed' in job['jobStatistics']:
-                    self._create_records(refTables, job['jobStatistics']['totalTablesProcessed'], email, job['jobName']['jobId'])
+                    self._create_records(
+                        refTables,
+                        job['jobStatistics']['totalTablesProcessed'], email,
+                        job['jobName']['jobId'])
 
             refViews = job['jobStatistics'].get('referencedViews', None)
             if refViews:
                 if 'totalViewsProcessed' in job['jobStatistics']:
-                    self._create_records(refViews, job['jobStatistics']['totalViewsProcessed'], email, job['jobName']['jobId'])
+                    self._create_records(
+                        refViews, job['jobStatistics']['totalViewsProcessed'],
+                        email, job['jobName']['jobId'])
 
-    def _create_records(self, refResources, resourcesProcessed, email, jobId) -> None:
+    def _create_records(self, refResources, resourcesProcessed, email,
+                        jobId) -> None:
         # if email filter is provided, only the email matched with filter will be recorded.
         if self.email_pattern:
             if not re.match(self.email_pattern, email):
@@ -88,7 +93,9 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
                 return
 
         if len(refResources) != resourcesProcessed:
-            LOGGER.warn('The number of tables listed in job {job_id} is not consistent'.format(job_id=jobId))
+            LOGGER.warn(
+                'The number of tables listed in job {job_id} is not consistent'
+                .format(job_id=jobId))
             return
 
         for refResource in refResources:
