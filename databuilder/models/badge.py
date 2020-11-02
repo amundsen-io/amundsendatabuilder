@@ -60,7 +60,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
 
     def __repr__(self) -> str:
         return 'BadgeMetadata({!r}, {!r})'.format(self.start_label,
-                                                        self.start_key)
+                                                  self.start_key)
 
     def create_next_node(self) -> Optional[Dict[str, Any]]:
         # return the string representation of the data
