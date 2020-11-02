@@ -380,8 +380,7 @@ class TableMetadata(Neo4jCsvSerializable):
             if col.badges:
                 badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
                                                start_key=self._get_col_key(col),
-                                               badges=col.badges,
-                                               cluster=self._get_cluster_key())
+                                               badges=col.badges)
                 badge_nodes = badge_metadata.create_nodes()
                 for node in badge_nodes:
                     yield node
@@ -457,8 +456,7 @@ class TableMetadata(Neo4jCsvSerializable):
             if col.badges:
                 badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
                                                start_key=self._get_col_key(col),
-                                               badges=col.badges,
-                                               cluster=self._get_cluster_key())
+                                               badges=col.badges)
                 badge_relations = badge_metadata.create_relation()
                 for relation in badge_relations:
                     yield relation

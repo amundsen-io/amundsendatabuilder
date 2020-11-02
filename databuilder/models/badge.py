@@ -35,10 +35,8 @@ class BadgeMetadata(Neo4jCsvSerializable):
                  start_label: str,  # Table, Dashboard, Column
                  start_key: str,
                  badges: List[Badge],
-                 cluster: str = 'gold',  # is this what we want as default for badges..?
                  ):
         self.badges = badges
-        self.cluster = cluster.lower()
 
         table_key_pattern = re.compile('[a-z]+://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
         dashboard_key_pattern = re.compile('[a-z]+_dashboard://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
@@ -61,8 +59,7 @@ class BadgeMetadata(Neo4jCsvSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def __repr__(self) -> str:
-        return 'BadgeMetadata({!r}, {!r}, {!r})'.format(self.cluster,
-                                                        self.start_label,
+        return 'BadgeMetadata({!r}, {!r})'.format(self.start_label,
                                                         self.start_key)
 
     def create_next_node(self) -> Optional[Dict[str, Any]]:
