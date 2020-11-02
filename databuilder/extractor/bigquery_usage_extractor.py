@@ -73,7 +73,7 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
             refTables = job['jobStatistics'].get('referencedTables', None)
             if refTables:
                 if 'totalTablesProcessed' in job['jobStatistics']:
-                self._create_records(refTables, job['jobStatistics']['totalTablesProcessed'], email, job['jobName']['jobId'])
+                    self._create_records(refTables, job['jobStatistics']['totalTablesProcessed'], email, job['jobName']['jobId'])
 
             refViews = job['jobStatistics'].get('referencedViews', None)
             if refViews:
