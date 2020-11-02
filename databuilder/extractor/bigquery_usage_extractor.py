@@ -8,7 +8,7 @@ import re
 from time import sleep
 
 from pyhocon import ConfigTree
-from typing import Any, Iterator, Dict, Optional, Tuple
+from typing import Any, Iterator, Dict, Optional, Tuple, List
 
 from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor
 
@@ -84,8 +84,8 @@ class BigQueryTableUsageExtractor(BaseBigQueryExtractor):
                         refViews, job['jobStatistics']['totalViewsProcessed'],
                         email, job['jobName']['jobId'])
 
-    def _create_records(self, refResources, resourcesProcessed, email,
-                        jobId) -> None:
+    def _create_records(self, refResources: List[dict], resourcesProcessed: int, email: str,
+                        jobId: str) -> None:
         # if email filter is provided, only the email matched with filter will be recorded.
         if self.email_pattern:
             if not re.match(self.email_pattern, email):
