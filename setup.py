@@ -18,6 +18,7 @@ requirements = [
     "unidecode",
     "Jinja2>=2.10.0,<2.12",
     "pytest>=3.6.0,<4.0",
+    "pytest-cov>=2.5.1,<=2.9",
     "pandas>=0.21.0,<1.2.0"
 ]
 
