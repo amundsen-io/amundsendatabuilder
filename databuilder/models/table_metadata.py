@@ -368,12 +368,9 @@ class TableMetadata(GraphSerializable):
                 yield col.description.get_node(node_key)
 
             if col.badges:
-                badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
-                                               schema=self._get_schema_key(),
-                                               start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
                                                start_key=self._get_col_key(col),
-                                               badges=col.badges,
-                                               cluster=self._get_cluster_key())
+                                               badges=col.badges)
                 badge_nodes = badge_metadata.create_nodes()
                 for node in badge_nodes:
                     yield node
@@ -480,12 +477,9 @@ class TableMetadata(GraphSerializable):
                 )
 
             if col.badges:
-                badge_metadata = BadgeMetadata(db_name=self._get_database_key(),
-                                               schema=self._get_schema_key(),
-                                               start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
                                                start_key=self._get_col_key(col),
-                                               badges=col.badges,
-                                               cluster=self._get_cluster_key())
+                                               badges=col.badges)
                 badge_relations = badge_metadata.create_relation()
                 for relation in badge_relations:
                     yield relation

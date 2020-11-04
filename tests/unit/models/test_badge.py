@@ -18,20 +18,17 @@ badge2 = Badge('badge2', 'column')
 class TestBadge(unittest.TestCase):
     def setUp(self) -> None:
         super(TestBadge, self).setUp()
-        self.badge_metada = BadgeMetadata(db_name='hive',
-                                          schema=SCHEMA,
-                                          start_label='Column',
+        self.badge_metada = BadgeMetadata(start_label='Column',
                                           start_key='hive://default.base/test/ds',
-                                          cluster=CLUSTER,
                                           badges=[badge1, badge2])
 
     def test_get_badge_key(self) -> None:
         badge_key = self.badge_metada.get_badge_key(badge1.name)
-        self.assertEquals(badge_key, badge1.name)
+        self.assertEqual(badge_key, badge1.name)
 
     def test_create_nodes(self) -> None:
         nodes = self.badge_metada.create_nodes()
-        self.assertEquals(len(nodes), 2)
+        self.assertEqual(len(nodes), 2)
 
         node1 = {
             NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge1.name),
@@ -57,11 +54,8 @@ class TestBadge(unittest.TestCase):
 
         self.assertRaises(Exception,
                           BadgeMetadata,
-                          db_name='hive',
-                          schema=SCHEMA,
                           start_label=column_label,
                           start_key=table_key,
-                          cluster=CLUSTER,
                           badges=[badge1, badge2])
 
     def test_bad_entity_label(self) -> None:
@@ -69,11 +63,8 @@ class TestBadge(unittest.TestCase):
         table_key = 'hive://default.base/test'
         self.assertRaises(Exception,
                           BadgeMetadata,
-                          db_name='hive',
-                          schema=SCHEMA,
                           start_label=user_label,
                           start_key=table_key,
-                          cluster=CLUSTER,
                           badges=[badge1, badge2])
 
     def test_create_relation(self) -> None:
@@ -82,7 +73,7 @@ class TestBadge(unittest.TestCase):
             neo4_serializer.serialize_relationship(relation)
             for relation in relations
         ]
-        self.assertEquals(len(relations), 2)
+        self.assertEqual(len(relations), 2)
 
         relation1 = {
             RELATION_START_LABEL: self.badge_metada.start_label,
