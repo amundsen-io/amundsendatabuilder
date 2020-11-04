@@ -17,6 +17,7 @@ requirements = [
     "pyhocon>=0.3.42",
     "unidecode",
     "Jinja2>=2.10.0,<2.12",
+    "pytest>=3.6.0,<4.0",
     "pandas>=0.21.0,<1.2.0"
 ]
 
