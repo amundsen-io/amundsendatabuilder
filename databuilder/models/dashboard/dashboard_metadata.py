@@ -20,7 +20,7 @@ class DashboardMetadata(Neo4jCsvSerializable):
     """
     Dashboard metadata including dashboard group name, dashboardgroup description, dashboard description,
     and tags.
-    
+
     Some other metadata e.g. Owners and last-reload/modified times are provided by other models
     e.g. DashboardOwner
 
