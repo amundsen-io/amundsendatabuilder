@@ -322,7 +322,7 @@ class Neo4jCsvPublisher(Publisher):
             for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
                 badge_exception = True
                 retries_for_badge_exception = 10  # TODO not sure how many times to retry
-                while badge_exception or retries_for_badge_exception > 0:
+                while badge_exception and retries_for_badge_exception > 0:
                     try:
                         stmt = self.create_relationship_merge_statement(rel_record=rel_record)
                         params = self._create_props_param(rel_record)
