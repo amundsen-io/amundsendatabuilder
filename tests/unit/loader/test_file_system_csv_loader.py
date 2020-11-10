@@ -72,7 +72,16 @@ class TestFileSystemCSVLoader(unittest.TestCase):
 
         expected = [
             ",".join(
-                ["database", "schema", "name", "description", "column_name", "column_type", "column_comment", "owner"]
+                [
+                    "database",
+                    "schema",
+                    "name",
+                    "description",
+                    "column_name",
+                    "column_type",
+                    "column_comment",
+                    "owner",
+                ]
             ),
             ",".join(
                 [
@@ -115,28 +124,28 @@ class TestFileSystemCSVLoader(unittest.TestCase):
             loader.load(d)
         loader.close()
 
-        expected = [
-            ",".join(
-                ["database", "schema", "name", "description", "column_name", "column_type", "column_comment", "owner"]
-            )
+        expected_values = [
+            "database",
+            "schema",
+            "name",
+            "description",
+            "column_name",
+            "column_type",
+            "column_comment",
+            "owner",
         ]
-        expected = (
-            expected
-            + [
-                ",".join(
-                    [
-                        "test_database",
-                        "test_schema",
-                        "test_table",
-                        "test_description",
-                        "test_column_name",
-                        "test_column_type",
-                        "test_column_comment",
-                        "test_owner",
-                    ]
-                )
-            ]
-            * 5
-        )
+        expected = [",".join(expected_values)]
+
+        expected_values = [
+            "test_database",
+            "test_schema",
+            "test_table",
+            "test_description",
+            "test_column_name",
+            "test_column_type",
+            "test_column_comment",
+            "test_owner",
+        ]
+        expected.extend(",".join(expected_values) * 5)
 
         self._check_results_helper(expected=expected)
