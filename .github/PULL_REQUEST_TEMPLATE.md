@@ -36,4 +36,5 @@ Make sure you have checked **all** steps below to ensure a timely review.
 - [ ] PR adds unit tests, updates existing unit tests, **OR** documents why no test additions or modifications are needed.
 - [ ] In case of new functionality, my PR adds documentation that describes how to use it.
   - All the public functions and the classes in the PR contain docstrings that explain what it does
+- [ ] PR passes `make lint`
 - [ ] PR passes `make test`
