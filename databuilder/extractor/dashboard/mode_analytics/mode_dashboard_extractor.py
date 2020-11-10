@@ -47,7 +47,7 @@ class ModeDashboardExtractor(Extractor):
         timestamp_str_to_epoch_transformer = TimestampStringToEpoch()
         timestamp_str_to_epoch_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({FIELD_NAME: 'created_timestamp', })))
+                ConfigFactory.from_dict({FIELD_NAME: 'created_timestamp'})))
 
         transformers.append(timestamp_str_to_epoch_transformer)
 

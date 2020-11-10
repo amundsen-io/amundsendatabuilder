@@ -81,7 +81,7 @@ class TableauDashboardLastModifiedExtractor(Extractor):
         timestamp_str_to_epoch_transformer = TimestampStringToEpoch()
         timestamp_str_to_epoch_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({FIELD_NAME: 'last_modified_timestamp', })))
+                ConfigFactory.from_dict({FIELD_NAME: 'last_modified_timestamp'})))
         transformers.append(timestamp_str_to_epoch_transformer)
 
         dict_to_model_transformer = DictToModel()

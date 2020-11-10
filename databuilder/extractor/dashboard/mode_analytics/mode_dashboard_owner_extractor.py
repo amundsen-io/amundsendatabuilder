@@ -30,7 +30,7 @@ class ModeDashboardOwnerExtractor(Extractor):
             restapi_query=restapi_query,
             conf=self._conf.with_fallback(
                 ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_owner.DashboardOwner', }
+                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_owner.DashboardOwner'}
                 )
             )
         )
