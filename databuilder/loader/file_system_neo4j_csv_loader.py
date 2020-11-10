@@ -8,7 +8,7 @@ import shutil
 from csv import DictWriter
 
 from pyhocon import ConfigTree, ConfigFactory
-from typing import Dict, Any
+from typing import Dict, Any, FrozenSet
 
 from databuilder.job.base_job import Job
 from databuilder.loader.base_loader import Loader
@@ -40,6 +40,7 @@ class FsNeo4jCSVLoader(Loader):
     def __init__(self) -> None:
         self._node_file_mapping: Dict[Any, DictWriter] = {}
         self._relation_file_mapping: Dict[Any, DictWriter] = {}
+        self._keys: Dict[FrozenSet[str], int] = {}
         self._closer = Closer()
 
     def init(self, conf: ConfigTree) -> None:
@@ -184,10 +185,6 @@ class FsNeo4jCSVLoader(Loader):
     def get_scope(self) -> str:
         return "loader.filesystem_csv_neo4j"
 
-    @staticmethod
-    def _make_key(record_dict: Dict[str, Any]) -> str:
-        # Create a CSV file name by joining all node attribute names,
-        # except KEY and LABEL which are common to all records.
-        # Sort to make sure the key is stable.
-        record_keys = sorted(set(record_dict.keys()) - {'KEY', 'LABEL'})
-        return "-".join(record_keys)
+    def _make_key(self, record_dict: Dict[str, Any]) -> int:
+        """ Each unique set of record keys is assigned an increasing numeric key """
+        return self._keys.setdefault(frozenset(record_dict.keys()), len(self._keys))
