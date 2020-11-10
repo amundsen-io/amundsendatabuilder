@@ -56,6 +56,30 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
         self.assertEqual(expected_relations, actual_relations)
 
 
+    def test_load_disjoint_properties(self) -> None:
+        people = [
+            Person("Taylor", job="Engineer"),
+            Person("Griffin", pet="Lion"),
+        ]
+
+        loader = FsNeo4jCSVLoader()
+
+        folder = 'people'
+        conf = self._make_conf(folder)
+
+        loader.init(conf)
+        loader.load(people[0])
+        loader.load(people[1]) #  Test fails here! "ValueError: dict contains fields not in fieldnames: 'pet'"
+        loader.close()
+
+        expected_node_path = '{}/../resources/fs_neo4j_csv_loader/{}/nodes'\
+            .format(os.path.join(os.path.dirname(__file__)), folder)
+        expected_nodes = self._get_csv_rows(expected_node_path, itemgetter('KEY'))
+        actual_nodes = self._get_csv_rows(conf.get_string(FsNeo4jCSVLoader.NODE_DIR_PATH),
+                                          itemgetter('KEY'))
+        self.assertEqual(expected_nodes, actual_nodes)
+
+
     def _make_conf(self, test_name: str) -> ConfigTree:
         prefix = '/var/tmp/TestFsNeo4jCSVLoader'
 
@@ -70,7 +94,7 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
                       path: str,
                       sorting_key_getter: Callable) -> Iterable[Dict[str, Any]]:
         files = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
-
+        
         result = []
         for f in files:
             with open(f, 'r') as f_input:
@@ -79,6 +103,48 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
                     result.append(collections.OrderedDict(sorted(row.items())))
 
         return sorted(result, key=sorting_key_getter)
+
+
+class Person(GraphSerializable):
+    """ A Person has multiple optional attributes. When an attribute is None,
+        it is not included in the resulting node.
+    """
+    LABEL = 'Person'
+    KEY_FORMAT = 'person://{}'
+
+    def __init__(self,
+                 name: str,
+                 *,
+                 pet: Optional[str] = None,
+                 job: Optional[str] = None,
+                 ) -> None:
+        self._name = name
+        self._pet = pet
+        self._job = job
+        self._node_iter = iter(self.create_nodes())
+
+    def create_next_node(self) -> Union[GraphNode, None]:
+        try:
+            return next(self._node_iter)
+        except StopIteration:
+            return None
+
+    def create_next_relation(self) -> Union[GraphRelationship, None]:
+        return None
+
+    def create_nodes(self) -> Iterable[GraphNode]:
+        attributes = {"name": self._name}
+        if self._pet:
+            attributes['pet'] = self._pet
+        if self._job:
+            attributes['job'] = self._job
+
+        return [GraphNode(
+            key=Movie.KEY_FORMAT.format(self._name),
+            label=Movie.LABEL,
+            attributes=attributes
+        )]
+        
 
 
 if __name__ == '__main__':
