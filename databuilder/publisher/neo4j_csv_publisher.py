@@ -220,7 +220,7 @@ class Neo4jCsvPublisher(Publisher):
         LOGGER.info('Creating indices. (Existing indices will be ignored)')
 
         with open(node_file, 'r', encoding='utf8') as node_csv:
-            for node_record in pandas.read_csv(node_csv).to_dict(orient='records'):
+            for node_record in pandas.read_csv(node_csv, na_filter=False).to_dict(orient='records'):
                 label = node_record[NODE_LABEL_KEY]
                 if label not in self.labels:
                     self._try_create_index(label)
@@ -247,7 +247,7 @@ class Neo4jCsvPublisher(Publisher):
         """
 
         with open(node_file, 'r', encoding='utf8') as node_csv:
-            for node_record in pandas.read_csv(node_csv).to_dict(orient="records"):
+            for node_record in pandas.read_csv(node_csv, na_filter=False).to_dict(orient="records"):
                 stmt = self.create_node_merge_statement(node_record=node_record)
                 params = self._create_props_param(node_record)
                 tx = self._execute_statement(stmt, tx, params)
@@ -302,7 +302,7 @@ class Neo4jCsvPublisher(Publisher):
 
             count = 0
             with open(relation_file, 'r', encoding='utf8') as relation_csv:
-                for rel_record in pandas.read_csv(relation_csv).to_dict(orient="records"):
+                for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
                     # TODO not sure if deadlock on badge node arises in preporcessing or not
                     stmt, params = self._relation_preprocessor.preprocess_cypher(
                         start_label=rel_record[RELATION_START_LABEL],
@@ -319,7 +319,7 @@ class Neo4jCsvPublisher(Publisher):
             LOGGER.info('Executed pre-processing Cypher statement {} times'.format(count))
 
         with open(relation_file, 'r', encoding='utf8') as relation_csv:
-            for rel_record in pandas.read_csv(relation_csv).to_dict(orient="records"):
+            for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
                 badge_exception = True
                 retries_for_badge_exception = 10  # TODO not sure how many times to retry
                 while badge_exception or retries_for_badge_exception > 0:
