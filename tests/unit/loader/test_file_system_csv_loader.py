@@ -146,6 +146,6 @@ class TestFileSystemCSVLoader(unittest.TestCase):
             "test_column_comment",
             "test_owner",
         ]
-        expected.extend(",".join(expected_values) * 5)
+        expected.extend([",".join(expected_values)] * 5)
 
         self._check_results_helper(expected=expected)
