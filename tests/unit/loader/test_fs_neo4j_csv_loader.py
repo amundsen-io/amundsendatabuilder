@@ -55,7 +55,6 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
                                               itemgetter('START_KEY', 'END_KEY'))
         self.assertEqual(expected_relations, actual_relations)
 
-
     def test_load_disjoint_properties(self) -> None:
         people = [
             Person("Taylor", job="Engineer"),
@@ -69,7 +68,7 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
 
         loader.init(conf)
         loader.load(people[0])
-        loader.load(people[1]) #  Test fails here! "ValueError: dict contains fields not in fieldnames: 'pet'"
+        loader.load(people[1])
         loader.close()
 
         expected_node_path = '{}/../resources/fs_neo4j_csv_loader/{}/nodes'\
@@ -78,7 +77,6 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
         actual_nodes = self._get_csv_rows(conf.get_string(FsNeo4jCSVLoader.NODE_DIR_PATH),
                                           itemgetter('KEY'))
         self.assertEqual(expected_nodes, actual_nodes)
-
 
     def _make_conf(self, test_name: str) -> ConfigTree:
         prefix = '/var/tmp/TestFsNeo4jCSVLoader'
@@ -89,12 +87,11 @@ class TestFsNeo4jCSVLoader(unittest.TestCase):
              .format(prefix, test_name, 'relationships'),
              FsNeo4jCSVLoader.SHOULD_DELETE_CREATED_DIR: True})
 
-
     def _get_csv_rows(self,
                       path: str,
                       sorting_key_getter: Callable) -> Iterable[Dict[str, Any]]:
         files = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
-        
+
         result = []
         for f in files:
             with open(f, 'r') as f_input:
@@ -140,11 +137,10 @@ class Person(GraphSerializable):
             attributes['job'] = self._job
 
         return [GraphNode(
-            key=Movie.KEY_FORMAT.format(self._name),
-            label=Movie.LABEL,
+            key=Person.KEY_FORMAT.format(self._name),
+            label=Person.LABEL,
             attributes=attributes
         )]
-        
 
 
 if __name__ == '__main__':

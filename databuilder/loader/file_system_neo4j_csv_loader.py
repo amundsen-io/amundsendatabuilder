@@ -109,7 +109,7 @@ class FsNeo4jCSVLoader(Loader):
         node = csv_serializable.next_node()
         while node:
             node_dict = neo4_serializer.serialize_node(node)
-            key = (node.label, len(node_dict))
+            key = (node.label, self._make_key(node_dict))
             file_suffix = '{}_{}'.format(*key)
             node_writer = self._get_writer(node_dict,
                                            self._node_file_mapping,
@@ -125,7 +125,7 @@ class FsNeo4jCSVLoader(Loader):
             key2 = (relation.start_label,
                     relation.end_label,
                     relation.type,
-                    len(relation_dict))
+                    self._make_key(relation_dict))
 
             file_suffix = '{}_{}_{}'.format(key2[0], key2[1], key2[2])
             relation_writer = self._get_writer(relation_dict,
@@ -183,3 +183,11 @@ class FsNeo4jCSVLoader(Loader):
 
     def get_scope(self) -> str:
         return "loader.filesystem_csv_neo4j"
+
+    @staticmethod
+    def _make_key(record_dict: Dict[str, Any]) -> str:
+        # Create a CSV file name by joining all node attribute names,
+        # except KEY and LABEL which are common to all records.
+        # Sort to make sure the key is stable.
+        record_keys = sorted(set(record_dict.keys()) - {'KEY', 'LABEL'})
+        return "-".join(record_keys)
