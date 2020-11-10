@@ -5,16 +5,12 @@ from datetime import datetime
 
 
 class FileMetadata(object):
-
-    def __init__(self,
-                 path: str,
-                 last_updated: datetime,
-                 size: int
-                 ) -> None:
+    def __init__(self, path: str, last_updated: datetime, size: int) -> None:
         self.path = path
         self.last_updated = last_updated
         self.size = size
 
     def __repr__(self) -> str:
-        return """FileMetadata(path={!r}, last_updated={!r}, size={!r})""" \
-            .format(self.path, self.last_updated, self.size)
+        return """FileMetadata(path={!r}, last_updated={!r}, size={!r})""".format(
+            self.path, self.last_updated, self.size
+        )

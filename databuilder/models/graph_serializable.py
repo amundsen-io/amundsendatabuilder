@@ -7,15 +7,15 @@ from typing import Union  # noqa: F401
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
-NODE_KEY = 'KEY'
-NODE_LABEL = 'LABEL'
+NODE_KEY = "KEY"
+NODE_LABEL = "LABEL"
 
-RELATION_START_KEY = 'START_KEY'
-RELATION_START_LABEL = 'START_LABEL'
-RELATION_END_KEY = 'END_KEY'
-RELATION_END_LABEL = 'END_LABEL'
-RELATION_TYPE = 'TYPE'
-RELATION_REVERSE_TYPE = 'REVERSE_TYPE'
+RELATION_START_KEY = "START_KEY"
+RELATION_START_LABEL = "START_LABEL"
+RELATION_END_KEY = "END_KEY"
+RELATION_END_LABEL = "END_LABEL"
+RELATION_TYPE = "TYPE"
+RELATION_REVERSE_TYPE = "REVERSE_TYPE"
 
 
 class GraphSerializable(object, metaclass=abc.ABCMeta):
@@ -25,6 +25,7 @@ class GraphSerializable(object, metaclass=abc.ABCMeta):
 
     Any model class that needs to be pushed to a graph database should inherit this class.
     """
+
     def __init__(self) -> None:
         pass
 
@@ -68,10 +69,10 @@ class GraphSerializable(object, metaclass=abc.ABCMeta):
         node_id, node_label, _ = node
 
         if node_id is None:
-            RuntimeError('Required header missing. Required attributes id and label , Missing: id')
+            RuntimeError("Required header missing. Required attributes id and label , Missing: id")
 
         if node_label is None:
-            RuntimeError('Required header missing. Required attributes id and label , Missing: label')
+            RuntimeError("Required header missing. Required attributes id and label , Missing: label")
 
         self._validate_label_value(node_label)
 
@@ -83,8 +84,8 @@ class GraphSerializable(object, metaclass=abc.ABCMeta):
 
     def _validate_relation_type_value(self, value: str) -> None:
         if not value == value.upper():
-            raise RuntimeError('TYPE needs to be upper case: {}'.format(value))
+            raise RuntimeError("TYPE needs to be upper case: {}".format(value))
 
     def _validate_label_value(self, value: str) -> None:
         if not value.istitle():
-            raise RuntimeError('LABEL should only have upper case character on its first one: {}'.format(value))
+            raise RuntimeError("LABEL should only have upper case character on its first one: {}".format(value))

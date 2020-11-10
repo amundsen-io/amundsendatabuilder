@@ -13,8 +13,11 @@ from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import Mo
 from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer, Transformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.template_variable_substitution_transformer import \
-    TemplateVariableSubstitutionTransformer, TEMPLATE, FIELD_NAME as VAR_FIELD_NAME
+from databuilder.transformer.template_variable_substitution_transformer import (
+    TemplateVariableSubstitutionTransformer,
+    TEMPLATE,
+    FIELD_NAME as VAR_FIELD_NAME,
+)
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
 
 LOGGER = logging.getLogger(__name__)
@@ -38,8 +41,9 @@ class ModeDashboardExtractor(Extractor):
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
-        self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(restapi_query=restapi_query,
-                                                                            conf=self._conf)
+        self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
+            restapi_query=restapi_query, conf=self._conf
+        )
 
         # Payload from RestApiQuery has timestamp which is ISO8601. Here we are using TimestampStringToEpoch to
         # transform into epoch and then using DictToModel to convert Dictionary to Model
@@ -47,30 +51,47 @@ class ModeDashboardExtractor(Extractor):
         timestamp_str_to_epoch_transformer = TimestampStringToEpoch()
         timestamp_str_to_epoch_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, timestamp_str_to_epoch_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({FIELD_NAME: 'created_timestamp'})))
+                ConfigFactory.from_dict({FIELD_NAME: "created_timestamp"})
+            )
+        )
 
         transformers.append(timestamp_str_to_epoch_transformer)
 
         dashboard_group_url_transformer = TemplateVariableSubstitutionTransformer()
         dashboard_group_url_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dashboard_group_url_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({VAR_FIELD_NAME: 'dashboard_group_url',
-                                         TEMPLATE: 'https://app.mode.com/{organization}/spaces/{dashboard_group_id}'})))
+                ConfigFactory.from_dict(
+                    {
+                        VAR_FIELD_NAME: "dashboard_group_url",
+                        TEMPLATE: "https://app.mode.com/{organization}/spaces/{dashboard_group_id}",
+                    }
+                )
+            )
+        )
 
         transformers.append(dashboard_group_url_transformer)
 
         dashboard_url_transformer = TemplateVariableSubstitutionTransformer()
         dashboard_url_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dashboard_url_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({VAR_FIELD_NAME: 'dashboard_url',
-                                         TEMPLATE: 'https://app.mode.com/{organization}/reports/{dashboard_id}'})))
+                ConfigFactory.from_dict(
+                    {
+                        VAR_FIELD_NAME: "dashboard_url",
+                        TEMPLATE: "https://app.mode.com/{organization}/reports/{dashboard_id}",
+                    }
+                )
+            )
+        )
         transformers.append(dashboard_url_transformer)
 
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
                 ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_metadata.DashboardMetadata'})))
+                    {MODEL_CLASS: "databuilder.models.dashboard.dashboard_metadata.DashboardMetadata"}
+                )
+            )
+        )
         transformers.append(dict_to_model_transformer)
 
         self._transformer = ChainedTransformer(transformers=transformers)
@@ -83,7 +104,7 @@ class ModeDashboardExtractor(Extractor):
         return self._transformer.transform(record=record)
 
     def get_scope(self) -> str:
-        return 'extractor.mode_dashboard'
+        return "extractor.mode_dashboard"
 
     def _build_restapi_query(self) -> RestApiQuery:
         """
@@ -93,7 +114,7 @@ class ModeDashboardExtractor(Extractor):
         """
 
         # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
-        reports_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
+        reports_url_template = "https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports"
 
         spaces_query = ModeDashboardUtils.get_spaces_query_api(conf=self._conf)
         params = ModeDashboardUtils.get_auth_params(conf=self._conf)
@@ -101,8 +122,14 @@ class ModeDashboardExtractor(Extractor):
         # Reports
         # JSONPATH expression. it goes into array which is located in _embedded.reports and then extracts token, name,
         # and description
-        json_path = '_embedded.reports[*].[token,name,description,created_at]'
-        field_names = ['dashboard_id', 'dashboard_name', 'description', 'created_timestamp']
-        reports_query = ModePaginatedRestApiQuery(query_to_join=spaces_query, url=reports_url_template, params=params,
-                                                  json_path=json_path, field_names=field_names, skip_no_result=True)
+        json_path = "_embedded.reports[*].[token,name,description,created_at]"
+        field_names = ["dashboard_id", "dashboard_name", "description", "created_timestamp"]
+        reports_query = ModePaginatedRestApiQuery(
+            query_to_join=spaces_query,
+            url=reports_url_template,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+        )
         return reports_query

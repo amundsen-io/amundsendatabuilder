@@ -5,9 +5,7 @@ from typing import Any, Iterator, List, Union, Set
 
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
-from databuilder.models.graph_serializable import (
-    GraphSerializable
-)
+from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -25,27 +23,27 @@ class MetricMetadata(GraphSerializable):
     This class can be used for both table and view metadata. If it is a View, is_view=True should be passed in.
     """
 
-    DESCRIPTION_NODE_LABEL = 'Description'
+    DESCRIPTION_NODE_LABEL = "Description"
 
-    METRIC_NODE_LABEL = 'Metric'
-    METRIC_KEY_FORMAT = 'metric://{name}'
-    METRIC_NAME = 'name'
+    METRIC_NODE_LABEL = "Metric"
+    METRIC_KEY_FORMAT = "metric://{name}"
+    METRIC_NAME = "name"
 
-    METRIC_DESCRIPTION = 'description'
-    METRIC_DESCRIPTION_FORMAT = 'metric://{name}/_description'
-    METRIC_DESCRIPTION_RELATION_TYPE = 'DESCRIPTION'
-    DESCRIPTION_METRIC_RELATION_TYPE = 'DESCRIPTION_OF'
+    METRIC_DESCRIPTION = "description"
+    METRIC_DESCRIPTION_FORMAT = "metric://{name}/_description"
+    METRIC_DESCRIPTION_RELATION_TYPE = "DESCRIPTION"
+    DESCRIPTION_METRIC_RELATION_TYPE = "DESCRIPTION_OF"
 
-    DASHBOARD_NODE_LABEL = 'Dashboard'
-    DASHBOARD_KEY_FORMAT = '{dashboard_group}://{dashboard_name}'
-    DASHBOARD_NAME = 'name'
-    DASHBOARD_METRIC_RELATION_TYPE = 'METRIC'
-    METRIC_DASHBOARD_RELATION_TYPE = 'METRIC_OF'
+    DASHBOARD_NODE_LABEL = "Dashboard"
+    DASHBOARD_KEY_FORMAT = "{dashboard_group}://{dashboard_name}"
+    DASHBOARD_NAME = "name"
+    DASHBOARD_METRIC_RELATION_TYPE = "METRIC"
+    METRIC_DASHBOARD_RELATION_TYPE = "METRIC_OF"
 
-    METRIC_TYPE_NODE_LABEL = 'Metrictype'
-    METRIC_TYPE_KEY_FORMAT = 'type://{type}'
-    METRIC_METRIC_TYPE_RELATION_TYPE = 'METRIC_TYPE'
-    METRIC_TYPE_METRIC_RELATION_TYPE = 'METRIC_TYPE_OF'
+    METRIC_TYPE_NODE_LABEL = "Metrictype"
+    METRIC_TYPE_KEY_FORMAT = "type://{type}"
+    METRIC_METRIC_TYPE_RELATION_TYPE = "METRIC_TYPE"
+    METRIC_TYPE_METRIC_RELATION_TYPE = "METRIC_TYPE_OF"
 
     # TODO: Idea, maybe move expression from attribute
     # to node or delete commented code below?
@@ -53,23 +51,24 @@ class MetricMetadata(GraphSerializable):
     # METRIC_EXPRESSION_KEY_FORMAT = 'expression://{name}'
     # METRIC_METRIC_EXPRESSION_RELATION_TYPE = 'DEFINITION'
     # METRIC_EXPRESSION_METRIC_RELATION_TYPE = 'DEFINITION_OF'
-    METRIC_EXPRESSION_VALUE = 'expression'
+    METRIC_EXPRESSION_VALUE = "expression"
 
-    METRIC_TAG_RELATION_TYPE = 'TAG'
-    TAG_METRIC_RELATION_TYPE = 'TAG_OF'
+    METRIC_TAG_RELATION_TYPE = "TAG"
+    TAG_METRIC_RELATION_TYPE = "TAG_OF"
 
     serialized_nodes: Set[Any] = set()
     serialized_rels: Set[Any] = set()
 
-    def __init__(self,
-                 dashboard_group: str,
-                 dashboard_name: str,
-                 name: Union[str, None],
-                 expression: str,
-                 description: str,
-                 type: str,
-                 tags: List,
-                 ) -> None:
+    def __init__(
+        self,
+        dashboard_group: str,
+        dashboard_name: str,
+        name: Union[str, None],
+        expression: str,
+        description: str,
+        type: str,
+        tags: List,
+    ) -> None:
         self.dashboard_group = dashboard_group
         self.dashboard_name = dashboard_name
         self.name = name
@@ -81,14 +80,14 @@ class MetricMetadata(GraphSerializable):
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self) -> str:
-        return 'MetricMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}'.format(
+        return "MetricMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}".format(
             self.dashboard_group,
             self.dashboard_name,
             self.name,
             self.expression,
             self.description,
             self.type,
-            self.tags
+            self.tags,
         )
 
     def _get_metric_key(self) -> str:
@@ -98,8 +97,9 @@ class MetricMetadata(GraphSerializable):
         return MetricMetadata.METRIC_TYPE_KEY_FORMAT.format(type=self.type)
 
     def _get_dashboard_key(self) -> str:
-        return MetricMetadata.DASHBOARD_KEY_FORMAT.format(dashboard_group=self.dashboard_group,
-                                                          dashboard_name=self.dashboard_name)
+        return MetricMetadata.DASHBOARD_KEY_FORMAT.format(
+            dashboard_group=self.dashboard_group, dashboard_name=self.dashboard_name
+        )
 
     def _get_metric_description_key(self) -> str:
         return MetricMetadata.METRIC_DESCRIPTION_FORMAT.format(name=self.name)
@@ -115,10 +115,7 @@ class MetricMetadata(GraphSerializable):
         metric_node = GraphNode(
             key=self._get_metric_key(),
             label=MetricMetadata.METRIC_NODE_LABEL,
-            attributes={
-                MetricMetadata.METRIC_NAME: self.name,
-                MetricMetadata.METRIC_EXPRESSION_VALUE: self.expression
-            }
+            attributes={MetricMetadata.METRIC_NAME: self.name, MetricMetadata.METRIC_EXPRESSION_VALUE: self.expression},
         )
         yield metric_node
 
@@ -127,9 +124,7 @@ class MetricMetadata(GraphSerializable):
             description_node = GraphNode(
                 key=self._get_metric_description_key(),
                 label=MetricMetadata.DESCRIPTION_NODE_LABEL,
-                attributes={
-                    MetricMetadata.METRIC_DESCRIPTION: self.description
-                }
+                attributes={MetricMetadata.METRIC_DESCRIPTION: self.description},
             )
             yield description_node
 
@@ -139,9 +134,7 @@ class MetricMetadata(GraphSerializable):
                 tag_node = GraphNode(
                     key=TagMetadata.get_tag_key(tag),
                     label=TagMetadata.TAG_NODE_LABEL,
-                    attributes={
-                        TagMetadata.TAG_TYPE: 'metric'
-                    }
+                    attributes={TagMetadata.TAG_TYPE: "metric"},
                 )
                 yield tag_node
 
@@ -150,9 +143,7 @@ class MetricMetadata(GraphSerializable):
             type_node = GraphNode(
                 key=self._get_metric_type_key(),
                 label=MetricMetadata.METRIC_TYPE_NODE_LABEL,
-                attributes={
-                    'name': self.type
-                }
+                attributes={"name": self.type},
             )
             yield type_node
 
@@ -180,7 +171,7 @@ class MetricMetadata(GraphSerializable):
             end_key=self._get_dashboard_key(),
             type=MetricMetadata.METRIC_DASHBOARD_RELATION_TYPE,
             reverse_type=MetricMetadata.DASHBOARD_METRIC_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         yield dashboard_metric_relation
 
@@ -193,7 +184,7 @@ class MetricMetadata(GraphSerializable):
                 end_key=self._get_metric_description_key(),
                 type=MetricMetadata.METRIC_DESCRIPTION_RELATION_TYPE,
                 reverse_type=MetricMetadata.DESCRIPTION_METRIC_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             yield metric_description_relation
 
@@ -207,7 +198,7 @@ class MetricMetadata(GraphSerializable):
                     end_key=TagMetadata.get_tag_key(tag),
                     type=MetricMetadata.METRIC_TAG_RELATION_TYPE,
                     reverse_type=MetricMetadata.TAG_METRIC_RELATION_TYPE,
-                    attributes={}
+                    attributes={},
                 )
                 yield tag_relation
 
@@ -220,7 +211,7 @@ class MetricMetadata(GraphSerializable):
                 end_key=self._get_metric_type_key(),
                 type=MetricMetadata.METRIC_METRIC_TYPE_RELATION_TYPE,
                 reverse_type=MetricMetadata.METRIC_TYPE_METRIC_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             yield type_relation
 

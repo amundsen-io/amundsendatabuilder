@@ -15,7 +15,7 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
 
-TableKey = namedtuple('TableKey', ['schema', 'table_name'])
+TableKey = namedtuple("TableKey", ["schema", "table_name"])
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,16 +26,16 @@ class BasePostgresMetadataExtractor(Extractor):
     """
 
     # CONFIG KEYS
-    WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CLUSTER_KEY = 'cluster_key'
-    USE_CATALOG_AS_CLUSTER_NAME = 'use_catalog_as_cluster_name'
-    DATABASE_KEY = 'database_key'
+    WHERE_CLAUSE_SUFFIX_KEY = "where_clause_suffix"
+    CLUSTER_KEY = "cluster_key"
+    USE_CATALOG_AS_CLUSTER_NAME = "use_catalog_as_cluster_name"
+    DATABASE_KEY = "database_key"
 
     # Default values
-    DEFAULT_CLUSTER_NAME = 'master'
+    DEFAULT_CLUSTER_NAME = "master"
 
     DEFAULT_CONFIG = ConfigFactory.from_dict(
-        {WHERE_CLAUSE_SUFFIX_KEY: ' ', CLUSTER_KEY: DEFAULT_CLUSTER_NAME, USE_CATALOG_AS_CLUSTER_NAME: True}
+        {WHERE_CLAUSE_SUFFIX_KEY: " ", CLUSTER_KEY: DEFAULT_CLUSTER_NAME, USE_CATALOG_AS_CLUSTER_NAME: True}
     )
 
     @abc.abstractmethod
@@ -47,9 +47,9 @@ class BasePostgresMetadataExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(BasePostgresMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(BasePostgresMetadataExtractor.CLUSTER_KEY))
+        self._cluster = "{}".format(conf.get_string(BasePostgresMetadataExtractor.CLUSTER_KEY))
 
-        self._database = conf.get_string(BasePostgresMetadataExtractor.DATABASE_KEY, default='postgres')
+        self._database = conf.get_string(BasePostgresMetadataExtractor.DATABASE_KEY, default="postgres")
 
         self.sql_stmt = self.get_sql_statement(
             use_catalog_as_cluster_name=conf.get_bool(BasePostgresMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME),
@@ -57,12 +57,13 @@ class BasePostgresMetadataExtractor(Extractor):
         )
 
         self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt})
+        )
 
         self.sql_stmt = sql_alch_conf.get_string(SQLAlchemyExtractor.EXTRACT_SQL)
 
-        LOGGER.info('SQL for postgres metadata: {}'.format(self.sql_stmt))
+        LOGGER.info("SQL for postgres metadata: {}".format(self.sql_stmt))
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None
@@ -85,14 +86,18 @@ class BasePostgresMetadataExtractor(Extractor):
 
             for row in group:
                 last_row = row
-                columns.append(ColumnMetadata(row['col_name'], row['col_description'],
-                                              row['col_type'], row['col_sort_order']))
+                columns.append(
+                    ColumnMetadata(row["col_name"], row["col_description"], row["col_type"], row["col_sort_order"])
+                )
 
-            yield TableMetadata(self._database, last_row['cluster'],
-                                last_row['schema'],
-                                last_row['name'],
-                                last_row['description'],
-                                columns)
+            yield TableMetadata(
+                self._database,
+                last_row["cluster"],
+                last_row["schema"],
+                last_row["name"],
+                last_row["description"],
+                columns,
+            )
 
     def _get_raw_extract_iter(self) -> Iterator[Dict[str, Any]]:
         """
@@ -111,6 +116,6 @@ class BasePostgresMetadataExtractor(Extractor):
         :return:
         """
         if row:
-            return TableKey(schema=row['schema'], table_name=row['name'])
+            return TableKey(schema=row["schema"], table_name=row["name"])
 
         return None

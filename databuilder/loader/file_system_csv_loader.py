@@ -21,8 +21,8 @@ class FileSystemCSVLoader(Loader):
         :param conf:
         """
         self.conf = conf
-        self.file_path = self.conf.get_string('file_path')
-        self.file_mode = self.conf.get_string('mode', 'w')
+        self.file_path = self.conf.get_string("file_path")
+        self.file_mode = self.conf.get_string("mode", "w")
 
         self.file_handler = open(self.file_path, self.file_mode)
 
@@ -35,9 +35,8 @@ class FileSystemCSVLoader(Loader):
         if not record:
             return
 
-        if not hasattr(self, 'writer'):
-            self.writer = csv.DictWriter(self.file_handler,
-                                         fieldnames=vars(record).keys())
+        if not hasattr(self, "writer"):
+            self.writer = csv.DictWriter(self.file_handler, fieldnames=vars(record).keys())
             self.writer.writeheader()
 
         self.writer.writerow(vars(record))
@@ -52,8 +51,7 @@ class FileSystemCSVLoader(Loader):
             if self.file_handler:
                 self.file_handler.close()
         except Exception as e:
-            logging.warning("Failed trying to close a file handler! %s",
-                            str(e))
+            logging.warning("Failed trying to close a file handler! %s", str(e))
 
     def get_scope(self) -> str:
         return "loader.filesystem.csv"

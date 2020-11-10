@@ -29,17 +29,15 @@ class ModeDashboardOwnerExtractor(Extractor):
         self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
             restapi_query=restapi_query,
             conf=self._conf.with_fallback(
-                ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_owner.DashboardOwner'}
-                )
-            )
+                ConfigFactory.from_dict({MODEL_CLASS: "databuilder.models.dashboard.dashboard_owner.DashboardOwner"})
+            ),
         )
 
     def extract(self) -> Any:
         return self._extractor.extract()
 
     def get_scope(self) -> str:
-        return 'extractor.mode_dashboard_owner'
+        return "extractor.mode_dashboard_owner"
 
     def _build_restapi_query(self) -> RestApiQuery:
         """
@@ -49,29 +47,38 @@ class ModeDashboardOwnerExtractor(Extractor):
         """
 
         # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
-        report_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
+        report_url_template = "https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports"
 
         # https://mode.com/developer/api-reference/management/users/
-        creator_url_template = 'https://app.mode.com{creator_resource_path}'
+        creator_url_template = "https://app.mode.com{creator_resource_path}"
 
         spaces_query = ModeDashboardUtils.get_spaces_query_api(conf=self._conf)
         params = ModeDashboardUtils.get_auth_params(conf=self._conf)
 
         # Reports
-        json_path = '(_embedded.reports[*].token) | (_embedded.reports[*]._links.creator.href)'
-        field_names = ['dashboard_id', 'creator_resource_path']
-        creator_resource_path_query = ModePaginatedRestApiQuery(query_to_join=spaces_query, url=report_url_template,
-                                                                params=params,
-                                                                json_path=json_path, field_names=field_names,
-                                                                skip_no_result=True,
-                                                                json_path_contains_or=True)
+        json_path = "(_embedded.reports[*].token) | (_embedded.reports[*]._links.creator.href)"
+        field_names = ["dashboard_id", "creator_resource_path"]
+        creator_resource_path_query = ModePaginatedRestApiQuery(
+            query_to_join=spaces_query,
+            url=report_url_template,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+            json_path_contains_or=True,
+        )
 
-        json_path = 'email'
-        field_names = ['email']
+        json_path = "email"
+        field_names = ["email"]
         failure_handler = HttpFailureSkipOnStatus(status_codes_to_skip={404})
-        owner_email_query = RestApiQuery(query_to_join=creator_resource_path_query, url=creator_url_template,
-                                         params=params,
-                                         json_path=json_path, field_names=field_names, skip_no_result=True,
-                                         can_skip_failure=failure_handler.can_skip_failure)
+        owner_email_query = RestApiQuery(
+            query_to_join=creator_resource_path_query,
+            url=creator_url_template,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+            can_skip_failure=failure_handler.can_skip_failure,
+        )
 
         return owner_email_query

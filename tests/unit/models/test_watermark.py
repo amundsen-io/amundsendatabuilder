@@ -12,101 +12,93 @@ from databuilder.models.graph_serializable import (
     RELATION_END_KEY,
     RELATION_END_LABEL,
     RELATION_TYPE,
-    RELATION_REVERSE_TYPE
+    RELATION_REVERSE_TYPE,
 )
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.serializers import neo4_serializer
 
-CREATE_TIME = '2017-09-18T00:00:00'
-DATABASE = 'DYNAMO'
-SCHEMA = 'BASE'
-TABLE = 'TEST'
-NESTED_PART = 'ds=2017-09-18/feature_id=9'
-CLUSTER = 'DEFAULT'
-PART_TYPE = 'LOW_WATERMARK'
+CREATE_TIME = "2017-09-18T00:00:00"
+DATABASE = "DYNAMO"
+SCHEMA = "BASE"
+TABLE = "TEST"
+NESTED_PART = "ds=2017-09-18/feature_id=9"
+CLUSTER = "DEFAULT"
+PART_TYPE = "LOW_WATERMARK"
 
 
 class TestWatermark(unittest.TestCase):
-
     def setUp(self) -> None:
         super(TestWatermark, self).setUp()
         self.watermark = Watermark(
-            create_time='2017-09-18T00:00:00',
+            create_time="2017-09-18T00:00:00",
             database=DATABASE,
             schema=SCHEMA,
             table_name=TABLE,
             cluster=CLUSTER,
             part_type=PART_TYPE,
-            part_name=NESTED_PART
+            part_name=NESTED_PART,
         )
-        start_key = '{database}://{cluster}.{schema}/{table}/{part_type}/'.format(
-            database=DATABASE,
-            cluster=CLUSTER,
-            schema=SCHEMA,
-            table=TABLE,
-            part_type=PART_TYPE
+        start_key = "{database}://{cluster}.{schema}/{table}/{part_type}/".format(
+            database=DATABASE, cluster=CLUSTER, schema=SCHEMA, table=TABLE, part_type=PART_TYPE
         )
-        end_key = '{database}://{cluster}.{schema}/{table}'.format(
-            database=DATABASE,
-            cluster=CLUSTER,
-            schema=SCHEMA,
-            table=TABLE
+        end_key = "{database}://{cluster}.{schema}/{table}".format(
+            database=DATABASE, cluster=CLUSTER, schema=SCHEMA, table=TABLE
         )
         self.expected_node_result = GraphNode(
             key=start_key,
-            label='Watermark',
+            label="Watermark",
             attributes={
-                'partition_key': 'ds',
-                'partition_value': '2017-09-18/feature_id=9',
-                'create_time': '2017-09-18T00:00:00'
-            }
+                "partition_key": "ds",
+                "partition_value": "2017-09-18/feature_id=9",
+                "create_time": "2017-09-18T00:00:00",
+            },
         )
 
         self.expected_serialized_node_result = {
             NODE_KEY: start_key,
-            NODE_LABEL: 'Watermark',
-            'partition_key': 'ds',
-            'partition_value': '2017-09-18/feature_id=9',
-            'create_time': '2017-09-18T00:00:00'
+            NODE_LABEL: "Watermark",
+            "partition_key": "ds",
+            "partition_value": "2017-09-18/feature_id=9",
+            "create_time": "2017-09-18T00:00:00",
         }
 
         self.expected_relation_result = GraphRelationship(
-            start_label='Watermark',
-            end_label='Table',
+            start_label="Watermark",
+            end_label="Table",
             start_key=start_key,
             end_key=end_key,
-            type='BELONG_TO_TABLE',
-            reverse_type='WATERMARK',
-            attributes={}
+            type="BELONG_TO_TABLE",
+            reverse_type="WATERMARK",
+            attributes={},
         )
 
         self.expected_serialized_relation_result = {
             RELATION_START_KEY: start_key,
-            RELATION_START_LABEL: 'Watermark',
+            RELATION_START_LABEL: "Watermark",
             RELATION_END_KEY: end_key,
-            RELATION_END_LABEL: 'Table',
-            RELATION_TYPE: 'BELONG_TO_TABLE',
-            RELATION_REVERSE_TYPE: 'WATERMARK'
+            RELATION_END_LABEL: "Table",
+            RELATION_TYPE: "BELONG_TO_TABLE",
+            RELATION_REVERSE_TYPE: "WATERMARK",
         }
 
     def test_get_watermark_model_key(self) -> None:
         watermark = self.watermark.get_watermark_model_key()
         self.assertEqual(
-            watermark, '{database}://{cluster}.{schema}/{table}/{part_type}/'
-            .format(database=DATABASE,
-                    cluster=CLUSTER,
-                    schema=SCHEMA,
-                    table=TABLE,
-                    part_type=PART_TYPE))
+            watermark,
+            "{database}://{cluster}.{schema}/{table}/{part_type}/".format(
+                database=DATABASE, cluster=CLUSTER, schema=SCHEMA, table=TABLE, part_type=PART_TYPE
+            ),
+        )
 
     def test_get_metadata_model_key(self) -> None:
         metadata = self.watermark.get_metadata_model_key()
-        self.assertEqual(metadata, '{database}://{cluster}.{schema}/{table}'
-                         .format(database=DATABASE,
-                                 cluster=CLUSTER,
-                                 schema=SCHEMA,
-                                 table=TABLE))
+        self.assertEqual(
+            metadata,
+            "{database}://{cluster}.{schema}/{table}".format(
+                database=DATABASE, cluster=CLUSTER, schema=SCHEMA, table=TABLE
+            ),
+        )
 
     def test_create_nodes(self) -> None:
         nodes = self.watermark.create_nodes()
@@ -128,6 +120,5 @@ class TestWatermark(unittest.TestCase):
     def test_create_next_relation(self) -> None:
         next_relation = self.watermark.create_next_relation()
         self.assertEquals(
-            neo4_serializer.serialize_relationship(next_relation),
-            self.expected_serialized_relation_result
+            neo4_serializer.serialize_relationship(next_relation), self.expected_serialized_relation_result
         )

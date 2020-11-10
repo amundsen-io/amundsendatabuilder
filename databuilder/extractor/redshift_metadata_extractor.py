@@ -68,4 +68,4 @@ class RedshiftMetadataExtractor(BasePostgresMetadataExtractor):
 
     def get_scope(self):
         # type: () -> str
-        return 'extractor.redshift_metadata'
+        return "extractor.redshift_metadata"

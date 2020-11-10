@@ -13,7 +13,7 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
-TableKey = namedtuple('TableKey', ['schema', 'table_name'])
+TableKey = namedtuple("TableKey", ["schema", "table_name"])
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,30 +33,29 @@ class AthenaMetadataExtractor(Extractor):
     """
 
     # CONFIG KEYS
-    WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CATALOG_KEY = 'catalog_source'
+    WHERE_CLAUSE_SUFFIX_KEY = "where_clause_suffix"
+    CATALOG_KEY = "catalog_source"
 
     # Default values
-    DEFAULT_CLUSTER_NAME = 'master'
+    DEFAULT_CLUSTER_NAME = "master"
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict(
-        {WHERE_CLAUSE_SUFFIX_KEY: ' ', CATALOG_KEY: DEFAULT_CLUSTER_NAME}
-    )
+    DEFAULT_CONFIG = ConfigFactory.from_dict({WHERE_CLAUSE_SUFFIX_KEY: " ", CATALOG_KEY: DEFAULT_CLUSTER_NAME})
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(AthenaMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(AthenaMetadataExtractor.CATALOG_KEY))
+        self._cluster = "{}".format(conf.get_string(AthenaMetadataExtractor.CATALOG_KEY))
 
         self.sql_stmt = AthenaMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(AthenaMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
-            catalog_source=self._cluster
+            catalog_source=self._cluster,
         )
 
-        LOGGER.info('SQL for Athena metadata: {}'.format(self.sql_stmt))
+        LOGGER.info("SQL for Athena metadata: {}".format(self.sql_stmt))
 
         self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt})
+        )
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None
@@ -70,7 +69,7 @@ class AthenaMetadataExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.athena_metadata'
+        return "extractor.athena_metadata"
 
     def _get_extract_iter(self) -> Iterator[TableMetadata]:
         """
@@ -83,15 +82,16 @@ class AthenaMetadataExtractor(Extractor):
 
             for row in group:
                 last_row = row
-                columns.append(ColumnMetadata(row['col_name'],
-                                              row['extras'] if row['extras'] is not None else row['col_description'],
-                                              row['col_type'], row['col_sort_order']))
+                columns.append(
+                    ColumnMetadata(
+                        row["col_name"],
+                        row["extras"] if row["extras"] is not None else row["col_description"],
+                        row["col_type"],
+                        row["col_sort_order"],
+                    )
+                )
 
-            yield TableMetadata('athena', last_row['cluster'],
-                                last_row['schema'],
-                                last_row['name'],
-                                '',
-                                columns)
+            yield TableMetadata("athena", last_row["cluster"], last_row["schema"], last_row["name"], "", columns)
 
     def _get_raw_extract_iter(self) -> Iterator[Dict[str, Any]]:
         """
@@ -110,6 +110,6 @@ class AthenaMetadataExtractor(Extractor):
         :return:
         """
         if row:
-            return TableKey(schema=row['schema'], table_name=row['name'])
+            return TableKey(schema=row["schema"], table_name=row["name"])
 
         return None

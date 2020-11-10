@@ -10,7 +10,6 @@ from databuilder.extractor.bigquery_usage_extractor import TableColumnUsageTuple
 
 
 class BigqueryUsageTransformer(Transformer):
-
     def init(self, conf: ConfigTree) -> None:
         """
         Transformer to convert TableColumnUsageTuple data to bigquery usage data
@@ -28,15 +27,19 @@ class BigqueryUsageTransformer(Transformer):
             raise Exception("BigqueryUsageTransformer expects record of type TableColumnUsageTuple")
 
         col_readers = []
-        col_readers.append(ColumnReader(database=key.database,
-                                        cluster=key.cluster,
-                                        schema=key.schema,
-                                        table=key.table,
-                                        column=key.column,
-                                        user_email=key.email,
-                                        read_count=count))
+        col_readers.append(
+            ColumnReader(
+                database=key.database,
+                cluster=key.cluster,
+                schema=key.schema,
+                table=key.table,
+                column=key.column,
+                user_email=key.email,
+                read_count=count,
+            )
+        )
 
         return TableColumnUsage(col_readers=col_readers)
 
     def get_scope(self) -> str:
-        return 'transformer.bigquery_usage'
+        return "transformer.bigquery_usage"

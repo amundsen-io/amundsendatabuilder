@@ -10,16 +10,13 @@ from databuilder.loader.generic_loader import GenericLoader, CALLBACK_FUNCTION
 
 
 class TestGenericLoader(unittest.TestCase):
-
     def test_loading(self) -> None:
 
         loader = GenericLoader()
         callback_func = MagicMock()
-        loader.init(conf=ConfigFactory.from_dict({
-            CALLBACK_FUNCTION: callback_func
-        }))
+        loader.init(conf=ConfigFactory.from_dict({CALLBACK_FUNCTION: callback_func}))
 
-        loader.load({'foo': 'bar'})
+        loader.load({"foo": "bar"})
         loader.close()
 
         callback_func.assert_called_once()
@@ -28,9 +25,7 @@ class TestGenericLoader(unittest.TestCase):
 
         loader = GenericLoader()
         callback_func = MagicMock()
-        loader.init(conf=ConfigFactory.from_dict({
-            CALLBACK_FUNCTION: callback_func
-        }))
+        loader.init(conf=ConfigFactory.from_dict({CALLBACK_FUNCTION: callback_func}))
 
         loader.load(None)
         loader.close()

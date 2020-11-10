@@ -6,8 +6,7 @@ from typing import Optional, Any, Union, Iterator
 
 
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
+from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -19,24 +18,27 @@ class DashboardChart(GraphSerializable):
     """
     A model that encapsulate Dashboard's charts
     """
-    DASHBOARD_CHART_LABEL = 'Chart'
-    DASHBOARD_CHART_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group_id}/' \
-                                 '{dashboard_id}/query/{query_id}/chart/{chart_id}'
-    CHART_RELATION_TYPE = 'HAS_CHART'
-    CHART_REVERSE_RELATION_TYPE = 'CHART_OF'
 
-    def __init__(self,
-                 dashboard_group_id: Optional[str],
-                 dashboard_id: Optional[str],
-                 query_id: str,
-                 chart_id: str,
-                 chart_name: Optional[str] = None,
-                 chart_type: Optional[str] = None,
-                 chart_url: Optional[str] = None,
-                 product: Optional[str] = '',
-                 cluster: str = 'gold',
-                 **kwargs: Any
-                 ) -> None:
+    DASHBOARD_CHART_LABEL = "Chart"
+    DASHBOARD_CHART_KEY_FORMAT = (
+        "{product}_dashboard://{cluster}.{dashboard_group_id}/" "{dashboard_id}/query/{query_id}/chart/{chart_id}"
+    )
+    CHART_RELATION_TYPE = "HAS_CHART"
+    CHART_REVERSE_RELATION_TYPE = "CHART_OF"
+
+    def __init__(
+        self,
+        dashboard_group_id: Optional[str],
+        dashboard_id: Optional[str],
+        query_id: str,
+        chart_id: str,
+        chart_name: Optional[str] = None,
+        chart_type: Optional[str] = None,
+        chart_url: Optional[str] = None,
+        product: Optional[str] = "",
+        cluster: str = "gold",
+        **kwargs: Any
+    ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._query_id = query_id
@@ -56,23 +58,19 @@ class DashboardChart(GraphSerializable):
             return None
 
     def _create_node_iterator(self) -> Iterator[GraphNode]:
-        node_attributes = {
-            'id': self._chart_id
-        }
+        node_attributes = {"id": self._chart_id}
 
         if self._chart_name:
-            node_attributes['name'] = self._chart_name
+            node_attributes["name"] = self._chart_name
 
         if self._chart_type:
-            node_attributes['type'] = self._chart_type
+            node_attributes["type"] = self._chart_type
 
         if self._chart_url:
-            node_attributes['url'] = self._chart_url
+            node_attributes["url"] = self._chart_url
 
         node = GraphNode(
-            key=self._get_chart_node_key(),
-            label=DashboardChart.DASHBOARD_CHART_LABEL,
-            attributes=node_attributes
+            key=self._get_chart_node_key(), label=DashboardChart.DASHBOARD_CHART_LABEL, attributes=node_attributes
         )
         yield node
 
@@ -90,13 +88,13 @@ class DashboardChart(GraphSerializable):
                 cluster=self._cluster,
                 dashboard_group_id=self._dashboard_group_id,
                 dashboard_id=self._dashboard_id,
-                query_id=self._query_id
+                query_id=self._query_id,
             ),
             end_label=DashboardChart.DASHBOARD_CHART_LABEL,
             end_key=self._get_chart_node_key(),
             type=DashboardChart.CHART_RELATION_TYPE,
             reverse_type=DashboardChart.CHART_REVERSE_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         yield relationship
 
@@ -107,11 +105,11 @@ class DashboardChart(GraphSerializable):
             dashboard_group_id=self._dashboard_group_id,
             dashboard_id=self._dashboard_id,
             query_id=self._query_id,
-            chart_id=self._chart_id
+            chart_id=self._chart_id,
         )
 
     def __repr__(self) -> str:
-        return 'DashboardChart({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
+        return "DashboardChart({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
             self._dashboard_group_id,
             self._dashboard_id,
             self._query_id,
@@ -120,5 +118,5 @@ class DashboardChart(GraphSerializable):
             self._chart_type,
             self._chart_url,
             self._product,
-            self._cluster
+            self._cluster,
         )

@@ -13,7 +13,8 @@ class GenericExtractor(Extractor):
     """
     Extractor to extract any arbitrary values from users.
     """
-    EXTRACTION_ITEMS = 'extraction_items'
+
+    EXTRACTION_ITEMS = "extraction_items"
 
     def init(self, conf: ConfigTree) -> None:
         """
@@ -24,13 +25,12 @@ class GenericExtractor(Extractor):
         self.conf = conf
         self.values: Iterable[Any] = conf.get(GenericExtractor.EXTRACTION_ITEMS)
 
-        model_class = conf.get('model_class', None)
+        model_class = conf.get("model_class", None)
         if model_class:
             module_name, class_name = model_class.rsplit(".", 1)
             mod = importlib.import_module(module_name)
             self.model_class = getattr(mod, class_name)
-            results = [self.model_class(**result)
-                       for result in self.values]
+            results = [self.model_class(**result) for result in self.values]
 
             self._iter = iter(results)
         else:
@@ -49,4 +49,4 @@ class GenericExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.generic'
+        return "extractor.generic"

@@ -18,20 +18,21 @@ class Neo4jExtractor(Extractor):
     """
     Extractor to fetch records from Neo4j Graph database
     """
-    CYPHER_QUERY_CONFIG_KEY = 'cypher_query'
-    GRAPH_URL_CONFIG_KEY = 'graph_url'
-    MODEL_CLASS_CONFIG_KEY = 'model_class'
-    NEO4J_AUTH_USER = 'neo4j_auth_user'
-    NEO4J_AUTH_PW = 'neo4j_auth_pw'
-    NEO4J_MAX_CONN_LIFE_TIME_SEC = 'neo4j_max_conn_life_time_sec'
-    NEO4J_ENCRYPTED = 'neo4j_encrypted'
+
+    CYPHER_QUERY_CONFIG_KEY = "cypher_query"
+    GRAPH_URL_CONFIG_KEY = "graph_url"
+    MODEL_CLASS_CONFIG_KEY = "model_class"
+    NEO4J_AUTH_USER = "neo4j_auth_user"
+    NEO4J_AUTH_PW = "neo4j_auth_pw"
+    NEO4J_MAX_CONN_LIFE_TIME_SEC = "neo4j_max_conn_life_time_sec"
+    NEO4J_ENCRYPTED = "neo4j_encrypted"
     """NEO4J_ENCRYPTED is a boolean indicating whether to use SSL/TLS when connecting."""
-    NEO4J_VALIDATE_SSL = 'neo4j_validate_ssl'
+    NEO4J_VALIDATE_SSL = "neo4j_validate_ssl"
     """NEO4J_VALIDATE_SSL is a boolean indicating whether to validate the server's SSL/TLS cert against system CAs."""
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
-                                              NEO4J_ENCRYPTED: True,
-                                              NEO4J_VALIDATE_SSL: False})
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {NEO4J_MAX_CONN_LIFE_TIME_SEC: 50, NEO4J_ENCRYPTED: True, NEO4J_VALIDATE_SSL: False}
+    )
 
     def init(self, conf: ConfigTree) -> None:
         """
@@ -64,21 +65,27 @@ class Neo4jExtractor(Extractor):
         """
         Create a Neo4j connection to Database
         """
-        trust = neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES if self.conf.get_bool(Neo4jExtractor.NEO4J_VALIDATE_SSL) \
+        trust = (
+            neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES
+            if self.conf.get_bool(Neo4jExtractor.NEO4J_VALIDATE_SSL)
             else neo4j.TRUST_ALL_CERTIFICATES
-        return GraphDatabase.driver(self.graph_url,
-                                    max_connection_life_time=self.conf.get_int(
-                                        Neo4jExtractor.NEO4J_MAX_CONN_LIFE_TIME_SEC),
-                                    auth=(self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_USER),
-                                          self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_PW)),
-                                    encrypted=self.conf.get_bool(Neo4jExtractor.NEO4J_ENCRYPTED),
-                                    trust=trust)
+        )
+        return GraphDatabase.driver(
+            self.graph_url,
+            max_connection_life_time=self.conf.get_int(Neo4jExtractor.NEO4J_MAX_CONN_LIFE_TIME_SEC),
+            auth=(
+                self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_USER),
+                self.conf.get_string(Neo4jExtractor.NEO4J_AUTH_PW),
+            ),
+            encrypted=self.conf.get_bool(Neo4jExtractor.NEO4J_ENCRYPTED),
+            trust=trust,
+        )
 
     def _execute_query(self, tx: Any) -> Any:
         """
         Create an iterator to execute sql.
         """
-        LOGGER.info('Executing query {}'.format(self.cypher_query))
+        LOGGER.info("Executing query {}".format(self.cypher_query))
         result = tx.run(self.cypher_query)
         return result
 
@@ -87,11 +94,11 @@ class Neo4jExtractor(Extractor):
         Execute {cypher_query} and yield result one at a time
         """
         with self.driver.session() as session:
-            if not hasattr(self, 'results'):
+            if not hasattr(self, "results"):
                 self.results = session.read_transaction(self._execute_query)
 
             for result in self.results:
-                if hasattr(self, 'model_class'):
+                if hasattr(self, "model_class"):
                     obj = self.model_class(**result)
                     yield obj
                 else:
@@ -111,4 +118,4 @@ class Neo4jExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.neo4j'
+        return "extractor.neo4j"

@@ -43,10 +43,10 @@ def notify_callbacks(callbacks: List[Callback], is_success: bool) -> None:
     """
 
     if not callbacks:
-        LOGGER.info('No callbacks to notify')
+        LOGGER.info("No callbacks to notify")
         return
 
-    LOGGER.info('Notifying callbacks')
+    LOGGER.info("Notifying callbacks")
 
     last_exception: Optional[Exception] = None
     for callback in callbacks:
@@ -56,7 +56,7 @@ def notify_callbacks(callbacks: List[Callback], is_success: bool) -> None:
             else:
                 callback.on_failure()
         except Exception as e:
-            LOGGER.exception('Failed while notifying callback')
+            LOGGER.exception("Failed while notifying callback")
             last_exception = e
 
     if last_exception:

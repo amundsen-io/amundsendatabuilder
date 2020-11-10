@@ -4,23 +4,31 @@
 import unittest
 from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.serializers import neo4_serializer
-from databuilder.models.graph_serializable import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE, NODE_KEY, NODE_LABEL
+from databuilder.models.graph_serializable import (
+    RELATION_START_KEY,
+    RELATION_START_LABEL,
+    RELATION_END_KEY,
+    RELATION_END_LABEL,
+    RELATION_TYPE,
+    RELATION_REVERSE_TYPE,
+    NODE_KEY,
+    NODE_LABEL,
+)
 
-db = 'hive'
-SCHEMA = 'BASE'
-TABLE = 'TEST'
-CLUSTER = 'DEFAULT'
-badge1 = Badge('badge1', 'column')
-badge2 = Badge('badge2', 'column')
+db = "hive"
+SCHEMA = "BASE"
+TABLE = "TEST"
+CLUSTER = "DEFAULT"
+badge1 = Badge("badge1", "column")
+badge2 = Badge("badge2", "column")
 
 
 class TestBadge(unittest.TestCase):
     def setUp(self) -> None:
         super(TestBadge, self).setUp()
-        self.badge_metada = BadgeMetadata(start_label='Column',
-                                          start_key='hive://default.base/test/ds',
-                                          badges=[badge1, badge2])
+        self.badge_metada = BadgeMetadata(
+            start_label="Column", start_key="hive://default.base/test/ds", badges=[badge1, badge2]
+        )
 
     def test_get_badge_key(self) -> None:
         badge_key = self.badge_metada.get_badge_key(badge1.name)
@@ -33,46 +41,36 @@ class TestBadge(unittest.TestCase):
         node1 = {
             NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge1.name),
             NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
-            BadgeMetadata.BADGE_CATEGORY: badge1.category
+            BadgeMetadata.BADGE_CATEGORY: badge1.category,
         }
         node2 = {
             NODE_KEY: BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge2.name),
             NODE_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
-            BadgeMetadata.BADGE_CATEGORY: badge2.category
+            BadgeMetadata.BADGE_CATEGORY: badge2.category,
         }
-        serialized_nodes = [
-            neo4_serializer.serialize_node(node)
-            for node in nodes
-        ]
+        serialized_nodes = [neo4_serializer.serialize_node(node) for node in nodes]
 
         self.assertTrue(node1 in serialized_nodes)
         self.assertTrue(node2 in serialized_nodes)
 
     def test_bad_key_entity_match(self) -> None:
-        column_label = 'Column'
-        table_key = 'hive://default.base/test'
+        column_label = "Column"
+        table_key = "hive://default.base/test"
 
-        self.assertRaises(Exception,
-                          BadgeMetadata,
-                          start_label=column_label,
-                          start_key=table_key,
-                          badges=[badge1, badge2])
+        self.assertRaises(
+            Exception, BadgeMetadata, start_label=column_label, start_key=table_key, badges=[badge1, badge2]
+        )
 
     def test_bad_entity_label(self) -> None:
-        user_label = 'User'
-        table_key = 'hive://default.base/test'
-        self.assertRaises(Exception,
-                          BadgeMetadata,
-                          start_label=user_label,
-                          start_key=table_key,
-                          badges=[badge1, badge2])
+        user_label = "User"
+        table_key = "hive://default.base/test"
+        self.assertRaises(
+            Exception, BadgeMetadata, start_label=user_label, start_key=table_key, badges=[badge1, badge2]
+        )
 
     def test_create_relation(self) -> None:
         relations = self.badge_metada.create_relation()
-        serialized_relations = [
-            neo4_serializer.serialize_relationship(relation)
-            for relation in relations
-        ]
+        serialized_relations = [neo4_serializer.serialize_relationship(relation) for relation in relations]
         self.assertEqual(len(relations), 2)
 
         relation1 = {

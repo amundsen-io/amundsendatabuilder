@@ -51,7 +51,7 @@ class Scoped(object, metaclass=abc.ABCMeta):
         Scope, string, is used to basically peel off nested config
         :return:
         """
-        return ''
+        return ""
 
     def close(self) -> None:
         """

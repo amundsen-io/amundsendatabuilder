@@ -10,7 +10,7 @@ from databuilder.loader.base_loader import Loader
 
 LOGGER = logging.getLogger(__name__)
 
-CALLBACK_FUNCTION = 'callback_function'
+CALLBACK_FUNCTION = "callback_function"
 
 
 def log_call_back(record: Optional[Any]) -> None:
@@ -19,7 +19,7 @@ def log_call_back(record: Optional[Any]) -> None:
     :param record:
     :return:
     """
-    LOGGER.info('record: {}'.format(record))
+    LOGGER.info("record: {}".format(record))
 
 
 class GenericLoader(Loader):

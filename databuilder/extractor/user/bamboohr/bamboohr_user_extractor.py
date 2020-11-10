@@ -13,8 +13,8 @@ from databuilder.models.user import User
 
 
 class BamboohrUserExtractor(Extractor):
-    API_KEY = 'api_key'
-    SUBDOMAIN = 'subdomain'
+    API_KEY = "api_key"
+    SUBDOMAIN = "subdomain"
 
     def init(self, conf: ConfigTree) -> None:
         self._extract_iter: Optional[Iterator] = None
@@ -32,34 +32,32 @@ class BamboohrUserExtractor(Extractor):
             return None
 
     def _employee_directory_uri(self) -> str:
-        return 'https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/employees/directory'.format(
+        return "https://api.bamboohr.com/api/gateway.php/{subdomain}/v1/employees/directory".format(
             subdomain=self._subdomain
         )
 
     def _get_extract_iter(self) -> Iterator[User]:
-        response = requests.get(
-            self._employee_directory_uri(), auth=HTTPBasicAuth(self._api_key, 'x')
-        )
+        response = requests.get(self._employee_directory_uri(), auth=HTTPBasicAuth(self._api_key, "x"))
 
         root = ElementTree.fromstring(response.content)
 
-        for user in root.findall('./employees/employee'):
+        for user in root.findall("./employees/employee"):
 
             def get_field(name: str) -> str:
-                field = user.find('./field[@id=\'{name}\']'.format(name=name))
+                field = user.find("./field[@id='{name}']".format(name=name))
                 if field is not None and field.text is not None:
                     return field.text
                 else:
-                    return ''
+                    return ""
 
             yield User(
-                email=get_field('workEmail'),
-                first_name=get_field('firstName'),
-                last_name=get_field('lastName'),
-                name=get_field('displayName'),
-                team_name=get_field('department'),
-                role_name=get_field('jobTitle'),
+                email=get_field("workEmail"),
+                first_name=get_field("firstName"),
+                last_name=get_field("lastName"),
+                name=get_field("displayName"),
+                team_name=get_field("department"),
+                role_name=get_field("jobTitle"),
             )
 
     def get_scope(self) -> str:
-        return 'extractor.bamboohr_user'
+        return "extractor.bamboohr_user"

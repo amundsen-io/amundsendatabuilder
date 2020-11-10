@@ -8,8 +8,8 @@ from typing import Any, Dict
 
 from databuilder.transformer.base_transformer import Transformer
 
-CALLBACK_FUNCTION = 'callback_function'
-FIELD_NAME = 'field_name'
+CALLBACK_FUNCTION = "callback_function"
+FIELD_NAME = "field_name"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,4 +32,4 @@ class GenericTransformer(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.generic'
+        return "transformer.generic"

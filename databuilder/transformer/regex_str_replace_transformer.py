@@ -12,8 +12,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 # Config keys
-REGEX_REPLACE_TUPLE_LIST = 'regex_replace_tuple_list'
-ATTRIBUTE_NAME = 'attribute_name'
+REGEX_REPLACE_TUPLE_LIST = "regex_replace_tuple_list"
+ATTRIBUTE_NAME = "attribute_name"
 
 
 class RegexStrReplaceTransformer(Transformer):
@@ -49,4 +49,4 @@ class RegexStrReplaceTransformer(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.regex_str_replace'
+        return "transformer.regex_str_replace"

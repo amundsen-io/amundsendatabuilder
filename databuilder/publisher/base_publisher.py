@@ -59,7 +59,7 @@ class Publisher(Scoped):
         self.call_backs.append(callback)
 
     def get_scope(self) -> str:
-        return 'publisher'
+        return "publisher"
 
 
 class NoopPublisher(Publisher):
@@ -73,4 +73,4 @@ class NoopPublisher(Publisher):
         pass
 
     def get_scope(self) -> str:
-        return 'publisher.noop'
+        return "publisher.noop"

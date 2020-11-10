@@ -8,8 +8,8 @@ from typing import Any, Dict
 
 from databuilder.transformer.base_transformer import Transformer
 
-TEMPLATE = 'template'
-FIELD_NAME = 'field_name'  # field name to UPSERT
+TEMPLATE = "template"
+FIELD_NAME = "field_name"  # field name to UPSERT
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,4 +33,4 @@ class TemplateVariableSubstitutionTransformer(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.template_variable_substitution'
+        return "transformer.template_variable_substitution"

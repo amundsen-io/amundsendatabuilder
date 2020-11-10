@@ -9,8 +9,10 @@ from pyhocon import ConfigFactory, ConfigTree
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
-    TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import (
+    TableauGraphQLApiExtractor,
+    TableauDashboardUtils,
+)
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
@@ -34,23 +36,26 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
     def execute(self) -> Iterator[Dict[str, Any]]:
         response = self.execute_query()
 
-        workbooks_data = [workbook for workbook in response['workbooks']
-                          if workbook['projectName'] not in
-                          self._conf.get_list(TableauGraphQLDashboardTableExtractor.EXCLUDED_PROJECTS)]
+        workbooks_data = [
+            workbook
+            for workbook in response["workbooks"]
+            if workbook["projectName"]
+            not in self._conf.get_list(TableauGraphQLDashboardTableExtractor.EXCLUDED_PROJECTS)
+        ]
 
         for workbook in workbooks_data:
             data = {
-                'dashboard_group_id': workbook['projectName'],
-                'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
-                'cluster': self._conf.get_string(TableauGraphQLDashboardTableExtractor.CLUSTER),
-                'table_ids': []
+                "dashboard_group_id": workbook["projectName"],
+                "dashboard_id": TableauDashboardUtils.sanitize_workbook_name(workbook["name"]),
+                "cluster": self._conf.get_string(TableauGraphQLDashboardTableExtractor.CLUSTER),
+                "table_ids": [],
             }
 
-            for table in workbook['upstreamTables']:
+            for table in workbook["upstreamTables"]:
 
                 # external tables have no schema, so they must be parsed differently
                 # see TableauExternalTableExtractor for more specifics
-                if table['schema'] != '':
+                if table["schema"] != "":
                     cluster = self._conf.get_string(TableauGraphQLDashboardTableExtractor.CLUSTER)
                     database = self._conf.get_string(TableauGraphQLDashboardTableExtractor.DATABASE)
 
@@ -59,19 +64,17 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     # It will hide the real schema inside the table name, like "real_schema.real_table",
                     # and set the "schema" value to "wrong_schema". In every case discovered so far, the schema
                     # key is incorrect, so the "inner" schema from the table name is used instead.
-                    if '.' in table['name']:
-                        schema, name = table['name'].split('.')
+                    if "." in table["name"]:
+                        schema, name = table["name"].split(".")
                     else:
-                        schema, name = table['schema'], table['name']
+                        schema, name = table["schema"], table["name"]
                     schema = TableauDashboardUtils.sanitize_schema_name(schema)
                     name = TableauDashboardUtils.sanitize_table_name(name)
                 else:
                     cluster = self._conf.get_string(TableauGraphQLDashboardTableExtractor.EXTERNAL_CLUSTER_NAME)
-                    database = TableauDashboardUtils.sanitize_database_name(
-                        table['database']['connectionType']
-                    )
-                    schema = TableauDashboardUtils.sanitize_schema_name(table['database']['name'])
-                    name = TableauDashboardUtils.sanitize_table_name(table['name'])
+                    database = TableauDashboardUtils.sanitize_database_name(table["database"]["connectionType"])
+                    schema = TableauDashboardUtils.sanitize_schema_name(table["database"]["name"])
+                    name = TableauDashboardUtils.sanitize_table_name(table["name"])
 
                 table_id = TableMetadata.TABLE_KEY_FORMAT.format(
                     db=database,
@@ -79,7 +82,7 @@ class TableauGraphQLDashboardTableExtractor(TableauGraphQLApiExtractor):
                     schema=schema,
                     tbl=name,
                 )
-                data['table_ids'].append(table_id)
+                data["table_ids"].append(table_id)
 
             yield data
 
@@ -125,8 +128,9 @@ class TableauDashboardTableExtractor(Extractor):
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_table.DashboardTable'})))
+                ConfigFactory.from_dict({MODEL_CLASS: "databuilder.models.dashboard.dashboard_table.DashboardTable"})
+            )
+        )
         transformers.append(dict_to_model_transformer)
         self._transformer = ChainedTransformer(transformers=transformers)
 
@@ -138,7 +142,7 @@ class TableauDashboardTableExtractor(Extractor):
         return self._transformer.transform(record=record)
 
     def get_scope(self) -> str:
-        return 'extractor.tableau_dashboard_table'
+        return "extractor.tableau_dashboard_table"
 
     def _build_extractor(self) -> TableauGraphQLDashboardTableExtractor:
         """
@@ -146,13 +150,14 @@ class TableauDashboardTableExtractor(Extractor):
         :return: A TableauGraphQLDashboardTableExtractor that creates dashboard <> table relationships.
         """
         extractor = TableauGraphQLDashboardTableExtractor()
-        tableau_extractor_conf = \
-            Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
-                  .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict({TableauGraphQLApiExtractor.QUERY: self.query,
-                                                          STATIC_RECORD_DICT: {'product': 'tableau'}
-                                                          }
-                                                         )
-                                 )
+        tableau_extractor_conf = (
+            Scoped.get_scoped_conf(self._conf, extractor.get_scope())
+            .with_fallback(self._conf)
+            .with_fallback(
+                ConfigFactory.from_dict(
+                    {TableauGraphQLApiExtractor.QUERY: self.query, STATIC_RECORD_DICT: {"product": "tableau"}}
+                )
+            )
+        )
         extractor.init(conf=tableau_extractor_conf)
         return extractor

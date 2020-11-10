@@ -9,8 +9,10 @@ from pyhocon import ConfigFactory, ConfigTree
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
-    TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import (
+    TableauGraphQLApiExtractor,
+    TableauDashboardUtils,
+)
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 
@@ -29,26 +31,24 @@ class TableauGraphQLExternalTableExtractor(TableauGraphQLApiExtractor):
     def execute(self) -> Iterator[Dict[str, Any]]:
         response = self.execute_query()
 
-        for table in response['databases']:
-            if table['connectionType'] in ['google-sheets', 'salesforce', 'excel-direct']:
-                for downstreamTable in table['tables']:
+        for table in response["databases"]:
+            if table["connectionType"] in ["google-sheets", "salesforce", "excel-direct"]:
+                for downstreamTable in table["tables"]:
                     data = {
-                        'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
-                        'database': TableauDashboardUtils.sanitize_database_name(
-                            table['connectionType']
-                        ),
-                        'schema': TableauDashboardUtils.sanitize_schema_name(table['name']),
-                        'name': TableauDashboardUtils.sanitize_table_name(downstreamTable['name']),
-                        'description': table['description']
+                        "cluster": self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
+                        "database": TableauDashboardUtils.sanitize_database_name(table["connectionType"]),
+                        "schema": TableauDashboardUtils.sanitize_schema_name(table["name"]),
+                        "name": TableauDashboardUtils.sanitize_table_name(downstreamTable["name"]),
+                        "description": table["description"],
                     }
                     yield data
             else:
                 data = {
-                    'cluster': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
-                    'database': TableauDashboardUtils.sanitize_database_name(table['connectionType']),
-                    'schema': self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_SCHEMA_NAME),
-                    'name': TableauDashboardUtils.sanitize_table_name(table['name']),
-                    'description': table['description']
+                    "cluster": self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_CLUSTER_NAME),
+                    "database": TableauDashboardUtils.sanitize_database_name(table["connectionType"]),
+                    "schema": self._conf.get_string(TableauGraphQLExternalTableExtractor.EXTERNAL_SCHEMA_NAME),
+                    "name": TableauDashboardUtils.sanitize_table_name(table["name"]),
+                    "description": table["description"],
                 }
                 yield data
 
@@ -104,15 +104,17 @@ class TableauDashboardExternalTableExtractor(Extractor):
           }
         }"""
         self.query_variables = {
-            'externalTableTypes': self._conf.get_list(TableauDashboardExternalTableExtractor.EXTERNAL_TABLE_TYPES)}
+            "externalTableTypes": self._conf.get_list(TableauDashboardExternalTableExtractor.EXTERNAL_TABLE_TYPES)
+        }
         self._extractor = self._build_extractor()
 
         transformers = []
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.table_metadata.TableMetadata'})))
+                ConfigFactory.from_dict({MODEL_CLASS: "databuilder.models.table_metadata.TableMetadata"})
+            )
+        )
         transformers.append(dict_to_model_transformer)
         self._transformer = ChainedTransformer(transformers=transformers)
 
@@ -124,7 +126,7 @@ class TableauDashboardExternalTableExtractor(Extractor):
         return self._transformer.transform(record=record)
 
     def get_scope(self) -> str:
-        return 'extractor.tableau_external_table'
+        return "extractor.tableau_external_table"
 
     def _build_extractor(self) -> TableauGraphQLExternalTableExtractor:
         """
@@ -135,10 +137,12 @@ class TableauDashboardExternalTableExtractor(Extractor):
 
         config_dict = {
             TableauGraphQLApiExtractor.QUERY_VARIABLES: self.query_variables,
-            TableauGraphQLApiExtractor.QUERY: self.query}
-        tableau_extractor_conf = \
-            Scoped.get_scoped_conf(self._conf, extractor.get_scope())\
-                  .with_fallback(self._conf)\
-                  .with_fallback(ConfigFactory.from_dict(config_dict))
+            TableauGraphQLApiExtractor.QUERY: self.query,
+        }
+        tableau_extractor_conf = (
+            Scoped.get_scoped_conf(self._conf, extractor.get_scope())
+            .with_fallback(self._conf)
+            .with_fallback(ConfigFactory.from_dict(config_dict))
+        )
         extractor.init(conf=tableau_extractor_conf)
         return extractor

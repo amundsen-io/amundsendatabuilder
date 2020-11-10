@@ -11,29 +11,30 @@ class TableESDocument(ElasticsearchDocument):
     Schema for the Search index document
     """
 
-    def __init__(self,
-                 database: str,
-                 cluster: str,
-                 schema: str,
-                 name: str,
-                 key: str,
-                 description: str,
-                 last_updated_timestamp: Optional[int],
-                 column_names: List[str],
-                 column_descriptions: List[str],
-                 total_usage: int,
-                 unique_usage: int,
-                 tags: List[str],
-                 badges: Optional[List[str]] = None,
-                 display_name: Optional[str] = None,
-                 schema_description: Optional[str] = None,
-                 programmatic_descriptions: List[str] = [],
-                 ) -> None:
+    def __init__(
+        self,
+        database: str,
+        cluster: str,
+        schema: str,
+        name: str,
+        key: str,
+        description: str,
+        last_updated_timestamp: Optional[int],
+        column_names: List[str],
+        column_descriptions: List[str],
+        total_usage: int,
+        unique_usage: int,
+        tags: List[str],
+        badges: Optional[List[str]] = None,
+        display_name: Optional[str] = None,
+        schema_description: Optional[str] = None,
+        programmatic_descriptions: List[str] = [],
+    ) -> None:
         self.database = database
         self.cluster = cluster
         self.schema = schema
         self.name = name
-        self.display_name = display_name if display_name else '{schema}.{table}'.format(schema=schema, table=name)
+        self.display_name = display_name if display_name else "{schema}.{table}".format(schema=schema, table=name)
         self.key = key
         self.description = description
         # todo: use last_updated_timestamp to match the record in metadata

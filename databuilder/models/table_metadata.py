@@ -13,23 +13,24 @@ from databuilder.models.badge import BadgeMetadata, Badge
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 
-DESCRIPTION_NODE_LABEL_VAL = 'Description'
+DESCRIPTION_NODE_LABEL_VAL = "Description"
 DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
 
 
 class TagMetadata(GraphSerializable):
-    TAG_NODE_LABEL = 'Tag'
-    TAG_KEY_FORMAT = '{tag}'
-    TAG_TYPE = 'tag_type'
-    DEFAULT_TYPE = 'default'
-    BADGE_TYPE = 'badge'
-    DASHBOARD_TYPE = 'dashboard'
-    METRIC_TYPE = 'metric'
+    TAG_NODE_LABEL = "Tag"
+    TAG_KEY_FORMAT = "{tag}"
+    TAG_TYPE = "tag_type"
+    DEFAULT_TYPE = "default"
+    BADGE_TYPE = "badge"
+    DASHBOARD_TYPE = "dashboard"
+    METRIC_TYPE = "metric"
 
-    def __init__(self,
-                 name: str,
-                 tag_type: str = 'default',
-                 ):
+    def __init__(
+        self,
+        name: str,
+        tag_type: str = "default",
+    ):
         self._name = name
         self._tag_type = tag_type
         self._nodes = iter([self.create_tag_node(self._name, self._tag_type)])
@@ -38,7 +39,7 @@ class TagMetadata(GraphSerializable):
     @staticmethod
     def get_tag_key(name: str) -> str:
         if not name:
-            return ''
+            return ""
         return TagMetadata.TAG_KEY_FORMAT.format(tag=name)
 
     @staticmethod
@@ -46,9 +47,7 @@ class TagMetadata(GraphSerializable):
         node = GraphNode(
             key=TagMetadata.get_tag_key(name),
             label=TagMetadata.TAG_NODE_LABEL,
-            attributes={
-                TagMetadata.TAG_TYPE: tag_type
-            }
+            attributes={TagMetadata.TAG_TYPE: tag_type},
         )
         return node
 
@@ -70,21 +69,18 @@ class TagMetadata(GraphSerializable):
 # TODO: this should inherit from ProgrammaticDescription in amundsen-common
 class DescriptionMetadata:
     DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
-    PROGRAMMATIC_DESCRIPTION_NODE_LABEL = 'Programmatic_Description'
-    DESCRIPTION_KEY_FORMAT = '{description}'
-    DESCRIPTION_TEXT = 'description'
-    DESCRIPTION_SOURCE = 'description_source'
+    PROGRAMMATIC_DESCRIPTION_NODE_LABEL = "Programmatic_Description"
+    DESCRIPTION_KEY_FORMAT = "{description}"
+    DESCRIPTION_TEXT = "description"
+    DESCRIPTION_SOURCE = "description_source"
 
-    DESCRIPTION_RELATION_TYPE = 'DESCRIPTION'
-    INVERSE_DESCRIPTION_RELATION_TYPE = 'DESCRIPTION_OF'
+    DESCRIPTION_RELATION_TYPE = "DESCRIPTION"
+    INVERSE_DESCRIPTION_RELATION_TYPE = "DESCRIPTION_OF"
 
     # The default editable source.
     DEFAULT_SOURCE = "description"
 
-    def __init__(self,
-                 text: Optional[str],
-                 source: str = DEFAULT_SOURCE
-                 ):
+    def __init__(self, text: Optional[str], source: str = DEFAULT_SOURCE):
         """
         :param source: The unique source of what is populating this description.
         :param text: the description text. Markdown supported.
@@ -92,15 +88,15 @@ class DescriptionMetadata:
         self._source = source
         self._text = text
         #  There are so many dependencies on Description node, that it is probably easier to just separate the rest out.
-        if (self._source == self.DEFAULT_SOURCE):
+        if self._source == self.DEFAULT_SOURCE:
             self._label = self.DESCRIPTION_NODE_LABEL
         else:
             self._label = self.PROGRAMMATIC_DESCRIPTION_NODE_LABEL
 
     @staticmethod
-    def create_description_metadata(text: Union[None, str],
-                                    source: Optional[str] = DEFAULT_SOURCE
-                                    ) -> Optional['DescriptionMetadata']:
+    def create_description_metadata(
+        text: Union[None, str], source: Optional[str] = DEFAULT_SOURCE
+    ) -> Optional["DescriptionMetadata"]:
         # We do not want to create a node if there is no description text!
         if text is None:
             return None
@@ -117,7 +113,7 @@ class DescriptionMetadata:
             return "_" + self._source + "_description"
 
     def __repr__(self) -> str:
-        return 'DescriptionMetadata({!r}, {!r})'.format(self._source, self._text)
+        return "DescriptionMetadata({!r}, {!r})".format(self._source, self._text)
 
     def get_node(self, node_key: str) -> GraphNode:
         node = GraphNode(
@@ -125,8 +121,8 @@ class DescriptionMetadata:
             label=self._label,
             attributes={
                 DescriptionMetadata.DESCRIPTION_SOURCE: self._source,
-                DescriptionMetadata.DESCRIPTION_TEXT: self._text
-            }
+                DescriptionMetadata.DESCRIPTION_TEXT: self._text,
+            },
         )
         return node
 
@@ -138,27 +134,28 @@ class DescriptionMetadata:
             end_key=end_key,
             type=DescriptionMetadata.DESCRIPTION_RELATION_TYPE,
             reverse_type=DescriptionMetadata.INVERSE_DESCRIPTION_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         return relationship
 
 
 class ColumnMetadata:
-    COLUMN_NODE_LABEL = 'Column'
-    COLUMN_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}'
-    COLUMN_NAME = 'name'
-    COLUMN_TYPE = 'type'
-    COLUMN_ORDER = 'sort_order'
-    COLUMN_DESCRIPTION = 'description'
-    COLUMN_DESCRIPTION_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{col}/{description_id}'
+    COLUMN_NODE_LABEL = "Column"
+    COLUMN_KEY_FORMAT = "{db}://{cluster}.{schema}/{tbl}/{col}"
+    COLUMN_NAME = "name"
+    COLUMN_TYPE = "type"
+    COLUMN_ORDER = "sort_order"
+    COLUMN_DESCRIPTION = "description"
+    COLUMN_DESCRIPTION_FORMAT = "{db}://{cluster}.{schema}/{tbl}/{col}/{description_id}"
 
-    def __init__(self,
-                 name: str,
-                 description: Union[str, None],
-                 col_type: str,
-                 sort_order: int,
-                 badges: Union[List[str], None] = None
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        description: Union[str, None],
+        col_type: str,
+        sort_order: int,
+        badges: Union[List[str], None] = None,
+    ) -> None:
         """
         TODO: Add stats
         :param name:
@@ -167,21 +164,18 @@ class ColumnMetadata:
         :param sort_order:
         """
         self.name = name
-        self.description = DescriptionMetadata.create_description_metadata(source=None,
-                                                                           text=description)
+        self.description = DescriptionMetadata.create_description_metadata(source=None, text=description)
         self.type = col_type
         self.sort_order = sort_order
         if badges:
-            self.badges = [Badge(badge, 'column') for badge in badges]
+            self.badges = [Badge(badge, "column") for badge in badges]
         else:
             self.badges = []
 
     def __repr__(self) -> str:
-        return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,
-                                                                     self.description,
-                                                                     self.type,
-                                                                     self.sort_order,
-                                                                     self.badges)
+        return "ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.name, self.description, self.type, self.sort_order, self.badges
+        )
 
 
 class TableMetadata(GraphSerializable):
@@ -195,50 +189,52 @@ class TableMetadata(GraphSerializable):
 
     This class can be used for both table and view metadata. If it is a View, is_view=True should be passed in.
     """
-    TABLE_NODE_LABEL = 'Table'
-    TABLE_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}'
-    TABLE_NAME = 'name'
-    IS_VIEW = 'is_view'
 
-    TABLE_DESCRIPTION_FORMAT = '{db}://{cluster}.{schema}/{tbl}/{description_id}'
+    TABLE_NODE_LABEL = "Table"
+    TABLE_KEY_FORMAT = "{db}://{cluster}.{schema}/{tbl}"
+    TABLE_NAME = "name"
+    IS_VIEW = "is_view"
 
-    DATABASE_NODE_LABEL = 'Database'
-    DATABASE_KEY_FORMAT = 'database://{db}'
+    TABLE_DESCRIPTION_FORMAT = "{db}://{cluster}.{schema}/{tbl}/{description_id}"
+
+    DATABASE_NODE_LABEL = "Database"
+    DATABASE_KEY_FORMAT = "database://{db}"
     DATABASE_CLUSTER_RELATION_TYPE = cluster_constants.CLUSTER_RELATION_TYPE
     CLUSTER_DATABASE_RELATION_TYPE = cluster_constants.CLUSTER_REVERSE_RELATION_TYPE
 
     CLUSTER_NODE_LABEL = cluster_constants.CLUSTER_NODE_LABEL
-    CLUSTER_KEY_FORMAT = '{db}://{cluster}'
+    CLUSTER_KEY_FORMAT = "{db}://{cluster}"
     CLUSTER_SCHEMA_RELATION_TYPE = schema_constant.SCHEMA_RELATION_TYPE
     SCHEMA_CLUSTER_RELATION_TYPE = schema_constant.SCHEMA_REVERSE_RELATION_TYPE
 
     SCHEMA_NODE_LABEL = schema_constant.SCHEMA_NODE_LABEL
     SCHEMA_KEY_FORMAT = schema_constant.DATABASE_SCHEMA_KEY_FORMAT
-    SCHEMA_TABLE_RELATION_TYPE = 'TABLE'
-    TABLE_SCHEMA_RELATION_TYPE = 'TABLE_OF'
+    SCHEMA_TABLE_RELATION_TYPE = "TABLE"
+    TABLE_SCHEMA_RELATION_TYPE = "TABLE_OF"
 
-    TABLE_COL_RELATION_TYPE = 'COLUMN'
-    COL_TABLE_RELATION_TYPE = 'COLUMN_OF'
+    TABLE_COL_RELATION_TYPE = "COLUMN"
+    COL_TABLE_RELATION_TYPE = "COLUMN_OF"
 
-    TABLE_TAG_RELATION_TYPE = 'TAGGED_BY'
-    TAG_TABLE_RELATION_TYPE = 'TAG'
+    TABLE_TAG_RELATION_TYPE = "TAGGED_BY"
+    TAG_TABLE_RELATION_TYPE = "TAG"
 
     # Only for deduping database, cluster, and schema (table and column will be always processed)
     serialized_nodes_keys: Set[Any] = set()
     serialized_rels_keys: Set[Any] = set()
 
-    def __init__(self,
-                 database: str,
-                 cluster: str,
-                 schema: str,
-                 name: str,
-                 description: Union[str, None],
-                 columns: Iterable[ColumnMetadata] = None,
-                 is_view: bool = False,
-                 tags: Union[List, str] = None,
-                 description_source: Union[str, None] = None,
-                 **kwargs: Any
-                 ) -> None:
+    def __init__(
+        self,
+        database: str,
+        cluster: str,
+        schema: str,
+        name: str,
+        description: Union[str, None],
+        columns: Iterable[ColumnMetadata] = None,
+        is_view: bool = False,
+        tags: Union[List, str] = None,
+        description_source: Union[str, None] = None,
+        **kwargs: Any
+    ) -> None:
         """
         :param database:
         :param cluster:
@@ -269,65 +265,54 @@ class TableMetadata(GraphSerializable):
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self) -> str:
-        return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
-               '{!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                self.cluster,
-                                                self.schema,
-                                                self.name,
-                                                self.description,
-                                                self.columns,
-                                                self.is_view,
-                                                self.tags)
+        return "TableMetadata({!r}, {!r}, {!r}, {!r} " "{!r}, {!r}, {!r}, {!r})".format(
+            self.database, self.cluster, self.schema, self.name, self.description, self.columns, self.is_view, self.tags
+        )
 
     def _get_table_key(self) -> str:
-        return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
-                                                     cluster=self.cluster,
-                                                     schema=self.schema,
-                                                     tbl=self.name)
+        return TableMetadata.TABLE_KEY_FORMAT.format(
+            db=self.database, cluster=self.cluster, schema=self.schema, tbl=self.name
+        )
 
     def _get_table_description_key(self, description: DescriptionMetadata) -> str:
-        return TableMetadata.TABLE_DESCRIPTION_FORMAT.format(db=self.database,
-                                                             cluster=self.cluster,
-                                                             schema=self.schema,
-                                                             tbl=self.name,
-                                                             description_id=description.get_description_id())
+        return TableMetadata.TABLE_DESCRIPTION_FORMAT.format(
+            db=self.database,
+            cluster=self.cluster,
+            schema=self.schema,
+            tbl=self.name,
+            description_id=description.get_description_id(),
+        )
 
     def _get_database_key(self) -> str:
         return TableMetadata.DATABASE_KEY_FORMAT.format(db=self.database)
 
     def _get_cluster_key(self) -> str:
-        return TableMetadata.CLUSTER_KEY_FORMAT.format(db=self.database,
-                                                       cluster=self.cluster)
+        return TableMetadata.CLUSTER_KEY_FORMAT.format(db=self.database, cluster=self.cluster)
 
     def _get_schema_key(self) -> str:
-        return TableMetadata.SCHEMA_KEY_FORMAT.format(db=self.database,
-                                                      cluster=self.cluster,
-                                                      schema=self.schema)
+        return TableMetadata.SCHEMA_KEY_FORMAT.format(db=self.database, cluster=self.cluster, schema=self.schema)
 
     def _get_col_key(self, col: ColumnMetadata) -> str:
-        return ColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.database,
-                                                       cluster=self.cluster,
-                                                       schema=self.schema,
-                                                       tbl=self.name,
-                                                       col=col.name,
-                                                       badges=col.badges)
+        return ColumnMetadata.COLUMN_KEY_FORMAT.format(
+            db=self.database, cluster=self.cluster, schema=self.schema, tbl=self.name, col=col.name, badges=col.badges
+        )
 
-    def _get_col_description_key(self,
-                                 col: ColumnMetadata,
-                                 description: DescriptionMetadata) -> str:
-        return ColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(db=self.database,
-                                                               cluster=self.cluster,
-                                                               schema=self.schema,
-                                                               tbl=self.name,
-                                                               col=col.name,
-                                                               description_id=description.get_description_id())
+    def _get_col_description_key(self, col: ColumnMetadata, description: DescriptionMetadata) -> str:
+        return ColumnMetadata.COLUMN_DESCRIPTION_FORMAT.format(
+            db=self.database,
+            cluster=self.cluster,
+            schema=self.schema,
+            tbl=self.name,
+            col=col.name,
+            description_id=description.get_description_id(),
+        )
 
     @staticmethod
     def format_tags(tags: Union[List, str, None]) -> List:
         if tags is None:
             tags = []
         if isinstance(tags, str):
-            tags = list(filter(None, tags.split(',')))
+            tags = list(filter(None, tags.split(",")))
         if isinstance(tags, list):
             tags = [tag.lower().strip() for tag in tags]
 
@@ -358,8 +343,8 @@ class TableMetadata(GraphSerializable):
                 attributes={
                     ColumnMetadata.COLUMN_NAME: col.name,
                     ColumnMetadata.COLUMN_TYPE: col.type,
-                    ColumnMetadata.COLUMN_ORDER: col.sort_order
-                }
+                    ColumnMetadata.COLUMN_ORDER: col.sort_order,
+                },
             )
             yield column_node
 
@@ -368,9 +353,9 @@ class TableMetadata(GraphSerializable):
                 yield col.description.get_node(node_key)
 
             if col.badges:
-                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
-                                               start_key=self._get_col_key(col),
-                                               badges=col.badges)
+                badge_metadata = BadgeMetadata(
+                    start_label=ColumnMetadata.COLUMN_NODE_LABEL, start_key=self._get_col_key(col), badges=col.badges
+                )
                 badge_nodes = badge_metadata.create_nodes()
                 for node in badge_nodes:
                     yield node
@@ -380,24 +365,14 @@ class TableMetadata(GraphSerializable):
             GraphNode(
                 key=self._get_database_key(),
                 label=TableMetadata.DATABASE_NODE_LABEL,
-                attributes={
-                    'name': self.database
-                }
+                attributes={"name": self.database},
             ),
             GraphNode(
-                key=self._get_cluster_key(),
-                label=TableMetadata.CLUSTER_NODE_LABEL,
-                attributes={
-                    'name': self.cluster
-                }
+                key=self._get_cluster_key(), label=TableMetadata.CLUSTER_NODE_LABEL, attributes={"name": self.cluster}
             ),
             GraphNode(
-                key=self._get_schema_key(),
-                label=TableMetadata.SCHEMA_NODE_LABEL,
-                attributes={
-                    'name': self.schema
-                }
-            )
+                key=self._get_schema_key(), label=TableMetadata.SCHEMA_NODE_LABEL, attributes={"name": self.schema}
+            ),
         ]
 
         for node_tuple in others:
@@ -406,20 +381,13 @@ class TableMetadata(GraphSerializable):
                 yield node_tuple
 
     def _create_table_node(self) -> GraphNode:
-        table_attributes = {
-            TableMetadata.TABLE_NAME: self.name,
-            TableMetadata.IS_VIEW: self.is_view
-        }
+        table_attributes = {TableMetadata.TABLE_NAME: self.name, TableMetadata.IS_VIEW: self.is_view}
         if self.attrs:
             for k, v in self.attrs.items():
                 if k not in table_attributes:
                     table_attributes[k] = v
 
-        return GraphNode(
-            key=self._get_table_key(),
-            label=TableMetadata.TABLE_NODE_LABEL,
-            attributes=table_attributes
-        )
+        return GraphNode(key=self._get_table_key(), label=TableMetadata.TABLE_NODE_LABEL, attributes=table_attributes)
 
     def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
@@ -435,14 +403,14 @@ class TableMetadata(GraphSerializable):
             end_label=TableMetadata.TABLE_NODE_LABEL,
             type=TableMetadata.SCHEMA_TABLE_RELATION_TYPE,
             reverse_type=TableMetadata.TABLE_SCHEMA_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         yield schema_table_relationship
 
         if self.description:
-            yield self.description.get_relation(TableMetadata.TABLE_NODE_LABEL,
-                                                self._get_table_key(),
-                                                self._get_table_description_key(self.description))
+            yield self.description.get_relation(
+                TableMetadata.TABLE_NODE_LABEL, self._get_table_key(), self._get_table_description_key(self.description)
+            )
 
         if self.tags:
             for tag in self.tags:
@@ -453,7 +421,7 @@ class TableMetadata(GraphSerializable):
                     end_key=TagMetadata.get_tag_key(tag),
                     type=TableMetadata.TABLE_TAG_RELATION_TYPE,
                     reverse_type=TableMetadata.TAG_TABLE_RELATION_TYPE,
-                    attributes={}
+                    attributes={},
                 )
                 yield tag_relationship
 
@@ -465,7 +433,7 @@ class TableMetadata(GraphSerializable):
                 end_key=self._get_col_key(col),
                 type=TableMetadata.TABLE_COL_RELATION_TYPE,
                 reverse_type=TableMetadata.COL_TABLE_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             yield column_relationship
 
@@ -473,13 +441,13 @@ class TableMetadata(GraphSerializable):
                 yield col.description.get_relation(
                     ColumnMetadata.COLUMN_NODE_LABEL,
                     self._get_col_key(col),
-                    self._get_col_description_key(col, col.description)
+                    self._get_col_description_key(col, col.description),
                 )
 
             if col.badges:
-                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
-                                               start_key=self._get_col_key(col),
-                                               badges=col.badges)
+                badge_metadata = BadgeMetadata(
+                    start_label=ColumnMetadata.COLUMN_NODE_LABEL, start_key=self._get_col_key(col), badges=col.badges
+                )
                 badge_relations = badge_metadata.create_relation()
                 for relation in badge_relations:
                     yield relation
@@ -492,7 +460,7 @@ class TableMetadata(GraphSerializable):
                 end_key=self._get_cluster_key(),
                 type=TableMetadata.DATABASE_CLUSTER_RELATION_TYPE,
                 reverse_type=TableMetadata.CLUSTER_DATABASE_RELATION_TYPE,
-                attributes={}
+                attributes={},
             ),
             GraphRelationship(
                 start_label=TableMetadata.CLUSTER_NODE_LABEL,
@@ -501,8 +469,8 @@ class TableMetadata(GraphSerializable):
                 end_key=self._get_schema_key(),
                 type=TableMetadata.CLUSTER_SCHEMA_RELATION_TYPE,
                 reverse_type=TableMetadata.SCHEMA_CLUSTER_RELATION_TYPE,
-                attributes={}
-            )
+                attributes={},
+            ),
         ]
 
         for rel_tuple in others:

@@ -13,7 +13,6 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 
 class TestDremioMetadataExtractor(unittest.TestCase):
-
     def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
 
@@ -21,7 +20,7 @@ class TestDremioMetadataExtractor(unittest.TestCase):
 
         self.conf = ConfigFactory.from_dict(config_dict)
 
-    @patch('databuilder.extractor.dremio_metadata_extractor.connect')
+    @patch("databuilder.extractor.dremio_metadata_extractor.connect")
     def test_extraction_with_empty_query_result(self, mock_connect: MagicMock) -> None:
         """
         Test Extraction with empty result from query
@@ -38,7 +37,7 @@ class TestDremioMetadataExtractor(unittest.TestCase):
         results = extractor.extract()
         self.assertEqual(results, None)
 
-    @patch('databuilder.extractor.dremio_metadata_extractor.connect')
+    @patch("databuilder.extractor.dremio_metadata_extractor.connect")
     def test_extraction_with_single_result(self, mock_connect: MagicMock) -> None:
         """
         Test Extraction with single table result from query
@@ -53,36 +52,29 @@ class TestDremioMetadataExtractor(unittest.TestCase):
         mock_cursor.execute = mock_execute
 
         mock_cursor.description = [
-            ['col_name'],
-            ['col_description'],
-            ['col_type'],
-            ['col_sort_order'],
-            ['database'],
-            ['cluster'],
-            ['schema'],
-            ['name'],
-            ['description'],
-            ['is_view']
+            ["col_name"],
+            ["col_description"],
+            ["col_type"],
+            ["col_sort_order"],
+            ["database"],
+            ["cluster"],
+            ["schema"],
+            ["name"],
+            ["description"],
+            ["is_view"],
         ]
 
         # Pass flake8 Unsupported operand types for + error
-        table: List[Any] = [
-            'DREMIO',
-            'Production',
-            'test_schema',
-            'test_table',
-            'a table for testing',
-            'false'
-        ]
+        table: List[Any] = ["DREMIO", "Production", "test_schema", "test_table", "a table for testing", "false"]
 
         # Pass flake8 Unsupported operand types for + error
         expected_input: List[List[Any]] = [
-            ['col_id1', 'description of id1', 'number', 0] + table,
-            ['col_id2', 'description of id2', 'number', 1] + table,
-            ['is_active', None, 'boolean', 2] + table,
-            ['source', 'description of source', 'varchar', 3] + table,
-            ['etl_created_at', 'description of etl_created_at', 'timestamp_ltz', 4] + table,
-            ['ds', None, 'varchar', 5] + table
+            ["col_id1", "description of id1", "number", 0] + table,
+            ["col_id2", "description of id2", "number", 1] + table,
+            ["is_active", None, "boolean", 2] + table,
+            ["source", "description of source", "varchar", 3] + table,
+            ["etl_created_at", "description of etl_created_at", "timestamp_ltz", 4] + table,
+            ["ds", None, "varchar", 5] + table,
         ]
 
         mock_cursor.execute.return_value = expected_input
@@ -91,18 +83,25 @@ class TestDremioMetadataExtractor(unittest.TestCase):
         extractor.init(self.conf)
 
         actual = extractor.extract()
-        expected = TableMetadata('DREMIO', 'Production', 'test_schema', 'test_table', 'a table for testing',
-                                 [ColumnMetadata('col_id1', 'description of id1', 'number', 0),
-                                  ColumnMetadata('col_id2', 'description of id2', 'number', 1),
-                                  ColumnMetadata('is_active', None, 'boolean', 2),
-                                  ColumnMetadata('source', 'description of source', 'varchar', 3),
-                                  ColumnMetadata('etl_created_at', 'description of etl_created_at',
-                                                 'timestamp_ltz', 4),
-                                  ColumnMetadata('ds', None, 'varchar', 5)])
+        expected = TableMetadata(
+            "DREMIO",
+            "Production",
+            "test_schema",
+            "test_table",
+            "a table for testing",
+            [
+                ColumnMetadata("col_id1", "description of id1", "number", 0),
+                ColumnMetadata("col_id2", "description of id2", "number", 1),
+                ColumnMetadata("is_active", None, "boolean", 2),
+                ColumnMetadata("source", "description of source", "varchar", 3),
+                ColumnMetadata("etl_created_at", "description of etl_created_at", "timestamp_ltz", 4),
+                ColumnMetadata("ds", None, "varchar", 5),
+            ],
+        )
 
         self.assertEqual(expected.__repr__(), actual.__repr__())
         self.assertIsNone(extractor.extract())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

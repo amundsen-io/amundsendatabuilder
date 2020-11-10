@@ -16,29 +16,26 @@ class CassandraExtractor(Extractor):
     Extracts tables and columns metadata from Apacha Cassandra
     """
 
-    CLUSTER_KEY = 'cluster'
+    CLUSTER_KEY = "cluster"
     # Key to define clusters ips, it should be List[str]
-    IPS_KEY = 'ips'
+    IPS_KEY = "ips"
     # Key to define extra kwargs to pass on cluster constructor,
     # it should be Dict[Any]
-    KWARGS_KEY = 'kwargs'
+    KWARGS_KEY = "kwargs"
     # Key to define custom filter function based on keyspace and table
     # since the cluster metadata doesn't support native filters,
     # it should be like def filter(keyspace: str, table: str) -> bool and return False if
     # going to skip that table and True if not
-    FILTER_FUNCTION_KEY = 'filter'
+    FILTER_FUNCTION_KEY = "filter"
 
     # Default values
-    DEFAULT_CONFIG = ConfigFactory.from_dict({
-        CLUSTER_KEY: 'gold',
-        IPS_KEY: [],
-        KWARGS_KEY: {},
-        FILTER_FUNCTION_KEY: None
-    })
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {CLUSTER_KEY: "gold", IPS_KEY: [], KWARGS_KEY: {}, FILTER_FUNCTION_KEY: None}
+    )
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(CassandraExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(CassandraExtractor.CLUSTER_KEY))
+        self._cluster = "{}".format(conf.get_string(CassandraExtractor.CLUSTER_KEY))
         self._filter = conf.get(CassandraExtractor.FILTER_FUNCTION_KEY)
         ips = conf.get_list(CassandraExtractor.IPS_KEY)
         kwargs = conf.get(CassandraExtractor.KWARGS_KEY)
@@ -55,7 +52,7 @@ class CassandraExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.cassandra'
+        return "extractor.cassandra"
 
     def _get_extract_iter(self) -> Iterator[TableMetadata]:
         """
@@ -65,7 +62,7 @@ class CassandraExtractor(Extractor):
         keyspaces = self._get_keyspaces()
         for keyspace in keyspaces:
             # system keyspaces
-            if keyspace.startswith('system'):
+            if keyspace.startswith("system"):
                 continue
             for table in self._get_tables(keyspace):
                 if self._filter and not self._filter(keyspace, table):
@@ -75,21 +72,9 @@ class CassandraExtractor(Extractor):
 
                 columns_dict = self._get_columns(keyspace, table)
                 for idx, (column_name, column) in enumerate(columns_dict.items()):
-                    columns.append(ColumnMetadata(
-                        column_name,
-                        None,
-                        column.cql_type,
-                        idx
-                    ))
+                    columns.append(ColumnMetadata(column_name, None, column.cql_type, idx))
 
-                yield TableMetadata(
-                    'cassandra',
-                    self._cluster,
-                    keyspace,
-                    table,
-                    None,
-                    columns
-                )
+                yield TableMetadata("cassandra", self._cluster, keyspace, table, None, columns)
 
     def _get_keyspaces(self) -> Dict[str, cassandra.metadata.KeyspaceMetadata]:
         return self._client.metadata.keyspaces

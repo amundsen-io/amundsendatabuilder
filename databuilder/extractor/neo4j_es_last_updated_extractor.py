@@ -23,17 +23,17 @@ class Neo4jEsLastUpdatedExtractor(GenericExtractor):
         """
         self.conf = conf
 
-        model_class = conf.get('model_class', None)
+        model_class = conf.get("model_class", None)
         if model_class:
             module_name, class_name = model_class.rsplit(".", 1)
             mod = importlib.import_module(module_name)
             self.model_class = getattr(mod, class_name)
             last_updated_timestamp = int(time.time())
-            result = {'timestamp': last_updated_timestamp}
+            result = {"timestamp": last_updated_timestamp}
             results = [self.model_class(**result)]
             self._iter = iter(results)
         else:
-            raise RuntimeError('model class needs to be provided!')
+            raise RuntimeError("model class needs to be provided!")
 
     def extract(self) -> Any:
         """
@@ -48,4 +48,4 @@ class Neo4jEsLastUpdatedExtractor(GenericExtractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.neo4j_es_last_updated'
+        return "extractor.neo4j_es_last_updated"

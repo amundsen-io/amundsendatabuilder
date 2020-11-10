@@ -15,15 +15,15 @@ class GlueExtractor(Extractor):
     Extracts tables and columns metadata from AWS Glue metastore
     """
 
-    CLUSTER_KEY = 'cluster'
-    FILTER_KEY = 'filters'
-    DEFAULT_CONFIG = ConfigFactory.from_dict({CLUSTER_KEY: 'gold', FILTER_KEY: None})
+    CLUSTER_KEY = "cluster"
+    FILTER_KEY = "filters"
+    DEFAULT_CONFIG = ConfigFactory.from_dict({CLUSTER_KEY: "gold", FILTER_KEY: None})
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(GlueExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(GlueExtractor.CLUSTER_KEY))
+        self._cluster = "{}".format(conf.get_string(GlueExtractor.CLUSTER_KEY))
         self._filters = conf.get(GlueExtractor.FILTER_KEY)
-        self._glue = boto3.client('glue')
+        self._glue = boto3.client("glue")
         self._extract_iter: Union[None, Iterator] = None
 
     def extract(self) -> Union[TableMetadata, None]:
@@ -35,7 +35,7 @@ class GlueExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.glue'
+        return "extractor.glue"
 
     def _get_extract_iter(self) -> Iterator[TableMetadata]:
         """
@@ -45,24 +45,22 @@ class GlueExtractor(Extractor):
         for row in self._get_raw_extract_iter():
             columns, i = [], 0
 
-            for column in row['StorageDescriptor']['Columns'] \
-                    + row.get('PartitionKeys', []):
-                columns.append(ColumnMetadata(
-                    column['Name'],
-                    column['Comment'] if 'Comment' in column else None,
-                    column['Type'],
-                    i
-                ))
+            for column in row["StorageDescriptor"]["Columns"] + row.get("PartitionKeys", []):
+                columns.append(
+                    ColumnMetadata(
+                        column["Name"], column["Comment"] if "Comment" in column else None, column["Type"], i
+                    )
+                )
                 i += 1
 
             yield TableMetadata(
-                'glue',
+                "glue",
                 self._cluster,
-                row['DatabaseName'],
-                row['Name'],
-                row.get('Description') or row.get('Parameters', {}).get('comment'),
+                row["DatabaseName"],
+                row["Name"],
+                row.get("Description") or row.get("Parameters", {}).get("comment"),
                 columns,
-                row.get('TableType') == 'VIRTUAL_VIEW',
+                row.get("TableType") == "VIRTUAL_VIEW",
             )
 
     def _get_raw_extract_iter(self) -> Iterator[Dict[str, Any]]:
@@ -77,12 +75,12 @@ class GlueExtractor(Extractor):
         tables = []
         kwargs = {}
         if self._filters is not None:
-            kwargs['Filters'] = self._filters
+            kwargs["Filters"] = self._filters
         data = self._glue.search_tables(**kwargs)
-        tables += data['TableList']
-        while 'NextToken' in data:
-            token = data['NextToken']
-            kwargs['NextToken'] = token
+        tables += data["TableList"]
+        while "NextToken" in data:
+            token = data["NextToken"]
+            kwargs["NextToken"] = token
             data = self._glue.search_tables(**kwargs)
-            tables += data['TableList']
+            tables += data["TableList"]
         return tables

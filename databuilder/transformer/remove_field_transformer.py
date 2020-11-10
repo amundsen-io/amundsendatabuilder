@@ -8,7 +8,7 @@ from pyhocon import ConfigTree
 
 from databuilder.transformer.base_transformer import Transformer
 
-FIELD_NAMES = 'field_names'  # field name to be removed
+FIELD_NAMES = "field_names"  # field name to be removed
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,4 +31,4 @@ class RemoveFieldTransformer(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.remove_field'
+        return "transformer.remove_field"

@@ -14,24 +14,26 @@ class TableSource(GraphSerializable):
     """
     Hive table source model.
     """
-    LABEL = 'Source'
-    KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/_source'
-    SOURCE_TABLE_RELATION_TYPE = 'SOURCE_OF'
-    TABLE_SOURCE_RELATION_TYPE = 'SOURCE'
 
-    def __init__(self,
-                 db_name: str,
-                 schema: str,
-                 table_name: str,
-                 cluster: str,
-                 source: str,
-                 source_type: str='github',
-                 ) -> None:
+    LABEL = "Source"
+    KEY_FORMAT = "{db}://{cluster}.{schema}/{tbl}/_source"
+    SOURCE_TABLE_RELATION_TYPE = "SOURCE_OF"
+    TABLE_SOURCE_RELATION_TYPE = "SOURCE"
+
+    def __init__(
+        self,
+        db_name: str,
+        schema: str,
+        table_name: str,
+        cluster: str,
+        source: str,
+        source_type: str = "github",
+    ) -> None:
         self.db = db_name
         self.schema = schema
         self.table = table_name
 
-        self.cluster = cluster if cluster else 'gold'
+        self.cluster = cluster if cluster else "gold"
         # source is the source file location
         self.source = source
         self.source_type = source_type
@@ -52,16 +54,12 @@ class TableSource(GraphSerializable):
             return None
 
     def get_source_model_key(self) -> str:
-        return TableSource.KEY_FORMAT.format(db=self.db,
-                                             cluster=self.cluster,
-                                             schema=self.schema,
-                                             tbl=self.table)
+        return TableSource.KEY_FORMAT.format(db=self.db, cluster=self.cluster, schema=self.schema, tbl=self.table)
 
     def get_metadata_model_key(self) -> str:
-        return '{db}://{cluster}.{schema}/{table}'.format(db=self.db,
-                                                          cluster=self.cluster,
-                                                          schema=self.schema,
-                                                          table=self.table)
+        return "{db}://{cluster}.{schema}/{table}".format(
+            db=self.db, cluster=self.cluster, schema=self.schema, table=self.table
+        )
 
     def create_nodes(self) -> List[GraphNode]:
         """
@@ -71,10 +69,7 @@ class TableSource(GraphSerializable):
         node = GraphNode(
             key=self.get_source_model_key(),
             label=TableSource.LABEL,
-            attributes={
-                'source': self.source,
-                'source_type': self.source_type
-            }
+            attributes={"source": self.source, "source_type": self.source_type},
         )
         results = [node]
         return results
@@ -91,14 +86,12 @@ class TableSource(GraphSerializable):
             end_key=self.get_metadata_model_key(),
             type=TableSource.SOURCE_TABLE_RELATION_TYPE,
             reverse_type=TableSource.TABLE_SOURCE_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         results = [relationship]
         return results
 
     def __repr__(self) -> str:
-        return 'TableSource({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.db,
-                                                                  self.cluster,
-                                                                  self.schema,
-                                                                  self.table,
-                                                                  self.source)
+        return "TableSource({!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.db, self.cluster, self.schema, self.table, self.source
+        )

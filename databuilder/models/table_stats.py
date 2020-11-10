@@ -14,25 +14,26 @@ class TableColumnStats(GraphSerializable):
     Hive table stats model.
     Each instance represents one row of hive watermark result.
     """
-    LABEL = 'Stat'
-    KEY_FORMAT = '{db}://{cluster}.{schema}' \
-                 '/{table}/{col}/{stat_name}/'
-    STAT_Column_RELATION_TYPE = 'STAT_OF'
-    Column_STAT_RELATION_TYPE = 'STAT'
 
-    def __init__(self,
-                 table_name: str,
-                 col_name: str,
-                 stat_name: str,
-                 stat_val: str,
-                 start_epoch: str,
-                 end_epoch: str,
-                 db: str = 'hive',
-                 cluster: str = 'gold',
-                 schema: str = None
-                 ) -> None:
+    LABEL = "Stat"
+    KEY_FORMAT = "{db}://{cluster}.{schema}" "/{table}/{col}/{stat_name}/"
+    STAT_Column_RELATION_TYPE = "STAT_OF"
+    Column_STAT_RELATION_TYPE = "STAT"
+
+    def __init__(
+        self,
+        table_name: str,
+        col_name: str,
+        stat_name: str,
+        stat_val: str,
+        start_epoch: str,
+        end_epoch: str,
+        db: str = "hive",
+        cluster: str = "gold",
+        schema: str = None,
+    ) -> None:
         if schema is None:
-            self.schema, self.table = table_name.split('.')
+            self.schema, self.table = table_name.split(".")
         else:
             self.table = table_name
             self.schema = schema
@@ -64,20 +65,20 @@ class TableColumnStats(GraphSerializable):
             return None
 
     def get_table_stat_model_key(self) -> str:
-        return TableColumnStats.KEY_FORMAT.format(db=self.db,
-                                                  cluster=self.cluster,
-                                                  schema=self.schema,
-                                                  table=self.table,
-                                                  col=self.col_name,
-                                                  stat_name=self.stat_name)
+        return TableColumnStats.KEY_FORMAT.format(
+            db=self.db,
+            cluster=self.cluster,
+            schema=self.schema,
+            table=self.table,
+            col=self.col_name,
+            stat_name=self.stat_name,
+        )
 
     def get_col_key(self) -> str:
         # no cluster, schema info from the input
-        return ColumnMetadata.COLUMN_KEY_FORMAT.format(db=self.db,
-                                                       cluster=self.cluster,
-                                                       schema=self.schema,
-                                                       tbl=self.table,
-                                                       col=self.col_name)
+        return ColumnMetadata.COLUMN_KEY_FORMAT.format(
+            db=self.db, cluster=self.cluster, schema=self.schema, tbl=self.table, col=self.col_name
+        )
 
     def create_nodes(self) -> List[GraphNode]:
         """
@@ -88,11 +89,11 @@ class TableColumnStats(GraphSerializable):
             key=self.get_table_stat_model_key(),
             label=TableColumnStats.LABEL,
             attributes={
-                'stat_val': self.stat_val,
-                'stat_name': self.stat_name,
-                'start_epoch': self.start_epoch,
-                'end_epoch': self.end_epoch,
-            }
+                "stat_val": self.stat_val,
+                "stat_name": self.stat_name,
+                "start_epoch": self.start_epoch,
+                "end_epoch": self.end_epoch,
+            },
         )
         results = [node]
         return results
@@ -109,7 +110,7 @@ class TableColumnStats(GraphSerializable):
             end_label=ColumnMetadata.COLUMN_NODE_LABEL,
             type=TableColumnStats.STAT_Column_RELATION_TYPE,
             reverse_type=TableColumnStats.Column_STAT_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         results = [relationship]
         return results

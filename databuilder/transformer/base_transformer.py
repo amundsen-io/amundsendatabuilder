@@ -13,6 +13,7 @@ class Transformer(Scoped):
     """
     A transformer transforms a record
     """
+
     @abc.abstractmethod
     def init(self, conf: ConfigTree) -> None:
         pass
@@ -42,9 +43,7 @@ class ChainedTransformer(Transformer):
     A chained transformer that iterates transformers and transforms a record
     """
 
-    def __init__(self,
-                 transformers: Iterable[Transformer],
-                 is_init_transformers: Optional[bool] = False) -> None:
+    def __init__(self, transformers: Iterable[Transformer], is_init_transformers: Optional[bool] = False) -> None:
         self.transformers = transformers
         self.is_init_transformers = is_init_transformers
 
@@ -63,7 +62,7 @@ class ChainedTransformer(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.chained'
+        return "transformer.chained"
 
     def close(self) -> None:
         for t in self.transformers:

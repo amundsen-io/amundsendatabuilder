@@ -11,13 +11,13 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
 
 
-REST_API_QUERY = 'restapi_query'
-MODEL_CLASS = 'model_class'
+REST_API_QUERY = "restapi_query"
+MODEL_CLASS = "model_class"
 
 # Static record that will be added into extracted record
 # For example, DashboardMetadata requires product name (static name) of Dashboard and REST api does not provide
 #  it. and you can add {'product': 'mode'} so that it will be included in the record.
-STATIC_RECORD_DICT = 'static_record_dict'
+STATIC_RECORD_DICT = "static_record_dict"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class RestAPIExtractor(Extractor):
         self._restapi_query: BaseRestApiQuery = conf.get(REST_API_QUERY)
         self._iterator: Optional[Iterator[Dict[str, Any]]] = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
-        LOGGER.info('static record: {}'.format(self._static_dict))
+        LOGGER.info("static record: {}".format(self._static_dict))
 
         model_class = conf.get(MODEL_CLASS, None)
         if model_class:
@@ -59,11 +59,11 @@ class RestAPIExtractor(Extractor):
         if self._static_dict:
             record.update(self._static_dict)
 
-        if hasattr(self, 'model_class'):
+        if hasattr(self, "model_class"):
             return self.model_class(**record)
 
         return record
 
     def get_scope(self) -> str:
 
-        return 'extractor.restapi'
+        return "extractor.restapi"

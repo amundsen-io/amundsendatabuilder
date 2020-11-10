@@ -15,22 +15,24 @@ class TableLineage(GraphSerializable):
     """
     Table Lineage Model. It won't create nodes but create upstream/downstream rels.
     """
-    LABEL = 'Lineage'
-    KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/'
-    ORIGIN_DEPENDENCY_RELATION_TYPE = 'UPSTREAM'
-    DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'
 
-    def __init__(self,
-                 db_name: str,
-                 schema: str,
-                 table_name: str,
-                 cluster: str,
-                 downstream_deps: List = None,
-                 ) -> None:
+    LABEL = "Lineage"
+    KEY_FORMAT = "{db}://{cluster}.{schema}/{tbl}/"
+    ORIGIN_DEPENDENCY_RELATION_TYPE = "UPSTREAM"
+    DEPENDENCY_ORIGIN_RELATION_TYPE = "DOWNSTREAM"
+
+    def __init__(
+        self,
+        db_name: str,
+        schema: str,
+        table_name: str,
+        cluster: str,
+        downstream_deps: List = None,
+    ) -> None:
         self.db = db_name
         self.schema = schema
         self.table = table_name
-        self.cluster = cluster if cluster else 'gold'
+        self.cluster = cluster if cluster else "gold"
         # a list of downstream dependencies, each of which will follow
         # the same key
         self.downstream_deps = downstream_deps or []
@@ -50,16 +52,8 @@ class TableLineage(GraphSerializable):
         except StopIteration:
             return None
 
-    def get_table_model_key(self,
-                            db: str,
-                            cluster: str,
-                            schema: str,
-                            table: str
-                            ) -> str:
-        return '{db}://{cluster}.{schema}/{table}'.format(db=db,
-                                                          cluster=cluster,
-                                                          schema=schema,
-                                                          table=table)
+    def get_table_model_key(self, db: str, cluster: str, schema: str, table: str) -> str:
+        return "{db}://{cluster}.{schema}/{table}".format(db=db, cluster=cluster, schema=schema, table=table)
 
     def create_nodes(self) -> List[Union[GraphNode, None]]:
         """
@@ -77,33 +71,24 @@ class TableLineage(GraphSerializable):
         for downstream_tab in self.downstream_deps:
             # every deps should follow '{db}://{cluster}.{schema}/{table}'
             # todo: if we change the table uri, we should change here.
-            m = re.match('(\w+)://(\w+)\.(\w+)\/(\w+)', downstream_tab)
+            m = re.match("(\w+)://(\w+)\.(\w+)\/(\w+)", downstream_tab)
             if m:
                 # if not match, skip those records
                 relationship = GraphRelationship(
                     start_key=self.get_table_model_key(
-                        db=self.db,
-                        cluster=self.cluster,
-                        schema=self.schema,
-                        table=self.table
+                        db=self.db, cluster=self.cluster, schema=self.schema, table=self.table
                     ),
                     start_label=TableMetadata.TABLE_NODE_LABEL,
                     end_label=TableMetadata.TABLE_NODE_LABEL,
                     end_key=self.get_table_model_key(
-                        db=m.group(1),
-                        cluster=m.group(2),
-                        schema=m.group(3),
-                        table=m.group(4)
+                        db=m.group(1), cluster=m.group(2), schema=m.group(3), table=m.group(4)
                     ),
                     type=TableLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
                     reverse_type=TableLineage.DEPENDENCY_ORIGIN_RELATION_TYPE,
-                    attributes={}
+                    attributes={},
                 )
                 results.append(relationship)
         return results
 
     def __repr__(self) -> str:
-        return 'TableLineage({!r}, {!r}, {!r}, {!r})'.format(self.db,
-                                                             self.cluster,
-                                                             self.schema,
-                                                             self.table)
+        return "TableLineage({!r}, {!r}, {!r}, {!r})".format(self.db, self.cluster, self.schema, self.table)

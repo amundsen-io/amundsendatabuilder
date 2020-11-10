@@ -17,8 +17,8 @@ LOGGER = logging.getLogger(__name__)
 
 class DefaultJob(Job):
     # Config keys
-    IS_STATSD_ENABLED = 'is_statsd_enabled'
-    JOB_IDENTIFIER = 'identifier'
+    IS_STATSD_ENABLED = "is_statsd_enabled"
+    JOB_IDENTIFIER = "identifier"
 
     """
     Default job that expects a task, and optional publisher
@@ -29,18 +29,14 @@ class DefaultJob(Job):
     To configure statsd itself, use environment variable: https://statsd.readthedocs.io/en/v3.2.1/configure.html
     """
 
-    def __init__(self,
-                 conf: ConfigTree,
-                 task: Task,
-                 publisher: Publisher = NoopPublisher()) -> None:
+    def __init__(self, conf: ConfigTree, task: Task, publisher: Publisher = NoopPublisher()) -> None:
         self.task = task
         self.conf = conf
         self.publisher = publisher
-        self.scoped_conf = Scoped.get_scoped_conf(self.conf,
-                                                  self.get_scope())
+        self.scoped_conf = Scoped.get_scoped_conf(self.conf, self.get_scope())
         if self.scoped_conf.get_bool(DefaultJob.IS_STATSD_ENABLED, False):
-            prefix = 'amundsen.databuilder.job.{}'.format(self.scoped_conf.get_string(DefaultJob.JOB_IDENTIFIER))
-            LOGGER.info('Setting statsd for job metrics with prefix: {}'.format(prefix))
+            prefix = "amundsen.databuilder.job.{}".format(self.scoped_conf.get_string(DefaultJob.JOB_IDENTIFIER))
+            LOGGER.info("Setting statsd for job metrics with prefix: {}".format(prefix))
             self.statsd = StatsClient(prefix=prefix)
         else:
             self.statsd = None
@@ -57,7 +53,7 @@ class DefaultJob(Job):
         :return:
         """
 
-        logging.info('Launching a job')
+        logging.info("Launching a job")
         #  Using nested try finally to make sure task get closed as soon as possible as well as to guarantee all the
         #  closeable get closed.
         try:
@@ -79,12 +75,12 @@ class DefaultJob(Job):
             # TODO: If more metrics are needed on different construct, such as task, consider abstracting this out
             if self.statsd:
                 if is_success:
-                    LOGGER.info('Publishing job metrics for success')
-                    self.statsd.incr('success')
+                    LOGGER.info("Publishing job metrics for success")
+                    self.statsd.incr("success")
                 else:
-                    LOGGER.info('Publishing job metrics for failure')
-                    self.statsd.incr('fail')
+                    LOGGER.info("Publishing job metrics for failure")
+                    self.statsd.incr("fail")
 
             Job.closer.close()
 
-        logging.info('Job completed')
+        logging.info("Job completed")

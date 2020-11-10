@@ -28,72 +28,71 @@ class KafkaSourceExtractor(Extractor, Callback):
     Once the publisher commit successfully, it will trigger the extractor's callback to commit the
     consumer offset.
     """
+
     # The dict of Kafka consumer config
-    CONSUMER_CONFIG = 'consumer_config'
+    CONSUMER_CONFIG = "consumer_config"
     # The consumer group id. Ideally each Kafka extractor should only associate with one consumer group.
-    CONSUMER_GROUP_ID = 'group.id'
+    CONSUMER_GROUP_ID = "group.id"
     # We don't deserde the key of the message.
     # CONSUMER_VALUE_DESERDE = 'value.deserializer'
     # Each Kafka extractor should only consume one single topic. We could extend to consume more topic if needed.
-    TOPIC_NAME_LIST = 'topic_name_list'
+    TOPIC_NAME_LIST = "topic_name_list"
 
     # Time out config. It will abort from reading the Kafka topic after timeout is reached. Unit is seconds
-    CONSUMER_TOTAL_TIMEOUT_SEC = 'consumer_total_timeout_sec'
+    CONSUMER_TOTAL_TIMEOUT_SEC = "consumer_total_timeout_sec"
 
     # The timeout for consumer polling messages. Default to 1 sec
-    CONSUMER_POLL_TIMEOUT_SEC = 'consumer_poll_timeout_sec'
+    CONSUMER_POLL_TIMEOUT_SEC = "consumer_poll_timeout_sec"
 
     # Config on whether we throw exception if transformation fails
-    TRANSFORMER_THROWN_EXCEPTION = 'transformer_thrown_exception'
+    TRANSFORMER_THROWN_EXCEPTION = "transformer_thrown_exception"
 
     # The value transformer to deserde the Kafka message
-    RAW_VALUE_TRANSFORMER = 'raw_value_transformer'
+    RAW_VALUE_TRANSFORMER = "raw_value_transformer"
 
     def init(self, conf: ConfigTree) -> None:
         self.conf = conf
-        self.consumer_config = conf.get_config(KafkaSourceExtractor.CONSUMER_CONFIG).\
-            as_plain_ordered_dict()
+        self.consumer_config = conf.get_config(KafkaSourceExtractor.CONSUMER_CONFIG).as_plain_ordered_dict()
 
         self.topic_names: list = conf.get_list(KafkaSourceExtractor.TOPIC_NAME_LIST)
 
         if not self.topic_names:
-            raise Exception('Kafka topic needs to be provided by the user.')
+            raise Exception("Kafka topic needs to be provided by the user.")
 
-        self.consumer_total_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_TOTAL_TIMEOUT_SEC,
-                                                   default=10)
+        self.consumer_total_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_TOTAL_TIMEOUT_SEC, default=10)
 
-        self.consumer_poll_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_POLL_TIMEOUT_SEC,
-                                                  default=1)
+        self.consumer_poll_timeout = conf.get_int(KafkaSourceExtractor.CONSUMER_POLL_TIMEOUT_SEC, default=1)
 
-        self.transformer_thrown_exception = conf.get_bool(KafkaSourceExtractor.TRANSFORMER_THROWN_EXCEPTION,
-                                                          default=False)
+        self.transformer_thrown_exception = conf.get_bool(
+            KafkaSourceExtractor.TRANSFORMER_THROWN_EXCEPTION, default=False
+        )
 
         # Transform the protoBuf message with a transformer
         val_transformer = conf.get(KafkaSourceExtractor.RAW_VALUE_TRANSFORMER)
         if val_transformer is None:
-            raise Exception('A message transformer should be provided.')
+            raise Exception("A message transformer should be provided.")
         else:
             try:
                 module_name, class_name = val_transformer.rsplit(".", 1)
                 mod = importlib.import_module(module_name)
                 self.transformer = getattr(mod, class_name)()
             except Exception:
-                raise RuntimeError('The Kafka message value deserde class cant instantiated!')
+                raise RuntimeError("The Kafka message value deserde class cant instantiated!")
 
             if not isinstance(self.transformer, Transformer):
-                raise Exception('The transformer needs to be subclass of the base transformer')
+                raise Exception("The transformer needs to be subclass of the base transformer")
             self.transformer.init(Scoped.get_scoped_conf(conf, self.transformer.get_scope()))
 
         # Consumer init
         try:
             # Disable enable.auto.commit
-            self.consumer_config['enable.auto.commit'] = False
+            self.consumer_config["enable.auto.commit"] = False
 
             self.consumer = Consumer(self.consumer_config)
             # TODO: to support only consume a subset of partitions.
             self.consumer.subscribe(self.topic_names)
         except Exception:
-            raise RuntimeError('Consumer could not start correctly!')
+            raise RuntimeError("Consumer could not start correctly!")
 
     def extract(self) -> Any:
         """
@@ -110,7 +109,7 @@ class KafkaSourceExtractor(Extractor, Callback):
                 if self.transformer_thrown_exception:
                     # if config enabled, it will throw exception.
                     # Users need to figure out how to rewind the consumer offset
-                    raise Exception('Encounter exception when transform the record')
+                    raise Exception("Encounter exception when transform the record")
 
     def on_success(self) -> None:
         """
@@ -168,4 +167,4 @@ class KafkaSourceExtractor(Extractor, Callback):
             return records
 
     def get_scope(self) -> str:
-        return 'extractor.kafka_source'
+        return "extractor.kafka_source"

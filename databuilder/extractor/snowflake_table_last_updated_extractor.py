@@ -21,6 +21,7 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
         snowflake-connector-python
         snowflake-sqlalchemy
     """
+
     # https://docs.snowflake.com/en/sql-reference/info-schema/views.html#columns
     # 'last_altered' column in 'TABLES` metadata view under 'INFORMATION_SCHEMA' contains last time when the table was
     # updated (both DML and DDL update). Below query fetches that column for each table.
@@ -36,23 +37,25 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
         """
 
     # CONFIG KEYS
-    WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CLUSTER_KEY = 'cluster_key'
-    USE_CATALOG_AS_CLUSTER_NAME = 'use_catalog_as_cluster_name'
+    WHERE_CLAUSE_SUFFIX_KEY = "where_clause_suffix"
+    CLUSTER_KEY = "cluster_key"
+    USE_CATALOG_AS_CLUSTER_NAME = "use_catalog_as_cluster_name"
     # Database Key, used to identify the database type in the UI.
-    DATABASE_KEY = 'database_key'
+    DATABASE_KEY = "database_key"
     # Snowflake Database Key, used to determine which Snowflake database to connect to.
-    SNOWFLAKE_DATABASE_KEY = 'snowflake_database'
+    SNOWFLAKE_DATABASE_KEY = "snowflake_database"
 
     # Default values
-    DEFAULT_CLUSTER_NAME = 'master'
+    DEFAULT_CLUSTER_NAME = "master"
 
     DEFAULT_CONFIG = ConfigFactory.from_dict(
-        {WHERE_CLAUSE_SUFFIX_KEY: ' WHERE t.last_altered IS NOT NULL ',
-         CLUSTER_KEY: DEFAULT_CLUSTER_NAME,
-         USE_CATALOG_AS_CLUSTER_NAME: True,
-         DATABASE_KEY: 'snowflake',
-         SNOWFLAKE_DATABASE_KEY: 'prod'}
+        {
+            WHERE_CLAUSE_SUFFIX_KEY: " WHERE t.last_altered IS NOT NULL ",
+            CLUSTER_KEY: DEFAULT_CLUSTER_NAME,
+            USE_CATALOG_AS_CLUSTER_NAME: True,
+            DATABASE_KEY: "snowflake",
+            SNOWFLAKE_DATABASE_KEY: "prod",
+        }
     )
 
     def init(self, conf: ConfigTree) -> None:
@@ -69,15 +72,16 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
         self.sql_stmt = SnowflakeTableLastUpdatedExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(SnowflakeTableLastUpdatedExtractor.WHERE_CLAUSE_SUFFIX_KEY),
             cluster_source=cluster_source,
-            database=self._snowflake_database
+            database=self._snowflake_database,
         )
 
-        LOGGER.info('SQL for snowflake table last updated timestamp: {}'.format(self.sql_stmt))
+        LOGGER.info("SQL for snowflake table last updated timestamp: {}".format(self.sql_stmt))
 
         # use an sql_alchemy_extractor to execute sql
         self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()) \
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt})
+        )
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None
@@ -91,7 +95,7 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.snowflake_table_last_updated'
+        return "extractor.snowflake_table_last_updated"
 
     def _get_extract_iter(self) -> Iterator[TableLastUpdated]:
         """
@@ -99,9 +103,11 @@ class SnowflakeTableLastUpdatedExtractor(Extractor):
         """
         tbl_last_updated_row = self._alchemy_extractor.extract()
         while tbl_last_updated_row:
-            yield TableLastUpdated(table_name=tbl_last_updated_row['table_name'],
-                                   last_updated_time_epoch=tbl_last_updated_row['last_updated_time'],
-                                   schema=tbl_last_updated_row['schema'],
-                                   db=self._database,
-                                   cluster=tbl_last_updated_row['cluster'])
+            yield TableLastUpdated(
+                table_name=tbl_last_updated_row["table_name"],
+                last_updated_time_epoch=tbl_last_updated_row["last_updated_time"],
+                schema=tbl_last_updated_row["schema"],
+                db=self._database,
+                cluster=tbl_last_updated_row["cluster"],
+            )
             tbl_last_updated_row = self._alchemy_extractor.extract()

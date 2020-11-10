@@ -19,23 +19,23 @@ class RedashVisualizationWidget:
 
     @property
     def raw_query(self) -> str:
-        return self._data['visualization']['query']['query']
+        return self._data["visualization"]["query"]["query"]
 
     @property
     def data_source_id(self) -> int:
-        return self._data['visualization']['query']['data_source_id']
+        return self._data["visualization"]["query"]["data_source_id"]
 
     @property
     def query_id(self) -> int:
-        return self._data['visualization']['query']['id']
+        return self._data["visualization"]["query"]["id"]
 
     @property
     def query_relative_url(self) -> str:
-        return '/queries/{id}'.format(id=self.query_id)
+        return "/queries/{id}".format(id=self.query_id)
 
     @property
     def query_name(self) -> str:
-        return self._data['visualization']['query']['name']
+        return self._data["visualization"]["query"]["name"]
 
 
 class RedashTextWidget:
@@ -49,7 +49,7 @@ class RedashTextWidget:
 
     @property
     def text(self) -> str:
-        return self._data['text']
+        return self._data["text"]
 
 
 class RedashPaginatedRestApiQuery(RestApiQuery):
@@ -59,18 +59,18 @@ class RedashPaginatedRestApiQuery(RestApiQuery):
 
     def __init__(self, **kwargs: Any) -> None:
         super(RedashPaginatedRestApiQuery, self).__init__(**kwargs)
-        if 'params' not in self._params:
-            self._params['params'] = {}
-        self._params['params']['page'] = 1
+        if "params" not in self._params:
+            self._params["params"] = {}
+        self._params["params"]["page"] = 1
 
     def _total_records(self, res: Dict[str, Any]) -> int:
-        return res['count']
+        return res["count"]
 
     def _max_record_on_page(self, res: Dict[str, Any]) -> int:
-        return res['page_size'] * res['page']
+        return res["page_size"] * res["page"]
 
     def _next_page(self, res: Dict[str, Any]) -> int:
-        return res['page'] + 1
+        return res["page"] + 1
 
     def _post_process(self, response: Any) -> None:
         parsed = response.json()
@@ -78,7 +78,7 @@ class RedashPaginatedRestApiQuery(RestApiQuery):
         if self._max_record_on_page(parsed) >= self._total_records(parsed):
             self._more_pages = False
         else:
-            self._params['params']['page'] = self._next_page(parsed)
+            self._params["params"]["page"] = self._next_page(parsed)
             self._more_pages = True
 
 
@@ -92,8 +92,8 @@ def sort_widgets(widgets: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     def row_and_col(widget: Dict[str, Any]) -> Tuple[Any, Any]:
         # these entities usually but not always have explicit rows and cols
-        pos = widget['options'].get('position', {})
-        return (pos.get('row', 0), pos.get('col', 0))
+        pos = widget["options"].get("position", {})
+        return (pos.get("row", 0), pos.get("col", 0))
 
     return sorted(widgets, key=row_and_col)
 
@@ -104,8 +104,7 @@ def get_text_widgets(widgets: Iterable[Dict[str, Any]]) -> List[RedashTextWidget
     to text widgets and return them as a list of `RedashTextWidget`
     """
 
-    return [RedashTextWidget(widget) for widget in widgets
-            if 'text' in widget and 'visualization' not in widget]
+    return [RedashTextWidget(widget) for widget in widgets if "text" in widget and "visualization" not in widget]
 
 
 def get_visualization_widgets(widgets: Iterable[Dict[str, Any]]) -> List[RedashVisualizationWidget]:
@@ -114,16 +113,16 @@ def get_visualization_widgets(widgets: Iterable[Dict[str, Any]]) -> List[RedashV
     to visualization widgets and return them as a list of `RedashVisualizationWidget`
     """
 
-    return [RedashVisualizationWidget(widget) for widget in widgets
-            if 'visualization' in widget]
+    return [RedashVisualizationWidget(widget) for widget in widgets if "visualization" in widget]
 
 
 def get_auth_headers(api_key: str) -> Dict[str, str]:
-    return {'Authorization': 'Key {}'.format(api_key)}
+    return {"Authorization": "Key {}".format(api_key)}
 
 
-def generate_dashboard_description(text_widgets: List[RedashTextWidget],
-                                   viz_widgets: List[RedashVisualizationWidget]) -> str:
+def generate_dashboard_description(
+    text_widgets: List[RedashTextWidget], viz_widgets: List[RedashVisualizationWidget]
+) -> str:
     """
     Redash doesn't have dashboard descriptions, so we'll make our own.
     If there exist any text widgets, concatenate them,
@@ -133,9 +132,9 @@ def generate_dashboard_description(text_widgets: List[RedashTextWidget],
     """
 
     if len(text_widgets) > 0:
-        return '\n\n'.join([w.text for w in text_widgets])
+        return "\n\n".join([w.text for w in text_widgets])
     elif len(viz_widgets) > 0:
-        query_list = '\n'.join(['- {}'.format(v.query_name) for v in set(viz_widgets)])
-        return 'A dashboard containing the following queries:\n\n' + query_list
+        query_list = "\n".join(["- {}".format(v.query_name) for v in set(viz_widgets)])
+        return "A dashboard containing the following queries:\n\n" + query_list
 
-    return 'This dashboard appears to be empty!'
+    return "This dashboard appears to be empty!"

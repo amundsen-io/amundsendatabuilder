@@ -23,14 +23,15 @@ class ModeDashboardUsageExtractor(Extractor):
         self._conf = conf
 
         restapi_query = self._build_restapi_query()
-        self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(restapi_query=restapi_query,
-                                                                            conf=self._conf)
+        self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
+            restapi_query=restapi_query, conf=self._conf
+        )
 
     def extract(self) -> Any:
         return self._extractor.extract()
 
     def get_scope(self) -> str:
-        return 'extractor.mode_dashboard_usage'
+        return "extractor.mode_dashboard_usage"
 
     def _build_restapi_query(self) -> RestApiQuery:
         """
@@ -40,7 +41,7 @@ class ModeDashboardUsageExtractor(Extractor):
         """
 
         # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
-        reports_url_template = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
+        reports_url_template = "https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports"
 
         spaces_query = ModeDashboardUtils.get_spaces_query_api(conf=self._conf)
         params = ModeDashboardUtils.get_auth_params(conf=self._conf)
@@ -48,8 +49,14 @@ class ModeDashboardUsageExtractor(Extractor):
         # Reports
         # JSONPATH expression. it goes into array which is located in _embedded.reports and then extracts token,
         # and view_count
-        json_path = '_embedded.reports[*].[token,view_count]'
-        field_names = ['dashboard_id', 'accumulated_view_count']
-        reports_query = ModePaginatedRestApiQuery(query_to_join=spaces_query, url=reports_url_template, params=params,
-                                                  json_path=json_path, field_names=field_names, skip_no_result=True)
+        json_path = "_embedded.reports[*].[token,view_count]"
+        field_names = ["dashboard_id", "accumulated_view_count"]
+        reports_query = ModePaginatedRestApiQuery(
+            query_to_join=spaces_query,
+            url=reports_url_template,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+        )
         return reports_query

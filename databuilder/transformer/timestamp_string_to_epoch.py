@@ -10,12 +10,12 @@ from typing import Any, Dict
 
 from databuilder.transformer.base_transformer import Transformer
 
-TIMESTAMP_FORMAT = 'timestamp_format'
-FIELD_NAME = 'field_name'
+TIMESTAMP_FORMAT = "timestamp_format"
+FIELD_NAME = "field_name"
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_CONFIG = ConfigFactory.from_dict({TIMESTAMP_FORMAT: '%Y-%m-%dT%H:%M:%S.%fZ'})
+DEFAULT_CONFIG = ConfigFactory.from_dict({TIMESTAMP_FORMAT: "%Y-%m-%dT%H:%M:%S.%fZ"})
 
 
 class TimestampStringToEpoch(Transformer):
@@ -29,7 +29,7 @@ class TimestampStringToEpoch(Transformer):
         self._field_name = self._conf.get_string(FIELD_NAME)
 
     def transform(self, record: Dict[str, Any]) -> Dict[str, Any]:
-        timestamp_str = record.get(self._field_name, '')
+        timestamp_str = record.get(self._field_name, "")
 
         if not timestamp_str:
             return record
@@ -45,4 +45,4 @@ class TimestampStringToEpoch(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.timestamp_str_to_epoch'
+        return "transformer.timestamp_str_to_epoch"

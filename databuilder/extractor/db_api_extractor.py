@@ -17,8 +17,9 @@ class DBAPIExtractor(Extractor):
     """
     Generic DB API extractor.
     """
-    CONNECTION_CONFIG_KEY = 'connection'
-    SQL_CONFIG_KEY = 'sql'
+
+    CONNECTION_CONFIG_KEY = "connection"
+    SQL_CONFIG_KEY = "sql"
 
     def init(self, conf: ConfigTree) -> None:
         """
@@ -34,7 +35,7 @@ class DBAPIExtractor(Extractor):
         self.cursor = self.connection.cursor()
         self.sql = conf.get(DBAPIExtractor.SQL_CONFIG_KEY)
 
-        model_class = conf.get('model_class', None)
+        model_class = conf.get("model_class", None)
         if model_class:
             module_name, class_name = model_class.rsplit(".", 1)
             mod = importlib.import_module(module_name)
@@ -47,7 +48,7 @@ class DBAPIExtractor(Extractor):
         Use cursor to execute the {sql}
         :return:
         """
-        LOGGER.info('Executing query: \n{}'.format(self.sql))
+        LOGGER.info("Executing query: \n{}".format(self.sql))
         self.cursor.execute(self.sql)
         return self.cursor.fetchall()
 
@@ -63,8 +64,8 @@ class DBAPIExtractor(Extractor):
         except StopIteration:
             return None
 
-        if hasattr(self, 'model_class'):
-            obj = self.model_class(*result[:len(result)])
+        if hasattr(self, "model_class"):
+            obj = self.model_class(*result[: len(result)])
             return obj
         else:
             return result
@@ -81,4 +82,4 @@ class DBAPIExtractor(Extractor):
             LOGGER.warning("Exception encountered while closing up connection handler!", e)
 
     def get_scope(self) -> str:
-        return 'extractor.dbapi'
+        return "extractor.dbapi"

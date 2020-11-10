@@ -13,10 +13,16 @@ from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import Mo
 from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer, Transformer
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.regex_str_replace_transformer import RegexStrReplaceTransformer, \
-    REGEX_REPLACE_TUPLE_LIST, ATTRIBUTE_NAME
-from databuilder.transformer.template_variable_substitution_transformer import \
-    TemplateVariableSubstitutionTransformer, TEMPLATE, FIELD_NAME
+from databuilder.transformer.regex_str_replace_transformer import (
+    RegexStrReplaceTransformer,
+    REGEX_REPLACE_TUPLE_LIST,
+    ATTRIBUTE_NAME,
+)
+from databuilder.transformer.template_variable_substitution_transformer import (
+    TemplateVariableSubstitutionTransformer,
+    TEMPLATE,
+    FIELD_NAME,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,19 +38,22 @@ class ModeDashboardQueriesExtractor(Extractor):
 
         restapi_query = self._build_restapi_query()
         self._extractor = ModeDashboardUtils.create_mode_rest_api_extractor(
-            restapi_query=restapi_query,
-            conf=self._conf
+            restapi_query=restapi_query, conf=self._conf
         )
 
         # Constructing URL using several ID via TemplateVariableSubstitutionTransformer
         transformers: List[Transformer] = []
         variable_substitution_transformer = TemplateVariableSubstitutionTransformer()
         variable_substitution_transformer.init(
-            conf=Scoped.get_scoped_conf(self._conf,
-                                        variable_substitution_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict({FIELD_NAME: 'url',
-                                         TEMPLATE: 'https://app.mode.com/{organization}'
-                                                   '/reports/{dashboard_id}/queries/{query_id}'})))
+            conf=Scoped.get_scoped_conf(self._conf, variable_substitution_transformer.get_scope()).with_fallback(
+                ConfigFactory.from_dict(
+                    {
+                        FIELD_NAME: "url",
+                        TEMPLATE: "https://app.mode.com/{organization}" "/reports/{dashboard_id}/queries/{query_id}",
+                    }
+                )
+            )
+        )
 
         transformers.append(variable_substitution_transformer)
 
@@ -52,15 +61,17 @@ class ModeDashboardQueriesExtractor(Extractor):
         replace_transformer = RegexStrReplaceTransformer()
         replace_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, replace_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict(
-                    {REGEX_REPLACE_TUPLE_LIST: [('\\', '\\\\')], ATTRIBUTE_NAME: 'query_text'})))
+                ConfigFactory.from_dict({REGEX_REPLACE_TUPLE_LIST: [("\\", "\\\\")], ATTRIBUTE_NAME: "query_text"})
+            )
+        )
         transformers.append(replace_transformer)
 
         dict_to_model_transformer = DictToModel()
         dict_to_model_transformer.init(
             conf=Scoped.get_scoped_conf(self._conf, dict_to_model_transformer.get_scope()).with_fallback(
-                ConfigFactory.from_dict(
-                    {MODEL_CLASS: 'databuilder.models.dashboard.dashboard_query.DashboardQuery'})))
+                ConfigFactory.from_dict({MODEL_CLASS: "databuilder.models.dashboard.dashboard_query.DashboardQuery"})
+            )
+        )
         transformers.append(dict_to_model_transformer)
 
         self._transformer = ChainedTransformer(transformers=transformers)
@@ -73,7 +84,7 @@ class ModeDashboardQueriesExtractor(Extractor):
         return self._transformer.transform(record=record)
 
     def get_scope(self) -> str:
-        return 'extractor.mode_dashboard_query'
+        return "extractor.mode_dashboard_query"
 
     def _build_restapi_query(self) -> RestApiQuery:
         """
@@ -87,16 +98,28 @@ class ModeDashboardQueriesExtractor(Extractor):
 
         # Reports
         # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
-        url = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
-        json_path = '(_embedded.reports[*].token)'
-        field_names = ['dashboard_id']
-        reports_query = ModePaginatedRestApiQuery(query_to_join=spaces_query, url=url, params=params,
-                                                  json_path=json_path, field_names=field_names, skip_no_result=True)
+        url = "https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports"
+        json_path = "(_embedded.reports[*].token)"
+        field_names = ["dashboard_id"]
+        reports_query = ModePaginatedRestApiQuery(
+            query_to_join=spaces_query,
+            url=url,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+        )
 
-        queries_url_template = 'https://app.mode.com/api/{organization}/reports/{dashboard_id}/queries'
-        json_path = '_embedded.queries[*].[token,name,raw_query]'
-        field_names = ['query_id', 'query_name', 'query_text']
-        query_names_query = RestApiQuery(query_to_join=reports_query, url=queries_url_template, params=params,
-                                         json_path=json_path, field_names=field_names, skip_no_result=True)
+        queries_url_template = "https://app.mode.com/api/{organization}/reports/{dashboard_id}/queries"
+        json_path = "_embedded.queries[*].[token,name,raw_query]"
+        field_names = ["query_id", "query_name", "query_text"]
+        query_names_query = RestApiQuery(
+            query_to_join=reports_query,
+            url=queries_url_template,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+        )
 
         return query_names_query

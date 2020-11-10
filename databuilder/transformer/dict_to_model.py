@@ -9,7 +9,7 @@ from typing import Any, Dict
 
 from databuilder.transformer.base_transformer import Transformer
 
-MODEL_CLASS = 'model_class'
+MODEL_CLASS = "model_class"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,4 +29,4 @@ class DictToModel(Transformer):
         return self._model_class(**record)
 
     def get_scope(self) -> str:
-        return 'transformer.dict_to_model'
+        return "transformer.dict_to_model"

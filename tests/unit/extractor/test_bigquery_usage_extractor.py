@@ -14,124 +14,114 @@ from databuilder.extractor.bigquery_usage_extractor import BigQueryTableUsageExt
 from databuilder.extractor.bigquery_usage_extractor import TableColumnUsageTuple
 
 
-CORRECT_DATA = {"entries": [
-{
-"protoPayload": {
-"@type": "type.googleapis.com/google.cloud.audit.AuditLog",
-"status": {},
-"authenticationInfo": {
-    "principalEmail": "your-user-here@test.com"
-},
-"serviceName": "bigquery.googleapis.com",
-"methodName": "jobservice.jobcompleted",
-"resourceName": "projects/your-project-here/jobs/bquxjob_758c08d1_16a96889839",
-"serviceData": {
-    "@type": "type.googleapis.com/google.cloud.bigquery.logging.v1.AuditData",
-    "jobCompletedEvent": {
-        "eventName": "query_job_completed",
-        "job": {
-            "jobName": {
-                "projectId": "your-project-here",
-                "jobId": "bquxjob_758c08d1_16a96889839",
-                "location": "US"
-            },
-            "jobConfiguration": {
-                "query": {
-                    "query": "select descript from "
-                    "`bigquery-public-data.austin_incidents.incidents_2008`\n",
-                    "destinationTable": {
-                        "projectId": "your-project-here",
-                        "datasetId": "_07147a061ddfd6dcaf246cfc5e858a0ccefa7080",
-                        "tableId": "anon1dd83635c62357091e55a5f76fb62d7deebcfa4c"
+CORRECT_DATA = {
+    "entries": [
+        {
+            "protoPayload": {
+                "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+                "status": {},
+                "authenticationInfo": {"principalEmail": "your-user-here@test.com"},
+                "serviceName": "bigquery.googleapis.com",
+                "methodName": "jobservice.jobcompleted",
+                "resourceName": "projects/your-project-here/jobs/bquxjob_758c08d1_16a96889839",
+                "serviceData": {
+                    "@type": "type.googleapis.com/google.cloud.bigquery.logging.v1.AuditData",
+                    "jobCompletedEvent": {
+                        "eventName": "query_job_completed",
+                        "job": {
+                            "jobName": {
+                                "projectId": "your-project-here",
+                                "jobId": "bquxjob_758c08d1_16a96889839",
+                                "location": "US",
+                            },
+                            "jobConfiguration": {
+                                "query": {
+                                    "query": "select descript from "
+                                    "`bigquery-public-data.austin_incidents.incidents_2008`\n",
+                                    "destinationTable": {
+                                        "projectId": "your-project-here",
+                                        "datasetId": "_07147a061ddfd6dcaf246cfc5e858a0ccefa7080",
+                                        "tableId": "anon1dd83635c62357091e55a5f76fb62d7deebcfa4c",
+                                    },
+                                    "createDisposition": "CREATE_IF_NEEDED",
+                                    "writeDisposition": "WRITE_TRUNCATE",
+                                    "defaultDataset": {},
+                                    "queryPriority": "QUERY_INTERACTIVE",
+                                    "statementType": "SELECT",
+                                }
+                            },
+                            "jobStatus": {"state": "DONE", "error": {}},
+                            "jobStatistics": {
+                                "createTime": "2019-05-08T08:22:56.349Z",
+                                "startTime": "2019-05-08T08:22:56.660Z",
+                                "endTime": "2019-05-08T08:23:00.049Z",
+                                "totalProcessedBytes": "3637807",
+                                "totalBilledBytes": "10485760",
+                                "billingTier": 1,
+                                "totalSlotMs": "452",
+                                "referencedTables": [
+                                    {
+                                        "projectId": "bigquery-public-data",
+                                        "datasetId": "austin_incidents",
+                                        "tableId": "incidents_2008",
+                                    }
+                                ],
+                                "totalTablesProcessed": 1,
+                                "queryOutputRowCount": "179524",
+                            },
+                        },
                     },
-                    "createDisposition": "CREATE_IF_NEEDED",
-                    "writeDisposition": "WRITE_TRUNCATE",
-                    "defaultDataset": {},
-                    "queryPriority": "QUERY_INTERACTIVE",
-                    "statementType": "SELECT"
-                }
+                },
             },
-            "jobStatus": {
-                "state": "DONE",
-                "error": {}
-            },
-            "jobStatistics": {
-                "createTime": "2019-05-08T08:22:56.349Z",
-                "startTime": "2019-05-08T08:22:56.660Z",
-                "endTime": "2019-05-08T08:23:00.049Z",
-                "totalProcessedBytes": "3637807",
-                "totalBilledBytes": "10485760",
-                "billingTier": 1,
-                "totalSlotMs": "452",
-                "referencedTables": [
-                    {
-                        "projectId": "bigquery-public-data",
-                        "datasetId": "austin_incidents",
-                        "tableId": "incidents_2008"
-                    }
-                ],
-                "totalTablesProcessed": 1,
-                "queryOutputRowCount": "179524"
-            }
+            "insertId": "-jyqvjse6lwjz",
+            "resource": {"type": "bigquery_resource", "labels": {"project_id": "your-project-here"}},
+            "timestamp": "2019-05-08T08:23:00.061Z",
+            "severity": "INFO",
+            "logName": "projects/your-project-here/logs/cloudaudit.googleapis.com%2Fdata_access",
+            "receiveTimestamp": "2019-05-08T08:23:00.310709609Z",
         }
-    }
-}
-},
-"insertId": "-jyqvjse6lwjz",
-"resource": {
-"type": "bigquery_resource",
-"labels": {
-    "project_id": "your-project-here"
-}
-},
-"timestamp": "2019-05-08T08:23:00.061Z",
-"severity": "INFO",
-"logName": "projects/your-project-here/logs/cloudaudit.googleapis.com%2Fdata_access",
-"receiveTimestamp": "2019-05-08T08:23:00.310709609Z"
-}
-]}   # noqa
+    ]
+}  # noqa
 
-FAILURE = {"entries": [
-{
-    "protoPayload": {
-        "authenticationInfo": {
-            "principalEmail": "your-user-here@test.com"
-        },
-        "methodName": "jobservice.jobcompleted",
-        "serviceData": {
-            "jobCompletedEvent": {
-                "job": {
-                    "jobStatus": {
-                        "state": "DONE",
-                        "error": {
-                            "code": 11,
-                            "message": "Some descriptive error message"
+FAILURE = {
+    "entries": [
+        {
+            "protoPayload": {
+                "authenticationInfo": {"principalEmail": "your-user-here@test.com"},
+                "methodName": "jobservice.jobcompleted",
+                "serviceData": {
+                    "jobCompletedEvent": {
+                        "job": {
+                            "jobStatus": {
+                                "state": "DONE",
+                                "error": {"code": 11, "message": "Some descriptive error message"},
+                            },
+                            "jobStatistics": {
+                                "createTime": "2019-05-08T08:22:56.349Z",
+                                "startTime": "2019-05-08T08:22:56.660Z",
+                                "endTime": "2019-05-08T08:23:00.049Z",
+                                "totalProcessedBytes": "3637807",
+                                "totalBilledBytes": "10485760",
+                                "referencedTables": [
+                                    {
+                                        "projectId": "bigquery-public-data",
+                                        "datasetId": "austin_incidents",
+                                        "tableId": "incidents_2008",
+                                    }
+                                ],
+                            },
                         }
-                    },
-                "jobStatistics": {
-                    "createTime": "2019-05-08T08:22:56.349Z",
-                    "startTime": "2019-05-08T08:22:56.660Z",
-                    "endTime": "2019-05-08T08:23:00.049Z",
-                    "totalProcessedBytes": "3637807",
-                    "totalBilledBytes": "10485760",
-                    "referencedTables": [
-                        {
-                            "projectId": "bigquery-public-data",
-                            "datasetId": "austin_incidents",
-                            "tableId": "incidents_2008"
-                        }
-                    ]
-                }
-                }
-            }
-        },
-    },
-}]}   # noqa
+                    }
+                },
+            },
+        }
+    ]
+}  # noqa
 
 # An empty dict will be ignored, but putting in nextPageToken causes the test
 # to loop infinitely, so we need a bogus key/value to ensure that we will try
 # to read entries
-NO_ENTRIES = {'key': 'value'}   # noqa
+NO_ENTRIES = {"key": "value"}  # noqa
 
 KEYFILE_DATA = """
 ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAieW91ci1wcm9q
@@ -178,7 +168,7 @@ ci1wcm9qZWN0LWhlcmUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iCn0KCgo=
 """
 
 
-class MockLoggingClient():
+class MockLoggingClient:
     def __init__(self, data: Any) -> None:
         self.data = data
         self.a = Mock()
@@ -191,24 +181,21 @@ class MockLoggingClient():
 
 
 # Patch fallback auth method to avoid actually calling google API
-@patch('google.auth.default', lambda scopes: ['dummy', 'dummy'])
+@patch("google.auth.default", lambda scopes: ["dummy", "dummy"])
 class TestBigqueryUsageExtractor(unittest.TestCase):
-
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_basic_extraction(self, mock_build: Any) -> None:
         """
         Test Extraction using mock class
         """
         config_dict = {
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                'your-project-here',
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PROJECT_ID_KEY): "your-project-here",
         }
         conf = ConfigFactory.from_dict(config_dict)
 
         mock_build.return_value = MockLoggingClient(CORRECT_DATA)
         extractor = BigQueryTableUsageExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
+        extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
         result = extractor.extract()
         assert result is not None
         self.assertIsInstance(result, tuple)
@@ -217,29 +204,27 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertIsInstance(key, TableColumnUsageTuple)
         self.assertIsInstance(value, int)
 
-        self.assertEqual(key.database, 'bigquery')
-        self.assertEqual(key.cluster, 'bigquery-public-data')
-        self.assertEqual(key.schema, 'austin_incidents')
-        self.assertEqual(key.table, 'incidents_2008')
-        self.assertEqual(key.email, 'your-user-here@test.com')
+        self.assertEqual(key.database, "bigquery")
+        self.assertEqual(key.cluster, "bigquery-public-data")
+        self.assertEqual(key.schema, "austin_incidents")
+        self.assertEqual(key.table, "incidents_2008")
+        self.assertEqual(key.email, "your-user-here@test.com")
         self.assertEqual(value, 1)
 
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_no_entries(self, mock_build: Any) -> None:
         config_dict = {
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                'your-project-here',
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PROJECT_ID_KEY): "your-project-here",
         }
         conf = ConfigFactory.from_dict(config_dict)
 
         mock_build.return_value = MockLoggingClient(NO_ENTRIES)
         extractor = BigQueryTableUsageExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
+        extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_key_path(self, mock_build: Any) -> None:
         """
         Test key_path can be used
@@ -252,102 +237,89 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
             keyfile.write(base64.b64decode(KEYFILE_DATA))
             keyfile.flush()
             config_dict = {
-                'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                    'your-project-here',
-                'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.KEY_PATH_KEY):
-                    keyfile.name,
+                "extractor.bigquery_table_usage.{}".format(
+                    BigQueryTableUsageExtractor.PROJECT_ID_KEY
+                ): "your-project-here",
+                "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.KEY_PATH_KEY): keyfile.name,
             }
             conf = ConfigFactory.from_dict(config_dict)
 
             mock_build.return_value = MockLoggingClient(CORRECT_DATA)
             extractor = BigQueryTableUsageExtractor()
-            extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                                  scope=extractor.get_scope()))
+            extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
 
             args, kwargs = mock_build.call_args
-            creds = kwargs['http'].credentials
-            self.assertEqual(creds.project_id, 'your-project-here')
-            self.assertEqual(creds.service_account_email, 'test-162@your-project-here.iam.gserviceaccount.com')
+            creds = kwargs["http"].credentials
+            self.assertEqual(creds.project_id, "your-project-here")
+            self.assertEqual(creds.service_account_email, "test-162@your-project-here.iam.gserviceaccount.com")
 
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_timestamp_pagesize_settings(self, mock_build: Any) -> None:
         """
         Test timestamp and pagesize can be set
         """
-        TIMESTAMP = '2019-01-01T00:00:00.00Z'
+        TIMESTAMP = "2019-01-01T00:00:00.00Z"
         PAGESIZE = 215
 
         config_dict = {
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                'your-project-here',
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.TIMESTAMP_KEY):
-                TIMESTAMP,
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PAGE_SIZE_KEY):
-                PAGESIZE,
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PROJECT_ID_KEY): "your-project-here",
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.TIMESTAMP_KEY): TIMESTAMP,
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PAGE_SIZE_KEY): PAGESIZE,
         }
         conf = ConfigFactory.from_dict(config_dict)
 
         client = MockLoggingClient(CORRECT_DATA)
         mock_build.return_value = client
         extractor = BigQueryTableUsageExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
+        extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
 
         args, kwargs = client.b.list.call_args
-        body = kwargs['body']
+        body = kwargs["body"]
 
-        self.assertEqual(body['pageSize'], PAGESIZE)
-        self.assertEqual(TIMESTAMP in body['filter'], True)
+        self.assertEqual(body["pageSize"], PAGESIZE)
+        self.assertEqual(TIMESTAMP in body["filter"], True)
 
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_failed_jobs_should_not_be_counted(self, mock_build: Any) -> None:
 
         config_dict = {
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                'your-project-here',
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PROJECT_ID_KEY): "your-project-here",
         }
         conf = ConfigFactory.from_dict(config_dict)
 
         client = MockLoggingClient(FAILURE)
         mock_build.return_value = client
         extractor = BigQueryTableUsageExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
+        extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
 
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_email_filter_not_counted(self, mock_build: Any) -> None:
         config_dict = {
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                'your-project-here',
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.EMAIL_PATTERN):
-                'emailFilter',
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PROJECT_ID_KEY): "your-project-here",
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.EMAIL_PATTERN): "emailFilter",
         }
         conf = ConfigFactory.from_dict(config_dict)
 
         mock_build.return_value = MockLoggingClient(CORRECT_DATA)
         extractor = BigQueryTableUsageExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
+        extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
         result = extractor.extract()
         self.assertIsNone(result)
 
-    @patch('databuilder.extractor.base_bigquery_extractor.build')
+    @patch("databuilder.extractor.base_bigquery_extractor.build")
     def test_email_filter_counted(self, mock_build: Any) -> None:
         config_dict = {
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.PROJECT_ID_KEY):
-                'your-project-here',
-            'extractor.bigquery_table_usage.{}'.format(BigQueryTableUsageExtractor.EMAIL_PATTERN):
-                '.*@test.com.*',
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.PROJECT_ID_KEY): "your-project-here",
+            "extractor.bigquery_table_usage.{}".format(BigQueryTableUsageExtractor.EMAIL_PATTERN): ".*@test.com.*",
         }
         conf = ConfigFactory.from_dict(config_dict)
 
         mock_build.return_value = MockLoggingClient(CORRECT_DATA)
         extractor = BigQueryTableUsageExtractor()
-        extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                              scope=extractor.get_scope()))
+        extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
         result = extractor.extract()
         assert result is not None
         self.assertIsInstance(result, tuple)
@@ -356,9 +328,9 @@ class TestBigqueryUsageExtractor(unittest.TestCase):
         self.assertIsInstance(key, TableColumnUsageTuple)
         self.assertIsInstance(value, int)
 
-        self.assertEqual(key.database, 'bigquery')
-        self.assertEqual(key.cluster, 'bigquery-public-data')
-        self.assertEqual(key.schema, 'austin_incidents')
-        self.assertEqual(key.table, 'incidents_2008')
-        self.assertEqual(key.email, 'your-user-here@test.com')
+        self.assertEqual(key.database, "bigquery")
+        self.assertEqual(key.cluster, "bigquery-public-data")
+        self.assertEqual(key.schema, "austin_incidents")
+        self.assertEqual(key.table, "incidents_2008")
+        self.assertEqual(key.email, "your-user-here@test.com")
         self.assertEqual(value, 1)

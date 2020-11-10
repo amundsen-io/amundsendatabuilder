@@ -15,6 +15,7 @@ class Job(Scoped):
     """
     A Databuilder job that represents single work unit.
     """
+
     @abc.abstractmethod
     def init(self, conf: ConfigTree) -> None:
         pass
@@ -28,4 +29,4 @@ class Job(Scoped):
         pass
 
     def get_scope(self) -> str:
-        return 'job'
+        return "job"

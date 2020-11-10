@@ -12,6 +12,7 @@ class Task(Scoped):
     """
     A Abstract task that can run an abstract task
     """
+
     @abc.abstractmethod
     def init(self, conf: ConfigTree) -> None:
         pass
@@ -25,4 +26,4 @@ class Task(Scoped):
         pass
 
     def get_scope(self) -> str:
-        return 'task'
+        return "task"

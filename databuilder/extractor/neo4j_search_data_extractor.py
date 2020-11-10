@@ -17,8 +17,9 @@ class Neo4jSearchDataExtractor(Extractor):
     Extractor to fetch data required to support search from Neo4j graph database
     Use Neo4jExtractor extractor class
     """
-    CYPHER_QUERY_CONFIG_KEY = 'cypher_query'
-    ENTITY_TYPE = 'entity_type'
+
+    CYPHER_QUERY_CONFIG_KEY = "cypher_query"
+    ENTITY_TYPE = "entity_type"
 
     DEFAULT_NEO4J_TABLE_CYPHER_QUERY = textwrap.dedent(
         """
@@ -116,9 +117,9 @@ class Neo4jSearchDataExtractor(Extractor):
 
     # todo: we will add more once we add more entities
     DEFAULT_QUERY_BY_ENTITY = {
-        'table': DEFAULT_NEO4J_TABLE_CYPHER_QUERY,
-        'user': DEFAULT_NEO4J_USER_CYPHER_QUERY,
-        'dashboard': DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY
+        "table": DEFAULT_NEO4J_TABLE_CYPHER_QUERY,
+        "user": DEFAULT_NEO4J_USER_CYPHER_QUERY,
+        "dashboard": DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY,
     }
 
     def init(self, conf: ConfigTree) -> None:
@@ -126,18 +127,19 @@ class Neo4jSearchDataExtractor(Extractor):
         Initialize Neo4jExtractor object from configuration and use that for extraction
         """
         self.conf = conf
-        self.entity = conf.get_string(Neo4jSearchDataExtractor.ENTITY_TYPE, default='table').lower()
+        self.entity = conf.get_string(Neo4jSearchDataExtractor.ENTITY_TYPE, default="table").lower()
         # extract cypher query from conf, if specified, else use default query
         if Neo4jSearchDataExtractor.CYPHER_QUERY_CONFIG_KEY in conf:
             self.cypher_query = conf.get_string(Neo4jSearchDataExtractor.CYPHER_QUERY_CONFIG_KEY)
         else:
             default_query = Neo4jSearchDataExtractor.DEFAULT_QUERY_BY_ENTITY[self.entity]
-            self.cypher_query = self._add_publish_tag_filter(conf.get_string(JOB_PUBLISH_TAG, ''),
-                                                             cypher_query=default_query)
+            self.cypher_query = self._add_publish_tag_filter(
+                conf.get_string(JOB_PUBLISH_TAG, ""), cypher_query=default_query
+            )
 
         self.neo4j_extractor = Neo4jExtractor()
         # write the cypher query in configs in Neo4jExtractor scope
-        key = self.neo4j_extractor.get_scope() + '.' + Neo4jExtractor.CYPHER_QUERY_CONFIG_KEY
+        key = self.neo4j_extractor.get_scope() + "." + Neo4jExtractor.CYPHER_QUERY_CONFIG_KEY
         self.conf.put(key, self.cypher_query)
         # initialize neo4j_extractor from configs
         self.neo4j_extractor.init(Scoped.get_scoped_conf(self.conf, self.neo4j_extractor.get_scope()))
@@ -156,7 +158,7 @@ class Neo4jSearchDataExtractor(Extractor):
         return self.neo4j_extractor.extract()
 
     def get_scope(self) -> str:
-        return 'extractor.search_data'
+        return "extractor.search_data"
 
     def _add_publish_tag_filter(self, publish_tag: str, cypher_query: str) -> str:
         """
@@ -167,10 +169,11 @@ class Neo4jSearchDataExtractor(Extractor):
         """
 
         if not publish_tag:
-            publish_tag_filter = ''
+            publish_tag_filter = ""
         else:
-            if not hasattr(self, 'entity'):
-                self.entity = 'table'
-            publish_tag_filter = """WHERE {entity}.published_tag = '{tag}'""".format(entity=self.entity,
-                                                                                     tag=publish_tag)
+            if not hasattr(self, "entity"):
+                self.entity = "table"
+            publish_tag_filter = """WHERE {entity}.published_tag = '{tag}'""".format(
+                entity=self.entity, tag=publish_tag
+            )
         return cypher_query.format(publish_tag_filter=publish_tag_filter)

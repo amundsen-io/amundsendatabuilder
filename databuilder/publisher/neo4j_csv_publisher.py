@@ -29,76 +29,85 @@ csv.field_size_limit(int(ctypes.c_ulong(-1).value // 2))
 
 # Config keys
 # A directory that contains CSV files for nodes
-NODE_FILES_DIR = 'node_files_directory'
+NODE_FILES_DIR = "node_files_directory"
 # A directory that contains CSV files for relationships
-RELATION_FILES_DIR = 'relation_files_directory'
+RELATION_FILES_DIR = "relation_files_directory"
 # A end point for Neo4j e.g: bolt://localhost:9999
-NEO4J_END_POINT_KEY = 'neo4j_endpoint'
+NEO4J_END_POINT_KEY = "neo4j_endpoint"
 # A transaction size that determines how often it commits.
-NEO4J_TRANSCATION_SIZE = 'neo4j_transaction_size'
+NEO4J_TRANSCATION_SIZE = "neo4j_transaction_size"
 # A progress report frequency that determines how often it report the progress.
-NEO4J_PROGRESS_REPORT_FREQUENCY = 'neo4j_progress_report_frequency'
+NEO4J_PROGRESS_REPORT_FREQUENCY = "neo4j_progress_report_frequency"
 # A boolean flag to make it fail if relationship is not created
-NEO4J_RELATIONSHIP_CREATION_CONFIRM = 'neo4j_relationship_creation_confirm'
+NEO4J_RELATIONSHIP_CREATION_CONFIRM = "neo4j_relationship_creation_confirm"
 
-NEO4J_MAX_CONN_LIFE_TIME_SEC = 'neo4j_max_conn_life_time_sec'
+NEO4J_MAX_CONN_LIFE_TIME_SEC = "neo4j_max_conn_life_time_sec"
 
 # list of nodes that are create only, and not updated if match exists
-NEO4J_CREATE_ONLY_NODES = 'neo4j_create_only_nodes'
+NEO4J_CREATE_ONLY_NODES = "neo4j_create_only_nodes"
 
-NEO4J_USER = 'neo4j_user'
-NEO4J_PASSWORD = 'neo4j_password'
-NEO4J_ENCRYPTED = 'neo4j_encrypted'
+NEO4J_USER = "neo4j_user"
+NEO4J_PASSWORD = "neo4j_password"
+NEO4J_ENCRYPTED = "neo4j_encrypted"
 """NEO4J_ENCRYPTED is a boolean indicating whether to use SSL/TLS when connecting."""
-NEO4J_VALIDATE_SSL = 'neo4j_validate_ssl'
+NEO4J_VALIDATE_SSL = "neo4j_validate_ssl"
 """NEO4J_VALIDATE_SSL is a boolean indicating whether to validate the server's SSL/TLS cert against system CAs."""
 
 # This will be used to provide unique tag to the node and relationship
-JOB_PUBLISH_TAG = 'job_publish_tag'
+JOB_PUBLISH_TAG = "job_publish_tag"
 
 # Neo4j property name for published tag
-PUBLISHED_TAG_PROPERTY_NAME = 'published_tag'
+PUBLISHED_TAG_PROPERTY_NAME = "published_tag"
 
 # Neo4j property name for last updated timestamp
-LAST_UPDATED_EPOCH_MS = 'publisher_last_updated_epoch_ms'
+LAST_UPDATED_EPOCH_MS = "publisher_last_updated_epoch_ms"
 
-RELATION_PREPROCESSOR = 'relation_preprocessor'
+RELATION_PREPROCESSOR = "relation_preprocessor"
 
 # CSV HEADER
 # A header with this suffix will be pass to Neo4j statement without quote
-UNQUOTED_SUFFIX = ':UNQUOTED'
+UNQUOTED_SUFFIX = ":UNQUOTED"
 # A header for Node label
-NODE_LABEL_KEY = 'LABEL'
+NODE_LABEL_KEY = "LABEL"
 # A header for Node key
-NODE_KEY_KEY = 'KEY'
+NODE_KEY_KEY = "KEY"
 # Required columns for Node
 NODE_REQUIRED_KEYS = {NODE_LABEL_KEY, NODE_KEY_KEY}
 
 # Relationship relates two nodes together
 # Start node label
-RELATION_START_LABEL = 'START_LABEL'
+RELATION_START_LABEL = "START_LABEL"
 # Start node key
-RELATION_START_KEY = 'START_KEY'
+RELATION_START_KEY = "START_KEY"
 # End node label
-RELATION_END_LABEL = 'END_LABEL'
+RELATION_END_LABEL = "END_LABEL"
 # Node node key
-RELATION_END_KEY = 'END_KEY'
+RELATION_END_KEY = "END_KEY"
 # Type for relationship (Start Node)->(End Node)
-RELATION_TYPE = 'TYPE'
+RELATION_TYPE = "TYPE"
 # Type for reverse relationship (End Node)->(Start Node)
-RELATION_REVERSE_TYPE = 'REVERSE_TYPE'
+RELATION_REVERSE_TYPE = "REVERSE_TYPE"
 # Required columns for Relationship
-RELATION_REQUIRED_KEYS = {RELATION_START_LABEL, RELATION_START_KEY,
-                          RELATION_END_LABEL, RELATION_END_KEY,
-                          RELATION_TYPE, RELATION_REVERSE_TYPE}
+RELATION_REQUIRED_KEYS = {
+    RELATION_START_LABEL,
+    RELATION_START_KEY,
+    RELATION_END_LABEL,
+    RELATION_END_KEY,
+    RELATION_TYPE,
+    RELATION_REVERSE_TYPE,
+}
 
-DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_TRANSCATION_SIZE: 500,
-                                          NEO4J_PROGRESS_REPORT_FREQUENCY: 500,
-                                          NEO4J_RELATIONSHIP_CREATION_CONFIRM: False,
-                                          NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
-                                          NEO4J_ENCRYPTED: True,
-                                          NEO4J_VALIDATE_SSL: False,
-                                          RELATION_PREPROCESSOR: NoopRelationPreprocessor()})
+DEFAULT_CONFIG = ConfigFactory.from_dict(
+    {
+        NEO4J_TRANSCATION_SIZE: 500,
+        NEO4J_PROGRESS_REPORT_FREQUENCY: 500,
+        NEO4J_RELATIONSHIP_CREATION_CONFIRM: False,
+        NEO4J_MAX_CONN_LIFE_TIME_SEC: 50,
+        NEO4J_ENCRYPTED: True,
+        NEO4J_VALIDATE_SSL: False,
+        RELATION_PREPROCESSOR: NoopRelationPreprocessor(),
+    }
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -128,14 +137,18 @@ class Neo4jCsvPublisher(Publisher):
         self._relation_files = self._list_files(conf, RELATION_FILES_DIR)
         self._relation_files_iter = iter(self._relation_files)
 
-        trust = neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES if conf.get_bool(NEO4J_VALIDATE_SSL) \
+        trust = (
+            neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES
+            if conf.get_bool(NEO4J_VALIDATE_SSL)
             else neo4j.TRUST_ALL_CERTIFICATES
-        self._driver = \
-            GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY),
-                                 max_connection_life_time=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
-                                 auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
-                                 encrypted=conf.get_bool(NEO4J_ENCRYPTED),
-                                 trust=trust)
+        )
+        self._driver = GraphDatabase.driver(
+            conf.get_string(NEO4J_END_POINT_KEY),
+            max_connection_life_time=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
+            auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
+            encrypted=conf.get_bool(NEO4J_ENCRYPTED),
+            trust=trust,
+        )
         self._transaction_size = conf.get_int(NEO4J_TRANSCATION_SIZE)
         self._session = self._driver.session()
         self._confirm_rel_created = conf.get_bool(NEO4J_RELATIONSHIP_CREATION_CONFIRM)
@@ -146,12 +159,13 @@ class Neo4jCsvPublisher(Publisher):
         self.labels: Set[str] = set()
         self.publish_tag: str = conf.get_string(JOB_PUBLISH_TAG)
         if not self.publish_tag:
-            raise Exception('{} should not be empty'.format(JOB_PUBLISH_TAG))
+            raise Exception("{} should not be empty".format(JOB_PUBLISH_TAG))
 
         self._relation_preprocessor = conf.get(RELATION_PREPROCESSOR)
 
-        LOGGER.info('Publishing Node csv files {}, and Relation CSV files {}'
-                    .format(self._node_files, self._relation_files))
+        LOGGER.info(
+            "Publishing Node csv files {}, and Relation CSV files {}".format(self._node_files, self._relation_files)
+        )
 
     def _list_files(self, conf: ConfigTree, path_key: str) -> List[str]:
         """
@@ -174,11 +188,11 @@ class Neo4jCsvPublisher(Publisher):
 
         start = time.time()
 
-        LOGGER.info('Creating indices using Node files: {}'.format(self._node_files))
+        LOGGER.info("Creating indices using Node files: {}".format(self._node_files))
         for node_file in self._node_files:
             self._create_indices(node_file=node_file)
 
-        LOGGER.info('Publishing Node files: {}'.format(self._node_files))
+        LOGGER.info("Publishing Node files: {}".format(self._node_files))
         try:
             tx = self._session.begin_transaction()
             while True:
@@ -188,7 +202,7 @@ class Neo4jCsvPublisher(Publisher):
                 except StopIteration:
                     break
 
-            LOGGER.info('Publishing Relationship files: {}'.format(self._relation_files))
+            LOGGER.info("Publishing Relationship files: {}".format(self._relation_files))
             while True:
                 try:
                     relation_file = next(self._relation_files_iter)
@@ -197,18 +211,18 @@ class Neo4jCsvPublisher(Publisher):
                     break
 
             tx.commit()
-            LOGGER.info('Committed total {} statements'.format(self._count))
+            LOGGER.info("Committed total {} statements".format(self._count))
 
             # TODO: Add statsd support
-            LOGGER.info('Successfully published. Elapsed: {} seconds'.format(time.time() - start))
+            LOGGER.info("Successfully published. Elapsed: {} seconds".format(time.time() - start))
         except Exception as e:
-            LOGGER.exception('Failed to publish. Rolling back.')
+            LOGGER.exception("Failed to publish. Rolling back.")
             if not tx.closed():
                 tx.rollback()
             raise e
 
     def get_scope(self) -> str:
-        return 'publisher.neo4j'
+        return "publisher.neo4j"
 
     def _create_indices(self, node_file: str) -> None:
         """
@@ -216,16 +230,16 @@ class Neo4jCsvPublisher(Publisher):
         :param node_file:
         :return:
         """
-        LOGGER.info('Creating indices. (Existing indices will be ignored)')
+        LOGGER.info("Creating indices. (Existing indices will be ignored)")
 
-        with open(node_file, 'r', encoding='utf8') as node_csv:
-            for node_record in pandas.read_csv(node_csv).to_dict(orient='records'):
+        with open(node_file, "r", encoding="utf8") as node_csv:
+            for node_record in pandas.read_csv(node_csv).to_dict(orient="records"):
                 label = node_record[NODE_LABEL_KEY]
                 if label not in self.labels:
                     self._try_create_index(label)
                     self.labels.add(label)
 
-        LOGGER.info('Indices have been created.')
+        LOGGER.info("Indices have been created.")
 
     def _publish_node(self, node_file: str, tx: Transaction) -> Transaction:
         """
@@ -245,7 +259,7 @@ class Neo4jCsvPublisher(Publisher):
         :return:
         """
 
-        with open(node_file, 'r', encoding='utf8') as node_csv:
+        with open(node_file, "r", encoding="utf8") as node_csv:
             for node_record in pandas.read_csv(node_csv).to_dict(orient="records"):
                 stmt = self.create_node_merge_statement(node_record=node_record)
                 params = self._create_props_param(node_record)
@@ -269,17 +283,19 @@ class Neo4jCsvPublisher(Publisher):
         :param node_record:
         :return:
         """
-        template = Template("""
+        template = Template(
+            """
             MERGE (node:{{ LABEL }} {key: $KEY})
             ON CREATE SET {{ PROP_BODY }}
             {% if update %} ON MATCH SET {{ PROP_BODY }} {% endif %}
-        """)
+        """
+        )
 
-        prop_body = self._create_props_body(node_record, NODE_REQUIRED_KEYS, 'node')
+        prop_body = self._create_props_body(node_record, NODE_REQUIRED_KEYS, "node")
 
-        return template.render(LABEL=node_record["LABEL"],
-                               PROP_BODY=prop_body,
-                               update=(not self.is_create_only_node(node_record)))
+        return template.render(
+            LABEL=node_record["LABEL"], PROP_BODY=prop_body, update=(not self.is_create_only_node(node_record))
+        )
 
     def _publish_relation(self, relation_file: str, tx: Transaction) -> Transaction:
         """
@@ -297,10 +313,10 @@ class Neo4jCsvPublisher(Publisher):
         """
 
         if self._relation_preprocessor.is_perform_preprocess():
-            LOGGER.info('Pre-processing relation with {}'.format(self._relation_preprocessor))
+            LOGGER.info("Pre-processing relation with {}".format(self._relation_preprocessor))
 
             count = 0
-            with open(relation_file, 'r', encoding='utf8') as relation_csv:
+            with open(relation_file, "r", encoding="utf8") as relation_csv:
                 for rel_record in pandas.read_csv(relation_csv).to_dict(orient="records"):
                     stmt, params = self._relation_preprocessor.preprocess_cypher(
                         start_label=rel_record[RELATION_START_LABEL],
@@ -308,20 +324,20 @@ class Neo4jCsvPublisher(Publisher):
                         start_key=rel_record[RELATION_START_KEY],
                         end_key=rel_record[RELATION_END_KEY],
                         relation=rel_record[RELATION_TYPE],
-                        reverse_relation=rel_record[RELATION_REVERSE_TYPE])
+                        reverse_relation=rel_record[RELATION_REVERSE_TYPE],
+                    )
 
                     if stmt:
                         tx = self._execute_statement(stmt, tx=tx, params=params)
                         count += 1
 
-            LOGGER.info('Executed pre-processing Cypher statement {} times'.format(count))
+            LOGGER.info("Executed pre-processing Cypher statement {} times".format(count))
 
-        with open(relation_file, 'r', encoding='utf8') as relation_csv:
+        with open(relation_file, "r", encoding="utf8") as relation_csv:
             for rel_record in pandas.read_csv(relation_csv).to_dict(orient="records"):
                 stmt = self.create_relationship_merge_statement(rel_record=rel_record)
                 params = self._create_props_param(rel_record)
-                tx = self._execute_statement(stmt, tx, params,
-                                             expect_result=self._confirm_rel_created)
+                tx = self._execute_statement(stmt, tx, params, expect_result=self._confirm_rel_created)
 
         return tx
 
@@ -331,7 +347,8 @@ class Neo4jCsvPublisher(Publisher):
         :param rel_record:
         :return:
         """
-        template = Template("""
+        template = Template(
+            """
             MATCH (n1:{{ START_LABEL }} {key: $START_KEY}), (n2:{{ END_LABEL }} {key: $END_KEY})
             MERGE (n1)-[r1:{{ TYPE }}]->(n2)-[r2:{{ REVERSE_TYPE }}]->(n1)
             {% if update_prop_body %}
@@ -339,34 +356,34 @@ class Neo4jCsvPublisher(Publisher):
             ON MATCH SET {{ prop_body }}
             {% endif %}
             RETURN n1.key, n2.key
-        """)
+        """
+        )
 
-        prop_body_r1 = self._create_props_body(rel_record, RELATION_REQUIRED_KEYS, 'r1')
-        prop_body_r2 = self._create_props_body(rel_record, RELATION_REQUIRED_KEYS, 'r2')
-        prop_body = ' , '.join([prop_body_r1, prop_body_r2])
+        prop_body_r1 = self._create_props_body(rel_record, RELATION_REQUIRED_KEYS, "r1")
+        prop_body_r2 = self._create_props_body(rel_record, RELATION_REQUIRED_KEYS, "r2")
+        prop_body = " , ".join([prop_body_r1, prop_body_r2])
 
-        return template.render(START_LABEL=rel_record["START_LABEL"],
-                               END_LABEL=rel_record["END_LABEL"],
-                               TYPE=rel_record["TYPE"],
-                               REVERSE_TYPE=rel_record["REVERSE_TYPE"],
-                               update_prop_body=prop_body_r1,
-                               prop_body=prop_body)
+        return template.render(
+            START_LABEL=rel_record["START_LABEL"],
+            END_LABEL=rel_record["END_LABEL"],
+            TYPE=rel_record["TYPE"],
+            REVERSE_TYPE=rel_record["REVERSE_TYPE"],
+            update_prop_body=prop_body_r1,
+            prop_body=prop_body,
+        )
 
     def _create_props_param(self, record_dict: dict) -> dict:
         params = {}
         for k, v in record_dict.items():
             if k.endswith(UNQUOTED_SUFFIX):
-                k = k[:-len(UNQUOTED_SUFFIX)]
+                k = k[: -len(UNQUOTED_SUFFIX)]
             else:
-                v = '{val}'.format(val=v)
+                v = "{val}".format(val=v)
 
             params[k] = v
         return params
 
-    def _create_props_body(self,
-                           record_dict: dict,
-                           excludes: Set,
-                           identifier: str) -> str:
+    def _create_props_body(self, record_dict: dict, excludes: Set, identifier: str) -> str:
         """
         Creates properties body with params required for resolving template.
 
@@ -384,25 +401,21 @@ class Neo4jCsvPublisher(Publisher):
                 continue
 
             if k.endswith(UNQUOTED_SUFFIX):
-                k = k[:-len(UNQUOTED_SUFFIX)]
+                k = k[: -len(UNQUOTED_SUFFIX)]
 
-            props.append('{id}.{key} = {val}'.format(id=identifier, key=k, val=f'${k}'))
+            props.append("{id}.{key} = {val}".format(id=identifier, key=k, val=f"${k}"))
 
-        props.append("""{id}.{key} = '{val}'""".format(id=identifier,
-                                                       key=PUBLISHED_TAG_PROPERTY_NAME,
-                                                       val=self.publish_tag))
+        props.append(
+            """{id}.{key} = '{val}'""".format(id=identifier, key=PUBLISHED_TAG_PROPERTY_NAME, val=self.publish_tag)
+        )
 
-        props.append("""{id}.{key} = {val}""".format(id=identifier,
-                                                     key=LAST_UPDATED_EPOCH_MS,
-                                                     val='timestamp()'))
+        props.append("""{id}.{key} = {val}""".format(id=identifier, key=LAST_UPDATED_EPOCH_MS, val="timestamp()"))
 
-        return ', '.join(props)
+        return ", ".join(props)
 
-    def _execute_statement(self,
-                           stmt: str,
-                           tx: Transaction,
-                           params: dict=None,
-                           expect_result: bool=False) -> Transaction:
+    def _execute_statement(
+        self, stmt: str, tx: Transaction, params: dict = None, expect_result: bool = False
+    ) -> Transaction:
         """
         Executes statement against Neo4j. If execution fails, it rollsback and raise exception.
         If 'expect_result' flag is True, it confirms if result object is not null.
@@ -414,24 +427,24 @@ class Neo4jCsvPublisher(Publisher):
         """
         try:
             if LOGGER.isEnabledFor(logging.DEBUG):
-                LOGGER.debug('Executing statement: {} with params {}'.format(stmt, params))
+                LOGGER.debug("Executing statement: {} with params {}".format(stmt, params))
 
-            result = tx.run(str(stmt).encode('utf-8', 'ignore'), parameters=params)
+            result = tx.run(str(stmt).encode("utf-8", "ignore"), parameters=params)
             if expect_result and not result.single():
-                raise RuntimeError('Failed to executed statement: {}'.format(stmt))
+                raise RuntimeError("Failed to executed statement: {}".format(stmt))
 
             self._count += 1
             if self._count > 1 and self._count % self._transaction_size == 0:
                 tx.commit()
-                LOGGER.info('Committed {} statements so far'.format(self._count))
+                LOGGER.info("Committed {} statements so far".format(self._count))
                 return self._session.begin_transaction()
 
             if self._count > 1 and self._count % self._progress_report_frequency == 0:
-                LOGGER.info('Processed {} statements so far'.format(self._count))
+                LOGGER.info("Processed {} statements so far".format(self._count))
 
             return tx
         except Exception as e:
-            LOGGER.exception('Failed to execute Cypher query')
+            LOGGER.exception("Failed to execute Cypher query")
             if not tx.closed():
                 tx.rollback()
             raise e
@@ -443,16 +456,17 @@ class Neo4jCsvPublisher(Publisher):
         :param label:
         :return:
         """
-        stmt = Template("""
+        stmt = Template(
+            """
             CREATE CONSTRAINT ON (node:{{ LABEL }}) ASSERT node.key IS UNIQUE
-        """).render(LABEL=label)
+        """
+        ).render(LABEL=label)
 
-        LOGGER.info('Trying to create index for label {label} if not exist: {stmt}'.format(label=label,
-                                                                                           stmt=stmt))
+        LOGGER.info("Trying to create index for label {label} if not exist: {stmt}".format(label=label, stmt=stmt))
         with self._driver.session() as session:
             try:
                 session.run(stmt)
             except CypherError as e:
-                if 'An equivalent constraint already exists' not in e.__str__():
+                if "An equivalent constraint already exists" not in e.__str__():
                     raise
                 # Else, swallow the exception, to make this function idempotent.

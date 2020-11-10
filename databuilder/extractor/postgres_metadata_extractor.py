@@ -40,4 +40,4 @@ class PostgresMetadataExtractor(BasePostgresMetadataExtractor):
 
     def get_scope(self):
         # type: () -> str
-        return 'extractor.postgres_metadata'
+        return "extractor.postgres_metadata"

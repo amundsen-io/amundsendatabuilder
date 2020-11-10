@@ -14,20 +14,16 @@ from databuilder.models.graph_relationship import GraphRelationship
 class TableLastUpdated(GraphSerializable):
     # constants
     LAST_UPDATED_NODE_LABEL = timestamp_constants.NODE_LABEL
-    LAST_UPDATED_KEY_FORMAT = '{db}://{cluster}.{schema}/{tbl}/timestamp'
+    LAST_UPDATED_KEY_FORMAT = "{db}://{cluster}.{schema}/{tbl}/timestamp"
     TIMESTAMP_PROPERTY = timestamp_constants.DEPRECATED_TIMESTAMP_PROPERTY
     TIMESTAMP_NAME_PROPERTY = timestamp_constants.TIMESTAMP_NAME_PROPERTY
 
     TABLE_LASTUPDATED_RELATION_TYPE = timestamp_constants.LASTUPDATED_RELATION_TYPE
     LASTUPDATED_TABLE_RELATION_TYPE = timestamp_constants.LASTUPDATED_REVERSE_RELATION_TYPE
 
-    def __init__(self,
-                 table_name: str,
-                 last_updated_time_epoch: int,
-                 schema: str,
-                 db: str = 'hive',
-                 cluster: str = 'gold'
-                 ) -> None:
+    def __init__(
+        self, table_name: str, last_updated_time_epoch: int, schema: str, db: str = "hive", cluster: str = "gold"
+    ) -> None:
         self.table_name = table_name
         self.last_updated_time = int(last_updated_time_epoch)
         self.schema = schema
@@ -38,9 +34,11 @@ class TableLastUpdated(GraphSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def __repr__(self) -> str:
-        return \
-            """TableLastUpdated(table_name={!r}, last_updated_time={!r}, schema={!r}, db={!r}, cluster={!r})"""\
-            .format(self.table_name, self.last_updated_time, self.schema, self.db, self.cluster)
+        return (
+            """TableLastUpdated(table_name={!r}, last_updated_time={!r}, schema={!r}, db={!r}, cluster={!r})""".format(
+                self.table_name, self.last_updated_time, self.schema, self.db, self.cluster
+            )
+        )
 
     def create_next_node(self) -> Union[GraphNode, None]:
         # creates new node
@@ -57,17 +55,15 @@ class TableLastUpdated(GraphSerializable):
 
     def get_table_model_key(self) -> str:
         # returns formatted string for table name
-        return TableMetadata.TABLE_KEY_FORMAT.format(db=self.db,
-                                                     cluster=self.cluster,
-                                                     schema=self.schema,
-                                                     tbl=self.table_name)
+        return TableMetadata.TABLE_KEY_FORMAT.format(
+            db=self.db, cluster=self.cluster, schema=self.schema, tbl=self.table_name
+        )
 
     def get_last_updated_model_key(self) -> str:
         # returns formatted string for last updated name
-        return TableLastUpdated.LAST_UPDATED_KEY_FORMAT.format(db=self.db,
-                                                               cluster=self.cluster,
-                                                               schema=self.schema,
-                                                               tbl=self.table_name)
+        return TableLastUpdated.LAST_UPDATED_KEY_FORMAT.format(
+            db=self.db, cluster=self.cluster, schema=self.schema, tbl=self.table_name
+        )
 
     def create_nodes(self) -> List[GraphNode]:
         """
@@ -82,8 +78,8 @@ class TableLastUpdated(GraphSerializable):
             attributes={
                 TableLastUpdated.TIMESTAMP_PROPERTY: self.last_updated_time,
                 timestamp_constants.TIMESTAMP_PROPERTY: self.last_updated_time,
-                TableLastUpdated.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name
-            }
+                TableLastUpdated.TIMESTAMP_NAME_PROPERTY: timestamp_constants.TimestampName.last_updated_timestamp.name,
+            },
         )
 
         results.append(node)
@@ -102,7 +98,7 @@ class TableLastUpdated(GraphSerializable):
             end_key=self.get_last_updated_model_key(),
             type=TableLastUpdated.TABLE_LASTUPDATED_RELATION_TYPE,
             reverse_type=TableLastUpdated.LASTUPDATED_TABLE_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         results = [relationship]
 

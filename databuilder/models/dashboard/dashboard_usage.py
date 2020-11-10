@@ -6,11 +6,11 @@ import logging
 from typing import Optional, Any, Union, Iterator
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (
-    GraphSerializable
-)
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.usage.usage_constants import (
-    READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
+    READ_RELATION_TYPE,
+    READ_REVERSE_RELATION_TYPE,
+    READ_RELATION_COUNT_PROPERTY,
 )
 from databuilder.models.user import User
 from databuilder.models.graph_node import GraphNode
@@ -24,16 +24,17 @@ class DashboardUsage(GraphSerializable):
     A model that encapsulate Dashboard usage between Dashboard and User
     """
 
-    def __init__(self,
-                 dashboard_group_id: Optional[str],
-                 dashboard_id: Optional[str],
-                 email: str,
-                 view_count: int,
-                 should_create_user_node: Optional[bool] = False,
-                 product: Optional[str] = '',
-                 cluster: Optional[str] = 'gold',
-                 **kwargs: Any
-                 ) -> None:
+    def __init__(
+        self,
+        dashboard_group_id: Optional[str],
+        dashboard_id: Optional[str],
+        email: str,
+        view_count: int,
+        should_create_user_node: Optional[bool] = False,
+        product: Optional[str] = "",
+        cluster: Optional[str] = "gold",
+        **kwargs: Any
+    ) -> None:
         """
 
         :param dashboard_group_id:
@@ -78,24 +79,22 @@ class DashboardUsage(GraphSerializable):
                 product=self._product,
                 cluster=self._cluster,
                 dashboard_group=self._dashboard_group_id,
-                dashboard_name=self._dashboard_id
+                dashboard_name=self._dashboard_id,
             ),
             end_key=User.get_user_model_key(email=self._email),
             type=READ_REVERSE_RELATION_TYPE,
             reverse_type=READ_RELATION_TYPE,
-            attributes={
-                READ_RELATION_COUNT_PROPERTY: self._view_count
-            }
+            attributes={READ_RELATION_COUNT_PROPERTY: self._view_count},
         )
         yield relationship
 
     def __repr__(self) -> str:
-        return 'DashboardUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
+        return "DashboardUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
             self._dashboard_group_id,
             self._dashboard_id,
             self._email,
             self._view_count,
             self._should_create_user_node,
             self._product,
-            self._cluster
+            self._cluster,
         )

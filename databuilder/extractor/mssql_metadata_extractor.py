@@ -13,7 +13,7 @@ from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
-TableKey = namedtuple('TableKey', ['schema_name', 'table_name'])
+TableKey = namedtuple("TableKey", ["schema_name", "table_name"])
 
 LOGGER = logging.getLogger(__name__)
 
@@ -57,63 +57,51 @@ class MSSQLMetadataExtractor(Extractor):
     """
 
     # CONFIG KEYS
-    WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CLUSTER_KEY = 'cluster_key'
-    USE_CATALOG_AS_CLUSTER_NAME = 'use_catalog_as_cluster_name'
-    DATABASE_KEY = 'database_key'
+    WHERE_CLAUSE_SUFFIX_KEY = "where_clause_suffix"
+    CLUSTER_KEY = "cluster_key"
+    USE_CATALOG_AS_CLUSTER_NAME = "use_catalog_as_cluster_name"
+    DATABASE_KEY = "database_key"
 
     # Default values
-    DEFAULT_CLUSTER_NAME = 'DB_NAME()'
+    DEFAULT_CLUSTER_NAME = "DB_NAME()"
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({
-        WHERE_CLAUSE_SUFFIX_KEY: '',
-        CLUSTER_KEY: DEFAULT_CLUSTER_NAME,
-        USE_CATALOG_AS_CLUSTER_NAME: True}
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {WHERE_CLAUSE_SUFFIX_KEY: "", CLUSTER_KEY: DEFAULT_CLUSTER_NAME, USE_CATALOG_AS_CLUSTER_NAME: True}
     )
 
-    DEFAULT_WHERE_CLAUSE_VALUE = 'and tbl.table_schema in {schemas}'
+    DEFAULT_WHERE_CLAUSE_VALUE = "and tbl.table_schema in {schemas}"
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(MSSQLMetadataExtractor.DEFAULT_CONFIG)
 
-        self._cluster = '{}'.format(
-            conf.get_string(MSSQLMetadataExtractor.CLUSTER_KEY))
+        self._cluster = "{}".format(conf.get_string(MSSQLMetadataExtractor.CLUSTER_KEY))
 
         if conf.get_bool(MSSQLMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME):
             cluster_source = "DB_NAME()"
         else:
             cluster_source = "'{}'".format(self._cluster)
 
-        self._database = conf.get_string(
-            MSSQLMetadataExtractor.DATABASE_KEY,
-            default='mssql')
+        self._database = conf.get_string(MSSQLMetadataExtractor.DATABASE_KEY, default="mssql")
 
-        config_where_clause = conf.get_string(
-            MSSQLMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY)
+        config_where_clause = conf.get_string(MSSQLMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY)
 
         logging.info("Crawling for Schemas %s", config_where_clause)
 
         if len(config_where_clause) > 0:
-            where_clause_suffix = MSSQLMetadataExtractor\
-                .DEFAULT_WHERE_CLAUSE_VALUE\
-                .format(schemas=config_where_clause)
+            where_clause_suffix = MSSQLMetadataExtractor.DEFAULT_WHERE_CLAUSE_VALUE.format(schemas=config_where_clause)
         else:
-            where_clause_suffix = ''
+            where_clause_suffix = ""
 
         self.sql_stmt = MSSQLMetadataExtractor.SQL_STATEMENT.format(
-            where_clause_suffix=where_clause_suffix,
-            cluster_source=cluster_source
+            where_clause_suffix=where_clause_suffix, cluster_source=cluster_source
         )
 
-        LOGGER.info('SQL for MS SQL Metadata: {}'.format(self.sql_stmt))
+        LOGGER.info("SQL for MS SQL Metadata: {}".format(self.sql_stmt))
 
         self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped\
-            .get_scoped_conf(conf, self._alchemy_extractor.get_scope()) \
-            .with_fallback(
-                ConfigFactory.from_dict({
-                    SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt})
-            )
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt})
+        )
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None
@@ -127,7 +115,7 @@ class MSSQLMetadataExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.mssql_metadata'
+        return "extractor.mssql_metadata"
 
     def _get_extract_iter(self) -> Iterator[TableMetadata]:
         """
@@ -141,20 +129,18 @@ class MSSQLMetadataExtractor(Extractor):
             for row in group:
                 last_row = row
                 columns.append(
-                    ColumnMetadata(
-                        row['col_name'],
-                        row['col_description'],
-                        row['col_type'],
-                        row['col_sort_order']))
+                    ColumnMetadata(row["col_name"], row["col_description"], row["col_type"], row["col_sort_order"])
+                )
 
             yield TableMetadata(
                 self._database,
-                last_row['cluster'],
-                last_row['schema_name'],
-                last_row['name'],
-                last_row['description'],
+                last_row["cluster"],
+                last_row["schema_name"],
+                last_row["name"],
+                last_row["description"],
                 columns,
-                tags=last_row['schema_name'])
+                tags=last_row["schema_name"],
+            )
 
     def _get_raw_extract_iter(self) -> Iterator[Dict[str, Any]]:
         """
@@ -173,8 +159,6 @@ class MSSQLMetadataExtractor(Extractor):
         :return:
         """
         if row:
-            return TableKey(
-                schema_name=row['schema_name'],
-                table_name=row['name'])
+            return TableKey(schema_name=row["schema_name"], table_name=row["name"])
 
         return None

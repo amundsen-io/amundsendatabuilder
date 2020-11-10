@@ -7,8 +7,7 @@ import re
 from typing import Optional, Any, List, Union, Iterator
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -23,17 +22,18 @@ class DashboardTable(GraphSerializable):
     between Tables and Dashboard
     """
 
-    DASHBOARD_TABLE_RELATION_TYPE = 'DASHBOARD_WITH_TABLE'
-    TABLE_DASHBOARD_RELATION_TYPE = 'TABLE_OF_DASHBOARD'
+    DASHBOARD_TABLE_RELATION_TYPE = "DASHBOARD_WITH_TABLE"
+    TABLE_DASHBOARD_RELATION_TYPE = "TABLE_OF_DASHBOARD"
 
-    def __init__(self,
-                 dashboard_group_id: str,
-                 dashboard_id: str,
-                 table_ids: List[str],
-                 product: Optional[str] = '',
-                 cluster: str = 'gold',
-                 **kwargs: Any
-                 ) -> None:
+    def __init__(
+        self,
+        dashboard_group_id: str,
+        dashboard_id: str,
+        table_ids: List[str],
+        product: Optional[str] = "",
+        cluster: str = "gold",
+        **kwargs: Any
+    ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         # A list of tables uri used in the dashboard
@@ -56,7 +56,7 @@ class DashboardTable(GraphSerializable):
 
     def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
         for table_id in self._table_ids:
-            m = re.match('([^./]+)://([^./]+)\.([^./]+)\/([^./]+)', table_id)
+            m = re.match("([^./]+)://([^./]+)\.([^./]+)\/([^./]+)", table_id)
             if m:
                 relationship = GraphRelationship(
                     start_label=DashboardMetadata.DASHBOARD_NODE_LABEL,
@@ -65,25 +65,22 @@ class DashboardTable(GraphSerializable):
                         product=self._product,
                         cluster=self._cluster,
                         dashboard_group=self._dashboard_group_id,
-                        dashboard_name=self._dashboard_id
+                        dashboard_name=self._dashboard_id,
                     ),
                     end_key=TableMetadata.TABLE_KEY_FORMAT.format(
-                        db=m.group(1),
-                        cluster=m.group(2),
-                        schema=m.group(3),
-                        tbl=m.group(4)
+                        db=m.group(1), cluster=m.group(2), schema=m.group(3), tbl=m.group(4)
                     ),
                     type=DashboardTable.DASHBOARD_TABLE_RELATION_TYPE,
                     reverse_type=DashboardTable.TABLE_DASHBOARD_RELATION_TYPE,
-                    attributes={}
+                    attributes={},
                 )
                 yield relationship
 
     def __repr__(self) -> str:
-        return 'DashboardTable({!r}, {!r}, {!r}, {!r}, ({!r}))'.format(
+        return "DashboardTable({!r}, {!r}, {!r}, {!r}, ({!r}))".format(
             self._dashboard_group_id,
             self._dashboard_id,
             self._product,
             self._cluster,
-            ','.join(self._table_ids),
+            ",".join(self._table_ids),
         )

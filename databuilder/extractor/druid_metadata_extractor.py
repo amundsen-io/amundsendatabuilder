@@ -15,7 +15,7 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 from itertools import groupby
 
 
-TableKey = namedtuple('TableKey', ['schema', 'table_name'])
+TableKey = namedtuple("TableKey", ["schema", "table_name"])
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,9 @@ class DruidMetadataExtractor(Extractor):
     """
     Extracts Druid table and column metadata from druid using dbapi extractor
     """
-    SQL_STATEMENT = textwrap.dedent("""
+
+    SQL_STATEMENT = textwrap.dedent(
+        """
         SELECT
         TABLE_SCHEMA as schema,
         TABLE_NAME as name,
@@ -34,26 +36,27 @@ class DruidMetadataExtractor(Extractor):
         FROM INFORMATION_SCHEMA.COLUMNS
         {where_clause_suffix}
         order by TABLE_SCHEMA, TABLE_NAME, CAST(ORDINAL_POSITION AS int)
-    """)
+    """
+    )
 
     # CONFIG KEYS
-    WHERE_CLAUSE_SUFFIX_KEY = 'where_clause_suffix'
-    CLUSTER_KEY = 'cluster'
+    WHERE_CLAUSE_SUFFIX_KEY = "where_clause_suffix"
+    CLUSTER_KEY = "cluster"
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({WHERE_CLAUSE_SUFFIX_KEY: ' ',
-                                              CLUSTER_KEY: 'gold'})
+    DEFAULT_CONFIG = ConfigFactory.from_dict({WHERE_CLAUSE_SUFFIX_KEY: " ", CLUSTER_KEY: "gold"})
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(DruidMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(DruidMetadataExtractor.CLUSTER_KEY))
+        self._cluster = "{}".format(conf.get_string(DruidMetadataExtractor.CLUSTER_KEY))
 
         self.sql_stmt = DruidMetadataExtractor.SQL_STATEMENT.format(
-            where_clause_suffix=conf.get_string(DruidMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY,
-                                                default=''))
+            where_clause_suffix=conf.get_string(DruidMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY, default="")
+        )
 
         self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
+        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt})
+        )
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None
@@ -67,7 +70,7 @@ class DruidMetadataExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.druid_metadata'
+        return "extractor.druid_metadata"
 
     def _get_extract_iter(self) -> Iterator[TableMetadata]:
         """
@@ -79,16 +82,19 @@ class DruidMetadataExtractor(Extractor):
             # no table description and column description
             for row in group:
                 last_row = row
-                columns.append(ColumnMetadata(name=row['col_name'],
-                                              description='',
-                                              col_type=row['col_type'],
-                                              sort_order=row['col_sort_order']))
-            yield TableMetadata(database='druid',
-                                cluster=self._cluster,
-                                schema=last_row['schema'],
-                                name=last_row['name'],
-                                description='',
-                                columns=columns)
+                columns.append(
+                    ColumnMetadata(
+                        name=row["col_name"], description="", col_type=row["col_type"], sort_order=row["col_sort_order"]
+                    )
+                )
+            yield TableMetadata(
+                database="druid",
+                cluster=self._cluster,
+                schema=last_row["schema"],
+                name=last_row["name"],
+                description="",
+                columns=columns,
+            )
 
     def _get_raw_extract_iter(self) -> Iterator[Dict[str, Any]]:
         """
@@ -107,6 +113,6 @@ class DruidMetadataExtractor(Extractor):
         :return:
         """
         if row:
-            return TableKey(schema=row['schema'], table_name=row['name'])
+            return TableKey(schema=row["schema"], table_name=row["name"])
 
         return None

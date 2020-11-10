@@ -13,59 +13,60 @@ from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
 
 
 class TestNeo4jExtractor(unittest.TestCase):
-
     def test_adding_filter(self: Any) -> None:
         extractor = Neo4jSearchDataExtractor()
-        actual = extractor._add_publish_tag_filter('foo', 'MATCH (table:Table) {publish_tag_filter} RETURN table')
+        actual = extractor._add_publish_tag_filter("foo", "MATCH (table:Table) {publish_tag_filter} RETURN table")
 
         self.assertEqual(actual, """MATCH (table:Table) WHERE table.published_tag = 'foo' RETURN table""")
 
     def test_not_adding_filter(self: Any) -> None:
         extractor = Neo4jSearchDataExtractor()
-        actual = extractor._add_publish_tag_filter('', 'MATCH (table:Table) {publish_tag_filter} RETURN table')
+        actual = extractor._add_publish_tag_filter("", "MATCH (table:Table) {publish_tag_filter} RETURN table")
 
         self.assertEqual(actual, """MATCH (table:Table)  RETURN table""")
 
     def test_default_search_query(self: Any) -> None:
-        with patch.object(Neo4jExtractor, '_get_driver'):
+        with patch.object(Neo4jExtractor, "_get_driver"):
             extractor = Neo4jSearchDataExtractor()
-            conf = ConfigFactory.from_dict({
-                'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY):
-                    'test-endpoint',
-                'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER):
-                    'test-user',
-                'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW):
-                    'test-passwd',
-                'extractor.search_data.{}'.format(Neo4jSearchDataExtractor.ENTITY_TYPE):
-                    'dashboard',
-            })
-            extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                                  scope=extractor.get_scope()))
-            self.assertEqual(extractor.cypher_query, Neo4jSearchDataExtractor
-                             .DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY.format(publish_tag_filter=''))
+            conf = ConfigFactory.from_dict(
+                {
+                    "extractor.search_data.extractor.neo4j.{}".format(
+                        Neo4jExtractor.GRAPH_URL_CONFIG_KEY
+                    ): "test-endpoint",
+                    "extractor.search_data.extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_USER): "test-user",
+                    "extractor.search_data.extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_PW): "test-passwd",
+                    "extractor.search_data.{}".format(Neo4jSearchDataExtractor.ENTITY_TYPE): "dashboard",
+                }
+            )
+            extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
+            self.assertEqual(
+                extractor.cypher_query,
+                Neo4jSearchDataExtractor.DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY.format(publish_tag_filter=""),
+            )
 
     def test_default_search_query_with_tag(self: Any) -> None:
-        with patch.object(Neo4jExtractor, '_get_driver'):
+        with patch.object(Neo4jExtractor, "_get_driver"):
             extractor = Neo4jSearchDataExtractor()
-            conf = ConfigFactory.from_dict({
-                'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY):
-                    'test-endpoint',
-                'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER):
-                    'test-user',
-                'extractor.search_data.extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW):
-                    'test-passwd',
-                'extractor.search_data.{}'.format(Neo4jSearchDataExtractor.ENTITY_TYPE):
-                    'dashboard',
-                'extractor.search_data.{}'.format(JOB_PUBLISH_TAG):
-                    'test-date',
-            })
-            extractor.init(Scoped.get_scoped_conf(conf=conf,
-                                                  scope=extractor.get_scope()))
+            conf = ConfigFactory.from_dict(
+                {
+                    "extractor.search_data.extractor.neo4j.{}".format(
+                        Neo4jExtractor.GRAPH_URL_CONFIG_KEY
+                    ): "test-endpoint",
+                    "extractor.search_data.extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_USER): "test-user",
+                    "extractor.search_data.extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_PW): "test-passwd",
+                    "extractor.search_data.{}".format(Neo4jSearchDataExtractor.ENTITY_TYPE): "dashboard",
+                    "extractor.search_data.{}".format(JOB_PUBLISH_TAG): "test-date",
+                }
+            )
+            extractor.init(Scoped.get_scoped_conf(conf=conf, scope=extractor.get_scope()))
 
-            self.assertEqual(extractor.cypher_query,
-                             Neo4jSearchDataExtractor.DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY.format
-                             (publish_tag_filter="""WHERE dashboard.published_tag = 'test-date'"""))
+            self.assertEqual(
+                extractor.cypher_query,
+                Neo4jSearchDataExtractor.DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY.format(
+                    publish_tag_filter="""WHERE dashboard.published_tag = 'test-date'"""
+                ),
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

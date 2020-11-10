@@ -10,7 +10,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BaseRestApiQuery(object, metaclass=abc.ABCMeta):
-
     @abc.abstractmethod
     def execute(self) -> Iterator[Dict[str, Any]]:
         """
@@ -31,9 +30,7 @@ class RestApiQuerySeed(BaseRestApiQuery):
     Example: see ModeDashboardExtractor._build_restapi_query
     """
 
-    def __init__(self,
-                 seed_record: Iterable[Dict[str, Any]]
-                 ) -> None:
+    def __init__(self, seed_record: Iterable[Dict[str, Any]]) -> None:
         self._seed_record = seed_record
 
     def execute(self) -> Iterator[Dict[str, Any]]:
@@ -46,4 +43,4 @@ class EmptyRestApiQuerySeed(RestApiQuerySeed):
     """
 
     def __init__(self) -> None:
-        super(EmptyRestApiQuerySeed, self).__init__([{'empty_rest_api_query_seed': 1}])
+        super(EmptyRestApiQuerySeed, self).__init__([{"empty_rest_api_query_seed": 1}])

@@ -13,8 +13,9 @@ class FSElasticsearchJSONLoader(Loader):
     """
     Loader class to produce Elasticsearch bulk load file to Local FileSystem
     """
-    FILE_PATH_CONFIG_KEY = 'file_path'
-    FILE_MODE_CONFIG_KEY = 'mode'
+
+    FILE_PATH_CONFIG_KEY = "file_path"
+    FILE_MODE_CONFIG_KEY = "mode"
 
     def init(self, conf: ConfigTree) -> None:
         """
@@ -24,9 +25,9 @@ class FSElasticsearchJSONLoader(Loader):
         """
         self.conf = conf
         self.file_path = self.conf.get_string(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY)
-        self.file_mode = self.conf.get_string(FSElasticsearchJSONLoader.FILE_MODE_CONFIG_KEY, 'w')
+        self.file_mode = self.conf.get_string(FSElasticsearchJSONLoader.FILE_MODE_CONFIG_KEY, "w")
 
-        file_dir = self.file_path.rsplit('/', 1)[0]
+        file_dir = self.file_path.rsplit("/", 1)[0]
         self._ensure_directory_exists(file_dir)
         self.file_handler = open(self.file_path, self.file_mode)
 
@@ -65,4 +66,4 @@ class FSElasticsearchJSONLoader(Loader):
             self.file_handler.close()
 
     def get_scope(self) -> str:
-        return 'loader.filesystem.elasticsearch'
+        return "loader.filesystem.elasticsearch"

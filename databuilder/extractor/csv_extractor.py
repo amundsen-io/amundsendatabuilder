@@ -14,7 +14,7 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 class CsvExtractor(Extractor):
     # Config keys
-    FILE_LOCATION = 'file_location'
+    FILE_LOCATION = "file_location"
 
     """
     An Extractor that extracts records via CSV.
@@ -27,7 +27,7 @@ class CsvExtractor(Extractor):
         self.conf = conf
         self.file_location = conf.get_string(CsvExtractor.FILE_LOCATION)
 
-        model_class = conf.get('model_class', None)
+        model_class = conf.get("model_class", None)
         if model_class:
             module_name, class_name = model_class.rsplit(".", 1)
             mod = importlib.import_module(module_name)
@@ -38,13 +38,12 @@ class CsvExtractor(Extractor):
         """
         Create an iterator to execute sql.
         """
-        if not hasattr(self, 'results'):
-            with open(self.file_location, 'r') as fin:
+        if not hasattr(self, "results"):
+            with open(self.file_location, "r") as fin:
                 self.results = [dict(i) for i in csv.DictReader(fin)]
 
-        if hasattr(self, 'model_class'):
-            results = [self.model_class(**result)
-                       for result in self.results]
+        if hasattr(self, "model_class"):
+            results = [self.model_class(**result) for result in self.results]
         else:
             results = self.results
         self.iter = iter(results)
@@ -62,13 +61,13 @@ class CsvExtractor(Extractor):
             raise e
 
     def get_scope(self) -> str:
-        return 'extractor.csv'
+        return "extractor.csv"
 
 
 class CsvTableColumnExtractor(Extractor):
     # Config keys
-    TABLE_FILE_LOCATION = 'table_file_location'
-    COLUMN_FILE_LOCATION = 'column_file_location'
+    TABLE_FILE_LOCATION = "table_file_location"
+    COLUMN_FILE_LOCATION = "column_file_location"
 
     """
     An Extractor that combines Table and Column CSVs.
@@ -83,65 +82,58 @@ class CsvTableColumnExtractor(Extractor):
         self.column_file_location = conf.get_string(CsvTableColumnExtractor.COLUMN_FILE_LOCATION)
         self._load_csv()
 
-    def _get_key(self,
-                 db: str,
-                 cluster: str,
-                 schema: str,
-                 tbl: str
-                 ) -> str:
-        return TableMetadata.TABLE_KEY_FORMAT.format(db=db,
-                                                     cluster=cluster,
-                                                     schema=schema,
-                                                     tbl=tbl)
+    def _get_key(self, db: str, cluster: str, schema: str, tbl: str) -> str:
+        return TableMetadata.TABLE_KEY_FORMAT.format(db=db, cluster=cluster, schema=schema, tbl=tbl)
 
     def _load_csv(self) -> None:
         """
         Create an iterator to execute sql.
         """
 
-        with open(self.column_file_location, 'r') as fin:
+        with open(self.column_file_location, "r") as fin:
             self.columns = [dict(i) for i in csv.DictReader(fin)]
 
         parsed_columns = defaultdict(list)
         for column_dict in self.columns:
-            db = column_dict['database']
-            cluster = column_dict['cluster']
-            schema = column_dict['schema']
-            table_name = column_dict['table_name']
+            db = column_dict["database"]
+            cluster = column_dict["cluster"]
+            schema = column_dict["schema"]
+            table_name = column_dict["table_name"]
             id = self._get_key(db, cluster, schema, table_name)
             column = ColumnMetadata(
-                name=column_dict['name'],
-                description=column_dict['description'],
-                col_type=column_dict['col_type'],
-                sort_order=int(column_dict['sort_order'])
+                name=column_dict["name"],
+                description=column_dict["description"],
+                col_type=column_dict["col_type"],
+                sort_order=int(column_dict["sort_order"]),
             )
             parsed_columns[id].append(column)
 
         # Create Table Dictionary
-        with open(self.table_file_location, 'r') as fin:
+        with open(self.table_file_location, "r") as fin:
             tables = [dict(i) for i in csv.DictReader(fin)]
 
         results = []
         for table_dict in tables:
-            db = table_dict['database']
-            cluster = table_dict['cluster']
-            schema = table_dict['schema']
-            table_name = table_dict['name']
+            db = table_dict["database"]
+            cluster = table_dict["cluster"]
+            schema = table_dict["schema"]
+            table_name = table_dict["name"]
             id = self._get_key(db, cluster, schema, table_name)
             columns = parsed_columns[id]
             if columns is None:
                 columns = []
-            table = TableMetadata(database=table_dict['database'],
-                                  cluster=table_dict['cluster'],
-                                  schema=table_dict['schema'],
-                                  name=table_dict['name'],
-                                  description=table_dict['description'],
-                                  columns=columns,
-                                  # TODO: this possibly should parse stringified booleans;
-                                  # right now it only will be false for empty strings
-                                  is_view=bool(table_dict['is_view']),
-                                  tags=table_dict['tags']
-                                  )
+            table = TableMetadata(
+                database=table_dict["database"],
+                cluster=table_dict["cluster"],
+                schema=table_dict["schema"],
+                name=table_dict["name"],
+                description=table_dict["description"],
+                columns=columns,
+                # TODO: this possibly should parse stringified booleans;
+                # right now it only will be false for empty strings
+                is_view=bool(table_dict["is_view"]),
+                tags=table_dict["tags"],
+            )
             results.append(table)
         self._iter = iter(results)
 
@@ -158,4 +150,4 @@ class CsvTableColumnExtractor(Extractor):
             raise e
 
     def get_scope(self) -> str:
-        return 'extractor.csvtablecolumn'
+        return "extractor.csvtablecolumn"

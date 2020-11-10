@@ -6,19 +6,21 @@ import unittest
 from pyhocon import ConfigFactory
 from typing import Any
 
-from databuilder.transformer.regex_str_replace_transformer import RegexStrReplaceTransformer, \
-    REGEX_REPLACE_TUPLE_LIST, ATTRIBUTE_NAME
+from databuilder.transformer.regex_str_replace_transformer import (
+    RegexStrReplaceTransformer,
+    REGEX_REPLACE_TUPLE_LIST,
+    ATTRIBUTE_NAME,
+)
 
 
 class TestRegexReplacement(unittest.TestCase):
-
     def test(self) -> None:
         transformer = self._default_test_transformer()
 
-        foo = Foo('abc')
+        foo = Foo("abc")
         actual = transformer.transform(foo)
 
-        self.assertEqual('bba', actual.val)
+        self.assertEqual("bba", actual.val)
 
     def test_numeric_val(self) -> None:
         transformer = self._default_test_transformer()
@@ -37,10 +39,7 @@ class TestRegexReplacement(unittest.TestCase):
         self.assertEqual(None, actual.val)
 
     def _default_test_transformer(self) -> RegexStrReplaceTransformer:
-        config = ConfigFactory.from_dict({
-            REGEX_REPLACE_TUPLE_LIST: [('a', 'b'), ('c', 'a')],
-            ATTRIBUTE_NAME: 'val'
-        })
+        config = ConfigFactory.from_dict({REGEX_REPLACE_TUPLE_LIST: [("a", "b"), ("c", "a")], ATTRIBUTE_NAME: "val"})
 
         transformer = RegexStrReplaceTransformer()
         transformer.init(config)
@@ -48,19 +47,16 @@ class TestRegexReplacement(unittest.TestCase):
         return transformer
 
     def test_dict_replace(self) -> None:
-        config = ConfigFactory.from_dict({
-            REGEX_REPLACE_TUPLE_LIST: [('\\', '\\\\')],
-            ATTRIBUTE_NAME: 'val'
-        })
+        config = ConfigFactory.from_dict({REGEX_REPLACE_TUPLE_LIST: [("\\", "\\\\")], ATTRIBUTE_NAME: "val"})
 
         transformer = RegexStrReplaceTransformer()
         transformer.init(config)
 
-        d = {'val': '\\'}
+        d = {"val": "\\"}
 
         actual = transformer.transform(d)
 
-        self.assertEqual({'val': '\\\\'}, actual)
+        self.assertEqual({"val": "\\\\"}, actual)
 
 
 class Foo(object):
@@ -68,5 +64,5 @@ class Foo(object):
         self.val = val
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

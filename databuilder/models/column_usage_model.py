@@ -5,7 +5,9 @@ from typing import Union, Iterable, List
 
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.usage.usage_constants import (
-    READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
+    READ_RELATION_TYPE,
+    READ_REVERSE_RELATION_TYPE,
+    READ_RELATION_COUNT_PROPERTY,
 )
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
@@ -19,6 +21,7 @@ class ColumnUsageModel(GraphSerializable):
     A model represents user <--> column graph model
     Currently it only support to serialize to table level
     """
+
     TABLE_NODE_LABEL = TableMetadata.TABLE_NODE_LABEL
     TABLE_NODE_KEY_FORMAT = TableMetadata.TABLE_KEY_FORMAT
 
@@ -28,15 +31,16 @@ class ColumnUsageModel(GraphSerializable):
     # Property key for relationship read, readby relationship
     READ_RELATION_COUNT = READ_RELATION_COUNT_PROPERTY
 
-    def __init__(self,
-                 database: str,
-                 cluster: str,
-                 schema: str,
-                 table_name: str,
-                 column_name: str,
-                 user_email: str,
-                 read_count: int,
-                 ) -> None:
+    def __init__(
+        self,
+        database: str,
+        cluster: str,
+        schema: str,
+        table_name: str,
+        column_name: str,
+        user_email: str,
+        read_count: int,
+    ) -> None:
         self.database = database
         self.cluster = cluster
         self.schema = schema
@@ -77,26 +81,25 @@ class ColumnUsageModel(GraphSerializable):
             end_label=User.USER_NODE_LABEL,
             type=ColumnUsageModel.TABLE_USER_RELATION_TYPE,
             reverse_type=ColumnUsageModel.USER_TABLE_RELATION_TYPE,
-            attributes={
-                ColumnUsageModel.READ_RELATION_COUNT: self.read_count
-            }
+            attributes={ColumnUsageModel.READ_RELATION_COUNT: self.read_count},
         )
         return [relationship]
 
     def _get_table_key(self) -> str:
-        return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
-                                                     cluster=self.cluster,
-                                                     schema=self.schema,
-                                                     tbl=self.table_name)
+        return TableMetadata.TABLE_KEY_FORMAT.format(
+            db=self.database, cluster=self.cluster, schema=self.schema, tbl=self.table_name
+        )
 
     def _get_user_key(self, email: str) -> str:
         return User.get_user_model_key(email=email)
 
     def __repr__(self) -> str:
-        return 'TableColumnUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                                                   self.cluster,
-                                                                                   self.schema,
-                                                                                   self.table_name,
-                                                                                   self.column_name,
-                                                                                   self.user_email,
-                                                                                   self.read_count)
+        return "TableColumnUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.database,
+            self.cluster,
+            self.schema,
+            self.table_name,
+            self.column_name,
+            self.user_email,
+            self.read_count,
+        )

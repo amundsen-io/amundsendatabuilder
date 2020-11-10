@@ -27,9 +27,7 @@ class TableauDashboardUtils:
             - any [], (), -, &, and ? characters are deleted
         """
         # this indentation looks a little odd, but otherwise the linter complains
-        return re.sub(r' ', '_',
-                      re.sub(r'\.', '_',
-                             re.sub(r'(\[|\]|\(|\)|\-|\&|\?)', '', schema_name)))
+        return re.sub(r" ", "_", re.sub(r"\.", "_", re.sub(r"(\[|\]|\(|\)|\-|\&|\?)", "", schema_name)))
 
     @staticmethod
     def sanitize_database_name(database_name: str) -> str:
@@ -38,7 +36,7 @@ class TableauDashboardUtils:
         Sanitization behaves as follows:
             - all hyphens are deleted
         """
-        return re.sub(r'-', '', database_name)
+        return re.sub(r"-", "", database_name)
 
     @staticmethod
     def sanitize_table_name(table_name: str) -> str:
@@ -49,7 +47,7 @@ class TableauDashboardUtils:
         Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
-        return re.sub(r'(\/|\')', '', table_name)
+        return re.sub(r"(\/|\')", "", table_name)
 
     @staticmethod
     def sanitize_workbook_name(workbook_name: str) -> str:
@@ -60,7 +58,7 @@ class TableauDashboardUtils:
         Sanitization behaves as follows:
             - all forward slashes and single quotes characters are deleted
         """
-        return re.sub(r'(\/|\')', '', workbook_name)
+        return re.sub(r"(\/|\')", "", workbook_name)
 
 
 class TableauGraphQLApiExtractor(Extractor):
@@ -69,9 +67,9 @@ class TableauGraphQLApiExtractor(Extractor):
     """
 
     API_BASE_URL = const.API_BASE_URL
-    QUERY = 'query'
-    QUERY_VARIABLES = 'query_variables'
-    VERIFY_REQUEST = 'verify_request'
+    QUERY = "query"
+    QUERY_VARIABLES = "query_variables"
+    VERIFY_REQUEST = "verify_request"
 
     def init(self, conf: ConfigTree) -> None:
         self._conf = conf
@@ -79,7 +77,7 @@ class TableauGraphQLApiExtractor(Extractor):
         self._query = self._conf.get(TableauGraphQLApiExtractor.QUERY)
         self._iterator: Optional[Iterator[Dict[str, Any]]] = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
-        self._metadata_url = '{api_base_url}/api/metadata/graphql'.format(
+        self._metadata_url = "{api_base_url}/api/metadata/graphql".format(
             api_base_url=self._conf.get_string(TableauGraphQLApiExtractor.API_BASE_URL)
         )
         self._query_variables = self._conf.get(TableauGraphQLApiExtractor.QUERY_VARIABLES, {})
@@ -89,22 +87,14 @@ class TableauGraphQLApiExtractor(Extractor):
         """
         Executes the extractor's given query and returns the data from the results.
         """
-        query_payload = json.dumps({
-            'query': self._query,
-            'variables': self._query_variables
-        })
-        headers = {
-            'Content-Type': 'application/json',
-            'X-Tableau-Auth': self._auth_token
-        }
-        params = {
-            'headers': headers
-        }
+        query_payload = json.dumps({"query": self._query, "variables": self._query_variables})
+        headers = {"Content-Type": "application/json", "X-Tableau-Auth": self._auth_token}
+        params = {"headers": headers}
         if self._verify_request is not None:
-            params['verify'] = self._verify_request
+            params["verify"] = self._verify_request
 
         response = requests.post(url=self._metadata_url, data=query_payload, **params)
-        return response.json()['data']
+        return response.json()["data"]
 
     def execute(self) -> Iterator[Dict[str, Any]]:
         """
@@ -170,29 +160,23 @@ class TableauDashboardAuth:
         for details or ask your Tableau server administrator.
         """
         self._auth_url = "{api_base_url}/api/{api_version}/auth/signin".format(
-            api_base_url=self._api_base_url,
-            api_version=self._api_version
+            api_base_url=self._api_base_url, api_version=self._api_version
         )
 
-        payload = json.dumps({
-            'credentials': {
-                'personalAccessTokenName': self._access_token_name,
-                'personalAccessTokenSecret': self._access_token_secret,
-                'site': {
-                    'contentUrl': self._site_name
+        payload = json.dumps(
+            {
+                "credentials": {
+                    "personalAccessTokenName": self._access_token_name,
+                    "personalAccessTokenSecret": self._access_token_secret,
+                    "site": {"contentUrl": self._site_name},
                 }
             }
-        })
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
+        )
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
         # verify = False is needed bypass occasional (valid) self-signed cert errors. TODO: actually fix it!!
-        params = {
-            'headers': headers
-        }
+        params = {"headers": headers}
         if self._verify_request is not None:
-            params['verify'] = self._verify_request
+            params["verify"] = self._verify_request
 
         response_json = requests.post(url=self._auth_url, data=payload, **params).json()
-        return response_json['credentials']['token']
+        return response_json["credentials"]["token"]

@@ -13,6 +13,7 @@ class Loader(Scoped):
     """
     A loader loads to the destination or to the staging area
     """
+
     @abc.abstractmethod
     def init(self, conf: ConfigTree) -> None:
         pass
@@ -22,4 +23,4 @@ class Loader(Scoped):
         pass
 
     def get_scope(self) -> str:
-        return 'loader'
+        return "loader"

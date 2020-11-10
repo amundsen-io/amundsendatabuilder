@@ -12,8 +12,8 @@ from databuilder.extractor.base_extractor import Extractor
 
 class SQLAlchemyExtractor(Extractor):
     # Config keys
-    CONN_STRING = 'conn_string'
-    EXTRACT_SQL = 'extract_sql'
+    CONN_STRING = "conn_string"
+    EXTRACT_SQL = "extract_sql"
     """
     An Extractor that extracts records via SQLAlchemy. Database that supports SQLAlchemy can use this extractor
     """
@@ -29,7 +29,7 @@ class SQLAlchemyExtractor(Extractor):
 
         self.extract_sql = conf.get_string(SQLAlchemyExtractor.EXTRACT_SQL)
 
-        model_class = conf.get('model_class', None)
+        model_class = conf.get("model_class", None)
         if model_class:
             module_name, class_name = model_class.rsplit(".", 1)
             mod = importlib.import_module(module_name)
@@ -48,12 +48,11 @@ class SQLAlchemyExtractor(Extractor):
         """
         Create an iterator to execute sql.
         """
-        if not hasattr(self, 'results'):
+        if not hasattr(self, "results"):
             self.results = self.connection.execute(self.extract_sql)
 
-        if hasattr(self, 'model_class'):
-            results = [self.model_class(**result)
-                       for result in self.results]
+        if hasattr(self, "model_class"):
+            results = [self.model_class(**result) for result in self.results]
         else:
             results = self.results
         self.iter = iter(results)
@@ -71,4 +70,4 @@ class SQLAlchemyExtractor(Extractor):
             raise e
 
     def get_scope(self) -> str:
-        return 'extractor.sqlalchemy'
+        return "extractor.sqlalchemy"

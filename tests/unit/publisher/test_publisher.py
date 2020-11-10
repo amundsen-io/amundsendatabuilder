@@ -10,7 +10,6 @@ from databuilder.publisher.base_publisher import Publisher, NoopPublisher
 
 
 class TestPublisher(unittest.TestCase):
-
     def testCallback(self) -> None:
         publisher = NoopPublisher()
         callback = MagicMock()
@@ -40,8 +39,8 @@ class FailedPublisher(Publisher):
         pass
 
     def publish_impl(self) -> None:
-        raise Exception('Bomb')
+        raise Exception("Bomb")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

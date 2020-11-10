@@ -12,12 +12,12 @@ from databuilder.models.table_column_usage import TableColumnUsage
 
 class TestBigQueryUsageTransform(unittest.TestCase):
 
-    DATABASE = 'bigquery'
-    CLUSTER = 'your-project-here'
-    DATASET = 'dataset'
-    TABLE = 'table'
-    COLUMN = '*'
-    EMAIL = 'your-user-here@test.com'
+    DATABASE = "bigquery"
+    CLUSTER = "your-project-here"
+    DATASET = "dataset"
+    TABLE = "table"
+    COLUMN = "*"
+    EMAIL = "your-user-here@test.com"
     READ_COUNT = 305
 
     def test_transform_function(self) -> None:
@@ -26,12 +26,14 @@ class TestBigQueryUsageTransform(unittest.TestCase):
         transformer = BigqueryUsageTransformer()
         transformer.init(config)
 
-        key = TableColumnUsageTuple(database=TestBigQueryUsageTransform.DATABASE,
-                                    cluster=TestBigQueryUsageTransform.CLUSTER,
-                                    schema=TestBigQueryUsageTransform.DATASET,
-                                    table=TestBigQueryUsageTransform.TABLE,
-                                    column=TestBigQueryUsageTransform.COLUMN,
-                                    email=TestBigQueryUsageTransform.EMAIL)
+        key = TableColumnUsageTuple(
+            database=TestBigQueryUsageTransform.DATABASE,
+            cluster=TestBigQueryUsageTransform.CLUSTER,
+            schema=TestBigQueryUsageTransform.DATASET,
+            table=TestBigQueryUsageTransform.TABLE,
+            column=TestBigQueryUsageTransform.COLUMN,
+            email=TestBigQueryUsageTransform.EMAIL,
+        )
 
         t1 = (key, TestBigQueryUsageTransform.READ_COUNT)
         xformed = transformer.transform(t1)
@@ -55,4 +57,4 @@ class TestBigQueryUsageTransform(unittest.TestCase):
         transformer = BigqueryUsageTransformer()
         transformer.init(config)
 
-        self.assertEqual(transformer.get_scope(), 'transformer.bigquery_usage')
+        self.assertEqual(transformer.get_scope(), "transformer.bigquery_usage")

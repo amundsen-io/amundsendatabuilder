@@ -23,17 +23,18 @@ class ElasticsearchPublisher(Publisher):
 
     Old index is deleted after the alias swap is complete
     """
-    FILE_PATH_CONFIG_KEY = 'file_path'
-    FILE_MODE_CONFIG_KEY = 'mode'
 
-    ELASTICSEARCH_CLIENT_CONFIG_KEY = 'client'
-    ELASTICSEARCH_DOC_TYPE_CONFIG_KEY = 'doc_type'
-    ELASTICSEARCH_NEW_INDEX_CONFIG_KEY = 'new_index'
-    ELASTICSEARCH_ALIAS_CONFIG_KEY = 'alias'
-    ELASTICSEARCH_MAPPING_CONFIG_KEY = 'mapping'
+    FILE_PATH_CONFIG_KEY = "file_path"
+    FILE_MODE_CONFIG_KEY = "mode"
+
+    ELASTICSEARCH_CLIENT_CONFIG_KEY = "client"
+    ELASTICSEARCH_DOC_TYPE_CONFIG_KEY = "doc_type"
+    ELASTICSEARCH_NEW_INDEX_CONFIG_KEY = "new_index"
+    ELASTICSEARCH_ALIAS_CONFIG_KEY = "alias"
+    ELASTICSEARCH_MAPPING_CONFIG_KEY = "mapping"
 
     # config to control how many max documents to publish at a time
-    ELASTICSEARCH_PUBLISHER_BATCH_SIZE = 'batch_size'
+    ELASTICSEARCH_PUBLISHER_BATCH_SIZE = "batch_size"
 
     DEFAULT_ELASTICSEARCH_INDEX_MAPPING = TABLE_ELASTICSEARCH_INDEX_MAPPING
 
@@ -44,17 +45,18 @@ class ElasticsearchPublisher(Publisher):
         self.conf = conf
 
         self.file_path = self.conf.get_string(ElasticsearchPublisher.FILE_PATH_CONFIG_KEY)
-        self.file_mode = self.conf.get_string(ElasticsearchPublisher.FILE_MODE_CONFIG_KEY, 'w')
+        self.file_mode = self.conf.get_string(ElasticsearchPublisher.FILE_MODE_CONFIG_KEY, "w")
 
         self.elasticsearch_type = self.conf.get_string(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY)
         self.elasticsearch_client = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_CLIENT_CONFIG_KEY)
         self.elasticsearch_new_index = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY)
         self.elasticsearch_alias = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY)
 
-        self.elasticsearch_mapping = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY,
-                                                   ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING)
-        self.elasticsearch_batch_size = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_PUBLISHER_BATCH_SIZE,
-                                                      10000)
+        self.elasticsearch_mapping = self.conf.get(
+            ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY,
+            ElasticsearchPublisher.DEFAULT_ELASTICSEARCH_INDEX_MAPPING,
+        )
+        self.elasticsearch_batch_size = self.conf.get(ElasticsearchPublisher.ELASTICSEARCH_PUBLISHER_BATCH_SIZE, 10000)
         self.file_handler = open(self.file_path, self.file_mode)
 
     def _fetch_old_index(self) -> List[str]:
@@ -66,8 +68,10 @@ class ElasticsearchPublisher(Publisher):
             indices = self.elasticsearch_client.indices.get_alias(self.elasticsearch_alias).keys()
             return indices
         except NotFoundError:
-            LOGGER.warn("Received index not found error from Elasticsearch. " +
-                        "The index doesn't exist for a newly created ES. It's OK on first run.")
+            LOGGER.warn(
+                "Received index not found error from Elasticsearch. "
+                + "The index doesn't exist for a newly created ES. It's OK on first run."
+            )
             # return empty list on exception
             return []
 
@@ -92,14 +96,13 @@ class ElasticsearchPublisher(Publisher):
         # create new index with mapping
         self.elasticsearch_client.indices.create(index=self.elasticsearch_new_index, body=self.elasticsearch_mapping)
         for action in actions:
-            index_row = dict(index=dict(_index=self.elasticsearch_new_index,
-                                        _type=self.elasticsearch_type))
+            index_row = dict(index=dict(_index=self.elasticsearch_new_index, _type=self.elasticsearch_type))
             bulk_actions.append(index_row)
             bulk_actions.append(action)
             cnt += 1
             if cnt == self.elasticsearch_batch_size:
                 self.elasticsearch_client.bulk(bulk_actions)
-                LOGGER.info('Publish {} of records to ES'.format(str(cnt)))
+                LOGGER.info("Publish {} of records to ES".format(str(cnt)))
                 cnt = 0
                 bulk_actions = []
 
@@ -123,4 +126,4 @@ class ElasticsearchPublisher(Publisher):
         self.elasticsearch_client.indices.update_aliases(update_action)
 
     def get_scope(self) -> str:
-        return 'publisher.elasticsearch'
+        return "publisher.elasticsearch"

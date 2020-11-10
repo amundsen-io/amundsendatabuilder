@@ -18,12 +18,10 @@ from databuilder.transformer.base_transformer import Transformer
 
 
 class TestJob(unittest.TestCase):
-
     def setUp(self) -> None:
         self.temp_dir_path = tempfile.mkdtemp()
-        self.dest_file_name = '{}/superhero.json'.format(self.temp_dir_path)
-        self.conf = ConfigFactory.from_dict(
-            {'loader.superhero.dest_file': self.dest_file_name})
+        self.dest_file_name = "{}/superhero.json".format(self.temp_dir_path)
+        self.conf = ConfigFactory.from_dict({"loader.superhero.dest_file": self.dest_file_name})
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir_path)
@@ -31,18 +29,18 @@ class TestJob(unittest.TestCase):
     def test_job(self) -> None:
 
         with patch("databuilder.job.job.StatsClient") as mock_statsd:
-            task = DefaultTask(SuperHeroExtractor(),
-                               SuperHeroLoader(),
-                               transformer=SuperHeroReverseNameTransformer())
+            task = DefaultTask(SuperHeroExtractor(), SuperHeroLoader(), transformer=SuperHeroReverseNameTransformer())
 
             job = DefaultJob(self.conf, task)
             job.launch()
 
-            expected_list = ['{"hero": "Super man", "name": "tneK kralC"}',
-                             '{"hero": "Bat man", "name": "enyaW ecurB"}']
-            with open(self.dest_file_name, 'r') as file:
+            expected_list = [
+                '{"hero": "Super man", "name": "tneK kralC"}',
+                '{"hero": "Bat man", "name": "enyaW ecurB"}',
+            ]
+            with open(self.dest_file_name, "r") as file:
                 for expected in expected_list:
-                    actual = file.readline().rstrip('\n')
+                    actual = file.readline().rstrip("\n")
                     self.assertEqual(expected, actual)
                 self.assertFalse(file.readline())
 
@@ -50,12 +48,10 @@ class TestJob(unittest.TestCase):
 
 
 class TestJobNoTransform(unittest.TestCase):
-
     def setUp(self) -> None:
         self.temp_dir_path = tempfile.mkdtemp()
-        self.dest_file_name = '{}/superhero.json'.format(self.temp_dir_path)
-        self.conf = ConfigFactory.from_dict(
-            {'loader.superhero.dest_file': self.dest_file_name})
+        self.dest_file_name = "{}/superhero.json".format(self.temp_dir_path)
+        self.conf = ConfigFactory.from_dict({"loader.superhero.dest_file": self.dest_file_name})
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir_path)
@@ -66,24 +62,25 @@ class TestJobNoTransform(unittest.TestCase):
         job = DefaultJob(self.conf, task)
         job.launch()
 
-        expected_list = ['{"hero": "Super man", "name": "Clark Kent"}',
-                         '{"hero": "Bat man", "name": "Bruce Wayne"}']
-        with open(self.dest_file_name, 'r') as file:
+        expected_list = ['{"hero": "Super man", "name": "Clark Kent"}', '{"hero": "Bat man", "name": "Bruce Wayne"}']
+        with open(self.dest_file_name, "r") as file:
             for expected in expected_list:
-                actual = file.readline().rstrip('\n')
+                actual = file.readline().rstrip("\n")
                 self.assertEqual(expected, actual)
             self.assertFalse(file.readline())
 
 
 class TestJobStatsd(unittest.TestCase):
-
     def setUp(self) -> None:
         self.temp_dir_path = tempfile.mkdtemp()
-        self.dest_file_name = '{}/superhero.json'.format(self.temp_dir_path)
+        self.dest_file_name = "{}/superhero.json".format(self.temp_dir_path)
         self.conf = ConfigFactory.from_dict(
-            {'loader.superhero.dest_file': self.dest_file_name,
-             'job.is_statsd_enabled': True,
-             'job.identifier': 'foobar'})
+            {
+                "loader.superhero.dest_file": self.dest_file_name,
+                "job.is_statsd_enabled": True,
+                "job.identifier": "foobar",
+            }
+        )
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_dir_path)
@@ -95,11 +92,13 @@ class TestJobStatsd(unittest.TestCase):
             job = DefaultJob(self.conf, task)
             job.launch()
 
-            expected_list = ['{"hero": "Super man", "name": "Clark Kent"}',
-                             '{"hero": "Bat man", "name": "Bruce Wayne"}']
-            with open(self.dest_file_name, 'r') as file:
+            expected_list = [
+                '{"hero": "Super man", "name": "Clark Kent"}',
+                '{"hero": "Bat man", "name": "Bruce Wayne"}',
+            ]
+            with open(self.dest_file_name, "r") as file:
                 for expected in expected_list:
-                    actual = file.readline().rstrip('\n')
+                    actual = file.readline().rstrip("\n")
                     self.assertEqual(expected, actual)
                 self.assertFalse(file.readline())
 
@@ -111,8 +110,7 @@ class SuperHeroExtractor(Extractor):
         pass
 
     def init(self, conf: ConfigTree) -> None:
-        self.records = [SuperHero(hero='Super man', name='Clark Kent'),
-                        SuperHero(hero='Bat man', name='Bruce Wayne')]
+        self.records = [SuperHero(hero="Super man", name="Clark Kent"), SuperHero(hero="Bat man", name="Bruce Wayne")]
         self.iter = iter(self.records)
 
     def extract(self) -> Any:
@@ -122,13 +120,11 @@ class SuperHeroExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.superhero'
+        return "extractor.superhero"
 
 
 class SuperHero:
-    def __init__(self,
-                 hero: str,
-                 name: str) -> None:
+    def __init__(self, hero: str, name: str) -> None:
         self.hero = hero
         self.name = name
 
@@ -148,25 +144,25 @@ class SuperHeroReverseNameTransformer(Transformer):
         return record
 
     def get_scope(self) -> str:
-        return 'transformer.superhero'
+        return "transformer.superhero"
 
 
 class SuperHeroLoader(Loader):
     def init(self, conf: ConfigTree) -> None:
         self.conf = conf
-        dest_file_path = self.conf.get_string('dest_file')
-        print('Loading to {}'.format(dest_file_path))
-        self.dest_file_obj = open(self.conf.get_string('dest_file'), 'w')
+        dest_file_path = self.conf.get_string("dest_file")
+        print("Loading to {}".format(dest_file_path))
+        self.dest_file_obj = open(self.conf.get_string("dest_file"), "w")
 
     def load(self, record: Any) -> None:
         str = json.dumps(record.__dict__, sort_keys=True)
-        print('Writing record: {}'.format(str))
-        self.dest_file_obj.write('{}\n'.format(str))
+        print("Writing record: {}".format(str))
+        self.dest_file_obj.write("{}\n".format(str))
         self.dest_file_obj.flush()
 
     def get_scope(self) -> str:
-        return 'loader.superhero'
+        return "loader.superhero"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

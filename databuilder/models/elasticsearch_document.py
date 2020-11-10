@@ -10,6 +10,7 @@ class ElasticsearchDocument:
     Base class for ElasticsearchDocument
     Each different resource ESDoc will be a subclass
     """
+
     __metaclass__ = ABCMeta
 
     def to_json(self) -> str:

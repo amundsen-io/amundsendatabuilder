@@ -5,8 +5,9 @@ import logging
 
 from pyhocon import ConfigTree, ConfigFactory
 
-from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_executions_extractor import \
-    ModeDashboardExecutionsExtractor
+from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_executions_extractor import (
+    ModeDashboardExecutionsExtractor,
+)
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.models.dashboard.dashboard_execution import DashboardExecution
@@ -27,16 +28,20 @@ class ModeDashboardLastSuccessfulExecutionExtractor(ModeDashboardExecutionsExtra
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(
-            ConfigFactory.from_dict({
-                STATIC_RECORD_DICT: {'product': 'mode',
-                                     'execution_state': 'succeeded',
-                                     'execution_id': DashboardExecution.LAST_SUCCESSFUL_EXECUTION_ID}
-            })
+            ConfigFactory.from_dict(
+                {
+                    STATIC_RECORD_DICT: {
+                        "product": "mode",
+                        "execution_state": "succeeded",
+                        "execution_id": DashboardExecution.LAST_SUCCESSFUL_EXECUTION_ID,
+                    }
+                }
+            )
         )
         super(ModeDashboardLastSuccessfulExecutionExtractor, self).init(conf)
 
     def get_scope(self) -> str:
-        return 'extractor.mode_dashboard_last_successful_execution'
+        return "extractor.mode_dashboard_last_successful_execution"
 
     def _build_restapi_query(self) -> RestApiQuery:
         """
@@ -50,11 +55,16 @@ class ModeDashboardLastSuccessfulExecutionExtractor(ModeDashboardExecutionsExtra
 
         # Reports
         # https://mode.com/developer/api-reference/analytics/reports/#listReportsInSpace
-        url = 'https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports'
-        json_path = '_embedded.reports[*].[token,last_successfully_run_at]'
-        field_names = ['dashboard_id', 'execution_timestamp']
-        last_successful_run_query = ModePaginatedRestApiQuery(query_to_join=spaces_query, url=url, params=params,
-                                                              json_path=json_path, field_names=field_names,
-                                                              skip_no_result=True)
+        url = "https://app.mode.com/api/{organization}/spaces/{dashboard_group_id}/reports"
+        json_path = "_embedded.reports[*].[token,last_successfully_run_at]"
+        field_names = ["dashboard_id", "execution_timestamp"]
+        last_successful_run_query = ModePaginatedRestApiQuery(
+            query_to_join=spaces_query,
+            url=url,
+            params=params,
+            json_path=json_path,
+            field_names=field_names,
+            skip_no_result=True,
+        )
 
         return last_successful_run_query

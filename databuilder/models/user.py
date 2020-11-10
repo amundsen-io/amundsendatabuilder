@@ -14,40 +14,42 @@ class User(GraphSerializable):
     """
     User model. This model doesn't define any relationship.
     """
-    USER_NODE_LABEL = 'User'
-    USER_NODE_KEY_FORMAT = '{email}'
-    USER_NODE_EMAIL = 'email'
-    USER_NODE_FIRST_NAME = 'first_name'
-    USER_NODE_LAST_NAME = 'last_name'
-    USER_NODE_FULL_NAME = 'full_name'
-    USER_NODE_GITHUB_NAME = 'github_username'
-    USER_NODE_TEAM = 'team_name'
-    USER_NODE_EMPLOYEE_TYPE = 'employee_type'
-    USER_NODE_MANAGER_EMAIL = 'manager_email'
-    USER_NODE_SLACK_ID = 'slack_id'
-    USER_NODE_IS_ACTIVE = 'is_active'  # bool value needs to be unquoted when publish to neo4j
-    USER_NODE_UPDATED_AT = 'updated_at'
-    USER_NODE_ROLE_NAME = 'role_name'
 
-    USER_MANAGER_RELATION_TYPE = 'MANAGE_BY'
-    MANAGER_USER_RELATION_TYPE = 'MANAGE'
+    USER_NODE_LABEL = "User"
+    USER_NODE_KEY_FORMAT = "{email}"
+    USER_NODE_EMAIL = "email"
+    USER_NODE_FIRST_NAME = "first_name"
+    USER_NODE_LAST_NAME = "last_name"
+    USER_NODE_FULL_NAME = "full_name"
+    USER_NODE_GITHUB_NAME = "github_username"
+    USER_NODE_TEAM = "team_name"
+    USER_NODE_EMPLOYEE_TYPE = "employee_type"
+    USER_NODE_MANAGER_EMAIL = "manager_email"
+    USER_NODE_SLACK_ID = "slack_id"
+    USER_NODE_IS_ACTIVE = "is_active"  # bool value needs to be unquoted when publish to neo4j
+    USER_NODE_UPDATED_AT = "updated_at"
+    USER_NODE_ROLE_NAME = "role_name"
 
-    def __init__(self,
-                 email: str,
-                 first_name: str = '',
-                 last_name: str = '',
-                 name: str = '',
-                 github_username: str = '',
-                 team_name: str = '',
-                 employee_type: str = '',
-                 manager_email: str = '',
-                 slack_id: str = '',
-                 is_active: bool = True,
-                 updated_at: int = 0,
-                 role_name: str = '',
-                 do_not_update_empty_attribute: bool = False,
-                 **kwargs: Any
-                 ) -> None:
+    USER_MANAGER_RELATION_TYPE = "MANAGE_BY"
+    MANAGER_USER_RELATION_TYPE = "MANAGE"
+
+    def __init__(
+        self,
+        email: str,
+        first_name: str = "",
+        last_name: str = "",
+        name: str = "",
+        github_username: str = "",
+        team_name: str = "",
+        employee_type: str = "",
+        manager_email: str = "",
+        slack_id: str = "",
+        is_active: bool = True,
+        updated_at: int = 0,
+        role_name: str = "",
+        do_not_update_empty_attribute: bool = False,
+        **kwargs: Any
+    ) -> None:
         """
         This class models user node for Amundsen people.
 
@@ -108,11 +110,9 @@ class User(GraphSerializable):
             return None
 
     @classmethod
-    def get_user_model_key(cls,
-                           email: str=None
-                           ) -> str:
+    def get_user_model_key(cls, email: str = None) -> str:
         if not email:
-            return ''
+            return ""
         return User.USER_NODE_KEY_FORMAT.format(email=email)
 
     def create_nodes(self) -> List[GraphNode]:
@@ -126,14 +126,14 @@ class User(GraphSerializable):
             User.USER_NODE_IS_ACTIVE: self.is_active,
         }
 
-        node_attributes[User.USER_NODE_FIRST_NAME] = self.first_name if self.first_name else ''
-        node_attributes[User.USER_NODE_LAST_NAME] = self.last_name if self.last_name else ''
-        node_attributes[User.USER_NODE_FULL_NAME] = self.name if self.name else ''
-        node_attributes[User.USER_NODE_GITHUB_NAME] = self.github_username if self.github_username else ''
-        node_attributes[User.USER_NODE_TEAM] = self.team_name if self.team_name else ''
-        node_attributes[User.USER_NODE_EMPLOYEE_TYPE] = self.employee_type if self.employee_type else ''
-        node_attributes[User.USER_NODE_SLACK_ID] = self.slack_id if self.slack_id else ''
-        node_attributes[User.USER_NODE_ROLE_NAME] = self.role_name if self.role_name else ''
+        node_attributes[User.USER_NODE_FIRST_NAME] = self.first_name if self.first_name else ""
+        node_attributes[User.USER_NODE_LAST_NAME] = self.last_name if self.last_name else ""
+        node_attributes[User.USER_NODE_FULL_NAME] = self.name if self.name else ""
+        node_attributes[User.USER_NODE_GITHUB_NAME] = self.github_username if self.github_username else ""
+        node_attributes[User.USER_NODE_TEAM] = self.team_name if self.team_name else ""
+        node_attributes[User.USER_NODE_EMPLOYEE_TYPE] = self.employee_type if self.employee_type else ""
+        node_attributes[User.USER_NODE_SLACK_ID] = self.slack_id if self.slack_id else ""
+        node_attributes[User.USER_NODE_ROLE_NAME] = self.role_name if self.role_name else ""
 
         if self.updated_at:
             node_attributes[User.USER_NODE_UPDATED_AT] = self.updated_at
@@ -151,9 +151,7 @@ class User(GraphSerializable):
                     del node_attributes[k]
 
         node = GraphNode(
-            key=User.get_user_model_key(email=self.email),
-            label=User.USER_NODE_LABEL,
-            attributes=node_attributes
+            key=User.get_user_model_key(email=self.email), label=User.USER_NODE_LABEL, attributes=node_attributes
         )
 
         return [node]
@@ -168,22 +166,23 @@ class User(GraphSerializable):
                 end_key=self.get_user_model_key(email=self.manager_email),
                 type=User.USER_MANAGER_RELATION_TYPE,
                 reverse_type=User.MANAGER_USER_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             return [relationship]
         return []
 
     def __repr__(self) -> str:
-        return 'User({!r}, {!r}, {!r}, {!r}, {!r}, ' \
-               '{!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.first_name,
-                                                                  self.last_name,
-                                                                  self.name,
-                                                                  self.email,
-                                                                  self.github_username,
-                                                                  self.team_name,
-                                                                  self.slack_id,
-                                                                  self.manager_email,
-                                                                  self.employee_type,
-                                                                  self.is_active,
-                                                                  self.updated_at,
-                                                                  self.role_name)
+        return "User({!r}, {!r}, {!r}, {!r}, {!r}, " "{!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.first_name,
+            self.last_name,
+            self.name,
+            self.email,
+            self.github_username,
+            self.team_name,
+            self.slack_id,
+            self.manager_email,
+            self.employee_type,
+            self.is_active,
+            self.updated_at,
+            self.role_name,
+        )

@@ -6,7 +6,7 @@ import logging
 from typing import Optional, Any, Union, Iterator
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (GraphSerializable)
+from databuilder.models.graph_serializable import GraphSerializable
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
@@ -18,25 +18,28 @@ class DashboardExecution(GraphSerializable):
     """
     A model that encapsulate Dashboard's execution timestamp in epoch and execution state
     """
-    DASHBOARD_EXECUTION_LABEL = 'Execution'
-    DASHBOARD_EXECUTION_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group_id}/' \
-                                     '{dashboard_id}/execution/{execution_id}'
-    DASHBOARD_EXECUTION_RELATION_TYPE = 'EXECUTED'
-    EXECUTION_DASHBOARD_RELATION_TYPE = 'EXECUTION_OF'
 
-    LAST_EXECUTION_ID = '_last_execution'
-    LAST_SUCCESSFUL_EXECUTION_ID = '_last_successful_execution'
+    DASHBOARD_EXECUTION_LABEL = "Execution"
+    DASHBOARD_EXECUTION_KEY_FORMAT = (
+        "{product}_dashboard://{cluster}.{dashboard_group_id}/" "{dashboard_id}/execution/{execution_id}"
+    )
+    DASHBOARD_EXECUTION_RELATION_TYPE = "EXECUTED"
+    EXECUTION_DASHBOARD_RELATION_TYPE = "EXECUTION_OF"
 
-    def __init__(self,
-                 dashboard_group_id: Optional[str],
-                 dashboard_id: Optional[str],
-                 execution_timestamp: int,
-                 execution_state: str,
-                 execution_id: str = LAST_EXECUTION_ID,
-                 product: Optional[str] = '',
-                 cluster: str = 'gold',
-                 **kwargs: Any
-                 ) -> None:
+    LAST_EXECUTION_ID = "_last_execution"
+    LAST_SUCCESSFUL_EXECUTION_ID = "_last_successful_execution"
+
+    def __init__(
+        self,
+        dashboard_group_id: Optional[str],
+        dashboard_id: Optional[str],
+        execution_timestamp: int,
+        execution_state: str,
+        execution_id: str = LAST_EXECUTION_ID,
+        product: Optional[str] = "",
+        cluster: str = "gold",
+        **kwargs: Any
+    ) -> None:
         self._dashboard_group_id = dashboard_group_id
         self._dashboard_id = dashboard_id
         self._execution_timestamp = execution_timestamp
@@ -57,10 +60,7 @@ class DashboardExecution(GraphSerializable):
         node = GraphNode(
             key=self._get_last_execution_node_key(),
             label=DashboardExecution.DASHBOARD_EXECUTION_LABEL,
-            attributes={
-                'timestamp': self._execution_timestamp,
-                'state': self._execution_state
-            }
+            attributes={"timestamp": self._execution_timestamp, "state": self._execution_state},
         )
         yield node
 
@@ -77,13 +77,13 @@ class DashboardExecution(GraphSerializable):
                 product=self._product,
                 cluster=self._cluster,
                 dashboard_group=self._dashboard_group_id,
-                dashboard_name=self._dashboard_id
+                dashboard_name=self._dashboard_id,
             ),
             end_label=DashboardExecution.DASHBOARD_EXECUTION_LABEL,
             end_key=self._get_last_execution_node_key(),
             type=DashboardExecution.DASHBOARD_EXECUTION_RELATION_TYPE,
             reverse_type=DashboardExecution.EXECUTION_DASHBOARD_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         yield relationship
 
@@ -93,16 +93,16 @@ class DashboardExecution(GraphSerializable):
             cluster=self._cluster,
             dashboard_group_id=self._dashboard_group_id,
             dashboard_id=self._dashboard_id,
-            execution_id=self._execution_id
+            execution_id=self._execution_id,
         )
 
     def __repr__(self) -> str:
-        return 'DashboardExecution({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
+        return "DashboardExecution({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
             self._dashboard_group_id,
             self._dashboard_id,
             self._execution_timestamp,
             self._execution_state,
             self._execution_id,
             self._product,
-            self._cluster
+            self._cluster,
         )

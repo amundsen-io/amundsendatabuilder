@@ -14,7 +14,7 @@ from pyspark.sql.utils import AnalysisException
 from typing import Iterator, Union, List, Dict, Optional  # noqa: F401
 import concurrent.futures
 
-TableKey = namedtuple('TableKey', ['schema', 'table_name'])
+TableKey = namedtuple("TableKey", ["schema", "table_name"])
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,12 +35,14 @@ class ScrapedColumnMetadata(object):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ScrapedColumnMetadata):
             return False
-        return self.name == other.name and \
-            self.data_type == other.data_type and \
-            self.description == other.description and \
-            self.sort_order == other.sort_order and \
-            self.is_partition == other.is_partition and \
-            self.attributes == other.attributes
+        return (
+            self.name == other.name
+            and self.data_type == other.data_type
+            and self.description == other.description
+            and self.sort_order == other.sort_order
+            and self.is_partition == other.is_partition
+            and self.attributes == other.attributes
+        )
 
     def __repr__(self) -> str:
         return "{0}:{1}".format(self.name, self.data_type)
@@ -48,9 +50,9 @@ class ScrapedColumnMetadata(object):
 
 # TODO consider deprecating this for using TableMetadata directly
 class ScrapedTableMetadata(object):
-    LAST_MODIFIED_KEY = 'lastModified'
-    DESCRIPTION_KEY = 'description'
-    TABLE_FORMAT_KEY = 'format'
+    LAST_MODIFIED_KEY = "lastModified"
+    DESCRIPTION_KEY = "description"
+    TABLE_FORMAT_KEY = "format"
 
     def __init__(self, schema: str, table: str):
         self.schema: str = schema
@@ -103,7 +105,7 @@ class ScrapedTableMetadata(object):
     def is_delta_table(self) -> bool:
         details = self.get_details()
         if details and self.TABLE_FORMAT_KEY in details:
-            return details[self.TABLE_FORMAT_KEY].lower() == 'delta'
+            return details[self.TABLE_FORMAT_KEY].lower() == "delta"
         else:
             return False
 
@@ -117,6 +119,7 @@ class DeltaLakeMetadataExtractor(Extractor):
     This requires a spark session to run that has a hive metastore populated with all of the delta tables
     that you are interested in.
     """
+
     # CONFIG KEYS
     DATABASE_KEY = "database"
     # If you want to exclude specific schemas
@@ -126,11 +129,10 @@ class DeltaLakeMetadataExtractor(Extractor):
     CLUSTER_KEY = "cluster"
     # By default, this will only process and emit delta-lake tables, but it can support all hive table types.
     DELTA_TABLES_ONLY = "delta_tables_only"
-    DEFAULT_CONFIG = ConfigFactory.from_dict({DATABASE_KEY: "delta-lake",
-                                              EXCLUDE_LIST_SCHEMAS_KEY: [],
-                                              SCHEMA_LIST_KEY: [],
-                                              DELTA_TABLES_ONLY: True})
-    PARTITION_COLUMN_TAG = 'is_partition'
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {DATABASE_KEY: "delta-lake", EXCLUDE_LIST_SCHEMAS_KEY: [], SCHEMA_LIST_KEY: [], DELTA_TABLES_ONLY: True}
+    )
+    PARTITION_COLUMN_TAG = "is_partition"
 
     def init(self, conf: ConfigTree) -> None:
         self.conf = conf.with_fallback(DeltaLakeMetadataExtractor.DEFAULT_CONFIG)
@@ -153,7 +155,7 @@ class DeltaLakeMetadataExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.delta_lake_table_metadata'
+        return "extractor.delta_lake_table_metadata"
 
     def _get_extract_iter(self) -> Iterator[Union[TableMetadata, TableLastUpdated, None]]:
         """
@@ -188,7 +190,7 @@ class DeltaLakeMetadataExtractor(Extractor):
                     yield last_updated
 
     def get_schemas(self, exclude_list: List[str]) -> List[str]:
-        '''Returns all schemas.'''
+        """Returns all schemas."""
         schemas = self.spark.catalog.listDatabases()
         ret = []
         for schema in schemas:
@@ -197,14 +199,14 @@ class DeltaLakeMetadataExtractor(Extractor):
         return ret
 
     def get_all_tables(self, schemas: List[str]) -> List[Table]:
-        '''Returns all tables.'''
+        """Returns all tables."""
         ret = []
         for schema in schemas:
             ret.extend(self.get_tables_for_schema(schema))
         return ret
 
     def get_tables_for_schema(self, schema: str) -> List[Table]:
-        '''Returns all tables for a specific schema.'''
+        """Returns all tables for a specific schema."""
         return self.spark.catalog.listTables(schema)
 
     def scrape_all_tables(self, tables: List[Table]) -> List[Optional[ScrapedTableMetadata]]:
@@ -214,10 +216,10 @@ class DeltaLakeMetadataExtractor(Extractor):
         return scraped_tables
 
     def scrape_table(self, table: Table) -> Optional[ScrapedTableMetadata]:
-        '''Takes a table object and creates a scraped table metadata object.'''
+        """Takes a table object and creates a scraped table metadata object."""
         met = ScrapedTableMetadata(schema=table.database, table=table.name)
         table_name = met.get_full_table_name()
-        if table.tableType and table.tableType.lower() != 'view':
+        if table.tableType and table.tableType.lower() != "view":
             table_detail = self.scrape_table_detail(table_name)
             if table_detail is None:
                 LOGGER.error("Failed to parse table " + table_name)
@@ -256,8 +258,9 @@ class DeltaLakeMetadataExtractor(Extractor):
         # TODO the blanket try catches need to be changed
         describeExtendedOutput = []
         try:
-            describeExtendedOutput = self.spark.sql("describe extended {view_name}"
-                                                    .format(view_name=view_name)).collect()
+            describeExtendedOutput = self.spark.sql(
+                "describe extended {view_name}".format(view_name=view_name)
+            ).collect()
         except Exception as e:
             LOGGER.error(e)
             return None
@@ -266,15 +269,15 @@ class DeltaLakeMetadataExtractor(Extractor):
         for row in describeExtendedOutput:
             row_dict = row.asDict()
             if startAdding:
-                view_detail[row_dict['col_name']] = row_dict['data_type']
-            if "# Detailed Table" in row_dict['col_name']:
+                view_detail[row_dict["col_name"]] = row_dict["data_type"]
+            if "# Detailed Table" in row_dict["col_name"]:
                 # Then start parsing
                 startAdding = True
         return view_detail
 
     def fetch_columns(self, schema: str, table: str) -> List[ScrapedColumnMetadata]:
-        '''This fetches delta table columns, which unfortunately
-        in the general case cannot rely on spark.catalog.listColumns.'''
+        """This fetches delta table columns, which unfortunately
+        in the general case cannot rely on spark.catalog.listColumns."""
         raw_columns = []
         try:
             raw_columns = self.spark.sql("describe {0}.{1}".format(schema, table)).collect()
@@ -285,57 +288,57 @@ class DeltaLakeMetadataExtractor(Extractor):
         partition_cols = False
         sort_order = 0
         for row in raw_columns:
-            col_name = row['col_name']
+            col_name = row["col_name"]
             # NOTE: the behavior of describe has changed between spark 2 and spark 3
-            if col_name == '' or '#' in col_name:
+            if col_name == "" or "#" in col_name:
                 partition_cols = True
                 continue
             if not partition_cols:
                 column = ScrapedColumnMetadata(
-                    name=row['col_name'],
-                    description=row['comment'] if row['comment'] else None,
-                    data_type=row['data_type'],
-                    sort_order=sort_order
+                    name=row["col_name"],
+                    description=row["comment"] if row["comment"] else None,
+                    data_type=row["data_type"],
+                    sort_order=sort_order,
                 )
-                parsed_columns[row['col_name']] = column
+                parsed_columns[row["col_name"]] = column
                 sort_order += 1
             else:
-                if row['data_type'] in parsed_columns:
-                    LOGGER.debug("Adding partition column table for {0}".format(row['data_type']))
-                    parsed_columns[row['data_type']].set_is_partition(True)
-                elif row['col_name'] in parsed_columns:
-                    LOGGER.debug("Adding partition column table for {0}".format(row['col_name']))
-                    parsed_columns[row['col_name']].set_is_partition(True)
+                if row["data_type"] in parsed_columns:
+                    LOGGER.debug("Adding partition column table for {0}".format(row["data_type"]))
+                    parsed_columns[row["data_type"]].set_is_partition(True)
+                elif row["col_name"] in parsed_columns:
+                    LOGGER.debug("Adding partition column table for {0}".format(row["col_name"]))
+                    parsed_columns[row["col_name"]].set_is_partition(True)
         return list(parsed_columns.values())
 
     def create_table_metadata(self, table: ScrapedTableMetadata) -> TableMetadata:
-        '''Creates the amundsen table metadata object from the ScrapedTableMetadata object.'''
+        """Creates the amundsen table metadata object from the ScrapedTableMetadata object."""
         amundsen_columns = []
         if table.columns:
             for column in table.columns:
                 amundsen_columns.append(
-                    ColumnMetadata(name=column.name,
-                                   description=column.description,
-                                   col_type=column.data_type,
-                                   sort_order=column.sort_order)
+                    ColumnMetadata(
+                        name=column.name,
+                        description=column.description,
+                        col_type=column.data_type,
+                        sort_order=column.sort_order,
+                    )
                 )
         description = table.get_table_description()
-        return TableMetadata(self._db,
-                             self._cluster,
-                             table.schema,
-                             table.table,
-                             description,
-                             amundsen_columns,
-                             table.is_view)
+        return TableMetadata(
+            self._db, self._cluster, table.schema, table.table, description, amundsen_columns, table.is_view
+        )
 
     def create_table_last_updated(self, table: ScrapedTableMetadata) -> Optional[TableLastUpdated]:
-        '''Creates the amundsen table last updated metadata object from the ScrapedTableMetadata object.'''
+        """Creates the amundsen table last updated metadata object from the ScrapedTableMetadata object."""
         last_modified = table.get_last_modified()
         if last_modified:
-            return TableLastUpdated(table_name=table.table,
-                                    last_updated_time_epoch=int(last_modified.timestamp()),
-                                    schema=table.schema,
-                                    db=self._db,
-                                    cluster=self._cluster)
+            return TableLastUpdated(
+                table_name=table.table,
+                last_updated_time_epoch=int(last_modified.timestamp()),
+                schema=table.schema,
+                db=self._db,
+                cluster=self._cluster,
+            )
         else:
             return None

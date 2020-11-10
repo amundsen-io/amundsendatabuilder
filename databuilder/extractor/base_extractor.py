@@ -26,4 +26,4 @@ class Extractor(Scoped):
         return None
 
     def get_scope(self) -> str:
-        return 'extractor'
+        return "extractor"

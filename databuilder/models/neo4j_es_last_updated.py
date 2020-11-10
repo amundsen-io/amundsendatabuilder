@@ -14,13 +14,14 @@ class Neo4jESLastUpdated(GraphSerializable):
     neo4j and es.
     """
 
-    LABEL = 'Updatedtimestamp'
-    KEY = 'amundsen_updated_timestamp'
-    LATEST_TIMESTAMP = 'latest_timestmap'
+    LABEL = "Updatedtimestamp"
+    KEY = "amundsen_updated_timestamp"
+    LATEST_TIMESTAMP = "latest_timestmap"
 
-    def __init__(self,
-                 timestamp: int,
-                 ) -> None:
+    def __init__(
+        self,
+        timestamp: int,
+    ) -> None:
         """
         :param timestamp: epoch for latest updated timestamp for neo4j an es
         """
@@ -44,9 +45,7 @@ class Neo4jESLastUpdated(GraphSerializable):
         node = GraphNode(
             key=Neo4jESLastUpdated.KEY,
             label=Neo4jESLastUpdated.LABEL,
-            attributes={
-                Neo4jESLastUpdated.LATEST_TIMESTAMP: self.timestamp
-            }
+            attributes={Neo4jESLastUpdated.LATEST_TIMESTAMP: self.timestamp},
         )
         return [node]
 

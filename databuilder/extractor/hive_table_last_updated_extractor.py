@@ -36,10 +36,10 @@ def fs_error_handler(f: Any) -> Any:
             return f(*args, **kwargs)
         except Exception as e:
             if is_client_side_error(e):
-                LOGGER.info('Invalid metadata. Skipping. args: {}, kwargs: {}. error: {}'.format(args, kwargs, e))
+                LOGGER.info("Invalid metadata. Skipping. args: {}, kwargs: {}. error: {}".format(args, kwargs, e))
                 return None
             else:
-                LOGGER.exception('Unknown exception while processing args: {}, kwargs: {}'.format(args, kwargs))
+                LOGGER.exception("Unknown exception while processing args: {}, kwargs: {}".format(args, kwargs))
                 return None
 
     return wrapper
@@ -56,6 +56,7 @@ class HiveTableLastUpdatedExtractor(Extractor):
     timestamp.
 
     """
+
     PARTITION_TABLE_SQL_STATEMENT = """
     SELECT
     DBS.NAME as `schema`,
@@ -86,41 +87,44 @@ class HiveTableLastUpdatedExtractor(Extractor):
     AND NOT EXISTS (SELECT * FROM PARTITION_KEYS WHERE PARTITION_KEYS.TBL_ID = TBLS.TBL_ID)
     """
 
-    DATABASE = 'hive'
+    DATABASE = "hive"
 
     # CONFIG KEYS
-    PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY = 'partitioned_table_where_clause_suffix'
-    NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY = 'non_partitioned_table_where_clause_suffix'
-    CLUSTER_KEY = 'cluster'
+    PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY = "partitioned_table_where_clause_suffix"
+    NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY = "non_partitioned_table_where_clause_suffix"
+    CLUSTER_KEY = "cluster"
     # number of threads that fetches metadata from FileSystem
-    FS_WORKER_POOL_SIZE = 'fs_worker_pool_size'
-    FS_WORKER_TIMEOUT_SEC = 'fs_worker_timeout_sec'
+    FS_WORKER_POOL_SIZE = "fs_worker_pool_size"
+    FS_WORKER_TIMEOUT_SEC = "fs_worker_timeout_sec"
     # If number of files that it needs to fetch metadata is larger than this threshold, it will skip the table.
-    FILE_CHECK_THRESHOLD = 'file_check_threshold'
+    FILE_CHECK_THRESHOLD = "file_check_threshold"
 
-    DEFAULT_CONFIG = ConfigFactory.from_dict({PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY: ' ',
-                                              NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY: ' ',
-                                              CLUSTER_KEY: 'gold',
-                                              FS_WORKER_POOL_SIZE: 500,
-                                              FS_WORKER_TIMEOUT_SEC: 60,
-                                              FILE_CHECK_THRESHOLD: -1})
+    DEFAULT_CONFIG = ConfigFactory.from_dict(
+        {
+            PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY: " ",
+            NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY: " ",
+            CLUSTER_KEY: "gold",
+            FS_WORKER_POOL_SIZE: 500,
+            FS_WORKER_TIMEOUT_SEC: 60,
+            FILE_CHECK_THRESHOLD: -1,
+        }
+    )
 
     def init(self, conf: ConfigTree) -> None:
         self._conf = conf.with_fallback(HiveTableLastUpdatedExtractor.DEFAULT_CONFIG)
 
         pool_size = self._conf.get_int(HiveTableLastUpdatedExtractor.FS_WORKER_POOL_SIZE)
-        LOGGER.info('Using thread pool size: {}'.format(pool_size))
+        LOGGER.info("Using thread pool size: {}".format(pool_size))
         self._fs_worker_pool = ThreadPool(processes=pool_size)
         self._fs_worker_timeout = self._conf.get_int(HiveTableLastUpdatedExtractor.FS_WORKER_TIMEOUT_SEC)
-        LOGGER.info('Using thread timeout: {} seconds'.format(self._fs_worker_timeout))
+        LOGGER.info("Using thread timeout: {} seconds".format(self._fs_worker_timeout))
 
-        self._cluster = '{}'.format(self._conf.get_string(HiveTableLastUpdatedExtractor.CLUSTER_KEY))
+        self._cluster = "{}".format(self._conf.get_string(HiveTableLastUpdatedExtractor.CLUSTER_KEY))
 
         self._partitioned_table_extractor = self._get_partitioned_table_sql_alchemy_extractor()
         self._non_partitioned_table_extractor = self._get_non_partitioned_table_sql_alchemy_extractor()
         self._fs = self._get_filesystem()
-        self._last_updated_filecheck_threshold \
-            = self._conf.get_int(HiveTableLastUpdatedExtractor.FILE_CHECK_THRESHOLD)
+        self._last_updated_filecheck_threshold = self._conf.get_int(HiveTableLastUpdatedExtractor.FILE_CHECK_THRESHOLD)
 
         self._extract_iter: Union[None, Iterator] = None
 
@@ -132,13 +136,16 @@ class HiveTableLastUpdatedExtractor(Extractor):
 
         sql_stmt = HiveTableLastUpdatedExtractor.PARTITION_TABLE_SQL_STATEMENT.format(
             where_clause_suffix=self._conf.get_string(
-                HiveTableLastUpdatedExtractor.PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY, ' '))
+                HiveTableLastUpdatedExtractor.PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY, " "
+            )
+        )
 
-        LOGGER.info('SQL for partitioned table against Hive metastore: {}'.format(sql_stmt))
+        LOGGER.info("SQL for partitioned table against Hive metastore: {}".format(sql_stmt))
 
         sql_alchemy_extractor = SQLAlchemyExtractor()
-        sql_alchemy_conf = Scoped.get_scoped_conf(self._conf, sql_alchemy_extractor.get_scope()) \
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: sql_stmt}))
+        sql_alchemy_conf = Scoped.get_scoped_conf(self._conf, sql_alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: sql_stmt})
+        )
         sql_alchemy_extractor.init(sql_alchemy_conf)
         return sql_alchemy_extractor
 
@@ -153,20 +160,23 @@ class HiveTableLastUpdatedExtractor(Extractor):
             where_clause_suffix = """
             {}
             AND {}
-            """.format(self._conf.get_string(
-                HiveTableLastUpdatedExtractor.NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY),
-                HiveTableLastUpdatedExtractor.ADDTIONAL_WHERE_CLAUSE)
+            """.format(
+                self._conf.get_string(HiveTableLastUpdatedExtractor.NON_PARTITIONED_TABLE_WHERE_CLAUSE_SUFFIX_KEY),
+                HiveTableLastUpdatedExtractor.ADDTIONAL_WHERE_CLAUSE,
+            )
         else:
-            where_clause_suffix = 'WHERE {}'.format(HiveTableLastUpdatedExtractor.ADDTIONAL_WHERE_CLAUSE)
+            where_clause_suffix = "WHERE {}".format(HiveTableLastUpdatedExtractor.ADDTIONAL_WHERE_CLAUSE)
 
         sql_stmt = HiveTableLastUpdatedExtractor.NON_PARTITIONED_TABLE_SQL_STATEMENT.format(
-            where_clause_suffix=where_clause_suffix)
+            where_clause_suffix=where_clause_suffix
+        )
 
-        LOGGER.info('SQL for non-partitioned table against Hive metastore: {}'.format(sql_stmt))
+        LOGGER.info("SQL for non-partitioned table against Hive metastore: {}".format(sql_stmt))
 
         sql_alchemy_extractor = SQLAlchemyExtractor()
-        sql_alchemy_conf = Scoped.get_scoped_conf(self._conf, sql_alchemy_extractor.get_scope()) \
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: sql_stmt}))
+        sql_alchemy_conf = Scoped.get_scoped_conf(self._conf, sql_alchemy_extractor.get_scope()).with_fallback(
+            ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: sql_stmt})
+        )
         sql_alchemy_extractor.init(sql_alchemy_conf)
         return sql_alchemy_extractor
 
@@ -184,7 +194,7 @@ class HiveTableLastUpdatedExtractor(Extractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.hive_table_last_updated'
+        return "extractor.hive_table_last_updated"
 
     def _get_extract_iter(self) -> Iterator[TableLastUpdated]:
         """
@@ -198,43 +208,47 @@ class HiveTableLastUpdatedExtractor(Extractor):
 
         partitioned_tbl_row = self._partitioned_table_extractor.extract()
         while partitioned_tbl_row:
-            yield TableLastUpdated(table_name=partitioned_tbl_row['table_name'],
-                                   last_updated_time_epoch=partitioned_tbl_row['last_updated_time'],
-                                   schema=partitioned_tbl_row['schema'],
-                                   db=HiveTableLastUpdatedExtractor.DATABASE,
-                                   cluster=self._cluster)
+            yield TableLastUpdated(
+                table_name=partitioned_tbl_row["table_name"],
+                last_updated_time_epoch=partitioned_tbl_row["last_updated_time"],
+                schema=partitioned_tbl_row["schema"],
+                db=HiveTableLastUpdatedExtractor.DATABASE,
+                cluster=self._cluster,
+            )
             partitioned_tbl_row = self._partitioned_table_extractor.extract()
 
-        LOGGER.info('Extracting non-partitioned table')
+        LOGGER.info("Extracting non-partitioned table")
         count = 0
         non_partitioned_tbl_row = self._non_partitioned_table_extractor.extract()
         while non_partitioned_tbl_row:
             count += 1
             if count % 10 == 0:
-                LOGGER.info('Processed {} non-partitioned tables'.format(count))
+                LOGGER.info("Processed {} non-partitioned tables".format(count))
 
-            if not non_partitioned_tbl_row['location']:
-                LOGGER.warning('Skipping as no storage location available. {}'.format(non_partitioned_tbl_row))
+            if not non_partitioned_tbl_row["location"]:
+                LOGGER.warning("Skipping as no storage location available. {}".format(non_partitioned_tbl_row))
                 non_partitioned_tbl_row = self._non_partitioned_table_extractor.extract()
                 continue
 
             start = time.time()
             table_last_updated = self._get_last_updated_datetime_from_filesystem(
-                table=non_partitioned_tbl_row['table_name'],
-                schema=non_partitioned_tbl_row['schema'],
-                storage_location=non_partitioned_tbl_row['location'])
-            LOGGER.info('Elapsed: {} seconds'.format(time.time() - start))
+                table=non_partitioned_tbl_row["table_name"],
+                schema=non_partitioned_tbl_row["schema"],
+                storage_location=non_partitioned_tbl_row["location"],
+            )
+            LOGGER.info("Elapsed: {} seconds".format(time.time() - start))
 
             if table_last_updated:
                 yield table_last_updated
 
             non_partitioned_tbl_row = self._non_partitioned_table_extractor.extract()
 
-    def _get_last_updated_datetime_from_filesystem(self,
-                                                   table: str,
-                                                   schema: str,
-                                                   storage_location: str,
-                                                   ) -> Union[TableLastUpdated, None]:
+    def _get_last_updated_datetime_from_filesystem(
+        self,
+        table: str,
+        schema: str,
+        storage_location: str,
+    ) -> Union[TableLastUpdated, None]:
         """
         Fetching metadata within files under storage_location to get latest timestamp.
         (First level only under storage_location)
@@ -247,48 +261,63 @@ class HiveTableLastUpdatedExtractor(Extractor):
         """
 
         if LOGGER.isEnabledFor(logging.DEBUG):
-            LOGGER.debug('Getting last updated datetime for {}.{} in {}'.format(schema, table, storage_location))
+            LOGGER.debug("Getting last updated datetime for {}.{} in {}".format(schema, table, storage_location))
 
         last_updated = OLDEST_TIMESTAMP
 
         paths = self._ls(storage_location)
         if not paths:
-            LOGGER.info('{schema}.{table} does not have any file in path {path}. Skipping'
-                        .format(schema=schema, table=table, path=storage_location))
+            LOGGER.info(
+                "{schema}.{table} does not have any file in path {path}. Skipping".format(
+                    schema=schema, table=table, path=storage_location
+                )
+            )
             return None
 
-        LOGGER.info('Fetching metadata for {schema}.{table} of {num_files} files'
-                    .format(schema=schema, table=table, num_files=len(paths)))
+        LOGGER.info(
+            "Fetching metadata for {schema}.{table} of {num_files} files".format(
+                schema=schema, table=table, num_files=len(paths)
+            )
+        )
 
         if self._last_updated_filecheck_threshold > 0 and len(paths) > self._last_updated_filecheck_threshold:
-            LOGGER.info('Skipping {schema}.{table} due to too many files. {len_files} files exist in {location}'
-                        .format(schema=schema, table=table, len_files=len(paths), location=storage_location))
+            LOGGER.info(
+                "Skipping {schema}.{table} due to too many files. {len_files} files exist in {location}".format(
+                    schema=schema, table=table, len_files=len(paths), location=storage_location
+                )
+            )
             return None
 
-        time_stamp_futures = \
-            [self._fs_worker_pool.apply_async(self._get_timestamp, (path, schema, table, storage_location)) for path in
-             paths]
+        time_stamp_futures = [
+            self._fs_worker_pool.apply_async(self._get_timestamp, (path, schema, table, storage_location))
+            for path in paths
+        ]
         for time_stamp_future in time_stamp_futures:
             try:
                 time_stamp = time_stamp_future.get(timeout=self._fs_worker_timeout)
                 if time_stamp:
                     last_updated = max(time_stamp, last_updated)
             except Exception as e:
-                if e.__class__.__name__ == 'TimeoutError':
-                    LOGGER.warning('Timed out on paths {} . Skipping'.format(paths))
+                if e.__class__.__name__ == "TimeoutError":
+                    LOGGER.warning("Timed out on paths {} . Skipping".format(paths))
                 else:
                     raise e
 
         if last_updated == OLDEST_TIMESTAMP:
-            LOGGER.info('No timestamp was derived on {schema}.{table} from location: {location} . Skipping'.format(
-                schema=schema, table=table, location=storage_location))
+            LOGGER.info(
+                "No timestamp was derived on {schema}.{table} from location: {location} . Skipping".format(
+                    schema=schema, table=table, location=storage_location
+                )
+            )
             return None
 
-        result = TableLastUpdated(table_name=table,
-                                  last_updated_time_epoch=int((last_updated - OLDEST_TIMESTAMP).total_seconds()),
-                                  schema=schema,
-                                  db=HiveTableLastUpdatedExtractor.DATABASE,
-                                  cluster=self._cluster)
+        result = TableLastUpdated(
+            table_name=table,
+            last_updated_time_epoch=int((last_updated - OLDEST_TIMESTAMP).total_seconds()),
+            schema=schema,
+            db=HiveTableLastUpdatedExtractor.DATABASE,
+            cluster=self._cluster,
+        )
 
         return result
 
@@ -302,12 +331,13 @@ class HiveTableLastUpdatedExtractor(Extractor):
         return self._fs.ls(path)
 
     @fs_error_handler
-    def _get_timestamp(self,
-                       path: str,
-                       schema: str,
-                       table: str,
-                       storage_location: str,
-                       ) -> Union[datetime, None]:
+    def _get_timestamp(
+        self,
+        path: str,
+        schema: str,
+        table: str,
+        storage_location: str,
+    ) -> Union[datetime, None]:
         """
         An wrapper to FileSystem.ls to use fs_error_handler decorator
         :param path:
@@ -317,8 +347,11 @@ class HiveTableLastUpdatedExtractor(Extractor):
         :return:
         """
         if not path:
-            LOGGER.info('Empty path {path} on {schema}.{table} in storage location {location} . Skipping'
-                        .format(path=path, schema=schema, table=table, location=storage_location))
+            LOGGER.info(
+                "Empty path {path} on {schema}.{table} in storage location {location} . Skipping".format(
+                    path=path, schema=schema, table=table, location=storage_location
+                )
+            )
             return None
 
         if not self._fs.is_file(path):

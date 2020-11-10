@@ -4,21 +4,19 @@
 import unittest
 from databuilder.models.neo4j_es_last_updated import Neo4jESLastUpdated
 
-from databuilder.models.graph_serializable import NODE_KEY, \
-    NODE_LABEL
+from databuilder.models.graph_serializable import NODE_KEY, NODE_LABEL
 from databuilder.serializers import neo4_serializer
 
 
 class TestNeo4jESLastUpdated(unittest.TestCase):
-
     def setUp(self) -> None:
         super(TestNeo4jESLastUpdated, self).setUp()
         self.neo4j_es_last_updated = Neo4jESLastUpdated(timestamp=100)
 
         self.expected_node_result = {
-            NODE_KEY: 'amundsen_updated_timestamp',
-            NODE_LABEL: 'Updatedtimestamp',
-            'latest_timestmap:UNQUOTED': 100,
+            NODE_KEY: "amundsen_updated_timestamp",
+            NODE_LABEL: "Updatedtimestamp",
+            "latest_timestmap:UNQUOTED": 100,
         }
 
     def test_create_nodes(self) -> None:

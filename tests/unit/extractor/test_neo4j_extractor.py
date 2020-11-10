@@ -13,13 +13,12 @@ from databuilder.models.table_elasticsearch_document import TableESDocument
 
 
 class TestNeo4jExtractor(unittest.TestCase):
-
     def setUp(self) -> None:
         config_dict = {
-            'extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): 'TEST_GRAPH_URL',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.CYPHER_QUERY_CONFIG_KEY): 'TEST_QUERY',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER): 'TEST_USER',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW): 'TEST_PW'
+            "extractor.neo4j.{}".format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): "TEST_GRAPH_URL",
+            "extractor.neo4j.{}".format(Neo4jExtractor.CYPHER_QUERY_CONFIG_KEY): "TEST_QUERY",
+            "extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_USER): "TEST_USER",
+            "extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_PW): "TEST_PW",
         }
 
         self.conf = ConfigFactory.from_dict(config_dict)
@@ -28,12 +27,11 @@ class TestNeo4jExtractor(unittest.TestCase):
         """
         Test Extraction with empty results from query
         """
-        with patch.object(Neo4jExtractor, '_get_driver'):
+        with patch.object(Neo4jExtractor, "_get_driver"):
             extractor = Neo4jExtractor()
-            extractor.init(Scoped.get_scoped_conf(conf=self.conf,
-                                                  scope=extractor.get_scope()))
+            extractor.init(Scoped.get_scoped_conf(conf=self.conf, scope=extractor.get_scope()))
 
-            extractor.results = ['']
+            extractor.results = [""]
             result = extractor.extract()
             self.assertIsNone(result)
 
@@ -41,14 +39,13 @@ class TestNeo4jExtractor(unittest.TestCase):
         """
         Test Extraction with single result from query
         """
-        with patch.object(Neo4jExtractor, '_get_driver'):
+        with patch.object(Neo4jExtractor, "_get_driver"):
             extractor = Neo4jExtractor()
-            extractor.init(Scoped.get_scoped_conf(conf=self.conf,
-                                                  scope=extractor.get_scope()))
+            extractor.init(Scoped.get_scoped_conf(conf=self.conf, scope=extractor.get_scope()))
 
-            extractor.results = ['test_result']
+            extractor.results = ["test_result"]
             result = extractor.extract()
-            self.assertEqual(result, 'test_result')
+            self.assertEqual(result, "test_result")
 
             # Ensure second result is None
             result = extractor.extract()
@@ -58,21 +55,20 @@ class TestNeo4jExtractor(unittest.TestCase):
         """
         Test Extraction with multiple result from query
         """
-        with patch.object(Neo4jExtractor, '_get_driver'):
+        with patch.object(Neo4jExtractor, "_get_driver"):
             extractor = Neo4jExtractor()
-            extractor.init(Scoped.get_scoped_conf(conf=self.conf,
-                                                  scope=extractor.get_scope()))
+            extractor.init(Scoped.get_scoped_conf(conf=self.conf, scope=extractor.get_scope()))
 
-            extractor.results = ['test_result1', 'test_result2', 'test_result3']
-
-            result = extractor.extract()
-            self.assertEqual(result, 'test_result1')
+            extractor.results = ["test_result1", "test_result2", "test_result3"]
 
             result = extractor.extract()
-            self.assertEqual(result, 'test_result2')
+            self.assertEqual(result, "test_result1")
 
             result = extractor.extract()
-            self.assertEqual(result, 'test_result3')
+            self.assertEqual(result, "test_result2")
+
+            result = extractor.extract()
+            self.assertEqual(result, "test_result3")
 
             # Ensure next result is None
             result = extractor.extract()
@@ -83,37 +79,39 @@ class TestNeo4jExtractor(unittest.TestCase):
         Test Extraction using model class
         """
         config_dict = {
-            'extractor.neo4j.{}'.format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): 'TEST_GRAPH_URL',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.CYPHER_QUERY_CONFIG_KEY): 'TEST_QUERY',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_USER): 'TEST_USER',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.NEO4J_AUTH_PW): 'TEST_PW',
-            'extractor.neo4j.{}'.format(Neo4jExtractor.MODEL_CLASS_CONFIG_KEY):
-                'databuilder.models.table_elasticsearch_document.TableESDocument'
+            "extractor.neo4j.{}".format(Neo4jExtractor.GRAPH_URL_CONFIG_KEY): "TEST_GRAPH_URL",
+            "extractor.neo4j.{}".format(Neo4jExtractor.CYPHER_QUERY_CONFIG_KEY): "TEST_QUERY",
+            "extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_USER): "TEST_USER",
+            "extractor.neo4j.{}".format(Neo4jExtractor.NEO4J_AUTH_PW): "TEST_PW",
+            "extractor.neo4j.{}".format(
+                Neo4jExtractor.MODEL_CLASS_CONFIG_KEY
+            ): "databuilder.models.table_elasticsearch_document.TableESDocument",
         }
 
         self.conf = ConfigFactory.from_dict(config_dict)
 
-        with patch.object(Neo4jExtractor, '_get_driver'):
+        with patch.object(Neo4jExtractor, "_get_driver"):
             extractor = Neo4jExtractor()
-            extractor.init(Scoped.get_scoped_conf(conf=self.conf,
-                                                  scope=extractor.get_scope()))
+            extractor.init(Scoped.get_scoped_conf(conf=self.conf, scope=extractor.get_scope()))
 
-            result_dict = dict(database='test_database',
-                               cluster='test_cluster',
-                               schema='test_schema',
-                               name='test_table_name',
-                               display_name='test_schema.test_table_name',
-                               key='test_table_key',
-                               description='test_table_description',
-                               last_updated_timestamp=123456789,
-                               column_names=['test_col1', 'test_col2', 'test_col3'],
-                               column_descriptions=['test_description1', 'test_description2', ''],
-                               total_usage=100,
-                               unique_usage=5,
-                               tags=['hive'],
-                               badges=['badge1'],
-                               schema_description='schema_description',
-                               programmatic_descriptions=['TEST'])
+            result_dict = dict(
+                database="test_database",
+                cluster="test_cluster",
+                schema="test_schema",
+                name="test_table_name",
+                display_name="test_schema.test_table_name",
+                key="test_table_key",
+                description="test_table_description",
+                last_updated_timestamp=123456789,
+                column_names=["test_col1", "test_col2", "test_col3"],
+                column_descriptions=["test_description1", "test_description2", ""],
+                total_usage=100,
+                unique_usage=5,
+                tags=["hive"],
+                badges=["badge1"],
+                schema_description="schema_description",
+                programmatic_descriptions=["TEST"],
+            )
 
             extractor.results = [result_dict]
             result_obj = extractor.extract()

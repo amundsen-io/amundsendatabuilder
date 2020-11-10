@@ -14,21 +14,23 @@ class TableOwner(GraphSerializable):
     """
     Hive table owner model.
     """
+
     OWNER_TABLE_RELATION_TYPE = OWNER_OF_OBJECT_RELATION_TYPE
     TABLE_OWNER_RELATION_TYPE = OWNER_RELATION_TYPE
 
-    def __init__(self,
-                 db_name: str,
-                 schema: str,
-                 table_name: str,
-                 owners: Union[List, str],
-                 cluster: str = 'gold',
-                 ) -> None:
+    def __init__(
+        self,
+        db_name: str,
+        schema: str,
+        table_name: str,
+        owners: Union[List, str],
+        cluster: str = "gold",
+    ) -> None:
         self.db = db_name
         self.schema = schema
         self.table = table_name
         if isinstance(owners, str):
-            owners = owners.split(',')
+            owners = owners.split(",")
         self.owners = [owner.strip() for owner in owners]
 
         self.cluster = cluster
@@ -52,10 +54,9 @@ class TableOwner(GraphSerializable):
         return User.USER_NODE_KEY_FORMAT.format(email=owner)
 
     def get_metadata_model_key(self) -> str:
-        return '{db}://{cluster}.{schema}/{table}'.format(db=self.db,
-                                                          cluster=self.cluster,
-                                                          schema=self.schema,
-                                                          table=self.table)
+        return "{db}://{cluster}.{schema}/{table}".format(
+            db=self.db, cluster=self.cluster, schema=self.schema, table=self.table
+        )
 
     def create_nodes(self) -> List[GraphNode]:
         """
@@ -68,9 +69,7 @@ class TableOwner(GraphSerializable):
                 node = GraphNode(
                     key=self.get_owner_model_key(owner),
                     label=User.USER_NODE_LABEL,
-                    attributes={
-                        User.USER_NODE_EMAIL: owner
-                    }
+                    attributes={User.USER_NODE_EMAIL: owner},
                 )
                 results.append(node)
         return results
@@ -86,18 +85,16 @@ class TableOwner(GraphSerializable):
                 start_key=self.get_owner_model_key(owner),
                 start_label=User.USER_NODE_LABEL,
                 end_key=self.get_metadata_model_key(),
-                end_label='Table',
+                end_label="Table",
                 type=TableOwner.OWNER_TABLE_RELATION_TYPE,
                 reverse_type=TableOwner.TABLE_OWNER_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             results.append(relationship)
 
         return results
 
     def __repr__(self) -> str:
-        return 'TableOwner({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.db,
-                                                                 self.cluster,
-                                                                 self.schema,
-                                                                 self.table,
-                                                                 self.owners)
+        return "TableOwner({!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.db, self.cluster, self.schema, self.table, self.owners
+        )

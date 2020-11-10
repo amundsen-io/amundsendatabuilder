@@ -9,22 +9,23 @@ class UserESDocument(ElasticsearchDocument):
     Schema for the Search index document for user
     """
 
-    def __init__(self,
-                 email: str,
-                 first_name: str,
-                 last_name: str,
-                 full_name: str,
-                 github_username: str,
-                 team_name: str,
-                 employee_type: str,
-                 manager_email: str,
-                 slack_id: str,
-                 role_name: str,
-                 is_active: bool,
-                 total_read: int,
-                 total_own: int,
-                 total_follow: int,
-                 ) -> None:
+    def __init__(
+        self,
+        email: str,
+        first_name: str,
+        last_name: str,
+        full_name: str,
+        github_username: str,
+        team_name: str,
+        employee_type: str,
+        manager_email: str,
+        slack_id: str,
+        role_name: str,
+        is_active: bool,
+        total_read: int,
+        total_own: int,
+        total_follow: int,
+    ) -> None:
         self.email = email
         self.first_name = first_name
         self.last_name = last_name

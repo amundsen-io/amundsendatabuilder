@@ -17,23 +17,22 @@ class TestBamboohrUserExtractor(unittest.TestCase):
     @responses.activate
     def test_parse_testdata(self) -> None:
         bhr = BamboohrUserExtractor()
-        bhr.init(ConfigFactory.from_dict({'api_key': 'api_key', 'subdomain': 'amundsen'}))
+        bhr.init(ConfigFactory.from_dict({"api_key": "api_key", "subdomain": "amundsen"}))
 
         testdata_xml = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            '../../../resources/extractor/user/bamboohr/testdata.xml'
+            os.path.dirname(os.path.realpath(__file__)), "../../../resources/extractor/user/bamboohr/testdata.xml"
         )
 
         with io.open(testdata_xml) as testdata:
             responses.add(responses.GET, bhr._employee_directory_uri(), body=testdata.read())
 
         expected = User(
-            email='roald@amundsen.io',
-            first_name='Roald',
-            last_name='Amundsen',
-            name='Roald Amundsen',
-            team_name='508 Corporate Marketing',
-            role_name='Antarctic Explorer',
+            email="roald@amundsen.io",
+            first_name="Roald",
+            last_name="Amundsen",
+            name="Roald Amundsen",
+            team_name="508 Corporate Marketing",
+            role_name="Antarctic Explorer",
         )
 
         actual_users = list(bhr._get_extract_iter())
@@ -42,5 +41,5 @@ class TestBamboohrUserExtractor(unittest.TestCase):
         self.assertEqual(repr(expected), repr(actual_users[0]))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -4,9 +4,8 @@
 from typing import Any, Iterator, List, Optional, Set, Union, Dict
 
 from databuilder.models.cluster import cluster_constants
-from databuilder.models.graph_serializable import (
-    GraphSerializable
-)
+from databuilder.models.graph_serializable import GraphSerializable
+
 # TODO: We could separate TagMetadata from table_metadata to own module
 from databuilder.models.table_metadata import TagMetadata
 
@@ -26,52 +25,53 @@ class DashboardMetadata(GraphSerializable):
     Dashboard, Tag, Description and relations between those. Additionally, it will create a
     Dashboardgroup with relationships to the Dashboard.
     """
-    CLUSTER_KEY_FORMAT = '{product}_dashboard://{cluster}'
-    CLUSTER_DASHBOARD_GROUP_RELATION_TYPE = 'DASHBOARD_GROUP'
-    DASHBOARD_GROUP_CLUSTER_RELATION_TYPE = 'DASHBOARD_GROUP_OF'
 
-    DASHBOARD_NODE_LABEL = 'Dashboard'
-    DASHBOARD_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}'
-    DASHBOARD_NAME = 'name'
-    DASHBOARD_CREATED_TIME_STAMP = 'created_timestamp'
-    DASHBOARD_GROUP_URL = 'dashboard_group_url'
-    DASHBOARD_URL = 'dashboard_url'
+    CLUSTER_KEY_FORMAT = "{product}_dashboard://{cluster}"
+    CLUSTER_DASHBOARD_GROUP_RELATION_TYPE = "DASHBOARD_GROUP"
+    DASHBOARD_GROUP_CLUSTER_RELATION_TYPE = "DASHBOARD_GROUP_OF"
 
-    DASHBOARD_DESCRIPTION_NODE_LABEL = 'Description'
-    DASHBOARD_DESCRIPTION = 'description'
-    DASHBOARD_DESCRIPTION_FORMAT = \
-        '{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}/_description'
-    DASHBOARD_DESCRIPTION_RELATION_TYPE = 'DESCRIPTION'
-    DESCRIPTION_DASHBOARD_RELATION_TYPE = 'DESCRIPTION_OF'
+    DASHBOARD_NODE_LABEL = "Dashboard"
+    DASHBOARD_KEY_FORMAT = "{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}"
+    DASHBOARD_NAME = "name"
+    DASHBOARD_CREATED_TIME_STAMP = "created_timestamp"
+    DASHBOARD_GROUP_URL = "dashboard_group_url"
+    DASHBOARD_URL = "dashboard_url"
 
-    DASHBOARD_GROUP_NODE_LABEL = 'Dashboardgroup'
-    DASHBOARD_GROUP_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group}'
-    DASHBOARD_GROUP_DASHBOARD_RELATION_TYPE = 'DASHBOARD'
-    DASHBOARD_DASHBOARD_GROUP_RELATION_TYPE = 'DASHBOARD_OF'
+    DASHBOARD_DESCRIPTION_NODE_LABEL = "Description"
+    DASHBOARD_DESCRIPTION = "description"
+    DASHBOARD_DESCRIPTION_FORMAT = "{product}_dashboard://{cluster}.{dashboard_group}/{dashboard_name}/_description"
+    DASHBOARD_DESCRIPTION_RELATION_TYPE = "DESCRIPTION"
+    DESCRIPTION_DASHBOARD_RELATION_TYPE = "DESCRIPTION_OF"
 
-    DASHBOARD_GROUP_DESCRIPTION_KEY_FORMAT = '{product}_dashboard://{cluster}.{dashboard_group}/_description'
+    DASHBOARD_GROUP_NODE_LABEL = "Dashboardgroup"
+    DASHBOARD_GROUP_KEY_FORMAT = "{product}_dashboard://{cluster}.{dashboard_group}"
+    DASHBOARD_GROUP_DASHBOARD_RELATION_TYPE = "DASHBOARD"
+    DASHBOARD_DASHBOARD_GROUP_RELATION_TYPE = "DASHBOARD_OF"
 
-    DASHBOARD_TAG_RELATION_TYPE = 'TAG'
-    TAG_DASHBOARD_RELATION_TYPE = 'TAG_OF'
+    DASHBOARD_GROUP_DESCRIPTION_KEY_FORMAT = "{product}_dashboard://{cluster}.{dashboard_group}/_description"
+
+    DASHBOARD_TAG_RELATION_TYPE = "TAG"
+    TAG_DASHBOARD_RELATION_TYPE = "TAG_OF"
 
     serialized_nodes: Set[Any] = set()
     serialized_rels: Set[Any] = set()
 
-    def __init__(self,
-                 dashboard_group: str,
-                 dashboard_name: str,
-                 description: Union[str, None],
-                 tags: List = None,
-                 cluster: str = 'gold',
-                 product: Optional[str] = '',
-                 dashboard_group_id: Optional[str] = None,
-                 dashboard_id: Optional[str] = None,
-                 dashboard_group_description: Optional[str] = None,
-                 created_timestamp: Optional[int] = None,
-                 dashboard_group_url: Optional[str] = None,
-                 dashboard_url: Optional[str] = None,
-                 **kwargs: Any
-                 ) -> None:
+    def __init__(
+        self,
+        dashboard_group: str,
+        dashboard_name: str,
+        description: Union[str, None],
+        tags: List = None,
+        cluster: str = "gold",
+        product: Optional[str] = "",
+        dashboard_group_id: Optional[str] = None,
+        dashboard_id: Optional[str] = None,
+        dashboard_group_description: Optional[str] = None,
+        created_timestamp: Optional[int] = None,
+        dashboard_group_url: Optional[str] = None,
+        dashboard_url: Optional[str] = None,
+        **kwargs: Any
+    ) -> None:
 
         self.dashboard_group = dashboard_group
         self.dashboard_name = dashboard_name
@@ -91,44 +91,47 @@ class DashboardMetadata(GraphSerializable):
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self) -> str:
-        return 'DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})' \
-            .format(self.dashboard_group,
-                    self.dashboard_name,
-                    self.description,
-                    self.tags,
-                    self.dashboard_group_id,
-                    self.dashboard_id,
-                    self.dashboard_group_description,
-                    self.created_timestamp,
-                    self.dashboard_group_url,
-                    self.dashboard_url,
-                    )
+        return "DashboardMetadata({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})".format(
+            self.dashboard_group,
+            self.dashboard_name,
+            self.description,
+            self.tags,
+            self.dashboard_group_id,
+            self.dashboard_id,
+            self.dashboard_group_description,
+            self.created_timestamp,
+            self.dashboard_group_url,
+            self.dashboard_url,
+        )
 
     def _get_cluster_key(self) -> str:
-        return DashboardMetadata.CLUSTER_KEY_FORMAT.format(cluster=self.cluster,
-                                                           product=self.product)
+        return DashboardMetadata.CLUSTER_KEY_FORMAT.format(cluster=self.cluster, product=self.product)
 
     def _get_dashboard_key(self) -> str:
-        return DashboardMetadata.DASHBOARD_KEY_FORMAT.format(dashboard_group=self.dashboard_group_id,
-                                                             dashboard_name=self.dashboard_id,
-                                                             cluster=self.cluster,
-                                                             product=self.product)
+        return DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+            dashboard_group=self.dashboard_group_id,
+            dashboard_name=self.dashboard_id,
+            cluster=self.cluster,
+            product=self.product,
+        )
 
     def _get_dashboard_description_key(self) -> str:
-        return DashboardMetadata.DASHBOARD_DESCRIPTION_FORMAT.format(dashboard_group=self.dashboard_group_id,
-                                                                     dashboard_name=self.dashboard_id,
-                                                                     cluster=self.cluster,
-                                                                     product=self.product)
+        return DashboardMetadata.DASHBOARD_DESCRIPTION_FORMAT.format(
+            dashboard_group=self.dashboard_group_id,
+            dashboard_name=self.dashboard_id,
+            cluster=self.cluster,
+            product=self.product,
+        )
 
     def _get_dashboard_group_description_key(self) -> str:
-        return DashboardMetadata.DASHBOARD_GROUP_DESCRIPTION_KEY_FORMAT.format(dashboard_group=self.dashboard_group_id,
-                                                                               cluster=self.cluster,
-                                                                               product=self.product)
+        return DashboardMetadata.DASHBOARD_GROUP_DESCRIPTION_KEY_FORMAT.format(
+            dashboard_group=self.dashboard_group_id, cluster=self.cluster, product=self.product
+        )
 
     def _get_dashboard_group_key(self) -> str:
-        return DashboardMetadata.DASHBOARD_GROUP_KEY_FORMAT.format(dashboard_group=self.dashboard_group_id,
-                                                                   cluster=self.cluster,
-                                                                   product=self.product)
+        return DashboardMetadata.DASHBOARD_GROUP_KEY_FORMAT.format(
+            dashboard_group=self.dashboard_group_id, cluster=self.cluster, product=self.product
+        )
 
     def create_next_node(self) -> Union[GraphNode, None]:
         try:
@@ -143,9 +146,7 @@ class DashboardMetadata(GraphSerializable):
             cluster_node = GraphNode(
                 key=self._get_cluster_key(),
                 label=cluster_constants.CLUSTER_NODE_LABEL,
-                attributes={
-                    cluster_constants.CLUSTER_NAME_PROP_KEY: self.cluster
-                }
+                attributes={cluster_constants.CLUSTER_NAME_PROP_KEY: self.cluster},
             )
             yield cluster_node
 
@@ -162,7 +163,7 @@ class DashboardMetadata(GraphSerializable):
         dashboard_node = GraphNode(
             key=self._get_dashboard_key(),
             label=DashboardMetadata.DASHBOARD_NODE_LABEL,
-            attributes=dashboard_node_attributes
+            attributes=dashboard_node_attributes,
         )
 
         yield dashboard_node
@@ -180,7 +181,7 @@ class DashboardMetadata(GraphSerializable):
             dashboard_group_node = GraphNode(
                 key=self._get_dashboard_group_key(),
                 label=DashboardMetadata.DASHBOARD_GROUP_NODE_LABEL,
-                attributes=dashboard_group_node_attributes
+                attributes=dashboard_group_node_attributes,
             )
 
             yield dashboard_group_node
@@ -190,9 +191,7 @@ class DashboardMetadata(GraphSerializable):
             dashboard_group_description_node = GraphNode(
                 key=self._get_dashboard_group_description_key(),
                 label=DashboardMetadata.DASHBOARD_DESCRIPTION_NODE_LABEL,
-                attributes={
-                    DashboardMetadata.DASHBOARD_DESCRIPTION: self.dashboard_group_description
-                }
+                attributes={DashboardMetadata.DASHBOARD_DESCRIPTION: self.dashboard_group_description},
             )
             yield dashboard_group_description_node
 
@@ -201,9 +200,7 @@ class DashboardMetadata(GraphSerializable):
             dashboard_description_node = GraphNode(
                 key=self._get_dashboard_description_key(),
                 label=DashboardMetadata.DASHBOARD_DESCRIPTION_NODE_LABEL,
-                attributes={
-                    DashboardMetadata.DASHBOARD_DESCRIPTION: self.description
-                }
+                attributes={DashboardMetadata.DASHBOARD_DESCRIPTION: self.description},
             )
             yield dashboard_description_node
 
@@ -213,9 +210,7 @@ class DashboardMetadata(GraphSerializable):
                 dashboard_tag_node = GraphNode(
                     key=TagMetadata.get_tag_key(tag),
                     label=TagMetadata.TAG_NODE_LABEL,
-                    attributes={
-                        TagMetadata.TAG_TYPE: 'dashboard'
-                    }
+                    attributes={TagMetadata.TAG_TYPE: "dashboard"},
                 )
                 yield dashboard_tag_node
 
@@ -234,7 +229,7 @@ class DashboardMetadata(GraphSerializable):
             end_key=self._get_dashboard_group_key(),
             type=DashboardMetadata.CLUSTER_DASHBOARD_GROUP_RELATION_TYPE,
             reverse_type=DashboardMetadata.DASHBOARD_GROUP_CLUSTER_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         yield cluster_dashboard_group_relationship
 
@@ -247,7 +242,7 @@ class DashboardMetadata(GraphSerializable):
                 end_key=self._get_dashboard_group_description_key(),
                 type=DashboardMetadata.DASHBOARD_DESCRIPTION_RELATION_TYPE,
                 reverse_type=DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             yield dashboard_group_description_relationship
 
@@ -259,7 +254,7 @@ class DashboardMetadata(GraphSerializable):
             end_key=self._get_dashboard_group_key(),
             type=DashboardMetadata.DASHBOARD_DASHBOARD_GROUP_RELATION_TYPE,
             reverse_type=DashboardMetadata.DASHBOARD_GROUP_DASHBOARD_RELATION_TYPE,
-            attributes={}
+            attributes={},
         )
         yield dashboard_group_dashboard_relationship
 
@@ -272,7 +267,7 @@ class DashboardMetadata(GraphSerializable):
                 end_key=self._get_dashboard_description_key(),
                 type=DashboardMetadata.DASHBOARD_DESCRIPTION_RELATION_TYPE,
                 reverse_type=DashboardMetadata.DESCRIPTION_DASHBOARD_RELATION_TYPE,
-                attributes={}
+                attributes={},
             )
             yield dashboard_description_relationship
 
@@ -286,6 +281,6 @@ class DashboardMetadata(GraphSerializable):
                     end_key=TagMetadata.get_tag_key(tag),
                     type=DashboardMetadata.DASHBOARD_TAG_RELATION_TYPE,
                     reverse_type=DashboardMetadata.TAG_DASHBOARD_RELATION_TYPE,
-                    attributes={}
+                    attributes={},
                 )
                 yield dashboard_tag_relationship

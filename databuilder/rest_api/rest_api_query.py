@@ -50,18 +50,19 @@ class RestApiQuery(BaseRestApiQuery):
     (How it would work with Tableau/Looker is described in docstring of _authenticate method)
     """
 
-    def __init__(self,
-                 query_to_join: BaseRestApiQuery,
-                 url: str,
-                 params: Dict[str, Any],
-                 json_path: str,
-                 field_names: List[str],
-                 fail_no_result: bool=False,
-                 skip_no_result: bool=False,
-                 json_path_contains_or: bool=False,
-                 can_skip_failure: Callable=None,
-                 **kwargs: Any
-                 ) -> None:
+    def __init__(
+        self,
+        query_to_join: BaseRestApiQuery,
+        url: str,
+        params: Dict[str, Any],
+        json_path: str,
+        field_names: List[str],
+        fail_no_result: bool = False,
+        skip_no_result: bool = False,
+        json_path_contains_or: bool = False,
+        can_skip_failure: Callable = None,
+        **kwargs: Any
+    ) -> None:
         """
         :param query_to_join: Previous query to JOIN. RestApiQuerySeed can be used for the first query
         :param url: URL string. It will use <str>.format operation using record that comes from previous query to
@@ -118,7 +119,7 @@ class RestApiQuery(BaseRestApiQuery):
         self._url = url
         self._params = params
         self._json_path = json_path
-        if ',' in json_path and '|' in json_path:
+        if "," in json_path and "|" in json_path:
             raise Exception('RestApiQuery does not support "and (,)" and "or (|)" at the same time')
 
         self._jsonpath_expr = parse(self._json_path)
@@ -153,8 +154,9 @@ class RestApiQuery(BaseRestApiQuery):
                 result_list: List[Any] = [match.value for match in self._jsonpath_expr.find(response_json)]
 
                 if not result_list:
-                    log_msg = 'No result from URL: {url}, JSONPATH: {json_path} , response payload: {response}' \
-                        .format(url=self._url, json_path=self._json_path, response=response_json)
+                    log_msg = "No result from URL: {url}, JSONPATH: {json_path} , response payload: {response}".format(
+                        url=self._url, json_path=self._json_path, response=response_json
+                    )
                     LOGGER.info(log_msg)
 
                     self._post_process(response)
@@ -167,9 +169,11 @@ class RestApiQuery(BaseRestApiQuery):
 
                     yield copy.deepcopy(record_dict)
 
-                sub_records = RestApiQuery._compute_sub_records(result_list=result_list,
-                                                                field_names=self._field_names,
-                                                                json_path_contains_or=self._json_path_contains_or)
+                sub_records = RestApiQuery._compute_sub_records(
+                    result_list=result_list,
+                    field_names=self._field_names,
+                    json_path_contains_or=self._json_path_contains_or,
+                )
 
                 for sub_record in sub_records:
                     if not sub_record or len(sub_record) != len(self._field_names):
@@ -197,17 +201,18 @@ class RestApiQuery(BaseRestApiQuery):
         :param url:
         :return:
         """
-        LOGGER.info('Calling URL {}'.format(url))
+        LOGGER.info("Calling URL {}".format(url))
         response = requests.get(url, **self._params)
         response.raise_for_status()
         return response
 
     @classmethod
-    def _compute_sub_records(cls,
-                             result_list: List[Any],
-                             field_names: List[str],
-                             json_path_contains_or: bool=False,
-                             ) -> List[List[Any]]:
+    def _compute_sub_records(
+        cls,
+        result_list: List[Any],
+        field_names: List[str],
+        json_path_contains_or: bool = False,
+    ) -> List[List[Any]]:
         """
         The behavior of JSONPATH is different when it's extracting multiple fields using AND(,) vs OR(|)
         If it uses AND(,), first n records will be first record. If it uses OR(|), it will list first field of all
@@ -234,10 +239,10 @@ class RestApiQuery(BaseRestApiQuery):
         """
 
         if not field_names:
-            raise Exception('Field names should not be empty')
+            raise Exception("Field names should not be empty")
 
         if not json_path_contains_or:
-            return [result_list[i:i + len(field_names)] for i in range(0, len(result_list), len(field_names))]
+            return [result_list[i : i + len(field_names)] for i in range(0, len(result_list), len(field_names))]
 
         result = []
         num_subresult = int(len(result_list) / len(field_names))
