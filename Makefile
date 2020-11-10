@@ -9,6 +9,7 @@ test_unit:
 
 lint:
 	flake8 .
+	black --check .
 
 .PHONY: mypy
 mypy:
@@ -16,4 +17,3 @@ mypy:
 
 .PHONY: test
 test: test_unit lint mypy
-
