@@ -11,6 +11,9 @@ lint:
 	flake8 .
 	black --check .
 
+format:
+	black .
+
 .PHONY: mypy
 mypy:
 	mypy .
