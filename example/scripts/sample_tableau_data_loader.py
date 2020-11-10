@@ -196,7 +196,7 @@ def run_tableau_last_modified_job():
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
     dict_config = common_tableau_config
-    dict_config.update({
+    config_update = {
         'extractor.tableau_dashboard_last_modified.api_base_url': tableau_api_base_url,
         'extractor.tableau_dashboard_last_modified.api_version': tableau_api_version,
         'extractor.tableau_dashboard_last_modified.site_name': tableau_site_name,
@@ -216,7 +216,8 @@ def run_tableau_last_modified_job():
         'task.progress_report_frequency': 100,
         'publisher.neo4j.node_files_directory': node_files_folder,
         'publisher.neo4j.relation_files_directory': relationship_files_folder,
-    })
+    }
+    dict_config.update(config_update)
     job_config = ConfigFactory.from_dict(dict_config)
 
     job = DefaultJob(conf=job_config,
@@ -235,7 +236,7 @@ def run_tableau_query_job():
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
     dict_config = common_tableau_config
-    dict_config.update({
+    config_update = {
         'extractor.tableau_dashboard_query.api_base_url': tableau_api_base_url,
         'extractor.tableau_dashboard_query.api_version': tableau_api_version,
         'extractor.tableau_dashboard_query.site_name': tableau_site_name,
@@ -255,7 +256,9 @@ def run_tableau_query_job():
         'task.progress_report_frequency': 100,
         'publisher.neo4j.node_files_directory': node_files_folder,
         'publisher.neo4j.relation_files_directory': relationship_files_folder,
-    })
+    }
+
+    dict_config.update(config_update)
     job_config = ConfigFactory.from_dict(dict_config)
 
     job = DefaultJob(conf=job_config,
@@ -274,7 +277,7 @@ def run_tableau_table_job():
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
     dict_config = common_tableau_config
-    dict_config.update({
+    config_update = {
         'extractor.tableau_dashboard_table.api_base_url': tableau_api_base_url,
         'extractor.tableau_dashboard_table.api_version': tableau_api_version,
         'extractor.tableau_dashboard_table.site_name': tableau_site_name,
@@ -295,7 +298,9 @@ def run_tableau_table_job():
         'task.progress_report_frequency': 100,
         'publisher.neo4j.node_files_directory': node_files_folder,
         'publisher.neo4j.relation_files_directory': relationship_files_folder,
-    })
+    }
+
+    dict_config.update(config_update)
     job_config = ConfigFactory.from_dict(dict_config)
 
     job = DefaultJob(conf=job_config,
@@ -314,7 +319,7 @@ def run_tableau_external_table_job():
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
     dict_config = common_tableau_config
-    dict_config.update({
+    config_update = {
         'extractor.tableau_external_table.api_base_url': tableau_api_base_url,
         'extractor.tableau_external_table.api_version': tableau_api_version,
         'extractor.tableau_external_table.site_name': tableau_site_name,
@@ -335,7 +340,9 @@ def run_tableau_external_table_job():
         'task.progress_report_frequency': 100,
         'publisher.neo4j.node_files_directory': node_files_folder,
         'publisher.neo4j.relation_files_directory': relationship_files_folder,
-    })
+    }
+    
+    dict_config.update(config_update)
     job_config = ConfigFactory.from_dict(dict_config)
 
     job = DefaultJob(conf=job_config,
