@@ -85,17 +85,10 @@ class FeastExtractor(Extractor):
                 feature_table.created_timestamp.seconds
             )
             description = f"* Created at **{created_at}**\n"
-            for key, value in feature_table.labels.items():
-                description += f"* {key}: **{value}**\n"
 
-            if feature_table.batch_source:
-                batch_source = yaml.dump(feature_table.to_dict()["spec"]["batchSource"])
-                description += f"\nBatch source:\n```\n{batch_source}```"
-            if feature_table.stream_source:
-                stream_source = yaml.dump(
-                    feature_table.to_dict()["spec"]["streamSource"]
-                )
-                description += f"\nStream source:\n```\n{stream_source}```"
+            description += '* Labels\n'
+            for key, value in feature_table.labels.items():
+                description += f"    * {key}: **{value}**\n"
 
             yield TableMetadata(
                 "feast",
@@ -105,3 +98,22 @@ class FeastExtractor(Extractor):
                 description,
                 description_source="feature_table_details",
             )
+
+            yield TableMetadata(
+                "feast",
+                self._feast_service,
+                project,
+                feature_table.name,
+                f'```\n{yaml.dump(feature_table.to_dict()["spec"]["batchSource"])}```',
+                description_source="batch_source",
+            )
+
+            if feature_table.stream_source:
+                yield TableMetadata(
+                    "feast",
+                    self._feast_service,
+                    project,
+                    feature_table.name,
+                    f'```\n{yaml.dump(feature_table.to_dict()["spec"]["streamSource"])}```',
+                    description_source="stream_source",
+                )
