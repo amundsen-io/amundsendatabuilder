@@ -12,7 +12,13 @@ from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
 
 class FeastExtractor(Extractor):
     """
-    Extracts tables and columns metadata from Feast Core service
+    Extracts feature tables from Feast Core service. Since Feast is
+    a metadata store (and not the database itself), it maps the
+    following atributes:
+
+     * a database is name of feast project
+     * table name is a name of the feature table
+     * columns are features stored in the feature table
     """
 
     FEAST_SERVICE_CONFIG_KEY = "instance_name"
@@ -37,6 +43,16 @@ class FeastExtractor(Extractor):
         return "extractor.feast"
 
     def extract(self) -> Union[TableMetadata, None]:
+        """
+        For every feature table from Feast, a multiple objets are extracted:
+
+        1. TableMetadata with feature table description
+        2. Programmatic Description of the feature table, containing
+           metadata - date of creation and labels
+        3. Programmatic Description with Batch Source specification
+        4. (if applicable) Programmatic Description with Stream Source
+           specification
+        """
         if not self._extract_iter:
             self._extract_iter = self._get_extract_iter()
         try:
@@ -87,7 +103,7 @@ class FeastExtractor(Extractor):
             description = f"* Created at **{created_at}**\n"
 
             if feature_table.labels:
-                description += '* Labels:\n'
+                description += "* Labels:\n"
                 for key, value in feature_table.labels.items():
                     description += f"    * {key}: **{value}**\n"
 
