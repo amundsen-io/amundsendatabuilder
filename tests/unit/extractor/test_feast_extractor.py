@@ -69,50 +69,80 @@ class TestFeastExtractor(unittest.TestCase):
         self.extractor._client.list_projects.return_value = ["default"]
         self._mock_feature_table(labels={"label1": "value1"})
 
-        self.extractor.extract()  # table definition
-        programmatic_description = self.extractor.extract()
-        assert isinstance(programmatic_description, TableMetadata)
-        text = """* Created at **2020-01-01 00:00:00**
-                 |* label1: **value1**
-                 |
-                 |Batch source:
-                 |```
-                 |fileOptions:
-                 |  fileFormat:
-                 |    parquetFormat: {}
-                 |  fileUrl: file:///some/location
-                 |type: BATCH_FILE
-                 |```"""
+        feature_table_definition = self.extractor.extract()
+        assert isinstance(feature_table_definition, TableMetadata)
 
+        description = self.extractor.extract()
+        assert isinstance(description, TableMetadata)
         expected = DescriptionMetadata(
-            TestFeastExtractor._strip_margin(text), "feature_table_details"
+            TestFeastExtractor._strip_margin(
+                """* Created at **2020-01-01 00:00:00**
+                  |* Labels:
+                  |    * label1: **value1**
+                  |"""
+            ),
+            "feature_table_details",
         )
-        self.assertEqual(
-            expected.__repr__(), programmatic_description.description.__repr__()
+        self.assertEqual(expected.__repr__(), description.description.__repr__())
+
+        batch_source = self.extractor.extract()
+        assert isinstance(batch_source, TableMetadata)
+        expected = DescriptionMetadata(
+            TestFeastExtractor._strip_margin(
+                """```
+                |fileOptions:
+                |  fileFormat:
+                |    parquetFormat: {}
+                |  fileUrl: file:///some/location
+                |type: BATCH_FILE
+                |```"""
+            ),
+            "batch_source",
         )
+        self.assertEqual(expected.__repr__(), batch_source.description.__repr__())
+
         self.assertIsNone(self.extractor.extract())
 
     def test_feature_table_extraction_with_description_stream(self) -> None:
         self._init_extractor(programmatic_description_enabled=True)
         self.extractor._client.list_projects.return_value = ["default"]
-        self._mock_feature_table(labels={"label1": "value1"}, add_stream_source=True)
+        self._mock_feature_table(add_stream_source=True)
 
-        self.extractor.extract()  # table definition
-        programmatic_description = self.extractor.extract()
-        assert isinstance(programmatic_description, TableMetadata)
-        text = """* Created at **2020-01-01 00:00:00**
-                 |* label1: **value1**
-                 |
-                 |Batch source:
-                 |```
-                 |fileOptions:
-                 |  fileFormat:
-                 |    parquetFormat: {}
-                 |  fileUrl: file:///some/location
-                 |type: BATCH_FILE
-                 |```
-                 |Stream source:
-                 |```
+        feature_table_definition = self.extractor.extract()
+        assert isinstance(feature_table_definition, TableMetadata)
+
+        description = self.extractor.extract()
+        assert isinstance(description, TableMetadata)
+        expected = DescriptionMetadata(
+            TestFeastExtractor._strip_margin(
+                """* Created at **2020-01-01 00:00:00**
+                  |"""
+            ),
+            "feature_table_details",
+        )
+        self.assertEqual(expected.__repr__(), description.description.__repr__())
+
+        batch_source = self.extractor.extract()
+        assert isinstance(batch_source, TableMetadata)
+        expected = DescriptionMetadata(
+            TestFeastExtractor._strip_margin(
+                """```
+                |fileOptions:
+                |  fileFormat:
+                |    parquetFormat: {}
+                |  fileUrl: file:///some/location
+                |type: BATCH_FILE
+                |```"""
+            ),
+            "batch_source",
+        )
+        self.assertEqual(expected.__repr__(), batch_source.description.__repr__())
+
+        stream_source = self.extractor.extract()
+        assert isinstance(stream_source, TableMetadata)
+        expected = DescriptionMetadata(
+            TestFeastExtractor._strip_margin(
+                """```
                  |createdTimestampColumn: datetime
                  |eventTimestampColumn: datetime
                  |kafkaOptions:
@@ -125,12 +155,11 @@ class TestFeastExtractor(unittest.TestCase):
                  |  topic: driver_trips
                  |type: STREAM_KAFKA
                  |```"""
-        expected = DescriptionMetadata(
-            TestFeastExtractor._strip_margin(text), "feature_table_details"
+            ),
+            "stream_source",
         )
-        self.assertEqual(
-            expected.__repr__(), programmatic_description.description.__repr__()
-        )
+        self.assertEqual(expected.__repr__(), stream_source.description.__repr__())
+
         self.assertIsNone(self.extractor.extract())
 
     def _init_extractor(self, programmatic_description_enabled: bool = True) -> None:

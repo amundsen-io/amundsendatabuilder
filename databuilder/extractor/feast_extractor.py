@@ -86,9 +86,10 @@ class FeastExtractor(Extractor):
             )
             description = f"* Created at **{created_at}**\n"
 
-            description += '* Labels\n'
-            for key, value in feature_table.labels.items():
-                description += f"    * {key}: **{value}**\n"
+            if feature_table.labels:
+                description += '* Labels:\n'
+                for key, value in feature_table.labels.items():
+                    description += f"    * {key}: **{value}**\n"
 
             yield TableMetadata(
                 "feast",
