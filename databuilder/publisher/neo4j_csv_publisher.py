@@ -321,24 +321,20 @@ class Neo4jCsvPublisher(Publisher):
         with open(relation_file, 'r', encoding='utf8') as relation_csv:
             for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
                 badge_exception = True
-                retries_for_badge_exception = 10  # TODO not sure how many times to retry
+                retries_for_badge_exception = 5
                 while badge_exception and retries_for_badge_exception > 0:
                     try:
                         stmt = self.create_relationship_merge_statement(rel_record=rel_record)
                         params = self._create_props_param(rel_record)
                         tx = self._execute_statement(stmt, tx, params,
                                                      expect_result=self._confirm_rel_created)
-                        badge_exception = False  # if no exception happens we stop inner loop
-                        # TODO use break instead ^ ?
+                        badge_exception = False
                     except TransientError as e:
-                        # if exception is due to badge relation issue TODO could use a specific
-                        # exception for this condition (using TransientError)
                         if rel_record[RELATION_START_LABEL] == BadgeMetadata.BADGE_NODE_LABEL\
                                 or rel_record[RELATION_END_LABEL] == BadgeMetadata.BADGE_NODE_LABEL:
-                            # TODO not sure how long this op usually takes and how long should wait be
                             time.sleep(2)
                             retries_for_badge_exception -= 1
-                        else:  # if other exception happens oh well
+                        else:
                             raise e
 
         return tx
