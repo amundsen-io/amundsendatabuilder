@@ -47,6 +47,9 @@ NEO4J_MAX_CONN_LIFE_TIME_SEC = 'neo4j_max_conn_life_time_sec'
 # list of nodes that are create only, and not updated if match exists
 NEO4J_CREATE_ONLY_NODES = 'neo4j_create_only_nodes'
 
+# list of node labels that could attempt to be accessed simultaneously
+NEO4J_DEADLOCK_NODE_LABELS = 'neo4j_deadlock_node_labels'
+
 NEO4J_USER = 'neo4j_user'
 NEO4J_PASSWORD = 'neo4j_password'
 NEO4J_ENCRYPTED = 'neo4j_encrypted'
@@ -144,6 +147,7 @@ class Neo4jCsvPublisher(Publisher):
         # config is list of node label.
         # When set, this list specifies a list of nodes that shouldn't be updated, if exists
         self.create_only_nodes = set(conf.get_list(NEO4J_CREATE_ONLY_NODES, default=[]))
+        self.deadlock_node_labels = set(conf.get_list(NEO4J_DEADLOCK_NODE_LABELS, default=[]))
         self.labels: Set[str] = set()
         self.publish_tag: str = conf.get_string(JOB_PUBLISH_TAG)
         if not self.publish_tag:
@@ -330,8 +334,8 @@ class Neo4jCsvPublisher(Publisher):
                                                      expect_result=self._confirm_rel_created)
                         badge_exception = False
                     except TransientError as e:
-                        if rel_record[RELATION_START_LABEL] == BadgeMetadata.BADGE_NODE_LABEL\
-                                or rel_record[RELATION_END_LABEL] == BadgeMetadata.BADGE_NODE_LABEL:
+                        if rel_record[RELATION_START_LABEL] in self.deadlock_node_labels\
+                                or rel_record[RELATION_END_LABEL] in self.deadlock_node_labels:
                             time.sleep(2)
                             retries_for_badge_exception -= 1
                         else:
