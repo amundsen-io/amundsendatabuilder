@@ -20,7 +20,6 @@ from typing import Set, List
 
 from databuilder.publisher.base_publisher import Publisher
 from databuilder.publisher.neo4j_preprocessor import NoopRelationPreprocessor
-from databuilder.models.badge import BadgeMetadata
 
 
 # Setting field_size_limit to solve the error below
