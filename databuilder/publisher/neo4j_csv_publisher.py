@@ -103,6 +103,10 @@ DEFAULT_CONFIG = ConfigFactory.from_dict({NEO4J_TRANSACTION_SIZE: 500,
                                           NEO4J_VALIDATE_SSL: False,
                                           RELATION_PREPROCESSOR: NoopRelationPreprocessor()})
 
+# transient error retries and sleep time
+RETRIES_NUMBER = 5
+SLEEP_TIME = 2
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -323,9 +327,9 @@ class Neo4jCsvPublisher(Publisher):
 
         with open(relation_file, 'r', encoding='utf8') as relation_csv:
             for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
-                badge_exception = True
-                retries_for_badge_exception = 5
-                while badge_exception and retries_for_badge_exception > 0:
+                exception_exists = True
+                retries_for_exception = RETRIES_NUMBER
+                while exception_exists and retries_for_exception > 0:
                     try:
                         stmt = self.create_relationship_merge_statement(rel_record=rel_record)
                         params = self._create_props_param(rel_record)
@@ -335,8 +339,8 @@ class Neo4jCsvPublisher(Publisher):
                     except TransientError as e:
                         if rel_record[RELATION_START_LABEL] in self.deadlock_node_labels\
                                 or rel_record[RELATION_END_LABEL] in self.deadlock_node_labels:
-                            time.sleep(2)
-                            retries_for_badge_exception -= 1
+                            time.sleep(SLEEP_TIME)
+                            retries_for_exception -= 1
                         else:
                             raise e
 
