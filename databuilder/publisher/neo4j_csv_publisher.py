@@ -1,26 +1,24 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import pandas
 import csv
 import ctypes
-from io import open
 import logging
 import time
+from io import open
 from os import listdir
 from os.path import isfile, join
-from jinja2 import Template
+from typing import Set, List
 
-from neo4j import GraphDatabase, Transaction
 import neo4j
+from jinja2 import Template
+from neo4j import GraphDatabase, Transaction
 from neo4j.exceptions import CypherError
 from pyhocon import ConfigFactory
 from pyhocon import ConfigTree
-from typing import Set, List
 
 from databuilder.publisher.base_publisher import Publisher
 from databuilder.publisher.neo4j_preprocessor import NoopRelationPreprocessor
-
 
 # Setting field_size_limit to solve the error below
 # _csv.Error: field larger than field limit (131072)
@@ -219,7 +217,7 @@ class Neo4jCsvPublisher(Publisher):
         LOGGER.info('Creating indices. (Existing indices will be ignored)')
 
         with open(node_file, 'r', encoding='utf8') as node_csv:
-            for node_record in pandas.read_csv(node_csv, na_filter=False).to_dict(orient='records'):
+            for node_record in csv.DictReader(node_csv):
                 label = node_record[NODE_LABEL_KEY]
                 if label not in self.labels:
                     self._try_create_index(label)
@@ -246,7 +244,7 @@ class Neo4jCsvPublisher(Publisher):
         """
 
         with open(node_file, 'r', encoding='utf8') as node_csv:
-            for node_record in pandas.read_csv(node_csv, na_filter=False).to_dict(orient="records"):
+            for node_record in csv.DictReader(node_csv):
                 stmt = self.create_node_merge_statement(node_record=node_record)
                 params = self._create_props_param(node_record)
                 tx = self._execute_statement(stmt, tx, params)
@@ -301,7 +299,7 @@ class Neo4jCsvPublisher(Publisher):
 
             count = 0
             with open(relation_file, 'r', encoding='utf8') as relation_csv:
-                for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
+                for rel_record in csv.DictReader(relation_csv):
                     stmt, params = self._relation_preprocessor.preprocess_cypher(
                         start_label=rel_record[RELATION_START_LABEL],
                         end_label=rel_record[RELATION_END_LABEL],
@@ -317,7 +315,7 @@ class Neo4jCsvPublisher(Publisher):
             LOGGER.info('Executed pre-processing Cypher statement {} times'.format(count))
 
         with open(relation_file, 'r', encoding='utf8') as relation_csv:
-            for rel_record in pandas.read_csv(relation_csv, na_filter=False).to_dict(orient="records"):
+            for rel_record in csv.DictReader(relation_csv):
                 stmt = self.create_relationship_merge_statement(rel_record=rel_record)
                 params = self._create_props_param(rel_record)
                 tx = self._execute_statement(stmt, tx, params,
@@ -401,8 +399,8 @@ class Neo4jCsvPublisher(Publisher):
     def _execute_statement(self,
                            stmt: str,
                            tx: Transaction,
-                           params: dict=None,
-                           expect_result: bool=False) -> Transaction:
+                           params: dict = None,
+                           expect_result: bool = False) -> Transaction:
         """
         Executes statement against Neo4j. If execution fails, it rollsback and raise exception.
         If 'expect_result' flag is True, it confirms if result object is not null.
