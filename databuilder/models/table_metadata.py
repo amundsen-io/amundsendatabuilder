@@ -346,7 +346,7 @@ class TableMetadata(GraphSerializable):
         except StopIteration:
             return None
 
-    def _create_column_nodes(self, columns):
+    def _create_column_nodes(self) -> Iterator[GraphNode]:
         for col in self.columns:
             column_node = GraphNode(
                 key=self._get_col_key(col),
@@ -390,7 +390,7 @@ class TableMetadata(GraphSerializable):
             for node in table_badge_metadata.create_nodes():
                 yield node
 
-#        self._create_column_nodes(self.columns)
+#        self._create_column_nodes()
         for col in self.columns:
             column_node = GraphNode(
                 key=self._get_col_key(col),
@@ -467,7 +467,7 @@ class TableMetadata(GraphSerializable):
         except StopIteration:
             return None
 
-    def _yield_columns(self):
+    def _yield_column_rels(self) -> Iterator[GraphRelationship]:
         for col in self.columns:
             column_relationship = GraphRelationship(
                 start_label=TableMetadata.TABLE_NODE_LABEL,
@@ -532,7 +532,7 @@ class TableMetadata(GraphSerializable):
             for relation in table_badge_metadata.create_relation():
                 yield relation
 
-#        self._yield_columns()
+#        self._yield_column_rels()
         for col in self.columns:
             column_relationship = GraphRelationship(
                 start_label=TableMetadata.TABLE_NODE_LABEL,
