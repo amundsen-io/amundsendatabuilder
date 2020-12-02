@@ -65,6 +65,28 @@ class CsvExtractor(Extractor):
         return 'extractor.csv'
 
 
+class CsvTableBadgeExtractor(Extractor):
+    # Config keys
+    TABLE_FILE_LOCATION = 'table_file_location'
+    BADGE_FILE_LOCATION = 'badge_file_location'
+
+    """
+    An Extractor that combines Table and Badge CSVs.
+    """
+    def init(self, conf: ConfigTree) -> None:
+        self.conf = conf
+        self.table_file_location = conf.get_string(CsvTableBadgeExtractor.TABLE_FILE_LOCATION)
+        self.badge_file_location = conf.get_string(CsvTableBadgeExtractor.BADGE_FILE_LOCATION)
+        self._load_csv()
+    
+    def _get_key(self) -> None:
+        pass
+
+    def _load_csv(self) -> None:
+        with open(self.badge_file_location, 'r') as fin:
+            self.badges = [dict(i) for i in csv.DictReader(fin)]
+        print("BADGES: " + self.badges)
+
 class CsvTableColumnExtractor(Extractor):
     # Config keys
     TABLE_FILE_LOCATION = 'table_file_location'
