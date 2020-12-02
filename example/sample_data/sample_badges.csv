@@ -1,2 +1,2 @@
-name,category
-beta,table_status
+name,category,database,cluster,schema,table_name
+beta,table_status,hive,gold,test_schema,test_table1

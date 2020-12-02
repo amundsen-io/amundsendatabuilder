@@ -10,6 +10,7 @@ from typing import Any
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.badge import Badge, BadgeMetadata
 
 
 class CsvExtractor(Extractor):
@@ -86,6 +87,19 @@ class CsvTableBadgeExtractor(Extractor):
         with open(self.badge_file_location, 'r') as fin:
             self.badges = [dict(i) for i in csv.DictReader(fin)]
         print("BADGES: " + self.badges)
+
+        parsed_badges = defaultdict(list)
+        for badge_dict in self.badges:
+            db = badge_dict['database']
+            cluster = badge_dict['cluster']
+            schema = badge_dict['schema']
+            table_name = badge_dict['table_name']
+            id = self._get_key(db, cluster, schema, table_name)
+            badge = Badge(name=badge_dict['name'],
+                          category=badge_dict['category'])
+            parsed_badges[id].append(badge)
+        
+        
 
 class CsvTableColumnExtractor(Extractor):
     # Config keys
