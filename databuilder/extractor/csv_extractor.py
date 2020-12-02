@@ -113,7 +113,8 @@ class CsvTableColumnExtractor(Extractor):
                 name=column_dict['name'],
                 description=column_dict['description'],
                 col_type=column_dict['col_type'],
-                sort_order=int(column_dict['sort_order'])
+                sort_order=int(column_dict['sort_order']),
+                badges=column_dict['badges']
             )
             parsed_columns[id].append(column)
 
@@ -140,7 +141,8 @@ class CsvTableColumnExtractor(Extractor):
                                   # TODO: this possibly should parse stringified booleans;
                                   # right now it only will be false for empty strings
                                   is_view=bool(table_dict['is_view']),
-                                  tags=table_dict['tags']
+                                  tags=table_dict['tags'],
+                                  badges=table_dict['badges']
                                   )
             results.append(table)
         self._iter = iter(results)
