@@ -346,31 +346,6 @@ class TableMetadata(GraphSerializable):
         except StopIteration:
             return None
 
-    def _create_column_nodes(self) -> Iterator[GraphNode]:
-        for col in self.columns:
-            column_node = GraphNode(
-                key=self._get_col_key(col),
-                label=ColumnMetadata.COLUMN_NODE_LABEL,
-                attributes={
-                    ColumnMetadata.COLUMN_NAME: col.name,
-                    ColumnMetadata.COLUMN_TYPE: col.type,
-                    ColumnMetadata.COLUMN_ORDER: col.sort_order
-                }
-            )
-            yield column_node
-
-            if col.description:
-                node_key = self._get_col_description_key(col, col.description)
-                yield col.description.get_node(node_key)
-
-            if col.badges:
-                col_badge_metadata = BadgeMetadata(
-                    start_label=ColumnMetadata.COLUMN_NODE_LABEL,
-                    start_key=self._get_col_key(col),
-                    badges=col.badges)
-                for node in col_badge_metadata.create_nodes():
-                    yield node
-
     def _create_next_node(self) -> Iterator[GraphNode]:   # noqa: C901
         yield self._create_table_node()
 
@@ -390,7 +365,6 @@ class TableMetadata(GraphSerializable):
             for node in table_badge_metadata.create_nodes():
                 yield node
 
-#        self._create_column_nodes()
         for col in self.columns:
             column_node = GraphNode(
                 key=self._get_col_key(col),
@@ -467,34 +441,6 @@ class TableMetadata(GraphSerializable):
         except StopIteration:
             return None
 
-    def _yield_column_rels(self) -> Iterator[GraphRelationship]:
-        for col in self.columns:
-            column_relationship = GraphRelationship(
-                start_label=TableMetadata.TABLE_NODE_LABEL,
-                start_key=self._get_table_key(),
-                end_label=ColumnMetadata.COLUMN_NODE_LABEL,
-                end_key=self._get_col_key(col),
-                type=TableMetadata.TABLE_COL_RELATION_TYPE,
-                reverse_type=TableMetadata.COL_TABLE_RELATION_TYPE,
-                attributes={}
-            )
-            yield column_relationship
-
-            if col.description:
-                yield col.description.get_relation(
-                    ColumnMetadata.COLUMN_NODE_LABEL,
-                    self._get_col_key(col),
-                    self._get_col_description_key(col, col.description)
-                )
-
-            if col.badges:
-                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
-                                               start_key=self._get_col_key(col),
-                                               badges=col.badges)
-                badge_relations = badge_metadata.create_relation()
-                for relation in badge_relations:
-                    yield relation
-
     def _create_next_relation(self) -> Iterator[GraphRelationship]:   # noqa: C901
         schema_table_relationship = GraphRelationship(
             start_key=self._get_schema_key(),
@@ -532,7 +478,6 @@ class TableMetadata(GraphSerializable):
             for relation in table_badge_metadata.create_relation():
                 yield relation
 
-#        self._yield_column_rels()
         for col in self.columns:
             column_relationship = GraphRelationship(
                 start_label=TableMetadata.TABLE_NODE_LABEL,
