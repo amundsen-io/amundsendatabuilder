@@ -1,15 +1,12 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import logging
 from typing import Any, List, Optional
 import re
 
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
-
-LOGGER = logging.getLogger(__name__)
 
 
 class Badge:
@@ -44,8 +41,6 @@ class BadgeMetadata(GraphSerializable):
                  badges: List[Badge],
                  ):
         self.badges = badges
-
-        LOGGER.info(f"Badges model: got list '{badges}' for '{start_label}'")
 
         table_key_pattern = re.compile('[a-z]+://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
         dashboard_key_pattern = re.compile('[a-z]+_dashboard://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
@@ -112,9 +107,6 @@ class BadgeMetadata(GraphSerializable):
         return results
 
     def create_relation(self) -> List[GraphRelationship]:
-        """
-        :return: List[GraphRelationship]
-        """
         results: List[GraphRelationship] = []
         for badge in self.badges:
             relation = GraphRelationship(
