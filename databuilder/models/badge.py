@@ -1,12 +1,15 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
+import logging
+from typing import Any, List, Optional
 import re
 
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+
+LOGGER = logging.getLogger(__name__)
 
 
 class Badge:
@@ -17,6 +20,10 @@ class Badge:
     def __repr__(self) -> str:
         return 'Badge({!r}, {!r})'.format(self.name,
                                           self.category)
+
+    def __eq__(self, other: Any) -> bool:  # type: ignore[override]
+        return self.name == other.name and \
+            self.category == other.category
 
 
 class BadgeMetadata(GraphSerializable):
@@ -37,6 +44,8 @@ class BadgeMetadata(GraphSerializable):
                  badges: List[Badge],
                  ):
         self.badges = badges
+
+        LOGGER.info(f"Badges model: got list '{badges}' for '{start_label}'")
 
         table_key_pattern = re.compile('[a-z]+://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
         dashboard_key_pattern = re.compile('[a-z]+_dashboard://[a-zA-Z0-9_.-]+.[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+')
@@ -86,7 +95,7 @@ class BadgeMetadata(GraphSerializable):
 
     def create_nodes(self) -> List[GraphNode]:
         """
-        Create a list of Neo4j node records
+        Create a list of `GraphNode` records
         :return:
         """
         results = []
@@ -103,7 +112,10 @@ class BadgeMetadata(GraphSerializable):
         return results
 
     def create_relation(self) -> List[GraphRelationship]:
-        results = []
+        """
+        :return: List[GraphRelationship]
+        """
+        results: List[GraphRelationship] = []
         for badge in self.badges:
             relation = GraphRelationship(
                 start_label=self.start_label,
