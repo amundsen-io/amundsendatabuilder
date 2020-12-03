@@ -335,7 +335,7 @@ class Neo4jCsvPublisher(Publisher):
                         params = self._create_props_param(rel_record)
                         tx = self._execute_statement(stmt, tx, params,
                                                      expect_result=self._confirm_rel_created)
-                        badge_exception = False
+                        exception_exists = False
                     except TransientError as e:
                         if rel_record[RELATION_START_LABEL] in self.deadlock_node_labels\
                                 or rel_record[RELATION_END_LABEL] in self.deadlock_node_labels:
