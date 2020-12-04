@@ -102,6 +102,7 @@ def run_csv_job(file_loc, job_name, model):
                task=task,
                publisher=Neo4jCsvPublisher()).launch()
 
+
 def run_table_badge_job(table_path, badge_path):
     tmp_folder = '/var/tmp/amundsen/table_badge'
     node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
@@ -129,6 +130,7 @@ def run_table_badge_job(table_path, badge_path):
                      task=task,
                      publisher=Neo4jCsvPublisher())
     job.launch()
+
 
 def run_table_column_job(table_path, column_path):
     tmp_folder = '/var/tmp/amundsen/table_column'

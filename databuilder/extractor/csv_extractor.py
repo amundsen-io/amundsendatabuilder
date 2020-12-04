@@ -79,7 +79,7 @@ class CsvTableBadgeExtractor(Extractor):
         self.table_file_location = conf.get_string(CsvTableBadgeExtractor.TABLE_FILE_LOCATION)
         self.badge_file_location = conf.get_string(CsvTableBadgeExtractor.BADGE_FILE_LOCATION)
         self._load_csv()
-    
+
     def _get_key(self) -> None:
         pass
 
@@ -98,8 +98,7 @@ class CsvTableBadgeExtractor(Extractor):
             badge = Badge(name=badge_dict['name'],
                           category=badge_dict['category'])
             parsed_badges[id].append(badge)
-        
-        
+
 
 class CsvTableColumnExtractor(Extractor):
     # Config keys
