@@ -80,13 +80,21 @@ class CsvTableBadgeExtractor(Extractor):
         self.badge_file_location = conf.get_string(CsvTableBadgeExtractor.BADGE_FILE_LOCATION)
         self._load_csv()
 
-    def _get_key(self) -> None:
-        pass
+    def _get_key(self,
+                 db: str,
+                 cluster: str,
+                 schema: str,
+                 tbl: str
+                 ) -> str:
+        return TableMetadata.TABLE_KEY_FORMAT.format(db=db,
+                                                     cluster=cluster,
+                                                     schema=schema,
+                                                     tbl=tbl)
 
     def _load_csv(self) -> None:
         with open(self.badge_file_location, 'r') as fin:
             self.badges = [dict(i) for i in csv.DictReader(fin)]
-        print("BADGES: " + self.badges)
+        # print("BADGES: " + str(self.badges))
 
         parsed_badges = defaultdict(list)
         for badge_dict in self.badges:
@@ -116,7 +124,23 @@ class CsvTableBadgeExtractor(Extractor):
             badge_metadata = BadgeMetadata(start_label=TableMetadata.TABLE_NODE_LABEL,
                                            start_key=id,
                                            badges=badges)
+            results.append(badge_metadata)
         self._iter = iter(results)
+
+    def extract(self) -> Any:
+        """
+        Yield the csv result one at a time.
+        convert the result to model if a model_class is provided
+        """
+        try:
+            return next(self._iter)
+        except StopIteration:
+            return None
+        except Exception as e:
+            raise e
+
+    def get_scope(self) -> str:
+        return 'extractor.csvtablebadge'
 
 
 class CsvTableColumnExtractor(Extractor):

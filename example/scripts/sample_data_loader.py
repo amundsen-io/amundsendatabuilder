@@ -113,8 +113,8 @@ def run_table_badge_job(table_path, badge_path):
                        loader=csv_loader,
                        transformer=NoopTransformer())
     job_config = ConfigFactory.from_dict({
-        'extractor.csvtablecolumn.table_file_location': table_path,
-        'extractor.csvtablecolumn.badge_file_location': badge_path,
+        'extractor.csvtablebadge.table_file_location': table_path,
+        'extractor.csvtablebadge.badge_file_location': badge_path,
         'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
         'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
         'loader.filesystem_csv_neo4j.delete_created_directories': True,
