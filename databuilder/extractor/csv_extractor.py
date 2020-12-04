@@ -98,6 +98,25 @@ class CsvTableBadgeExtractor(Extractor):
             badge = Badge(name=badge_dict['name'],
                           category=badge_dict['category'])
             parsed_badges[id].append(badge)
+        
+        with open(self.table_file_location, 'r') as fin:
+            tables = [dict(i) for i in csv.DictReader(fin)]
+        
+        results = []
+        for table_dict in tables:
+            db = table_dict['database']
+            cluster = table_dict['cluster']
+            schema = table_dict['schema']
+            table_name = table_dict['name']
+            id = self._get_key(db, cluster, schema, table_name)
+            badges = parsed_badges[id]
+
+            if badges is None:
+                badges = []
+            badge_metadata = BadgeMetadata(start_label=TableMetadata.TABLE_NODE_LABEL,
+                                           start_key=id,
+                                           badges=badges)
+        self._iter = iter(results)
 
 
 class CsvTableColumnExtractor(Extractor):
