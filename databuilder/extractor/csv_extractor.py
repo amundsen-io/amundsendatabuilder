@@ -141,8 +141,7 @@ class CsvTableColumnExtractor(Extractor):
                                   # TODO: this possibly should parse stringified booleans;
                                   # right now it only will be false for empty strings
                                   is_view=bool(table_dict['is_view']),
-                                  tags=table_dict['tags'],
-                                  badges=table_dict['badges']
+                                  tags=table_dict['tags']
                                   )
             results.append(table)
         self._iter = iter(results)

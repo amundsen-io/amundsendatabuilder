@@ -246,7 +246,6 @@ class TableMetadata(GraphSerializable):
                  is_view: bool = False,
                  tags: Union[List, str] = None,
                  description_source: Union[str, None] = None,
-                 badges: Union[List, str] = None,
                  **kwargs: Any
                  ) -> None:
         """
@@ -258,7 +257,6 @@ class TableMetadata(GraphSerializable):
         :param columns:
         :param is_view: Indicate whether the table is a view or not
         :param tags:
-        :param badges: Optional. Table level badges
         :param description_source: Optional. Where the description is coming from. Used to compose unique id.
         :param kwargs: Put additional attributes to the table model if there is any.
         """
@@ -272,8 +270,6 @@ class TableMetadata(GraphSerializable):
         self.attrs: Optional[Dict[str, Any]] = None
 
         self.tags = _format_as_list(tags)
-        formatted_badges = _format_as_list(badges)
-        self.badges = [Badge(badge, 'table') for badge in formatted_badges]
 
         if kwargs:
             self.attrs = copy.deepcopy(kwargs)
@@ -283,15 +279,14 @@ class TableMetadata(GraphSerializable):
 
     def __repr__(self) -> str:
         return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
-               '{!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                      self.cluster,
-                                                      self.schema,
-                                                      self.name,
-                                                      self.description,
-                                                      self.columns,
-                                                      self.is_view,
-                                                      self.tags,
-                                                      self.badges)
+               '{!r}, {!r}, {!r}, {!r}'.format(self.database,
+                                               self.cluster,
+                                               self.schema,
+                                               self.name,
+                                               self.description,
+                                               self.columns,
+                                               self.is_view,
+                                               self.tags)
 
     def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
@@ -346,24 +341,17 @@ class TableMetadata(GraphSerializable):
         except StopIteration:
             return None
 
-    def _create_next_node(self) -> Iterator[GraphNode]:   # noqa: C901
+    def _create_next_node(self) -> Iterator[GraphNode]:
         yield self._create_table_node()
 
         if self.description:
             node_key = self._get_table_description_key(self.description)
             yield self.description.get_node(node_key)
 
-        # Create table tag and badge nodes
+        # Create table tag node
         if self.tags:
             for tag in self.tags:
                 yield TagMetadata.create_tag_node(tag)
-
-        if self.badges:
-            table_badge_metadata = BadgeMetadata(start_label=TableMetadata.TABLE_NODE_LABEL,
-                                                 start_key=self._get_table_key(),
-                                                 badges=self.badges)
-            for node in table_badge_metadata.create_nodes():
-                yield node
 
         for col in self.columns:
             column_node = GraphNode(
@@ -441,7 +429,7 @@ class TableMetadata(GraphSerializable):
         except StopIteration:
             return None
 
-    def _create_next_relation(self) -> Iterator[GraphRelationship]:   # noqa: C901
+    def _create_next_relation(self) -> Iterator[GraphRelationship]:
         schema_table_relationship = GraphRelationship(
             start_key=self._get_schema_key(),
             start_label=TableMetadata.SCHEMA_NODE_LABEL,
@@ -470,13 +458,6 @@ class TableMetadata(GraphSerializable):
                     attributes={}
                 )
                 yield tag_relationship
-
-        if self.badges:
-            table_badge_metadata = BadgeMetadata(start_label=TableMetadata.TABLE_NODE_LABEL,
-                                                 start_key=self._get_table_key(),
-                                                 badges=self.badges)
-            for relation in table_badge_metadata.create_relation():
-                yield relation
 
         for col in self.columns:
             column_relationship = GraphRelationship(

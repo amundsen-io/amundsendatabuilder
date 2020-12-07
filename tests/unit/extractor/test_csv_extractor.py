@@ -34,8 +34,6 @@ class TestCsvExtractor(unittest.TestCase):
         self.assertEqual(result.tags, ['tag1', 'tag2'])
         self.assertEqual(result.is_view, 'false')
 
-        self.assertEqual(result.badges, [Badge('pii', 'table'), Badge('high_quality', 'table')])
-
         result2 = extractor.extract()
         self.assertEqual(result2.name, 'test_table2')
         self.assertEqual(result2.is_view, 'FALSE')
@@ -62,7 +60,5 @@ class TestCsvExtractor(unittest.TestCase):
 
         result = extractor.extract()
         self.assertEqual(result.name, 'test_table1')
-        self.assertEqual(result.badges, [Badge('pii', 'table'), Badge('high_quality', 'table')])
-
         self.assertEqual(result.columns[0].badges, [Badge('pk', 'column')])
         self.assertEqual(result.columns[1].badges, [Badge('pii', 'column')])
