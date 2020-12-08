@@ -11,6 +11,7 @@ from databuilder.models.dashboard.dashboard_last_modified import DashboardLastMo
 from databuilder.models.dashboard.dashboard_owner import DashboardOwner
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
 from databuilder.models.dashboard.dashboard_table import DashboardTable
+from databuilder.models.dashboard.dashboard_chart import DashboardChart
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.rest_api.rest_api_query import RestApiQuery
@@ -125,8 +126,8 @@ class RedashDashboardExtractor(Extractor):
                 'dashboard_name':
                     record['dashboard_name'],
                 'dashboard_url':
-                    '{redash}/dashboard/{slug}'
-                    .format(redash=self._redash_base_url, slug=record['slug']),
+                    '{redash}/dashboards/{id}'
+                    .format(redash=self._redash_base_url, id=record['dashboard_id']),
                 'created_timestamp':
                     record['created_timestamp']
             }
@@ -164,6 +165,15 @@ class RedashDashboardExtractor(Extractor):
                 query_data.update(identity_data)
                 yield DashboardQuery(**query_data)
 
+                chart_data = {
+                    'query_id': viz.query_id,
+                    'chart_id': viz.visualization_id,
+                    'chart_name': viz.visualization_name,
+                    'chart_type': viz.visualization_type,
+                }
+                chart_data.update(identity_data)
+                yield DashboardChart(**chart_data)
+
                 # if a table parser is provided, retrieve tables from this viz
                 if self._parse_tables:
                     for tbl in self._parse_tables(viz):
@@ -197,7 +207,7 @@ class RedashDashboardExtractor(Extractor):
 
         return RestApiQuery(
             query_to_join=dashes_query,
-            url='{redash_api}/dashboards/{{slug}}'.format(redash_api=self._api_base_url),
+            url='{redash_api}/dashboards/{{dashboard_id}}'.format(redash_api=self._api_base_url),
             params=self._get_default_api_query_params(),
             json_path='widgets',
             field_names=['widgets'],
