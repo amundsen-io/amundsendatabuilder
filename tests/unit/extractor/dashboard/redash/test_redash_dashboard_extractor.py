@@ -100,7 +100,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
 
             # DashboardMetadata
             record = extractor.extract()
-            self.assertEqual(record.dashboard_id, 1000)
+            self.assertEqual(record.dashboard_id, '1000')
             self.assertEqual(record.dashboard_name, 'Test Dash')
             self.assertEqual(record.dashboard_group_id, RedashDashboardExtractor.DASHBOARD_GROUP_ID)
             self.assertEqual(record.dashboard_group, RedashDashboardExtractor.DASHBOARD_GROUP_NAME)
@@ -113,7 +113,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
             # DashboardLastModified
             record = extractor.extract()
             identity: Dict[str, Any] = {
-                'dashboard_id': 1000,
+                'dashboard_id': '1000',
                 'dashboard_group_id': RedashDashboardExtractor.DASHBOARD_GROUP_ID,
                 'product': RedashDashboardExtractor.PRODUCT,
                 'cluster': u'prod'
@@ -132,7 +132,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
             # DashboardQuery
             record = extractor.extract()
             expected_query = DashboardQuery(
-                query_id=1234,
+                query_id='1234',
                 query_name='Test Query',
                 url=u'{base}/queries/1234'.format(base=redash_base_url),
                 query_text='SELECT id FROM users',
@@ -142,14 +142,14 @@ class TestRedashDashboardExtractor(unittest.TestCase):
 
             # DashboardChart
             record = extractor.extract()
-            expected_table = DashboardChart(
-                query_id=1234,
-                chart_id=12345,
+            expected_chart = DashboardChart(
+                query_id='1234',
+                chart_id='12345',
                 chart_name='test_widget',
                 chart_type='CHART',
                 **identity
             )
-            self.assertEqual(record.__repr__(), expected_table.__repr__())
+            self.assertEqual(record.__repr__(), expected_chart.__repr__())
 
             # DashboardTable
             record = extractor.extract()

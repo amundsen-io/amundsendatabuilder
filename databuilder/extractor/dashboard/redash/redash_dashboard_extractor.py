@@ -114,8 +114,8 @@ class RedashDashboardExtractor(Extractor):
             identity_data = {
                 'cluster': self._cluster,
                 'product': RedashDashboardExtractor.PRODUCT,
-                'dashboard_group_id': RedashDashboardExtractor.DASHBOARD_GROUP_ID,
-                'dashboard_id': record['dashboard_id']
+                'dashboard_group_id': str(RedashDashboardExtractor.DASHBOARD_GROUP_ID),
+                'dashboard_id': str(record['dashboard_id'])
             }
 
             dash_data = {
@@ -156,7 +156,7 @@ class RedashDashboardExtractor(Extractor):
 
             for viz in viz_widgets:
                 query_data = {
-                    'query_id': viz.query_id,
+                    'query_id': str(viz.query_id),
                     'query_name': viz.query_name,
                     'url': self._redash_base_url + viz.query_relative_url,
                     'query_text': viz.raw_query
@@ -166,8 +166,8 @@ class RedashDashboardExtractor(Extractor):
                 yield DashboardQuery(**query_data)
 
                 chart_data = {
-                    'query_id': viz.query_id,
-                    'chart_id': viz.visualization_id,
+                    'query_id': str(viz.query_id),
+                    'chart_id': str(viz.visualization_id),
                     'chart_name': viz.visualization_name,
                     'chart_type': viz.visualization_type,
                 }
