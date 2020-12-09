@@ -167,7 +167,7 @@ class ColumnMetadata:
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 badges: Union[List, str, None] = None,
+                 badges: Union[List[str], None] = None,
                  ) -> None:
         """
         TODO: Add stats
@@ -279,14 +279,14 @@ class TableMetadata(GraphSerializable):
 
     def __repr__(self) -> str:
         return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
-               '{!r}, {!r}, {!r}, {!r}'.format(self.database,
-                                               self.cluster,
-                                               self.schema,
-                                               self.name,
-                                               self.description,
-                                               self.columns,
-                                               self.is_view,
-                                               self.tags)
+               '{!r}, {!r}, {!r}, {!r})'.format(self.database,
+                                                self.cluster,
+                                                self.schema,
+                                                self.name,
+                                                self.description,
+                                                self.columns,
+                                                self.is_view,
+                                                self.tags)
 
     def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
@@ -348,7 +348,7 @@ class TableMetadata(GraphSerializable):
             node_key = self._get_table_description_key(self.description)
             yield self.description.get_node(node_key)
 
-        # Create table tag node
+        # Create the table tag nodes
         if self.tags:
             for tag in self.tags:
                 yield TagMetadata.create_tag_node(tag)
