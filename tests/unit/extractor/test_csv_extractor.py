@@ -36,7 +36,7 @@ class TestCsvExtractor(unittest.TestCase):
 
         result2 = extractor.extract()
         self.assertEqual(result2.name, 'test_table2')
-        self.assertEqual(result2.is_view, 'FALSE')
+        self.assertEqual(result2.is_view, 'false')
 
         result3 = extractor.extract()
         self.assertEqual(result3.name, 'test_view1')
