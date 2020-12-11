@@ -3,11 +3,12 @@
 
 import csv
 import logging
-
-from pyhocon import ConfigTree
 from typing import Any
 
 from databuilder.loader.base_loader import Loader
+from pyhocon import ConfigTree
+
+LOGGER = logging.getLogger(__name__)
 
 
 class FileSystemCSVLoader(Loader):
@@ -52,8 +53,7 @@ class FileSystemCSVLoader(Loader):
             if self.file_handler:
                 self.file_handler.close()
         except Exception as e:
-            logging.warning("Failed trying to close a file handler! %s",
-                            str(e))
+            LOGGER.warning("Failed trying to close a file handler! %s", e)
 
     def get_scope(self) -> str:
         return "loader.filesystem.csv"

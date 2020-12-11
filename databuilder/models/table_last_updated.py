@@ -38,9 +38,8 @@ class TableLastUpdated(GraphSerializable):
         self._relation_iter = iter(self.create_relation())
 
     def __repr__(self) -> str:
-        return \
-            """TableLastUpdated(table_name={!r}, last_updated_time={!r}, schema={!r}, db={!r}, cluster={!r})"""\
-            .format(self.table_name, self.last_updated_time, self.schema, self.db, self.cluster)
+        return f"TableLastUpdated(table_name={self.table_name!r}, last_updated_time={self.last_updated_time!r}, " \
+               f"schema={self.schema!r}, db={self.db!r}, cluster={self.cluster!r})"
 
     def create_next_node(self) -> Union[GraphNode, None]:
         # creates new node

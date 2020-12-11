@@ -47,7 +47,7 @@ class BasePostgresMetadataExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(BasePostgresMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(BasePostgresMetadataExtractor.CLUSTER_KEY))
+        self._cluster = conf.get_string(BasePostgresMetadataExtractor.CLUSTER_KEY)
 
         self._database = conf.get_string(BasePostgresMetadataExtractor.DATABASE_KEY, default='postgres')
 
@@ -62,7 +62,7 @@ class BasePostgresMetadataExtractor(Extractor):
 
         self.sql_stmt = sql_alch_conf.get_string(SQLAlchemyExtractor.EXTRACT_SQL)
 
-        LOGGER.info('SQL for postgres metadata: {}'.format(self.sql_stmt))
+        LOGGER.info('SQL for postgres metadata: %s', self.sql_stmt)
 
         self._alchemy_extractor.init(sql_alch_conf)
         self._extract_iter: Union[None, Iterator] = None

@@ -3,18 +3,17 @@
 
 from typing import Union, Iterable, List
 
+from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.usage.usage_constants import (
     READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
 )
-from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.user import User
-from databuilder.models.graph_node import GraphNode
-from databuilder.models.graph_relationship import GraphRelationship
 
 
 class ColumnUsageModel(GraphSerializable):
-
     """
     A model represents user <--> column graph model
     Currently it only support to serialize to table level
@@ -93,10 +92,5 @@ class ColumnUsageModel(GraphSerializable):
         return User.get_user_model_key(email=email)
 
     def __repr__(self) -> str:
-        return 'TableColumnUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                                                   self.cluster,
-                                                                                   self.schema,
-                                                                                   self.table_name,
-                                                                                   self.column_name,
-                                                                                   self.user_email,
-                                                                                   self.read_count)
+        return f'TableColumnUsage({self.database!r}, {self.cluster!r}, {self.schema!r}, ' \
+               f'{self.table_name!r}, {self.column_name!r}, {self.user_email!r}, {self.read_count!r})'

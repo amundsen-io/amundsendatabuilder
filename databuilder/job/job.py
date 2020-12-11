@@ -39,8 +39,8 @@ class DefaultJob(Job):
         self.scoped_conf = Scoped.get_scoped_conf(self.conf,
                                                   self.get_scope())
         if self.scoped_conf.get_bool(DefaultJob.IS_STATSD_ENABLED, False):
-            prefix = 'amundsen.databuilder.job.{}'.format(self.scoped_conf.get_string(DefaultJob.JOB_IDENTIFIER))
-            LOGGER.info('Setting statsd for job metrics with prefix: {}'.format(prefix))
+            prefix = f'amundsen.databuilder.job.{self.scoped_conf.get_string(DefaultJob.JOB_IDENTIFIER)}'
+            LOGGER.info('Setting statsd for job metrics with prefix: %s', prefix)
             self.statsd = StatsClient(prefix=prefix)
         else:
             self.statsd = None

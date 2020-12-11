@@ -21,7 +21,7 @@ class GlueExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(GlueExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(GlueExtractor.CLUSTER_KEY))
+        self._cluster = conf.get_string(GlueExtractor.CLUSTER_KEY)
         self._filters = conf.get(GlueExtractor.FILTER_KEY)
         self._glue = boto3.client('glue')
         self._extract_iter: Union[None, Iterator] = None

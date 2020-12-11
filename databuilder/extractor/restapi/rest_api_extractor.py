@@ -33,7 +33,7 @@ class RestAPIExtractor(Extractor):
         self._restapi_query: BaseRestApiQuery = conf.get(REST_API_QUERY)
         self._iterator: Optional[Iterator[Dict[str, Any]]] = None
         self._static_dict = conf.get(STATIC_RECORD_DICT, dict())
-        LOGGER.info('static record: {}'.format(self._static_dict))
+        LOGGER.info('static record: %s', self._static_dict)
 
         model_class = conf.get(MODEL_CLASS, None)
         if model_class:

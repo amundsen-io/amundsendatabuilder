@@ -47,12 +47,12 @@ class PrestoViewMetadataExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(PrestoViewMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(PrestoViewMetadataExtractor.CLUSTER_KEY))
+        self._cluster = conf.get_string(PrestoViewMetadataExtractor.CLUSTER_KEY)
 
         self.sql_stmt = PrestoViewMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(PrestoViewMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY))
 
-        LOGGER.info('SQL for hive metastore: {}'.format(self.sql_stmt))
+        LOGGER.info('SQL for hive metastore: %s', self.sql_stmt)
 
         self._alchemy_extractor = SQLAlchemyExtractor()
         sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\

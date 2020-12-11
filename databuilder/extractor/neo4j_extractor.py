@@ -78,7 +78,7 @@ class Neo4jExtractor(Extractor):
         """
         Create an iterator to execute sql.
         """
-        LOGGER.info('Executing query {}'.format(self.cypher_query))
+        LOGGER.info('Executing query %s', self.cypher_query)
         result = tx.run(self.cypher_query)
         return result
 

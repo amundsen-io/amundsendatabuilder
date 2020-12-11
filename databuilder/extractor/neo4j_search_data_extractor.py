@@ -4,12 +4,11 @@
 import textwrap
 from typing import Any
 
-from pyhocon import ConfigTree
-
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.neo4j_extractor import Neo4jExtractor
 from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
+from pyhocon import ConfigTree
 
 
 class Neo4jSearchDataExtractor(Extractor):
@@ -171,6 +170,5 @@ class Neo4jSearchDataExtractor(Extractor):
         else:
             if not hasattr(self, 'entity'):
                 self.entity = 'table'
-            publish_tag_filter = """WHERE {entity}.published_tag = '{tag}'""".format(entity=self.entity,
-                                                                                     tag=publish_tag)
+            publish_tag_filter = f"WHERE {self.entity}.published_tag = '{publish_tag}'"
         return cypher_query.format(publish_tag_filter=publish_tag_filter)

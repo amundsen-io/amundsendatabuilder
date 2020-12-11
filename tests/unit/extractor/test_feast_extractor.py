@@ -5,10 +5,10 @@ import json
 import re
 import unittest
 
+from feast.entity import Entity
+from feast.feature_table import FeatureTable
 from mock import call, MagicMock
 from pyhocon import ConfigFactory
-from feast.feature_table import FeatureTable
-from feast.entity import Entity
 
 from databuilder import Scoped
 from databuilder.extractor.feast_extractor import FeastExtractor
@@ -167,15 +167,9 @@ class TestFeastExtractor(unittest.TestCase):
 
     def _init_extractor(self, programmatic_description_enabled: bool = True) -> None:
         conf = {
-            "extractor.feast.{}".format(
-                FeastExtractor.FEAST_ENDPOINT_CONFIG_KEY
-            ): "feast-core.example.com:6565",
-            "extractor.feast.{}".format(
-                FeastExtractor.FEAST_SERVICE_CONFIG_KEY
-            ): "unittest-feast-instance",
-            "extractor.feast.{}".format(
-                FeastExtractor.DESCRIBE_FEATURE_TABLES
-            ): programmatic_description_enabled,
+            f'extractor.feast.{FeastExtractor.FEAST_ENDPOINT_CONFIG_KEY}': 'feast-core.example.com:6565',
+            f'extractor.feast.{FeastExtractor.FEAST_SERVICE_CONFIG_KEY}': 'unittest-feast-instance',
+            f'extractor.feast.{FeastExtractor.DESCRIBE_FEATURE_TABLES}': programmatic_description_enabled,
         }
         self.extractor = FeastExtractor()
         self.extractor.init(
@@ -190,7 +184,7 @@ class TestFeastExtractor(unittest.TestCase):
         return re.sub("\n[ \t]*\\|", "\n", text)
 
     def _mock_feature_table(
-        self, labels: dict = {}, add_stream_source: bool = False
+            self, labels: dict = {}, add_stream_source: bool = False
     ) -> None:
         table_spec = {
             "name": "driver_trips",

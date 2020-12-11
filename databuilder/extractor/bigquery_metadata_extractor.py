@@ -91,7 +91,7 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
                            cols: List[ColumnMetadata],
                            total_cols: int) -> int:
         if len(parent) > 0:
-            col_name = '{parent}.{field}'.format(parent=parent, field=column['name'])
+            col_name = f'{parent}.{column["name"]}'
         else:
             col_name = column['name']
 

@@ -3,8 +3,8 @@
 
 from typing import Dict, Any, Optional
 
-from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_node import GraphNode
+from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_serializable import (
     NODE_LABEL,
     NODE_KEY,
@@ -28,10 +28,7 @@ def serialize_node(node: Optional[GraphNode]) -> Dict[str, Any]:
     }
     for key, value in node.attributes.items():
         key_suffix = _get_neo4j_suffix_value(value)
-        formatted_key = "{key}{suffix}".format(
-            key=key,
-            suffix=key_suffix
-        )
+        formatted_key = f'{key}{key_suffix}'
         node_dict[formatted_key] = value
     return node_dict
 
@@ -50,10 +47,7 @@ def serialize_relationship(relationship: Optional[GraphRelationship]) -> Dict[st
     }
     for key, value in relationship.attributes.items():
         key_suffix = _get_neo4j_suffix_value(value)
-        formatted_key = "{key}{suffix}".format(
-            key=key,
-            suffix=key_suffix
-        )
+        formatted_key = f'{key}{key_suffix}'
         relationship_dict[formatted_key] = value
 
     return relationship_dict

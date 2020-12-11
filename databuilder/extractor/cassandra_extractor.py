@@ -38,7 +38,7 @@ class CassandraExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(CassandraExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(CassandraExtractor.CLUSTER_KEY))
+        self._cluster = conf.get_string(CassandraExtractor.CLUSTER_KEY)
         self._filter = conf.get(CassandraExtractor.FILTER_FUNCTION_KEY)
         ips = conf.get_list(CassandraExtractor.IPS_KEY)
         kwargs = conf.get(CassandraExtractor.KWARGS_KEY)

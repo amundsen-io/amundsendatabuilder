@@ -54,7 +54,7 @@ class SchemaModel(GraphSerializable):
 
     def _get_description_node_key(self) -> str:
         desc = self._description.get_description_id() if self._description is not None else ''
-        return '{}/{}'.format(self._schema_key, desc)
+        return f'{self._schema_key}/{desc}'
 
     def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
         if self._description:

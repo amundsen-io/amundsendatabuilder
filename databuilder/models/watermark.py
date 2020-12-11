@@ -3,9 +3,9 @@
 
 from typing import List, Union, Tuple
 
-from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
 
 
 class Watermark(GraphSerializable):
@@ -67,10 +67,7 @@ class Watermark(GraphSerializable):
                                            part_type=self.part_type)
 
     def get_metadata_model_key(self) -> str:
-        return '{database}://{cluster}.{schema}/{table}'.format(database=self.database,
-                                                                cluster=self.cluster,
-                                                                schema=self.schema,
-                                                                table=self.table)
+        return f'{self.database}://{self.cluster}.{self.schema}/{self.table}'
 
     def create_nodes(self) -> List[GraphNode]:
         """

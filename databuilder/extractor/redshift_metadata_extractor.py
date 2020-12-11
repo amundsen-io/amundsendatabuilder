@@ -1,8 +1,9 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
 from typing import Iterator, Union, Dict, Any  # noqa: F401
+
+from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
 
 from databuilder.extractor.base_postgres_metadata_extractor import BasePostgresMetadataExtractor
 
@@ -15,12 +16,11 @@ class RedshiftMetadataExtractor(BasePostgresMetadataExtractor):
     we need to join the INFORMATION_SCHEMA data against the function PG_GET_LATE_BINDING_VIEW_COLS().
     """
 
-    def get_sql_statement(self, use_catalog_as_cluster_name, where_clause_suffix):
-        # type: (bool, str) -> str
+    def get_sql_statement(self, use_catalog_as_cluster_name: bool, where_clause_suffix: str) -> str:
         if use_catalog_as_cluster_name:
             cluster_source = "CURRENT_DATABASE()"
         else:
-            cluster_source = "'{}'".format(self._cluster)
+            cluster_source = f"'{self._cluster}'"
 
         return """
         SELECT
@@ -66,6 +66,5 @@ class RedshiftMetadataExtractor(BasePostgresMetadataExtractor):
             where_clause_suffix=where_clause_suffix,
         )
 
-    def get_scope(self):
-        # type: () -> str
+    def get_scope(self) -> str:
         return 'extractor.redshift_metadata'

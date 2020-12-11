@@ -47,7 +47,7 @@ class DBAPIExtractor(Extractor):
         Use cursor to execute the {sql}
         :return:
         """
-        LOGGER.info('Executing query: \n{}'.format(self.sql))
+        LOGGER.info('Executing query: \n%s', self.sql)
         self.cursor.execute(self.sql)
         return self.cursor.fetchall()
 

@@ -170,7 +170,7 @@ class DeleteRelationPreprocessor(RelationPreprocessor):
         """
 
         if not (start_label or end_label or start_key or end_key):
-            raise Exception('all labels and keys are required: {}'.format(locals()))
+            raise Exception(f'all labels and keys are required: {locals()}')
 
         params = {'start_key': start_key, 'end_key': end_key}
         return DeleteRelationPreprocessor.RELATION_MERGE_TEMPLATE.format(start_label=start_label,

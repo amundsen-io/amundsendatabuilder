@@ -45,7 +45,7 @@ class DruidMetadataExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(DruidMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(DruidMetadataExtractor.CLUSTER_KEY))
+        self._cluster = conf.get_string(DruidMetadataExtractor.CLUSTER_KEY)
 
         self.sql_stmt = DruidMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(DruidMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY,

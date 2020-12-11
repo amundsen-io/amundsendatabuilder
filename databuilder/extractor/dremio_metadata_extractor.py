@@ -108,7 +108,7 @@ class DremioMetadataExtractor(Extractor):
             where_stmt=where_stmt
         )
 
-        LOGGER.info('SQL for Dremio metadata: {}'.format(self.sql_stmt))
+        LOGGER.info('SQL for Dremio metadata: %s', self.sql_stmt)
 
         self._pyodbc_cursor = connect(
             conf.get_string(DremioMetadataExtractor.DREMIO_DRIVER_KEY),

@@ -3,8 +3,6 @@
 
 import logging
 
-from pyhocon import ConfigTree, ConfigFactory
-
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_executions_extractor import \
     ModeDashboardExecutionsExtractor
 from databuilder.extractor.dashboard.mode_analytics.mode_dashboard_utils import ModeDashboardUtils
@@ -13,6 +11,7 @@ from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import Mo
 from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
+from pyhocon import ConfigTree, ConfigFactory
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,9 +29,9 @@ class ModeDashboardLastModifiedTimestampExtractor(ModeDashboardExecutionsExtract
         conf = conf.with_fallback(
             ConfigFactory.from_dict({
                 STATIC_RECORD_DICT: {'product': 'mode'},
-                '{}.{}'.format(DictToModel().get_scope(), MODEL_CLASS):
+                f'{DictToModel().get_scope()}.{MODEL_CLASS}':
                     'databuilder.models.dashboard.dashboard_last_modified.DashboardLastModifiedTimestamp',
-                '{}.{}'.format(TimestampStringToEpoch().get_scope(), FIELD_NAME):
+                f'{TimestampStringToEpoch().get_scope()}.{FIELD_NAME}':
                     'last_modified_timestamp'
             })
         )

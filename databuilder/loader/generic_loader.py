@@ -19,7 +19,7 @@ def log_call_back(record: Optional[Any]) -> None:
     :param record:
     :return:
     """
-    LOGGER.info('record: {}'.format(record))
+    LOGGER.info('record: %s', record)
 
 
 class GenericLoader(Loader):

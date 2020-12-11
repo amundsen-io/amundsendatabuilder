@@ -70,10 +70,5 @@ class DashboardOwner(GraphSerializable):
         yield relationship
 
     def __repr__(self) -> str:
-        return 'DashboardOwner({!r}, {!r}, {!r}, {!r}, {!r})'.format(
-            self._dashboard_group_id,
-            self._dashboard_id,
-            self._email,
-            self._product,
-            self._cluster
-        )
+        return f'DashboardOwner({self._dashboard_group_id!r}, {self._dashboard_id!r}, ' \
+               f'{self._email!r}, {self._product!r}, {self._cluster!r})'

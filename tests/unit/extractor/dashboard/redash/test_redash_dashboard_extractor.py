@@ -134,7 +134,7 @@ class TestRedashDashboardExtractor(unittest.TestCase):
             expected_query = DashboardQuery(
                 query_id='1234',
                 query_name='Test Query',
-                url=u'{base}/queries/1234'.format(base=redash_base_url),
+                url=f'{redash_base_url}/queries/1234',
                 query_text='SELECT id FROM users',
                 **identity
             )

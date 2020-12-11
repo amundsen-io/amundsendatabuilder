@@ -19,8 +19,7 @@ class TestPrestoViewMetadataExtractor(unittest.TestCase):
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
-            'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
-            'TEST_CONNECTION'
+            f'extractor.sqlalchemy.{SQLAlchemyExtractor.CONN_STRING}': 'TEST_CONNECTION'
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 

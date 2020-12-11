@@ -18,7 +18,7 @@ class TestFSElasticsearchJSONLoader(unittest.TestCase):
 
     def setUp(self) -> None:
         self.temp_dir_path = tempfile.mkdtemp()
-        self.dest_file_name = '{}/test_file.json'.format(self.temp_dir_path)
+        self.dest_file_name = f'{self.temp_dir_path}/test_file.json'
         self.file_mode = 'w'
         config_dict = {'loader.filesystem.elasticsearch.file_path': self.dest_file_name,
                        'loader.filesystem.elasticsearch.mode': self.file_mode}

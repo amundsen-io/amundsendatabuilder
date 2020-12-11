@@ -45,14 +45,14 @@ class AthenaMetadataExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(AthenaMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(AthenaMetadataExtractor.CATALOG_KEY))
+        self._cluster = conf.get_string(AthenaMetadataExtractor.CATALOG_KEY)
 
         self.sql_stmt = AthenaMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(AthenaMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY),
             catalog_source=self._cluster
         )
 
-        LOGGER.info('SQL for Athena metadata: {}'.format(self.sql_stmt))
+        LOGGER.info('SQL for Athena metadata: %s', self.sql_stmt)
 
         self._alchemy_extractor = SQLAlchemyExtractor()
         sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
