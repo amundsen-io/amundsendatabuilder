@@ -1,7 +1,7 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, List, Optional
+from typing import List, Optional
 import re
 
 from databuilder.models.graph_serializable import GraphSerializable
@@ -18,7 +18,9 @@ class Badge:
         return 'Badge({!r}, {!r})'.format(self.name,
                                           self.category)
 
-    def __eq__(self, other: Any) -> bool:  # type: ignore[override]
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Badge):
+            return NotImplemented
         return self.name == other.name and \
             self.category == other.category
 
