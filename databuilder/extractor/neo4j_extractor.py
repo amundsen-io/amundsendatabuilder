@@ -3,11 +3,13 @@
 
 import importlib
 import logging
-from typing import Any, Iterator, Union
+from typing import (
+    Any, Iterator, Union,
+)
 
-from pyhocon import ConfigTree, ConfigFactory
-from neo4j import GraphDatabase
 import neo4j
+from neo4j import GraphDatabase
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
 

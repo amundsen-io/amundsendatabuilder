@@ -7,15 +7,13 @@ import unittest
 
 from feast.entity import Entity
 from feast.feature_table import FeatureTable
-from mock import call, MagicMock
+from mock import MagicMock, call
 from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.feast_extractor import FeastExtractor
 from databuilder.models.table_metadata import (
-    TableMetadata,
-    ColumnMetadata,
-    DescriptionMetadata,
+    ColumnMetadata, DescriptionMetadata, TableMetadata,
 )
 
 

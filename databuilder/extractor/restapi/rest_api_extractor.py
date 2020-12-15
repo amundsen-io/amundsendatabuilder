@@ -1,15 +1,16 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import logging
 import importlib
-from typing import Any, Iterator, Dict, Optional
+import logging
+from typing import (
+    Any, Dict, Iterator, Optional,
+)
 
 from pyhocon import ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery
-
 
 REST_API_QUERY = 'restapi_query'
 MODEL_CLASS = 'model_class'

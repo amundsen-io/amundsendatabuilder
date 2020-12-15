@@ -9,7 +9,7 @@ import unittest
 from typing import Any
 
 from mock import patch
-from pyhocon import ConfigTree, ConfigFactory
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.job.job import DefaultJob

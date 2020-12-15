@@ -6,12 +6,11 @@ import tempfile
 import unittest
 from typing import Any
 
-from mock import patch, Mock
+from mock import Mock, patch
 from pyhocon import ConfigFactory
 
 from databuilder import Scoped
-from databuilder.extractor.bigquery_usage_extractor import BigQueryTableUsageExtractor
-from databuilder.extractor.bigquery_usage_extractor import TableColumnUsageTuple
+from databuilder.extractor.bigquery_usage_extractor import BigQueryTableUsageExtractor, TableColumnUsageTuple
 
 CORRECT_DATA = {
     "entries": [{

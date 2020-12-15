@@ -4,9 +4,9 @@
 import shutil
 import tempfile
 import unittest
+from typing import List
 
 from pyhocon import ConfigFactory
-from typing import List
 
 from databuilder import Scoped
 from databuilder.loader.file_system_csv_loader import FileSystemCSVLoader

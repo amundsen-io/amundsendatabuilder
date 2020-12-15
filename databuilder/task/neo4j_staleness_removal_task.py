@@ -4,7 +4,9 @@
 import logging
 import textwrap
 import time
-from typing import Any, Dict, Iterable
+from typing import (
+    Any, Dict, Iterable,
+)
 
 import neo4j
 from neo4j import GraphDatabase

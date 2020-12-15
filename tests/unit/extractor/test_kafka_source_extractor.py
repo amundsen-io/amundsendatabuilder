@@ -4,7 +4,7 @@
 import logging
 import unittest
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from pyhocon import ConfigFactory
 
 from databuilder import Scoped

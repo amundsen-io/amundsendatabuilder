@@ -6,16 +6,17 @@ import logging
 import os
 import shutil
 from csv import DictWriter
+from typing import (
+    Any, Dict, FrozenSet,
+)
 
-from pyhocon import ConfigTree, ConfigFactory
-from typing import Dict, Any, FrozenSet
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.job.base_job import Job
 from databuilder.loader.base_loader import Loader
 from databuilder.models.graph_serializable import GraphSerializable
-from databuilder.utils.closer import Closer
 from databuilder.serializers import neo4_serializer
-
+from databuilder.utils.closer import Closer
 
 LOGGER = logging.getLogger(__name__)
 

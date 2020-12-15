@@ -5,8 +5,9 @@ import csv
 import logging
 from typing import Any
 
-from databuilder.loader.base_loader import Loader
 from pyhocon import ConfigTree
+
+from databuilder.loader.base_loader import Loader
 
 LOGGER = logging.getLogger(__name__)
 

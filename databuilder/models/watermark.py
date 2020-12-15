@@ -1,7 +1,9 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Union, Tuple
+from typing import (
+    List, Tuple, Union,
+)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship

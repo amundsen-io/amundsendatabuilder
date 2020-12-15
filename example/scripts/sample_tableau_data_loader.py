@@ -25,12 +25,14 @@ from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_extractor import TableauDashboardExtractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor import \
-    TableauDashboardLastModifiedExtractor
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_last_modified_extractor import (
+    TableauDashboardLastModifiedExtractor,
+)
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_query_extractor import TableauDashboardQueryExtractor
 from databuilder.extractor.dashboard.tableau.tableau_dashboard_table_extractor import TableauDashboardTableExtractor
-from databuilder.extractor.dashboard.tableau.tableau_external_table_extractor import \
-    TableauDashboardExternalTableExtractor
+from databuilder.extractor.dashboard.tableau.tableau_external_table_extractor import (
+    TableauDashboardExternalTableExtractor,
+)
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader

@@ -4,11 +4,12 @@
 import logging
 from typing import Iterator, Union
 
+from pyhocon import ConfigFactory, ConfigTree
+
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.models.table_last_updated import TableLastUpdated
-from pyhocon import ConfigFactory, ConfigTree
 
 LOGGER = logging.getLogger(__name__)
 

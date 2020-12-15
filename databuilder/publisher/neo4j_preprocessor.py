@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import abc
-
 import logging
-from typing import Dict, List, Tuple, Optional
 import textwrap
+from typing import (
+    Dict, List, Optional, Tuple,
+)
 
 LOGGER = logging.getLogger(__name__)
 

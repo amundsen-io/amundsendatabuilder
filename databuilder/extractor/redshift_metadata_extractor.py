@@ -1,7 +1,9 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Iterator, Union, Dict, Any  # noqa: F401
+from typing import (  # noqa: F401
+    Any, Dict, Iterator, Union,
+)
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
 

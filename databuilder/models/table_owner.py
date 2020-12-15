@@ -1,12 +1,14 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional, Union
+from typing import (
+    List, Optional, Union,
+)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_serializable import GraphSerializable
-from databuilder.models.owner_constants import OWNER_RELATION_TYPE, OWNER_OF_OBJECT_RELATION_TYPE
+from databuilder.models.owner_constants import OWNER_OF_OBJECT_RELATION_TYPE, OWNER_RELATION_TYPE
 from databuilder.models.user import User
 
 

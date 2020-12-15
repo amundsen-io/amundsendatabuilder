@@ -3,7 +3,9 @@
 
 import copy
 import logging
-from typing import List, Dict, Any, Union, Iterator, Callable
+from typing import (
+    Any, Callable, Dict, Iterator, List, Union,
+)
 
 import requests
 from jsonpath_rw import parse

@@ -1,14 +1,16 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from cassandra.cluster import Cluster
-import cassandra.metadata
+from typing import (
+    Dict, Iterator, Union,
+)
 
+import cassandra.metadata
+from cassandra.cluster import Cluster
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, Union, Dict
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
 class CassandraExtractor(Extractor):

@@ -29,21 +29,25 @@ from elasticsearch import Elasticsearch
 from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
-from databuilder.extractor.csv_extractor import CsvTableBadgeExtractor, CsvTableColumnExtractor, CsvExtractor
+from databuilder.extractor.csv_extractor import (
+    CsvExtractor, CsvTableBadgeExtractor, CsvTableColumnExtractor,
+)
 from databuilder.extractor.neo4j_es_last_updated_extractor import Neo4jEsLastUpdatedExtractor
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader
 from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
-from databuilder.publisher.elasticsearch_constants import DASHBOARD_ELASTICSEARCH_INDEX_MAPPING, \
-    USER_ELASTICSEARCH_INDEX_MAPPING
+from databuilder.publisher.elasticsearch_constants import (
+    DASHBOARD_ELASTICSEARCH_INDEX_MAPPING, USER_ELASTICSEARCH_INDEX_MAPPING,
+)
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
-from databuilder.transformer.base_transformer import ChainedTransformer
-from databuilder.transformer.base_transformer import NoopTransformer
-from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.generic_transformer import GenericTransformer, CALLBACK_FUNCTION, FIELD_NAME
+from databuilder.transformer.base_transformer import ChainedTransformer, NoopTransformer
+from databuilder.transformer.dict_to_model import MODEL_CLASS, DictToModel
+from databuilder.transformer.generic_transformer import (
+    CALLBACK_FUNCTION, FIELD_NAME, GenericTransformer,
+)
 
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
 neo_host = os.getenv('CREDENTIALS_NEO4J_PROXY_HOST', 'localhost')

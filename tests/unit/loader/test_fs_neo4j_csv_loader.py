@@ -9,14 +9,20 @@ import unittest
 from operator import itemgetter
 from os import listdir
 from os.path import isfile, join
-from typing import Dict, Iterable, Any, Callable, Optional, Union
+from typing import (
+    Any, Callable, Dict, Iterable, Optional, Union,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.job.base_job import Job
 from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
-from databuilder.models.graph_serializable import GraphSerializable, GraphNode, GraphRelationship
-from tests.unit.models.test_graph_serializable import Movie, Actor, City
+from databuilder.models.graph_serializable import (
+    GraphNode, GraphRelationship, GraphSerializable,
+)
+from tests.unit.models.test_graph_serializable import (
+    Actor, City, Movie,
+)
 
 here = os.path.dirname(__file__)
 

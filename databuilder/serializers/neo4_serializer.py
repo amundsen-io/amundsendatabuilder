@@ -1,19 +1,15 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Dict, Any, Optional
+from typing import (
+    Any, Dict, Optional,
+)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_serializable import (
-    NODE_LABEL,
-    NODE_KEY,
-    RELATION_END_KEY,
-    RELATION_END_LABEL,
-    RELATION_REVERSE_TYPE,
-    RELATION_START_KEY,
-    RELATION_START_LABEL,
-    RELATION_TYPE
+    NODE_KEY, NODE_LABEL, RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY,
+    RELATION_START_LABEL, RELATION_TYPE,
 )
 from databuilder.publisher.neo4j_csv_publisher import UNQUOTED_SUFFIX
 

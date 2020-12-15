@@ -6,10 +6,13 @@ import re
 from collections import namedtuple
 from datetime import date, timedelta
 from time import sleep
-from typing import Any, Iterator, Dict, Optional, Tuple, List
+from typing import (
+    Any, Dict, Iterator, List, Optional, Tuple,
+)
+
+from pyhocon import ConfigTree
 
 from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor
-from pyhocon import ConfigTree
 
 TableColumnUsageTuple = namedtuple('TableColumnUsageTuple', ['database', 'cluster', 'schema',
                                                              'table', 'column', 'email'])

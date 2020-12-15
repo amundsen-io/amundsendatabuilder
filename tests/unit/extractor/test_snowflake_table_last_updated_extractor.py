@@ -3,7 +3,7 @@
 
 import unittest
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from pyhocon import ConfigFactory
 
 from databuilder.extractor.snowflake_table_last_updated_extractor import SnowflakeTableLastUpdatedExtractor

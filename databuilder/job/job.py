@@ -8,8 +8,7 @@ from statsd import StatsClient
 
 from databuilder import Scoped
 from databuilder.job.base_job import Job
-from databuilder.publisher.base_publisher import NoopPublisher
-from databuilder.publisher.base_publisher import Publisher
+from databuilder.publisher.base_publisher import NoopPublisher, Publisher
 from databuilder.task.base_task import Task
 
 LOGGER = logging.getLogger(__name__)

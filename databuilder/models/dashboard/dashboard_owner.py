@@ -2,17 +2,16 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-
-from typing import Optional, Any, Union, Iterator
+from typing import (
+    Any, Iterator, Optional, Union,
+)
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
-from databuilder.models.owner_constants import OWNER_OF_OBJECT_RELATION_TYPE, OWNER_RELATION_TYPE
-from databuilder.models.user import User
-
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.owner_constants import OWNER_OF_OBJECT_RELATION_TYPE, OWNER_RELATION_TYPE
+from databuilder.models.user import User
 
 LOGGER = logging.getLogger(__name__)
 

@@ -4,15 +4,16 @@
 import base64
 import json
 import logging
+from typing import (
+    Iterator, List, Union,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, List, Union
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 LOGGER = logging.getLogger(__name__)
 

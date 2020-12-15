@@ -1,14 +1,16 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Union, Iterable, List
+from typing import (
+    Iterable, List, Union,
+)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.usage.usage_constants import (
-    READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
+    READ_RELATION_COUNT_PROPERTY, READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE,
 )
 from databuilder.models.user import User
 

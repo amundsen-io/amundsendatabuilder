@@ -2,18 +2,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from collections import namedtuple
 import textwrap
+from collections import namedtuple
+from itertools import groupby
+from typing import (
+    Any, Dict, Iterator, Union,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, Union, Dict, Any
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-from itertools import groupby
-
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 TableKey = namedtuple('TableKey', ['schema', 'table_name'])
 

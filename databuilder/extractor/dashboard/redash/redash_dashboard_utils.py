@@ -1,7 +1,9 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import (
+    Any, Dict, Iterable, List, Tuple,
+)
 
 from databuilder.rest_api.rest_api_query import RestApiQuery
 

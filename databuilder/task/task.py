@@ -9,9 +9,7 @@ from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.loader.base_loader import Loader
 from databuilder.task.base_task import Task
-from databuilder.transformer.base_transformer \
-    import NoopTransformer
-from databuilder.transformer.base_transformer import Transformer
+from databuilder.transformer.base_transformer import NoopTransformer, Transformer
 from databuilder.utils.closer import Closer
 
 LOGGER = logging.getLogger(__name__)

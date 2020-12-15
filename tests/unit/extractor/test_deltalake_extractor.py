@@ -12,9 +12,10 @@ from pyspark.sql import SparkSession
 from pyspark.sql.catalog import Table
 
 from databuilder import Scoped
-from databuilder.extractor.delta_lake_metadata_extractor import DeltaLakeMetadataExtractor, \
-    ScrapedTableMetadata, ScrapedColumnMetadata
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.extractor.delta_lake_metadata_extractor import (
+    DeltaLakeMetadataExtractor, ScrapedColumnMetadata, ScrapedTableMetadata,
+)
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
 class TestDeltaLakeExtractor(unittest.TestCase):

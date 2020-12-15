@@ -6,15 +6,18 @@ import time
 from datetime import datetime
 from functools import wraps
 from multiprocessing.pool import ThreadPool
-from typing import Iterator, Union, Any, List
+from typing import (
+    Any, Iterator, List, Union,
+)
+
+from pyhocon import ConfigFactory, ConfigTree
+from pytz import UTC
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.filesystem.filesystem import FileSystem, is_client_side_error
 from databuilder.models.table_last_updated import TableLastUpdated
-from pyhocon import ConfigFactory, ConfigTree
-from pytz import UTC
 
 LOGGER = logging.getLogger(__name__)
 OLDEST_TIMESTAMP = datetime.fromtimestamp(0, UTC)

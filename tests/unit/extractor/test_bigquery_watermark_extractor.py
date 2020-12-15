@@ -6,7 +6,7 @@ import unittest
 from datetime import datetime
 from typing import Any
 
-from mock import patch, Mock
+from mock import Mock, patch
 from pyhocon import ConfigFactory
 
 from databuilder import Scoped

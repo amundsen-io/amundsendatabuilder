@@ -3,12 +3,11 @@
 
 import importlib
 import logging
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 from pyhocon import ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
-
 
 LOGGER = logging.getLogger(__name__)
 

@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import Any, Optional
 
 from pyhocon import ConfigTree
-from typing import Optional, Any
 
 from databuilder.loader.base_loader import Loader
 

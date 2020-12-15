@@ -4,11 +4,12 @@
 import textwrap
 from typing import Any
 
+from pyhocon import ConfigTree
+
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.neo4j_extractor import Neo4jExtractor
 from databuilder.publisher.neo4j_csv_publisher import JOB_PUBLISH_TAG
-from pyhocon import ConfigTree
 
 
 class Neo4jSearchDataExtractor(Extractor):

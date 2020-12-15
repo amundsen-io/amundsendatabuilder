@@ -8,15 +8,14 @@ import time
 from io import open
 from os import listdir
 from os.path import isfile, join
-from typing import Set, List
+from typing import List, Set
 
 import neo4j
 import pandas
 from jinja2 import Template
 from neo4j import GraphDatabase, Transaction
 from neo4j.exceptions import CypherError, TransientError
-from pyhocon import ConfigFactory
-from pyhocon import ConfigTree
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.publisher.base_publisher import Publisher
 from databuilder.publisher.neo4j_preprocessor import NoopRelationPreprocessor

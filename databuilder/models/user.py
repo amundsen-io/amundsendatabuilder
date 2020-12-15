@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import copy
-from typing import Any, List, Optional
+from typing import (
+    Any, List, Optional,
+)
 
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship

@@ -5,9 +5,11 @@ import itertools
 import logging
 import unittest
 from datetime import datetime
-from typing import Iterable, Iterator, Optional, TypeVar
+from typing import (
+    Iterable, Iterator, Optional, TypeVar,
+)
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from pyhocon import ConfigFactory
 from pytz import UTC
 

@@ -2,15 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import importlib
-from typing import Any, Dict, Iterator, Optional
+from typing import (
+    Any, Dict, Iterator, Optional,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.redash.redash_dashboard_utils import \
-    get_auth_headers, get_text_widgets, get_visualization_widgets, sort_widgets, \
-    generate_dashboard_description, RedashPaginatedRestApiQuery
-from databuilder.extractor.restapi.rest_api_extractor import RestAPIExtractor, REST_API_QUERY
+from databuilder.extractor.dashboard.redash.redash_dashboard_utils import (
+    RedashPaginatedRestApiQuery, generate_dashboard_description, get_auth_headers, get_text_widgets,
+    get_visualization_widgets, sort_widgets,
+)
+from databuilder.extractor.restapi.rest_api_extractor import REST_API_QUERY, RestAPIExtractor
 from databuilder.models.dashboard.dashboard_chart import DashboardChart
 from databuilder.models.dashboard.dashboard_last_modified import DashboardLastModifiedTimestamp
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
@@ -21,7 +24,7 @@ from databuilder.models.table_metadata import TableMetadata
 from databuilder.rest_api.base_rest_api_query import EmptyRestApiQuerySeed
 from databuilder.rest_api.rest_api_query import RestApiQuery
 from databuilder.transformer.base_transformer import ChainedTransformer
-from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME as TS_FIELD_NAME
+from databuilder.transformer.timestamp_string_to_epoch import FIELD_NAME as TS_FIELD_NAME, TimestampStringToEpoch
 
 
 class TableRelationData:

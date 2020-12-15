@@ -3,12 +3,11 @@
 
 from typing import List, Union
 
-from databuilder.models.graph_serializable import GraphSerializable
-
-from databuilder.models.table_metadata import TableMetadata
-from databuilder.models.timestamp import timestamp_constants
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_metadata import TableMetadata
+from databuilder.models.timestamp import timestamp_constants
 
 
 class TableLastUpdated(GraphSerializable):

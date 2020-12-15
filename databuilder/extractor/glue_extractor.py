@@ -1,13 +1,15 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import boto3
+from typing import (
+    Any, Dict, Iterator, List, Union,
+)
 
+import boto3
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, Union, Dict, Any, List
 
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
 class GlueExtractor(Extractor):

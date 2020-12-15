@@ -6,12 +6,12 @@ import json
 import logging
 import unittest
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from pyhocon import ConfigFactory
 
 from databuilder.extractor.presto_view_metadata_extractor import PrestoViewMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
 class TestPrestoViewMetadataExtractor(unittest.TestCase):

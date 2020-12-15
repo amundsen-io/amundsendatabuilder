@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import copy
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union
+from typing import (
+    Any, Dict, Iterable, Iterator, List, Optional, Set, Union,
+)
 
-from databuilder.models.badge import BadgeMetadata, Badge
+from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.models.cluster import cluster_constants
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship

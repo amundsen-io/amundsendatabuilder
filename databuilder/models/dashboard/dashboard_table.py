@@ -3,13 +3,14 @@
 
 import logging
 import re
-from typing import Optional, Any, List, Union, Iterator
+from typing import (
+    Any, Iterator, List, Optional, Union,
+)
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
+from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.table_metadata import TableMetadata
 
 LOGGER = logging.getLogger(__name__)

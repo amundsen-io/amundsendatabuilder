@@ -1,14 +1,15 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from collections import namedtuple
-
-import logging
 import datetime
+import logging
 import textwrap
+from collections import namedtuple
+from typing import (
+    Any, Dict, Iterator, List, Tuple, Union,
+)
 
 from pyhocon import ConfigTree
-from typing import Any, Dict, Iterator, List, Tuple, Union
 
 from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor, DatasetRef
 from databuilder.models.watermark import Watermark

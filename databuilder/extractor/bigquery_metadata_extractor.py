@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import (
+    Any, Dict, List, Set, cast,
+)
 
 from pyhocon import ConfigTree
-from typing import cast, Any, Dict, List, Set
 
 from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor, DatasetRef
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 LOGGER = logging.getLogger(__name__)
 

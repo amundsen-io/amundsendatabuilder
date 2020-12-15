@@ -5,7 +5,9 @@ import concurrent.futures
 import logging
 from collections import namedtuple
 from datetime import datetime
-from typing import Iterator, Union, List, Dict, Optional  # noqa: F401
+from typing import (  # noqa: F401
+    Dict, Iterator, List, Optional, Union,
+)
 
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
 from pyspark.sql import SparkSession
@@ -14,7 +16,7 @@ from pyspark.sql.utils import AnalysisException
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.table_last_updated import TableLastUpdated
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 TableKey = namedtuple('TableKey', ['schema', 'table_name'])
 

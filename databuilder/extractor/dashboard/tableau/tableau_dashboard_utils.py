@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-import requests
 import re
-from typing import Any, Dict, Iterator, Optional
+from typing import (
+    Any, Dict, Iterator, Optional,
+)
 
+import requests
 from pyhocon import ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const

@@ -4,13 +4,16 @@
 import logging
 from collections import namedtuple
 from itertools import groupby
-from typing import Iterator, Union, Dict, Any
+from typing import (
+    Any, Dict, Iterator, Union,
+)
+
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-from pyhocon import ConfigFactory, ConfigTree
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 TableKey = namedtuple('TableKey', ['schema_name', 'table_name'])
 

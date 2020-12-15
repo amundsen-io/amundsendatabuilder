@@ -6,7 +6,7 @@ import os
 import unittest
 import uuid
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 from neo4j import GraphDatabase
 from pyhocon import ConfigFactory
 
