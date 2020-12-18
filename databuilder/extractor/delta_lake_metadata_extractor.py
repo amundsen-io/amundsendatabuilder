@@ -342,40 +342,35 @@ class DeltaLakeMetadataExtractor(Extractor):
         else:
             return None
 
-    def create_table_watermarks(self, table: ScrapedTableMetadata) -> List[Tuple[Optional[Watermark],
+    def create_table_watermarks(self, table: ScrapedTableMetadata) -> List[Tuple[Optional[Watermark],  # noqa: C901
                                                                                  Optional[Watermark]]]:
         """Creates the Watermark objects that reflect the highest and lowest values in the partition columns"""
-        if not table.table_detail:
-            LOGGER.info(f'No table details found in {table}, skipping')
-            return [(None, None)]
 
-        if 'partitionColumns' not in table.table_detail or len(table.table_detail['partitionColumns']) < 1:
-            LOGGER.info(f'No partitions found in {table}, skipping')
-            return [(None, None)]
-
-        # We can't seem to do a SHOW PARTITIONS here (Hive?):
-        # pyspark.sql.utils.AnalysisException: SHOW PARTITIONS is not allowed on a table that is not partitioned
-        # So we do ANALYZE to get all the column statistics for the partitions used.
-        # TODO: analyze is way too heavy for just giving a view on the high/low partition values
-        partition_columns = ','.join(table.table_detail['partitionColumns'])
-        self.spark.sql(f"analyze table {table.schema}.{table.table} compute statistics for columns {partition_columns}")
-
-        # Example output after analyzing the table:
-        # col_name:       _date
-        # data_type:      date
-        # comment:        NULL
-        # min:            2020-09-07
-        # max:            2020-12-12
-        # num_nulls:      0
-        # distinct_count: 97
-        # avg_col_len:    4
-        # max_col_len:    4
-        # histogram:      NULL
-
-        r = []
-
-        for partition_column in table.table_detail['partitionColumns']:
+        def _is_show_partitions_supported(t: ScrapedTableMetadata) -> bool:
             try:
+                self.spark.sql(f'show partitions {t.schema}.{t.table}')
+                return True
+            except Exception as e:
+                # pyspark.sql.utils.AnalysisException: SHOW PARTITIONS is not allowed on a table that is not partitioned
+                LOGGER.warning(e)
+                return False
+
+        def _fetch_minmax(table: ScrapedTableMetadata, partition_column: str) -> Tuple[str, str]:
+            LOGGER.info(f'Fetching partition info for {partition_column} in {table.schema}.{table.table}')
+            if is_show_partitions_supported:
+                LOGGER.info('Using SHOW PARTITION')
+                min = str(self
+                          .spark
+                          .sql(f'show partitions {table.schema}.{table.table}')
+                          .orderBy(partition_column, ascending=True)
+                          .first()[0])
+                max = str(self
+                          .spark
+                          .sql(f'show partitions {table.schema}.{table.table}')
+                          .orderBy(partition_column, ascending=False)
+                          .first()[0])
+            else:
+                LOGGER.info('Using DESCRIBE EXTENDED')
                 part_info = (self
                              .spark
                              .sql(f'describe extended {table.schema}.{table.table} {partition_column}')
@@ -384,22 +379,35 @@ class DeltaLakeMetadataExtractor(Extractor):
                 minmax = {}
                 for mm in list(filter(lambda x: x['info_name'] in ['min', 'max'], part_info)):
                     minmax[mm['info_name']] = mm['info_value']
-                p_name = partition_column
-                first = minmax['min']
-                last = minmax['max']
-            except Exception as e:
-                LOGGER.error(e)
-                p_name = 'error'
-                first = 'notFound'
-                last = 'notFound'
-                pass
+                min = minmax['min']
+                max = minmax['max']
+            return max, min
 
+        if not table.table_detail:
+            LOGGER.info(f'No table details found in {table}, skipping')
+            return [(None, None)]
+
+        if 'partitionColumns' not in table.table_detail or len(table.table_detail['partitionColumns']) < 1:
+            LOGGER.info(f'No partitions found in {table}, skipping')
+            return [(None, None)]
+
+        is_show_partitions_supported: bool = _is_show_partitions_supported(table)
+
+        if not is_show_partitions_supported:
+            LOGGER.info('Analyzing table, this can take a while...')
+            partition_columns = ','.join(table.table_detail['partitionColumns'])
+            self.spark.sql(
+                f"analyze table {table.schema}.{table.table} compute statistics for columns {partition_columns}")
+
+        r = []
+        for partition_column in table.table_detail['partitionColumns']:
+            last, first = _fetch_minmax(table, partition_column)
             low = Watermark(
                 create_time=table.table_detail['createdAt'],
                 database=self._db,
                 schema=table.schema,
                 table_name=table.table,
-                part_name=f'{p_name}={first}',
+                part_name=f'{partition_column}={first}',
                 part_type='low_watermark',
                 cluster=self._cluster)
             high = Watermark(
@@ -407,7 +415,7 @@ class DeltaLakeMetadataExtractor(Extractor):
                 database=self._db,
                 schema=table.schema,
                 table_name=table.table,
-                part_name=f'{p_name}={last}',
+                part_name=f'{partition_column}={last}',
                 part_type='high_watermark',
                 cluster=self._cluster)
             r.append((high, low))
