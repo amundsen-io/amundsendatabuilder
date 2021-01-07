@@ -3,10 +3,12 @@
 
 import unittest
 
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
 from databuilder.models.table_source import TableSource
-from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-
+from databuilder.serializers import neo4_serializer
 
 DB = 'hive'
 SCHEMA = 'base'
@@ -27,34 +29,25 @@ class TestTableSource(unittest.TestCase):
 
     def test_get_source_model_key(self) -> None:
         source = self.table_source.get_source_model_key()
-        self.assertEquals(source, '{db}://{cluster}.{schema}/{tbl}/_source'.format(db=DB,
-                                                                                   schema=SCHEMA,
-                                                                                   tbl=TABLE,
-                                                                                   cluster=CLUSTER,
-                                                                                   ))
+        self.assertEqual(source, f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}/_source')
 
     def test_get_metadata_model_key(self) -> None:
         metadata = self.table_source.get_metadata_model_key()
-        self.assertEquals(metadata, 'hive://default.base/test')
+        self.assertEqual(metadata, 'hive://default.base/test')
 
     def test_create_nodes(self) -> None:
         nodes = self.table_source.create_nodes()
-        self.assertEquals(len(nodes), 1)
+        self.assertEqual(len(nodes), 1)
 
     def test_create_relation(self) -> None:
         relations = self.table_source.create_relation()
         self.assertEquals(len(relations), 1)
+        serialized_relation = neo4_serializer.serialize_relationship(relations[0])
 
-        start_key = '{db}://{cluster}.{schema}/{tbl}/_source'.format(db=DB,
-                                                                     schema=SCHEMA,
-                                                                     tbl=TABLE,
-                                                                     cluster=CLUSTER)
-        end_key = '{db}://{cluster}.{schema}/{tbl}'.format(db=DB,
-                                                           schema=SCHEMA,
-                                                           tbl=TABLE,
-                                                           cluster=CLUSTER)
+        start_key = f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}/_source'
+        end_key = f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}'
 
-        relation = {
+        expected_relation = {
             RELATION_START_KEY: start_key,
             RELATION_START_LABEL: TableSource.LABEL,
             RELATION_END_KEY: end_key,
@@ -63,4 +56,4 @@ class TestTableSource(unittest.TestCase):
             RELATION_REVERSE_TYPE: TableSource.TABLE_SOURCE_RELATION_TYPE
         }
 
-        self.assertTrue(relation in relations)
+        self.assertDictEqual(expected_relation, serialized_relation)

@@ -17,8 +17,7 @@ class TestGenericExtractor(unittest.TestCase):
         """
         config_dict = {
             'extractor.generic.extraction_items': [{'timestamp': 10000000}],
-            'extractor.generic.model_class':
-                'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
+            'extractor.generic.model_class': 'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
         }
         conf = ConfigFactory.from_dict(config_dict)
 
@@ -28,7 +27,7 @@ class TestGenericExtractor(unittest.TestCase):
                                               scope=extractor.get_scope()))
 
         result = extractor.extract()
-        self.assertEquals(result.timestamp, 10000000)
+        self.assertEqual(result.timestamp, 10000000)
 
     def test_extraction_without_model_class(self) -> None:
         """
@@ -44,5 +43,5 @@ class TestGenericExtractor(unittest.TestCase):
         extractor.init(Scoped.get_scoped_conf(conf=conf,
                                               scope=extractor.get_scope()))
 
-        self.assertEquals(extractor.extract(), {'foo': 1})
-        self.assertEquals(extractor.extract(), {'bar': 2})
+        self.assertEqual(extractor.extract(), {'foo': 1})
+        self.assertEqual(extractor.extract(), {'bar': 2})

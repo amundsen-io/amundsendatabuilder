@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-
 from typing import Any, Dict
 
 from databuilder.models.dashboard.dashboard_chart import DashboardChart
-from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
+from databuilder.serializers import neo4_serializer
 
 
 class TestDashboardChart(unittest.TestCase):
@@ -24,6 +26,7 @@ class TestDashboardChart(unittest.TestCase):
                                          )
 
         actual = dashboard_chart.create_next_node()
+        actual_serialized = neo4_serializer.serialize_node(actual)
         expected: Dict[str, Any] = {
             'name': 'c_name',
             'type': 'bar',
@@ -34,7 +37,7 @@ class TestDashboardChart(unittest.TestCase):
         }
 
         assert actual is not None
-        self.assertDictEqual(expected, actual)
+        self.assertDictEqual(expected, actual_serialized)
         self.assertIsNone(dashboard_chart.create_next_node())
 
         dashboard_chart = DashboardChart(dashboard_group_id='dg_id',
@@ -45,6 +48,7 @@ class TestDashboardChart(unittest.TestCase):
                                          )
 
         actual2 = dashboard_chart.create_next_node()
+        actual2_serialized = neo4_serializer.serialize_node(actual2)
         expected2: Dict[str, Any] = {
             'id': 'c_id',
             'KEY': '_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
@@ -52,7 +56,7 @@ class TestDashboardChart(unittest.TestCase):
             'url': 'http://gold.foo.bar/'
         }
         assert actual2 is not None
-        self.assertDictEqual(expected2, actual2)
+        self.assertDictEqual(expected2, actual2_serialized)
 
     def test_create_relation(self) -> None:
         dashboard_chart = DashboardChart(dashboard_group_id='dg_id',
@@ -64,6 +68,7 @@ class TestDashboardChart(unittest.TestCase):
                                          )
 
         actual = dashboard_chart.create_next_relation()
+        actual_serialized = neo4_serializer.serialize_relationship(actual)
         expected: Dict[str, Any] = {
             RELATION_END_KEY: '_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
             RELATION_START_LABEL: 'Query', RELATION_END_LABEL: 'Chart',
@@ -72,5 +77,5 @@ class TestDashboardChart(unittest.TestCase):
         }
 
         assert actual is not None
-        self.assertEqual(expected, actual)
+        self.assertEqual(expected, actual_serialized)
         self.assertIsNone(dashboard_chart.create_next_relation())

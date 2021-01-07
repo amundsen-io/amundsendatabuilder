@@ -5,7 +5,9 @@ import unittest
 
 from pyhocon import ConfigFactory
 
-from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME, TIMESTAMP_FORMAT
+from databuilder.transformer.timestamp_string_to_epoch import (
+    FIELD_NAME, TIMESTAMP_FORMAT, TimestampStringToEpoch,
+)
 
 
 class TestTimestampStrToEpoch(unittest.TestCase):
@@ -40,7 +42,7 @@ class TestTimestampStrToEpoch(unittest.TestCase):
         })
         transformer.init(conf=config)
         actual = transformer.transform({'foo': '165de33266d4'})
-        self.assertEquals(actual['foo'], 0)
+        self.assertEqual(actual['foo'], 0)
 
 
 if __name__ == '__main__':

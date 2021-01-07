@@ -4,14 +4,17 @@
 import logging
 import random
 import unittest
+from typing import (
+    Any, Dict, List,
+)
 
 from mock import patch
-from typing import Any, Dict, List
 
+from databuilder.extractor.dashboard.redash.redash_dashboard_utils import (
+    RedashPaginatedRestApiQuery, generate_dashboard_description, get_auth_headers, get_text_widgets,
+    get_visualization_widgets, sort_widgets,
+)
 from databuilder.rest_api.base_rest_api_query import EmptyRestApiQuerySeed
-from databuilder.extractor.dashboard.redash.redash_dashboard_utils import \
-    get_text_widgets, get_visualization_widgets, sort_widgets, \
-    generate_dashboard_description, get_auth_headers, RedashPaginatedRestApiQuery
 
 logging.basicConfig(level=logging.INFO)
 
@@ -66,7 +69,10 @@ class TestRedashDashboardUtils(unittest.TestCase):
                     'data_source_id': 1,
                     'query': 'SELECT 2+2 FROM DUAL',
                     'name': 'Test'
-                }
+                },
+                'id': 12345,
+                'name': 'test_widget',
+                'type': 'CHART'
             }
         }
         widget = get_visualization_widgets([widget_data])[0]
@@ -75,6 +81,9 @@ class TestRedashDashboardUtils(unittest.TestCase):
         self.assertEqual(widget.data_source_id, 1)
         self.assertEqual(widget.raw_query, 'SELECT 2+2 FROM DUAL')
         self.assertEqual(widget.query_name, 'Test')
+        self.assertEqual(widget.visualization_id, 12345)
+        self.assertEqual(widget.visualization_name, 'test_widget')
+        self.assertEqual(widget.visualization_type, 'CHART')
 
     def test_descriptions_from_text(self) -> None:
         text_widgets = get_text_widgets([
@@ -122,6 +131,32 @@ class TestRedashDashboardUtils(unittest.TestCase):
         # no widgets
         desc4 = generate_dashboard_description([], [])
         self.assertTrue('empty' in desc4)
+
+    def test_descriptions_remove_duplicate(self) -> None:
+        viz_widgets = get_visualization_widgets([
+            {
+                'visualization': {
+                    'query': {
+                        'id': 1,
+                        'data_source_id': 1,
+                        'name': 'same_query_name',
+                        'query': 'n/a'
+                    }
+                }
+            },
+            {
+                'visualization': {
+                    'query': {
+                        'id': 2,
+                        'data_source_id': 1,
+                        'name': 'same_query_name',
+                        'query': 'n/a'
+                    }
+                }
+            }
+        ])
+        desc1 = generate_dashboard_description([], viz_widgets)
+        self.assertEqual('A dashboard containing the following queries:\n\n- same_query_name', desc1)
 
     def test_auth_headers(self) -> None:
         headers = get_auth_headers('testkey')

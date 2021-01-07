@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import (
+    Any, Dict, List, Set, cast,
+)
 
 from pyhocon import ConfigTree
-from typing import cast, Any, Dict, List, Set
 
 from databuilder.extractor.base_bigquery_extractor import BaseBigQueryExtractor, DatasetRef
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,10 +28,11 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
 
     def init(self, conf: ConfigTree) -> None:
         BaseBigQueryExtractor.init(self, conf)
-        self.grouped_tables: Set[str] = set([])
         self.iter = iter(self._iterate_over_tables())
 
     def _retrieve_tables(self, dataset: DatasetRef) -> Any:
+        grouped_tables: Set[str] = set([])
+
         for page in self._page_table_list_results(dataset):
             if 'tables' not in page:
                 continue
@@ -46,13 +48,13 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
                     # If the last eight characters are digits, we assume the table is of a table date range type
                     # and then we only need one schema definition
                     table_prefix = table_id[:-BigQueryMetadataExtractor.DATE_LENGTH]
-                    if table_prefix in self.grouped_tables:
+                    if table_prefix in grouped_tables:
                         # If one table in the date range is processed, then ignore other ones
                         # (it adds too much metadata)
                         continue
 
                     table_id = table_prefix
-                    self.grouped_tables.add(table_prefix)
+                    grouped_tables.add(table_prefix)
 
                 table = self.bigquery_service.tables().get(
                     projectId=tableRef['projectId'],
@@ -88,7 +90,7 @@ class BigQueryMetadataExtractor(BaseBigQueryExtractor):
                            cols: List[ColumnMetadata],
                            total_cols: int) -> int:
         if len(parent) > 0:
-            col_name = '{parent}.{field}'.format(parent=parent, field=column['name'])
+            col_name = f'{parent}.{column["name"]}'
         else:
             col_name = column['name']
 

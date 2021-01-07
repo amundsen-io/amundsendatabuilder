@@ -3,14 +3,14 @@
 
 import logging
 import unittest
-
-from mock import patch, MagicMock
-from pyhocon import ConfigFactory
 from typing import Any, Dict
+
+from mock import MagicMock, patch
+from pyhocon import ConfigFactory
 
 from databuilder.extractor.hive_table_metadata_extractor import HiveTableMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
 class TestHiveTableMetadataExtractor(unittest.TestCase):
@@ -18,8 +18,7 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
         logging.basicConfig(level=logging.INFO)
 
         config_dict = {
-            'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
-            'TEST_CONNECTION'
+            f'extractor.sqlalchemy.{SQLAlchemyExtractor.CONN_STRING}': 'TEST_CONNECTION'
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
@@ -27,7 +26,9 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
         """
         Test Extraction with empty result from query
         """
-        with patch.object(SQLAlchemyExtractor, '_get_connection'):
+        with patch.object(SQLAlchemyExtractor, '_get_connection'), \
+            patch.object(HiveTableMetadataExtractor, '_choose_default_sql_stm',
+                         return_value=HiveTableMetadataExtractor.DEFAULT_SQL_STATEMENT):
             extractor = HiveTableMetadataExtractor()
             extractor.init(self.conf)
 
@@ -35,7 +36,9 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             self.assertEqual(results, None)
 
     def test_extraction_with_single_result(self) -> None:
-        with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
+        with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection, \
+                patch.object(HiveTableMetadataExtractor, '_choose_default_sql_stm',
+                             return_value=HiveTableMetadataExtractor.DEFAULT_SQL_STATEMENT):
             connection = MagicMock()
             mock_connection.return_value = connection
             sql_execute = MagicMock()
@@ -50,32 +53,38 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
                     {'col_name': 'col_id1',
                      'col_type': 'bigint',
                      'col_description': 'description of id1',
-                     'col_sort_order': 0}, table),
+                     'col_sort_order': 0,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'col_id2',
                      'col_type': 'bigint',
                      'col_description': 'description of id2',
-                     'col_sort_order': 1}, table),
+                     'col_sort_order': 1,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'is_active',
                      'col_type': 'boolean',
                      'col_description': None,
-                     'col_sort_order': 2}, table),
+                     'col_sort_order': 2,
+                     'is_partition_col': 1}, table),
                 self._union(
                     {'col_name': 'source',
                      'col_type': 'varchar',
                      'col_description': 'description of source',
-                     'col_sort_order': 3}, table),
+                     'col_sort_order': 3,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'etl_created_at',
                      'col_type': 'timestamp',
                      'col_description': 'description of etl_created_at',
-                     'col_sort_order': 4}, table),
+                     'col_sort_order': 4,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'ds',
                      'col_type': 'varchar',
                      'col_description': None,
-                     'col_sort_order': 5}, table)
+                     'col_sort_order': 5,
+                     'is_partition_col': 0}, table)
             ]
 
             extractor = HiveTableMetadataExtractor()
@@ -84,16 +93,20 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
             expected = TableMetadata('hive', 'gold', 'test_schema', 'test_table', 'a table for testing',
                                      [ColumnMetadata('col_id1', 'description of id1', 'bigint', 0),
                                       ColumnMetadata('col_id2', 'description of id2', 'bigint', 1),
-                                      ColumnMetadata('is_active', None, 'boolean', 2),
+                                      ColumnMetadata('is_active', None, 'boolean', 2, ['partition column']),
                                       ColumnMetadata('source', 'description of source', 'varchar', 3),
-                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
+                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp',
+                                                     4),
                                       ColumnMetadata('ds', None, 'varchar', 5)],
                                      is_view=False)
+
             self.assertEqual(expected.__repr__(), actual.__repr__())
             self.assertIsNone(extractor.extract())
 
     def test_extraction_with_multiple_result(self) -> None:
-        with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection:
+        with patch.object(SQLAlchemyExtractor, '_get_connection') as mock_connection, \
+                patch.object(HiveTableMetadataExtractor, '_choose_default_sql_stm',
+                             return_value=HiveTableMetadataExtractor.DEFAULT_SQL_STATEMENT):
             connection = MagicMock()
             mock_connection.return_value = connection
             sql_execute = MagicMock()
@@ -118,63 +131,75 @@ class TestHiveTableMetadataExtractor(unittest.TestCase):
                     {'col_name': 'col_id1',
                      'col_type': 'bigint',
                      'col_description': 'description of col_id1',
-                     'col_sort_order': 0}, table),
+                     'col_sort_order': 0,
+                     'is_partition_col': 1}, table),
                 self._union(
                     {'col_name': 'col_id2',
                      'col_type': 'bigint',
                      'col_description': 'description of col_id2',
-                     'col_sort_order': 1}, table),
+                     'col_sort_order': 1,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'is_active',
                      'col_type': 'boolean',
                      'col_description': None,
-                     'col_sort_order': 2}, table),
+                     'col_sort_order': 2,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'source',
                      'col_type': 'varchar',
                      'col_description': 'description of source',
-                     'col_sort_order': 3}, table),
+                     'col_sort_order': 3,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'etl_created_at',
                      'col_type': 'timestamp',
                      'col_description': 'description of etl_created_at',
-                     'col_sort_order': 4}, table),
+                     'col_sort_order': 4,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'ds',
                      'col_type': 'varchar',
                      'col_description': None,
-                     'col_sort_order': 5}, table),
+                     'col_sort_order': 5,
+                     'is_partition_col': 0}, table),
                 self._union(
                     {'col_name': 'col_name',
                      'col_type': 'varchar',
                      'col_description': 'description of col_name',
-                     'col_sort_order': 0}, table1),
+                     'col_sort_order': 0,
+                     'is_partition_col': 0}, table1),
                 self._union(
                     {'col_name': 'col_name2',
                      'col_type': 'varchar',
                      'col_description': 'description of col_name2',
-                     'col_sort_order': 1}, table1),
+                     'col_sort_order': 1,
+                     'is_partition_col': 0}, table1),
                 self._union(
                     {'col_name': 'col_id3',
                      'col_type': 'varchar',
                      'col_description': 'description of col_id3',
-                     'col_sort_order': 0}, table2),
+                     'col_sort_order': 0,
+                     'is_partition_col': 0}, table2),
                 self._union(
                     {'col_name': 'col_name3',
                      'col_type': 'varchar',
                      'col_description': 'description of col_name3',
-                     'col_sort_order': 1}, table2)
+                     'col_sort_order': 1,
+                     'is_partition_col': 0}, table2)
             ]
 
             extractor = HiveTableMetadataExtractor()
             extractor.init(self.conf)
 
             expected = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test table 1',
-                                     [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0),
+                                     [ColumnMetadata('col_id1', 'description of col_id1', 'bigint', 0,
+                                                     ['partition column']),
                                       ColumnMetadata('col_id2', 'description of col_id2', 'bigint', 1),
                                       ColumnMetadata('is_active', None, 'boolean', 2),
                                       ColumnMetadata('source', 'description of source', 'varchar', 3),
-                                      ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
+                                      ColumnMetadata('etl_created_at', 'description of etl_created_at',
+                                                     'timestamp', 4),
                                       ColumnMetadata('ds', None, 'varchar', 5)],
                                      is_view=False)
             self.assertEqual(expected.__repr__(), extractor.extract().__repr__())
@@ -211,8 +236,7 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
 
         config_dict = {
             HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY: self.where_clause_suffix,
-            'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
-                'TEST_CONNECTION'
+            f'extractor.sqlalchemy.{SQLAlchemyExtractor.CONN_STRING}': 'TEST_CONNECTION'
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 
@@ -220,7 +244,9 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
         """
         Test Extraction with empty result from query
         """
-        with patch.object(SQLAlchemyExtractor, '_get_connection'):
+        with patch.object(SQLAlchemyExtractor, '_get_connection'), \
+            patch.object(HiveTableMetadataExtractor, '_choose_default_sql_stm',
+                         return_value=HiveTableMetadataExtractor.DEFAULT_SQL_STATEMENT):
             extractor = HiveTableMetadataExtractor()
             extractor.init(self.conf)
             self.assertTrue(self.where_clause_suffix in extractor.sql_stmt)
@@ -230,11 +256,12 @@ class TestHiveTableMetadataExtractorWithWhereClause(unittest.TestCase):
         Test Extraction by providing a custom sql
         :return:
         """
-        with patch.object(SQLAlchemyExtractor, '_get_connection'):
+        with patch.object(SQLAlchemyExtractor, '_get_connection'), \
+            patch.object(HiveTableMetadataExtractor, '_choose_default_sql_stm',
+                         return_value=HiveTableMetadataExtractor.DEFAULT_SQL_STATEMENT):
             config_dict = {
                 HiveTableMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY: self.where_clause_suffix,
-                'extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING):
-                    'TEST_CONNECTION',
+                f'extractor.sqlalchemy.{SQLAlchemyExtractor.CONN_STRING}': 'TEST_CONNECTION',
                 HiveTableMetadataExtractor.EXTRACT_SQL:
                     'select sth for test {where_clause_suffix}'
             }

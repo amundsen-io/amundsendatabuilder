@@ -6,17 +6,17 @@ import logging
 import os
 import shutil
 from csv import DictWriter
+from typing import (
+    Any, Dict, FrozenSet,
+)
 
-from pyhocon import ConfigTree, ConfigFactory
-from typing import Dict, Any
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.job.base_job import Job
 from databuilder.loader.base_loader import Loader
-from databuilder.models.neo4j_csv_serde import NODE_LABEL, \
-    RELATION_START_LABEL, RELATION_END_LABEL, RELATION_TYPE
-from databuilder.models.neo4j_csv_serde import Neo4jCsvSerializable
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.serializers import neo4_serializer
 from databuilder.utils.closer import Closer
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -41,6 +41,7 @@ class FsNeo4jCSVLoader(Loader):
     def __init__(self) -> None:
         self._node_file_mapping: Dict[Any, DictWriter] = {}
         self._relation_file_mapping: Dict[Any, DictWriter] = {}
+        self._keys: Dict[FrozenSet[str], int] = {}
         self._closer = Closer()
 
     def init(self, conf: ConfigTree) -> None:
@@ -72,25 +73,25 @@ class FsNeo4jCSVLoader(Loader):
         """
         if os.path.exists(path):
             if self._force_create_dir:
-                LOGGER.info('Directory exist. Deleting directory {}'.format(path))
+                LOGGER.info('Directory exist. Deleting directory %s', path)
                 shutil.rmtree(path)
             else:
-                raise RuntimeError('Directory should not exist: {}'.format(path))
+                raise RuntimeError(f'Directory should not exist: {path}')
 
         os.makedirs(path)
 
         def _delete_dir() -> None:
             if not self._delete_created_dir:
-                LOGGER.warn('Skip Deleting directory {}'.format(path))
+                LOGGER.warning('Skip Deleting directory %s', path)
                 return
 
-            LOGGER.info('Deleting directory {}'.format(path))
+            LOGGER.info('Deleting directory %s', path)
             shutil.rmtree(path)
 
         # Directory should be deleted after publish is finished
         Job.closer.register(_delete_dir)
 
-    def load(self, csv_serializable: Neo4jCsvSerializable) -> None:
+    def load(self, csv_serializable: GraphSerializable) -> None:
         """
         Writes Neo4jCsvSerializable into CSV files.
         There are multiple CSV files that this method writes.
@@ -107,9 +108,10 @@ class FsNeo4jCSVLoader(Loader):
         :return:
         """
 
-        node_dict = csv_serializable.next_node()
-        while node_dict:
-            key = (node_dict[NODE_LABEL], len(node_dict))
+        node = csv_serializable.next_node()
+        while node:
+            node_dict = neo4_serializer.serialize_node(node)
+            key = (node.label, self._make_key(node_dict))
             file_suffix = '{}_{}'.format(*key)
             node_writer = self._get_writer(node_dict,
                                            self._node_file_mapping,
@@ -117,23 +119,24 @@ class FsNeo4jCSVLoader(Loader):
                                            self._node_dir,
                                            file_suffix)
             node_writer.writerow(node_dict)
-            node_dict = csv_serializable.next_node()
+            node = csv_serializable.next_node()
 
-        relation_dict = csv_serializable.next_relation()
-        while relation_dict:
-            key2 = (relation_dict[RELATION_START_LABEL],
-                    relation_dict[RELATION_END_LABEL],
-                    relation_dict[RELATION_TYPE],
-                    len(relation_dict))
+        relation = csv_serializable.next_relation()
+        while relation:
+            relation_dict = neo4_serializer.serialize_relationship(relation)
+            key2 = (relation.start_label,
+                    relation.end_label,
+                    relation.type,
+                    self._make_key(relation_dict))
 
-            file_suffix = '{}_{}_{}'.format(key2[0], key2[1], key2[2])
+            file_suffix = f'{key2[0]}_{key2[1]}_{key2[2]}'
             relation_writer = self._get_writer(relation_dict,
                                                self._relation_file_mapping,
                                                key2,
                                                self._relation_dir,
                                                file_suffix)
             relation_writer.writerow(relation_dict)
-            relation_dict = csv_serializable.next_relation()
+            relation = csv_serializable.next_relation()
 
     def _get_writer(self,
                     csv_record_dict: Dict[str, Any],
@@ -157,14 +160,14 @@ class FsNeo4jCSVLoader(Loader):
         if writer:
             return writer
 
-        LOGGER.info('Creating file for {}'.format(key))
+        LOGGER.info('Creating file for %s', key)
 
-        file_out = open('{}/{}.csv'.format(dir_path, file_suffix), 'w', encoding='utf8')
+        file_out = open(f'{dir_path}/{file_suffix}.csv', 'w', encoding='utf8')
         writer = csv.DictWriter(file_out, fieldnames=csv_record_dict.keys(),
                                 quoting=csv.QUOTE_NONNUMERIC)
 
         def file_out_close() -> None:
-            LOGGER.info('Closing file IO {}'.format(file_out))
+            LOGGER.info('Closing file IO %s', file_out)
             file_out.close()
         self._closer.register(file_out_close)
 
@@ -182,3 +185,7 @@ class FsNeo4jCSVLoader(Loader):
 
     def get_scope(self) -> str:
         return "loader.filesystem_csv_neo4j"
+
+    def _make_key(self, record_dict: Dict[str, Any]) -> int:
+        """ Each unique set of record keys is assigned an increasing numeric key """
+        return self._keys.setdefault(frozenset(record_dict.keys()), len(self._keys))

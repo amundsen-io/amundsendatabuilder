@@ -1,10 +1,10 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from setuptools import setup, find_packages
 
+from setuptools import find_packages, setup
 
-__version__ = '3.2.0'
+__version__ = '4.0.4'
 
 
 requirements = [
@@ -16,6 +16,8 @@ requirements = [
     "elasticsearch>=6.2.0,<7.0",
     "pyhocon>=0.3.42",
     "unidecode",
+    "Jinja2>=2.10.0,<2.12",
+    "pandas>=0.21.0,<1.2.0"
 ]
 
 kafka = ['confluent-kafka==1.0.0']
@@ -29,7 +31,7 @@ snowflake = [
     'snowflake-sqlalchemy'
 ]
 
-athena = ['PyAthena[SQLAlchemy]>=1.0.0']
+athena = ['PyAthena[SQLAlchemy]>=1.0.0, <2.0.0']
 
 # Python API client for google
 # License: Apache Software License
@@ -47,11 +49,28 @@ db2 = [
     'ibm-db-sa-py3==0.3.1-1'
 ]
 
+dremio = [
+    'pyodbc==4.0.30'
+]
+
 druid = [
     'pydruid'
 ]
 
-all_deps = requirements + kafka + cassandra + glue + snowflake + athena + bigquery + jsonpath + db2 + druid
+spark = [
+    'pyspark == 3.0.1'
+]
+
+feast = [
+    'feast==0.8.0'
+]
+
+atlas = [
+    'pyatlasclient==1.1.2'
+]
+
+all_deps = requirements + kafka + cassandra + glue + snowflake + athena + \
+    bigquery + jsonpath + db2 + dremio + druid + spark + feast
 
 setup(
     name='amundsen-databuilder',
@@ -63,9 +82,8 @@ setup(
     packages=find_packages(exclude=['tests*']),
     dependency_links=[],
     install_requires=requirements,
-    python_requires='>=3.6,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*',
+    python_requires='>=3.6',
     extras_require={
-        ':python_version=="2.7"': ['typing>=3.6'],  # allow typehinting PY2
         'all': all_deps,
         'kafka': kafka,  # To use with Kafka source extractor
         'cassandra': cassandra,
@@ -75,7 +93,11 @@ setup(
         'bigquery': bigquery,
         'jsonpath': jsonpath,
         'db2': db2,
+        'dremio': dremio,
         'druid': druid,
+        'delta': spark,
+        'feast': feast,
+        'atlas': atlas
     },
     classifiers=[
         'Programming Language :: Python :: 3.6',

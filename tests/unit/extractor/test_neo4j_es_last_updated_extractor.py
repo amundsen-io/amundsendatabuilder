@@ -1,10 +1,10 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from mock import patch
-from typing import Any
 import unittest
+from typing import Any
 
+from mock import patch
 from pyhocon import ConfigFactory
 
 from databuilder import Scoped
@@ -31,4 +31,4 @@ class TestNeo4jEsLastUpdatedExtractor(unittest.TestCase):
                                               scope=extractor.get_scope()))
 
         result = extractor.extract()
-        self.assertEquals(result.timestamp, 10000000)
+        self.assertEqual(result.timestamp, 10000000)

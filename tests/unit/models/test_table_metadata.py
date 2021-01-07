@@ -5,11 +5,14 @@ import copy
 import unittest
 
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
+from databuilder.serializers import neo4_serializer
 
 
 class TestTableMetadata(unittest.TestCase):
     def setUp(self) -> None:
         super(TestTableMetadata, self).setUp()
+        TableMetadata.serialized_nodes_keys = set()
+        TableMetadata.serialized_rels_keys = set()
 
     def test_serialize(self) -> None:
         self.table_metadata = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test_table1', [
@@ -108,7 +111,8 @@ class TestTableMetadata(unittest.TestCase):
         node_row = self.table_metadata.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            actual.append(node_row_serialized)
             node_row = self.table_metadata.next_node()
         for i in range(0, len(self.expected_nodes)):
             self.assertEqual(actual[i], self.expected_nodes[i])
@@ -116,18 +120,18 @@ class TestTableMetadata(unittest.TestCase):
         relation_row = self.table_metadata.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            relation_row_serialized = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(relation_row_serialized)
             relation_row = self.table_metadata.next_relation()
         for i in range(0, len(self.expected_rels)):
-            print(self.expected_rels[i])
-            print(actual[i])
             self.assertEqual(actual[i], self.expected_rels[i])
 
         # 2nd record should not show already serialized database, cluster, and schema
         node_row = self.table_metadata2.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            actual.append(node_row_serialized)
             node_row = self.table_metadata2.next_node()
 
         self.assertEqual(self.expected_nodes_deduped, actual)
@@ -135,7 +139,8 @@ class TestTableMetadata(unittest.TestCase):
         relation_row = self.table_metadata2.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            relation_row_serialized = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(relation_row_serialized)
             relation_row = self.table_metadata2.next_relation()
 
         self.assertEqual(self.expected_rels_deduped, actual)
@@ -152,7 +157,8 @@ class TestTableMetadata(unittest.TestCase):
         node_row = self.table_metadata3.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            actual.append(node_row_serialized)
             node_row = self.table_metadata3.next_node()
 
         self.assertEqual(actual[0].get('attr1'), 'uri')
@@ -171,7 +177,8 @@ class TestTableMetadata(unittest.TestCase):
         node_row = self.custom_source.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            actual.append(node_row_serialized)
             node_row = self.custom_source.next_node()
         expected = {'LABEL': 'Programmatic_Description',
                     'KEY': 'hive://gold.test_schema3/test_table4/_custom_description',
@@ -180,13 +187,14 @@ class TestTableMetadata(unittest.TestCase):
 
     def test_tags_field(self) -> None:
         self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
-            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-tag1', 'col-tag2'])],
+            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0)],
             is_view=False, tags=['tag1', 'tag2'], attr1='uri', attr2='attr2')
 
         node_row = self.table_metadata4.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            actual.append(node_row_serialized)
             node_row = self.table_metadata4.next_node()
 
         self.assertEqual(actual[0].get('attr1'), 'uri')
@@ -195,13 +203,12 @@ class TestTableMetadata(unittest.TestCase):
         self.assertEqual(actual[2].get('LABEL'), 'Tag')
         self.assertEqual(actual[2].get('KEY'), 'tag1')
         self.assertEqual(actual[3].get('KEY'), 'tag2')
-        self.assertEqual(actual[6].get('KEY'), 'col-tag1')
-        self.assertEqual(actual[7].get('KEY'), 'col-tag2')
 
         relation_row = self.table_metadata4.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            relation_row_serialized = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(relation_row_serialized)
             relation_row = self.table_metadata4.next_relation()
 
         # Table tag relationship
@@ -211,18 +218,43 @@ class TestTableMetadata(unittest.TestCase):
         expected_tab_tag_rel2 = {'END_KEY': 'tag2', 'START_LABEL': 'Table',
                                  'END_LABEL': 'Tag', 'START_KEY': 'hive://gold.test_schema4/test_table4',
                                  'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
-        expected_col_tag_rel1 = {'END_KEY': 'col-tag1', 'START_LABEL': 'Table',
-                                 'END_LABEL': 'Tag',
-                                 'START_KEY': 'hive://gold.test_schema4/test_table4',
-                                 'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
-        expected_col_tag_rel2 = {'END_KEY': 'col-tag2', 'START_LABEL': 'Table',
-                                 'END_LABEL': 'Tag',
-                                 'START_KEY': 'hive://gold.test_schema4/test_table4',
-                                 'TYPE': 'TAGGED_BY', 'REVERSE_TYPE': 'TAG'}
+
         self.assertEqual(actual[2], expected_tab_tag_rel1)
         self.assertEqual(actual[3], expected_tab_tag_rel2)
-        self.assertEqual(actual[6], expected_col_tag_rel1)
-        self.assertEqual(actual[7], expected_col_tag_rel2)
+
+    def test_col_badge_field(self) -> None:
+        self.table_metadata4 = TableMetadata('hive', 'gold', 'test_schema4', 'test_table4', 'test_table4', [
+            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0, ['col-badge1', 'col-badge2'])],
+            is_view=False, attr1='uri', attr2='attr2')
+
+        node_row = self.table_metadata4.next_node()
+        actual = []
+        while node_row:
+            serialized_node_row = neo4_serializer.serialize_node(node_row)
+            actual.append(serialized_node_row)
+            node_row = self.table_metadata4.next_node()
+
+        self.assertEqual(actual[4].get('KEY'), 'col-badge1')
+        self.assertEqual(actual[5].get('KEY'), 'col-badge2')
+
+        relation_row = self.table_metadata4.next_relation()
+        actual = []
+        while relation_row:
+            serialized_relation_row = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(serialized_relation_row)
+            relation_row = self.table_metadata4.next_relation()
+
+        expected_col_badge_rel1 = {'END_KEY': 'col-badge1', 'START_LABEL': 'Column',
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+        expected_col_badge_rel2 = {'END_KEY': 'col-badge2', 'START_LABEL': 'Column',
+                                   'END_LABEL': 'Badge',
+                                   'START_KEY': 'hive://gold.test_schema4/test_table4/test_id1',
+                                   'TYPE': 'HAS_BADGE', 'REVERSE_TYPE': 'BADGE_FOR'}
+
+        self.assertEqual(actual[4], expected_col_badge_rel1)
+        self.assertEqual(actual[5], expected_col_badge_rel2)
 
     def test_tags_populated_from_str(self) -> None:
         self.table_metadata5 = TableMetadata('hive', 'gold', 'test_schema5', 'test_table5', 'test_table5', [
@@ -232,7 +264,8 @@ class TestTableMetadata(unittest.TestCase):
         node_row = self.table_metadata5.next_node()
         actual = []
         while node_row:
-            actual.append(node_row)
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            actual.append(node_row_serialized)
             node_row = self.table_metadata5.next_node()
 
         self.assertEqual(actual[2].get('LABEL'), 'Tag')
@@ -242,7 +275,8 @@ class TestTableMetadata(unittest.TestCase):
         relation_row = self.table_metadata5.next_relation()
         actual = []
         while relation_row:
-            actual.append(relation_row)
+            relation_row_serialized = neo4_serializer.serialize_relationship(relation_row)
+            actual.append(relation_row_serialized)
             relation_row = self.table_metadata5.next_relation()
 
         # Table tag relationship
@@ -265,13 +299,15 @@ class TestTableMetadata(unittest.TestCase):
         # Test table tag fields are not populated from empty List
         node_row = self.table_metadata6.next_node()
         while node_row:
-            self.assertNotEqual(node_row.get('LABEL'), 'Tag')
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            self.assertNotEqual(node_row_serialized.get('LABEL'), 'Tag')
             node_row = self.table_metadata6.next_node()
 
         # Test table tag fields are not populated from empty str
         node_row = self.table_metadata7.next_node()
         while node_row:
-            self.assertNotEqual(node_row.get('LABEL'), 'Tag')
+            node_row_serialized = neo4_serializer.serialize_node(node_row)
+            self.assertNotEqual(node_row_serialized.get('LABEL'), 'Tag')
             node_row = self.table_metadata7.next_node()
 
 

@@ -8,6 +8,11 @@ flake8==3.5.0
 # Upstream url: https://pypi.python.org/pypi/flake8-tidy-imports
 flake8-tidy-imports>=1.1.0,<2.0
 
+# A Python utility / library to sort imports.
+# License: MIT
+# Upstream url: https://github.com/PyCQA/isort
+isort[colors]~=5.4
+
 # A mature full-featured Python testing tool.
 # License: MIT
 # Upstream url: http://pytest.org/
@@ -27,11 +32,6 @@ mock>=2.0.0,<3.0
 # License: MIT
 # Upstream url: https://pypi.python.org/pypi/pytest-mock
 pytest-mock>=1.1,<2.0
-
-# PEP 484
-# License: PSF
-# Upstream url: https://github.com/python/typing
-typing==3.6.4
 
 # Python client for ElasticSearch
 # License: Apache Software License
@@ -57,5 +57,10 @@ unicodecsv==0.14.1,<1.0
 
 httplib2>=0.18.0
 unidecode
+Jinja2>=2.10.0,<2.12
+pandas>=0.21.0,<1.2.0
 
 requests==2.23.0,<3.0
+responses==0.10.6
+
+pyatlasclient==1.1.2

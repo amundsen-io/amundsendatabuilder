@@ -1,8 +1,13 @@
-import json
-import requests
-import re
-from typing import Any, Dict, Iterator, Optional
+# Copyright Contributors to the Amundsen project.
+# SPDX-License-Identifier: Apache-2.0
 
+import json
+import re
+from typing import (
+    Any, Dict, Iterator, Optional,
+)
+
+import requests
 from pyhocon import ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
@@ -166,10 +171,7 @@ class TableauDashboardAuth:
         See https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm
         for details or ask your Tableau server administrator.
         """
-        self._auth_url = "{api_base_url}/api/{api_version}/auth/signin".format(
-            api_base_url=self._api_base_url,
-            api_version=self._api_version
-        )
+        self._auth_url = f"{self._api_base_url}/api/{self._api_version}/auth/signin"
 
         payload = json.dumps({
             'credentials': {

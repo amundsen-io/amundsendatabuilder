@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-
 from typing import Any, Dict
 
 from databuilder.models.dashboard.dashboard_usage import DashboardUsage
-from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
+from databuilder.serializers import neo4_serializer
 
 
 class TestDashboardOwner(unittest.TestCase):
@@ -18,13 +20,14 @@ class TestDashboardOwner(unittest.TestCase):
                                          product='product_id', should_create_user_node=True)
 
         actual = dashboard_usage.create_next_node()
+        actual_serialized = neo4_serializer.serialize_node(actual)
         expected: Dict[str, Any] = {
             'is_active:UNQUOTED': True,
             'last_name': '',
             'full_name': '',
             'employee_type': '',
             'first_name': '',
-            'updated_at': 0,
+            'updated_at:UNQUOTED': 0,
             'LABEL': 'User',
             'slack_id': '',
             'KEY': 'foo@bar.com',
@@ -35,7 +38,7 @@ class TestDashboardOwner(unittest.TestCase):
         }
 
         assert actual is not None
-        self.assertDictEqual(expected, actual)
+        self.assertDictEqual(expected, actual_serialized)
         self.assertIsNone(dashboard_usage.create_next_node())
 
     def test_dashboard_usage_no_user_nodes(self) -> None:
@@ -52,6 +55,7 @@ class TestDashboardOwner(unittest.TestCase):
                                          product='product_id')
 
         actual = dashboard_usage.create_next_relation()
+        actual_serialized = neo4_serializer.serialize_relationship(actual)
         expected: Dict[str, Any] = {
             'read_count:UNQUOTED': 123,
             RELATION_END_KEY: 'foo@bar.com',
@@ -63,5 +67,5 @@ class TestDashboardOwner(unittest.TestCase):
         }
 
         assert actual is not None
-        self.assertDictEqual(expected, actual)
+        self.assertDictEqual(expected, actual_serialized)
         self.assertIsNone(dashboard_usage.create_next_relation())

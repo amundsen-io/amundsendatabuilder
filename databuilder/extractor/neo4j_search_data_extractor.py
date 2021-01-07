@@ -33,7 +33,7 @@ class Neo4jSearchDataExtractor(Extractor):
         OPTIONAL MATCH (table)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
         WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions,
         COLLECT(DISTINCT tags.key) as tags
-        OPTIONAL MATCH (table)-[:TAGGED_BY]->(badges:Tag) WHERE badges.tag_type='badge'
+        OPTIONAL MATCH (table)-[:HAS_BADGE]->(badges:Badge)
         WITH db, cluster, schema, schema_description, table, table_description, programmatic_descriptions, tags,
         COLLECT(DISTINCT badges.key) as badges
         OPTIONAL MATCH (table)-[read:READ_BY]->(user:User)
@@ -84,32 +84,33 @@ class Neo4jSearchDataExtractor(Extractor):
 
     DEFAULT_NEO4J_DASHBOARD_CYPHER_QUERY = textwrap.dedent(
         """
-        MATCH (dashboard:Dashboard)
-        {publish_tag_filter}
-        MATCH (dashboard)-[:DASHBOARD_OF]->(dbg:Dashboardgroup)
-        MATCH (dbg)-[:DASHBOARD_GROUP_OF]->(cluster:Cluster)
-        OPTIONAL MATCH (dashboard)-[:DESCRIPTION]->(db_descr:Description)
-        OPTIONAL MATCH (dbg)-[:DESCRIPTION]->(dbg_descr:Description)
-        OPTIONAL MATCH (dashboard)-[:EXECUTED]->(last_exec:Execution)
-        WHERE split(last_exec.key, '/')[5] = '_last_successful_execution'
-        OPTIONAL MATCH (dashboard)-[read:READ_BY]->(user:User)
-        WITH dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, SUM(read.read_count) AS total_usage
-        OPTIONAL MATCH (dashboard)-[:HAS_QUERY]->(query:Query)
-        WITH dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, COLLECT(DISTINCT query.name) as query_names,
-        total_usage
-        OPTIONAL MATCH (dashboard)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
-        WITH dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, query_names, total_usage,
-        COLLECT(DISTINCT tags.key) as tags
-        OPTIONAL MATCH (dashboard)-[:TAGGED_BY]->(badges:Tag) WHERE badges.tag_type='badge'
-        WITH  dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, query_names, total_usage, tags,
-        COLLECT(DISTINCT badges.key) as badges
-        RETURN dbg.name as group_name, dashboard.name as name, cluster.name as cluster,
-        coalesce(db_descr.description, '') as description,
-        coalesce(dbg.description, '') as group_description, dbg.dashboard_group_url as group_url,
-        dashboard.dashboard_url as url, dashboard.key as uri,
-        split(dashboard.key, '_')[0] as product, toInteger(last_exec.timestamp) as last_successful_run_timestamp,
-        query_names, total_usage, tags, badges
-        order by dbg.name;
+         MATCH (dashboard:Dashboard)
+         {publish_tag_filter}
+         MATCH (dashboard)-[:DASHBOARD_OF]->(dbg:Dashboardgroup)
+         MATCH (dbg)-[:DASHBOARD_GROUP_OF]->(cluster:Cluster)
+         OPTIONAL MATCH (dashboard)-[:DESCRIPTION]->(db_descr:Description)
+         OPTIONAL MATCH (dbg)-[:DESCRIPTION]->(dbg_descr:Description)
+         OPTIONAL MATCH (dashboard)-[:EXECUTED]->(last_exec:Execution)
+         WHERE split(last_exec.key, '/')[5] = '_last_successful_execution'
+         OPTIONAL MATCH (dashboard)-[read:READ_BY]->(user:User)
+         WITH dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, SUM(read.read_count) AS total_usage
+         OPTIONAL MATCH (dashboard)-[:HAS_QUERY]->(query:Query)-[:HAS_CHART]->(chart:Chart)
+         WITH dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, COLLECT(DISTINCT query.name) as query_names,
+         COLLECT(DISTINCT chart.name) as chart_names,
+         total_usage
+         OPTIONAL MATCH (dashboard)-[:TAGGED_BY]->(tags:Tag) WHERE tags.tag_type='default'
+         WITH dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, query_names, chart_names, total_usage,
+         COLLECT(DISTINCT tags.key) as tags
+         OPTIONAL MATCH (dashboard)-[:HAS_BADGE]->(badges:Badge)
+         WITH  dashboard, dbg, db_descr, dbg_descr, cluster, last_exec, query_names, chart_names, total_usage, tags,
+         COLLECT(DISTINCT badges.key) as badges
+         RETURN dbg.name as group_name, dashboard.name as name, cluster.name as cluster,
+         coalesce(db_descr.description, '') as description,
+         coalesce(dbg.description, '') as group_description, dbg.dashboard_group_url as group_url,
+         dashboard.dashboard_url as url, dashboard.key as uri,
+         split(dashboard.key, '_')[0] as product, toInteger(last_exec.timestamp) as last_successful_run_timestamp,
+         query_names, chart_names, total_usage, tags, badges
+         order by dbg.name
         """
     )
 
@@ -170,6 +171,5 @@ class Neo4jSearchDataExtractor(Extractor):
         else:
             if not hasattr(self, 'entity'):
                 self.entity = 'table'
-            publish_tag_filter = """WHERE {entity}.published_tag = '{tag}'""".format(entity=self.entity,
-                                                                                     tag=publish_tag)
+            publish_tag_filter = f"WHERE {self.entity}.published_tag = '{publish_tag}'"
         return cypher_query.format(publish_tag_filter=publish_tag_filter)

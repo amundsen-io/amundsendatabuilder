@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import abc
+from typing import (
+    Any, Iterable, Iterator, List, Optional,
+)
 
 from pyhocon import ConfigTree
-from typing import Any, Iterable, List, Iterator, Optional
 
 from databuilder import Scoped
 

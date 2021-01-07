@@ -3,10 +3,12 @@
 
 import unittest
 
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
 from databuilder.models.table_lineage import TableLineage
-from databuilder.models.neo4j_csv_serde import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-
+from databuilder.serializers import neo4_serializer
 
 DB = 'hive'
 SCHEMA = 'base'
@@ -30,24 +32,18 @@ class TestTableLineage(unittest.TestCase):
                                                           cluster=CLUSTER,
                                                           schema=SCHEMA,
                                                           table=TABLE)
-        self.assertEquals(metadata, 'hive://default.base/test')
+        self.assertEqual(metadata, 'hive://default.base/test')
 
     def test_create_nodes(self) -> None:
         nodes = self.table_lineage.create_nodes()
-        self.assertEquals(len(nodes), 0)
+        self.assertEqual(len(nodes), 0)
 
     def test_create_relation(self) -> None:
         relations = self.table_lineage.create_relation()
-        self.assertEquals(len(relations), 2)
+        self.assertEqual(len(relations), 2)
 
-        start_key = '{db}://{cluster}.{schema}/{tbl}'.format(db=DB,
-                                                             schema=SCHEMA,
-                                                             tbl=TABLE,
-                                                             cluster=CLUSTER)
-        end_key1 = '{db}://{cluster}.{schema}/{tbl}'.format(db=DB,
-                                                            schema='test_schema',
-                                                            tbl='test_table1',
-                                                            cluster=CLUSTER)
+        start_key = f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}'
+        end_key1 = f'{DB}://{CLUSTER}.test_schema/test_table1'
 
         relation = {
             RELATION_START_KEY: start_key,
@@ -57,5 +53,9 @@ class TestTableLineage(unittest.TestCase):
             RELATION_TYPE: TableLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
             RELATION_REVERSE_TYPE: TableLineage.DEPENDENCY_ORIGIN_RELATION_TYPE
         }
+        actual_relations = [
+            neo4_serializer.serialize_relationship(relation)
+            for relation in relations
+        ]
         self.assertTrue(len(relations), 2)
-        self.assertTrue(relation in relations)
+        self.assertTrue(relation in actual_relations)
