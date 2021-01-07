@@ -2,7 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-from typing import Any, Iterable, List, Optional
+from typing import (
+    Any, Iterable, List, Optional,
+)
+
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.job.job import DefaultJob
@@ -11,12 +15,8 @@ from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.table_owner import TableOwner
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import (
-    ChainedTransformer,
-    NoopTransformer,
-    Transformer,
+    ChainedTransformer, NoopTransformer, Transformer,
 )
-
-from pyhocon import ConfigFactory, ConfigTree
 
 TEST_DATA = [
     TableMetadata(
