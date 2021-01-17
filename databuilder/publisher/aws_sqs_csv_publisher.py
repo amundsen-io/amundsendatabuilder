@@ -1,5 +1,6 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
+
 import csv
 import ctypes
 import json
@@ -13,7 +14,7 @@ from typing import List, Set
 import boto3
 import pandas
 from botocore.config import Config
-from pyhocon import ConfigTree
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.publisher.base_publisher import Publisher
 
@@ -28,11 +29,12 @@ NODE_FILES_DIR = 'node_files_directory'
 # A directory that contains CSV files for relationships
 RELATION_FILES_DIR = 'relation_files_directory'
 
-# AWS SQS config
+# AWS SQS configs
 # AWS SQS region
 AWS_SQS_REGION = 'aws_sqs_region'
 # AWS SQS url to send a message
 AWS_SQS_URL = 'aws_sqs_url'
+# AWS SQS message group id
 AWS_SQS_MESSAGE_GROUP_ID = 'aws_sqs_message_group_id'
 # credential configuration of AWS SQS
 AWS_SQS_ACCESS_KEY_ID = 'aws_sqs_access_key_id'
@@ -51,6 +53,8 @@ NODE_KEY_KEY = 'KEY'
 # Required columns for Node
 NODE_REQUIRED_KEYS = {NODE_LABEL_KEY, NODE_KEY_KEY}
 
+DEFAULT_CONFIG = ConfigFactory.from_dict({AWS_SQS_MESSAGE_GROUP_ID: 'metadata'})
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -58,13 +62,14 @@ class AWSSQSCsvPublisher(Publisher):
     """
     A Publisher takes two folders for input and publishes it as message to AWS SQS.
     One folder will contain CSV file(s) for Node where the other folder will contain CSV file(s) for Relationship.
-    #TODO User UNWIND batch operation for better performance
+    If the target AWS SQS Queue does not use content based deduplication, Message ID should be defined.
     """
 
     def __init__(self) -> None:
         super(AWSSQSCsvPublisher, self).__init__()
 
     def init(self, conf: ConfigTree) -> None:
+        conf = conf.with_fallback(DEFAULT_CONFIG)
 
         self._node_files = self._list_files(conf, NODE_FILES_DIR)
         self._node_files_iter = iter(self._node_files)
@@ -75,6 +80,7 @@ class AWSSQSCsvPublisher(Publisher):
         # Initialize AWS SQS client
         self.client = self._get_client(conf=conf)
         self.aws_sqs_url = conf.get_string(AWS_SQS_URL)
+        self.message_group_id = conf.get_string(AWS_SQS_MESSAGE_GROUP_ID)
 
         LOGGER.info('Publishing Node csv files {}, and Relation CSV files {}'
                     .format(self._node_files, self._relation_files))
@@ -130,7 +136,7 @@ class AWSSQSCsvPublisher(Publisher):
             self.client.send_message(
                 QueueUrl=self.aws_sqs_url,
                 MessageBody=json.dumps(message_body),
-                MessageGroupId=conf.get_string(AWS_SQS_MESSAGE_GROUP_ID)
+                MessageGroupId=self.message_group_id
             )
 
             LOGGER.info('Successfully published. Elapsed: {} seconds'.format(time.time() - start))
@@ -157,6 +163,10 @@ class AWSSQSCsvPublisher(Publisher):
         return ret
 
     def _get_client(self, conf: ConfigTree) -> boto3.client:
+        """
+        Create a client object to access AWS SQS
+        :return:
+        """
         return boto3.client('sqs',
                             aws_access_key_id=conf.get_string(AWS_SQS_ACCESS_KEY_ID),
                             aws_secret_access_key=conf.get_string(AWS_SQS_SECRET_ACCESS_KEY),
