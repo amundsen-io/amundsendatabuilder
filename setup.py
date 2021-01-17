@@ -69,8 +69,12 @@ atlas = [
     'pyatlasclient==1.1.2'
 ]
 
+aws= [
+    'boto3>=1.10.1'
+]
+
 all_deps = requirements + kafka + cassandra + glue + snowflake + athena + \
-    bigquery + jsonpath + db2 + dremio + druid + spark + feast
+    bigquery + jsonpath + db2 + dremio + druid + spark + feast + aws
 
 setup(
     name='amundsen-databuilder',
@@ -97,7 +101,8 @@ setup(
         'druid': druid,
         'delta': spark,
         'feast': feast,
-        'atlas': atlas
+        'atlas': atlas,
+        'aws': aws
     },
     classifiers=[
         'Programming Language :: Python :: 3.6',
