@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-import logging.config
 import os
 import textwrap
 
@@ -32,7 +31,7 @@ DATABASE_DB_NAME = os.getenv('DATABASE_DB_NAME', 'mysql')
 
 MYSQL_CONN_STRING = \
     f'mysql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_DB_NAME}'
-    
+
 
 def run_mysql_job() -> DefaultJob:
     where_clause_suffix = textwrap.dedent("""

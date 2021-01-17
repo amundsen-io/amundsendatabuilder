@@ -69,7 +69,7 @@ atlas = [
     'pyatlasclient==1.1.2'
 ]
 
-aws= [
+aws = [
     'boto3>=1.10.1'
 ]
 

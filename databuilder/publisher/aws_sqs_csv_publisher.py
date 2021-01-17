@@ -9,7 +9,7 @@ import time
 from io import open
 from os import listdir
 from os.path import isfile, join
-from typing import List, Set
+from typing import List
 
 import boto3
 import pandas
