@@ -4,15 +4,15 @@
 import os
 import textwrap
 
+from pyhocon import ConfigFactory
+
 from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
 from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
-from databuilder.task.task import DefaultTask
-from pyhocon import ConfigFactory
-
 from databuilder.publisher import aws_sqs_csv_publisher
 from databuilder.publisher.aws_sqs_csv_publisher import AWSSQSCsvPublisher
+from databuilder.task.task import DefaultTask
 
 # TODO: AWS SQS url, region and credentials need to change
 AWS_SQS_REGION = os.getenv('AWS_SQS_REGION', 'ap-northeast-2')
