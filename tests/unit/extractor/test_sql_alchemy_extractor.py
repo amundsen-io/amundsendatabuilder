@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-from typing import Any
+from typing import Any, Dict
 
 from mock import patch
 from pyhocon import ConfigFactory
@@ -100,7 +100,7 @@ class TestSqlAlchemyExtractor(unittest.TestCase):
         Test that configs are passed through correctly to the _get_connection method
         """
         extractor = SQLAlchemyExtractor()
-        config_dict = {
+        config_dict: Dict[str, Any] = {
             'extractor.sqlalchemy.conn_string': 'TEST_CONNECTION',
             'extractor.sqlalchemy.extract_sql': 'SELECT 1 FROM TEST_TABLE;'
         }
