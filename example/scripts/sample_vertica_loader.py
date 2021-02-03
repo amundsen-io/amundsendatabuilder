@@ -7,7 +7,6 @@ into Neo4j and Elasticsearch without using an Airflow DAG.
 
 """
 
-import logging
 import os
 import sys
 import textwrap
@@ -65,6 +64,7 @@ def connection_string():
     port = '5433'
     db = 'vertica'
     return "vertica+vertica_python://%s:%s@%s:%s/%s" % (user, password, host, port, db)
+
 
 # provide schemas to run extraction on (default 'public')
 def run_vertica_job():
