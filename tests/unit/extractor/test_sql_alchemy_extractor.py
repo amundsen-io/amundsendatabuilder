@@ -123,7 +123,6 @@ class TestSqlAlchemyExtractor(unittest.TestCase):
         mock_method.assert_called_with('TEST_CONNECTION', connect_args={"protocol": "https"})
 
 
-
 class TableMetadataResult:
     """
     Table metadata result model.
