@@ -11,14 +11,15 @@ import os
 import sys
 import textwrap
 import uuid
+
 from elasticsearch import Elasticsearch
 from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
-from databuilder.extractor.vertica_metadata_extractor import VerticaMetadataExtractor
-from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
 from databuilder.extractor.neo4j_extractor import Neo4jExtractor
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
+from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
+from databuilder.extractor.vertica_metadata_extractor import VerticaMetadataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader
 from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
