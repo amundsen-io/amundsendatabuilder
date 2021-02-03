@@ -94,6 +94,35 @@ class TestSqlAlchemyExtractor(unittest.TestCase):
         self.assertIsInstance(result, TableMetadataResult)
         self.assertEqual(result.name, 'test_table')
 
+    @patch('databuilder.extractor.sql_alchemy_extractor.create_engine')
+    def test_get_connection(self: Any, mock_method: Any) -> None:
+        """
+        Test that configs are passed through correctly to the _get_connection method
+        """
+        extractor = SQLAlchemyExtractor()
+        config_dict = {
+            'extractor.sqlalchemy.conn_string': 'TEST_CONNECTION',
+            'extractor.sqlalchemy.extract_sql': 'SELECT 1 FROM TEST_TABLE;'
+        }
+        conf = ConfigFactory.from_dict(config_dict)
+        extractor.init(Scoped.get_scoped_conf(conf=conf,
+                                              scope=extractor.get_scope()))
+        extractor._get_connection()
+        mock_method.assert_called_with('TEST_CONNECTION', connect_args={})
+
+        extractor = SQLAlchemyExtractor()
+        config_dict = {
+            'extractor.sqlalchemy.conn_string': 'TEST_CONNECTION',
+            'extractor.sqlalchemy.extract_sql': 'SELECT 1 FROM TEST_TABLE;',
+            'extractor.sqlalchemy.connect_args': {"protocol": "https"},
+        }
+        conf = ConfigFactory.from_dict(config_dict)
+        extractor.init(Scoped.get_scoped_conf(conf=conf,
+                                              scope=extractor.get_scope()))
+        extractor._get_connection()
+        mock_method.assert_called_with('TEST_CONNECTION', connect_args={"protocol": "https"})
+
+
 
 class TableMetadataResult:
     """
