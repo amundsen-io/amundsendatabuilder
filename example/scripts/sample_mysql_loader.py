@@ -11,10 +11,6 @@ import sys
 import textwrap
 import uuid
 
-from elasticsearch import Elasticsearch
-from pyhocon import ConfigFactory
-from sqlalchemy.ext.declarative import declarative_base
-
 from databuilder.extractor.mysql_metadata_extractor import MysqlMetadataExtractor
 from databuilder.extractor.neo4j_extractor import Neo4jExtractor
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
@@ -27,6 +23,10 @@ from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import NoopTransformer
+
+from elasticsearch import Elasticsearch
+from pyhocon import ConfigFactory
+from sqlalchemy.ext.declarative import declarative_base
 
 es_host = None
 neo_host = None
