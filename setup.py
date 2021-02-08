@@ -61,8 +61,17 @@ spark = [
     'pyspark == 3.0.1'
 ]
 
+neptune = [
+    'amundsen-gremlin>=0.0.5',
+    'Flask==1.0.2',
+    'gremlinpython==3.4.3',
+    'requests-aws4auth==0.9',
+    'typing-extensions==3.7.4',
+    'overrides==2.5'
+]
+
 all_deps = requirements + kafka + cassandra + glue + snowflake + athena + \
-    bigquery + jsonpath + db2 + dremio + druid + spark
+    bigquery + jsonpath + db2 + dremio + druid + spark + neptune
 
 setup(
     name='amundsen-databuilder',
@@ -87,7 +96,8 @@ setup(
         'db2': db2,
         'dremio': dremio,
         'druid': druid,
-        'delta-lake': spark
+        'delta-lake': spark,
+        'neptune': neptune
     },
     classifiers=[
         'Programming Language :: Python :: 3.6',

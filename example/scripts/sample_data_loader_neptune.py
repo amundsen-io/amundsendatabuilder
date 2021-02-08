@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """
-This is a example script demonstrating how to load data into Neo4j and
+This is a example script demonstrating how to load data into Neptune and
 Elasticsearch without using an Airflow DAG.
 
 It contains several jobs:
 - `run_csv_job`: runs a job that extracts table data from a CSV, loads (writes)
   this into a different local directory as a csv, then publishes this data to
-  neo4j.
+  neptune.
 - `run_table_column_job`: does the same thing as `run_csv_job`, but with a csv
   containing column data.
 - `create_last_updated_job`: creates a job that gets the current time, dumps it
@@ -22,23 +22,24 @@ https://github.com/amundsen-io/amundsendatabuilder#list-of-extractors
 
 import logging
 import os
-import sys
 import uuid
 
+import boto3
 from elasticsearch import Elasticsearch
 from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
+from databuilder.clients.neptune_client import NeptuneSessionClient
 from databuilder.extractor.csv_extractor import CsvTableColumnExtractor, CsvExtractor
 from databuilder.extractor.es_last_updated_extractor import EsLastUpdatedExtractor
-from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor
+from databuilder.extractor.neptune_search_data_extractor import NeptuneSearchDataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader
-from databuilder.loader.file_system_neo4j_csv_loader import FsNeo4jCSVLoader
+from databuilder.loader.file_system_neptune_csv_loader import FSNeptuneCSVLoader
 from databuilder.publisher.elasticsearch_constants import DASHBOARD_ELASTICSEARCH_INDEX_MAPPING, \
     USER_ELASTICSEARCH_INDEX_MAPPING
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
-from databuilder.publisher.neo4j_csv_publisher import Neo4jCsvPublisher
+from databuilder.publisher.neptune_csv_publisher import NeptuneCSVPublisher
 from databuilder.task.task import DefaultTask
 from databuilder.transformer.base_transformer import ChainedTransformer
 from databuilder.transformer.base_transformer import NoopTransformer
@@ -46,27 +47,25 @@ from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
 from databuilder.transformer.generic_transformer import GenericTransformer, CALLBACK_FUNCTION, FIELD_NAME
 
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
-neo_host = os.getenv('CREDENTIALS_NEO4J_PROXY_HOST', 'localhost')
+neptune_host = os.getenv('CREDENTIALS_NEPTUNE_HOST', 'localhost')
 
 es_port = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_PORT', 9200)
-neo_port = os.getenv('CREDENTIALS_NEO4J_PROXY_PORT', 7687)
-if len(sys.argv) > 1:
-    es_host = sys.argv[1]
-if len(sys.argv) > 2:
-    neo_host = sys.argv[2]
+neptune_port = os.getenv('CREDENTIALS_NEPTUNE_PORT', 7687)
 
-es = Elasticsearch([
-    {'host': es_host, 'port': es_port},
-])
+neptune_iam_role_name = os.getenv('NEPTUNE_IAM_ROLE')
+
+S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
+assert S3_BUCKET_NAME, "A S3 bucket is needed to load the data from"
+S3_DATA_PATH = os.getenv("S3_DATA_PATH", "amundsen_data")
+AWS_REGION = os.environ.get("AWS_REGION", 'us-east-1')
+
+es = Elasticsearch(
+    '{}:{}'.format(es_host, es_port)
+)
 
 Base = declarative_base()
 
-NEO4J_ENDPOINT = 'bolt://{}:{}'.format(neo_host, neo_port)
-
-neo4j_endpoint = NEO4J_ENDPOINT
-
-neo4j_user = 'neo4j'
-neo4j_password = 'test'
+NEPTUNE_ENDPOINT = '{}:{}'.format(neptune_host, neptune_port)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -77,30 +76,39 @@ def run_csv_job(file_loc, job_name, model):
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
     csv_extractor = CsvExtractor()
-    csv_loader = FsNeo4jCSVLoader()
+    loader = FSNeptuneCSVLoader()
+    publisher = NeptuneCSVPublisher()
 
-    task = DefaultTask(extractor=csv_extractor,
-                       loader=csv_loader,
-                       transformer=NoopTransformer())
+    task = DefaultTask(
+        extractor=csv_extractor,
+        loader=loader,
+        transformer=NoopTransformer()
+    )
 
     job_config = ConfigFactory.from_dict({
         'extractor.csv.file_location': file_loc,
         'extractor.csv.model_class': model,
-        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
-        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
-        'loader.filesystem_csv_neo4j.delete_created_directories': True,
-        'publisher.neo4j.node_files_directory': node_files_folder,
-        'publisher.neo4j.relation_files_directory': relationship_files_folder,
-        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
-        'publisher.neo4j.neo4j_user': neo4j_user,
-        'publisher.neo4j.neo4j_password': neo4j_password,
-        'publisher.neo4j.neo4j_encrypted': False,
-        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+        loader.get_scope(): {
+            FSNeptuneCSVLoader.NODE_DIR_PATH: node_files_folder,
+            FSNeptuneCSVLoader.RELATION_DIR_PATH: relationship_files_folder,
+            FSNeptuneCSVLoader.SHOULD_DELETE_CREATED_DIR: True,
+            FSNeptuneCSVLoader.JOB_PUBLISHER_TAG: 'unique_tag'
+        },
+        publisher.get_scope(): {
+            NeptuneCSVPublisher.NODE_FILES_DIR: node_files_folder,
+            NeptuneCSVPublisher.RELATION_FILES_DIR: relationship_files_folder,
+            NeptuneCSVPublisher.AWS_S3_BUCKET_NAME: S3_BUCKET_NAME,
+            NeptuneCSVPublisher.AWS_BASE_S3_DATA_PATH: S3_DATA_PATH,
+            NeptuneCSVPublisher.NEPTUNE_HOST: NEPTUNE_ENDPOINT,
+            NeptuneCSVPublisher.AWS_IAM_ROLE_NAME: neptune_iam_role_name
+        },
     })
 
-    DefaultJob(conf=job_config,
-               task=task,
-               publisher=Neo4jCsvPublisher()).launch()
+    DefaultJob(
+        conf=job_config,
+        task=task,
+        publisher=publisher
+    ).launch()
 
 
 def run_table_column_job(table_path, column_path):
@@ -108,27 +116,36 @@ def run_table_column_job(table_path, column_path):
     node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
     extractor = CsvTableColumnExtractor()
-    csv_loader = FsNeo4jCSVLoader()
-    task = DefaultTask(extractor,
-                       loader=csv_loader,
-                       transformer=NoopTransformer())
+    csv_loader = FSNeptuneCSVLoader()
+    publisher = NeptuneCSVPublisher()
+    task = DefaultTask(
+        extractor,
+        loader=csv_loader,
+        transformer=NoopTransformer()
+    )
     job_config = ConfigFactory.from_dict({
         'extractor.csvtablecolumn.table_file_location': table_path,
         'extractor.csvtablecolumn.column_file_location': column_path,
-        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
-        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
-        'loader.filesystem_csv_neo4j.delete_created_directories': True,
-        'publisher.neo4j.node_files_directory': node_files_folder,
-        'publisher.neo4j.relation_files_directory': relationship_files_folder,
-        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
-        'publisher.neo4j.neo4j_user': neo4j_user,
-        'publisher.neo4j.neo4j_password': neo4j_password,
-        'publisher.neo4j.neo4j_encrypted': False,
-        'publisher.neo4j.job_publish_tag': 'unique_tag',  # should use unique tag here like {ds}
+        csv_loader.get_scope(): {
+            FSNeptuneCSVLoader.NODE_DIR_PATH: node_files_folder,
+            FSNeptuneCSVLoader.RELATION_DIR_PATH: relationship_files_folder,
+            FSNeptuneCSVLoader.SHOULD_DELETE_CREATED_DIR: True,
+            FSNeptuneCSVLoader.JOB_PUBLISHER_TAG: 'unique_tag'
+        },
+        publisher.get_scope(): {
+            NeptuneCSVPublisher.NODE_FILES_DIR: node_files_folder,
+            NeptuneCSVPublisher.RELATION_FILES_DIR: relationship_files_folder,
+            NeptuneCSVPublisher.AWS_S3_BUCKET_NAME: S3_BUCKET_NAME,
+            NeptuneCSVPublisher.AWS_BASE_S3_DATA_PATH: S3_DATA_PATH,
+            NeptuneCSVPublisher.NEPTUNE_HOST: NEPTUNE_ENDPOINT,
+            NeptuneCSVPublisher.AWS_IAM_ROLE_NAME: neptune_iam_role_name
+        }
     })
-    job = DefaultJob(conf=job_config,
-                     task=task,
-                     publisher=Neo4jCsvPublisher())
+    job = DefaultJob(
+        conf=job_config,
+        task=task,
+        publisher=publisher
+    )
     job.launch()
 
 
@@ -138,27 +155,38 @@ def create_last_updated_job():
     node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
-    task = DefaultTask(extractor=EsLastUpdatedExtractor(),
-                       loader=FsNeo4jCSVLoader())
+    loader = FSNeptuneCSVLoader()
+    task = DefaultTask(
+        extractor=EsLastUpdatedExtractor(),
+        loader=loader
+    )
+
+    publisher = NeptuneCSVPublisher()
 
     job_config = ConfigFactory.from_dict({
-        'extractor.neo4j_es_last_updated.model_class':
-            'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
-
-        'loader.filesystem_csv_neo4j.node_dir_path': node_files_folder,
-        'loader.filesystem_csv_neo4j.relationship_dir_path': relationship_files_folder,
-        'publisher.neo4j.node_files_directory': node_files_folder,
-        'publisher.neo4j.relation_files_directory': relationship_files_folder,
-        'publisher.neo4j.neo4j_endpoint': neo4j_endpoint,
-        'publisher.neo4j.neo4j_user': neo4j_user,
-        'publisher.neo4j.neo4j_password': neo4j_password,
-        'publisher.neo4j.neo4j_encrypted': False,
-        'publisher.neo4j.job_publish_tag': 'unique_lastupdated_tag',  # should use unique tag here like {ds}
+        'extractor.neo4j_es_last_updated.model_class': 'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
+        loader.get_scope(): {
+            FSNeptuneCSVLoader.NODE_DIR_PATH: node_files_folder,
+            FSNeptuneCSVLoader.RELATION_DIR_PATH: relationship_files_folder,
+            FSNeptuneCSVLoader.SHOULD_DELETE_CREATED_DIR: True,
+            FSNeptuneCSVLoader.JOB_PUBLISHER_TAG: 'unique_tag'
+        },
+        publisher.get_scope(): {
+            NeptuneCSVPublisher.NODE_FILES_DIR: node_files_folder,
+            NeptuneCSVPublisher.RELATION_FILES_DIR: relationship_files_folder,
+            NeptuneCSVPublisher.AWS_S3_BUCKET_NAME: S3_BUCKET_NAME,
+            NeptuneCSVPublisher.AWS_BASE_S3_DATA_PATH: S3_DATA_PATH,
+            NeptuneCSVPublisher.NEPTUNE_HOST: NEPTUNE_ENDPOINT,
+            NeptuneCSVPublisher.AWS_IAM_ROLE_NAME: neptune_iam_role_name,
+            'job_publish_tag': 'unique_lastupdated_tag'
+        }
     })
 
-    return DefaultJob(conf=job_config,
-                      task=task,
-                      publisher=Neo4jCsvPublisher())
+    return DefaultJob(
+        conf=job_config,
+        task=task,
+        publisher=publisher
+    )
 
 
 def _str_to_list(str_val):
@@ -172,39 +200,56 @@ def create_dashboard_tables_job():
     relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
     csv_extractor = CsvExtractor()
-    csv_loader = FsNeo4jCSVLoader()
+    loader = FSNeptuneCSVLoader()
+    publisher = NeptuneCSVPublisher()
 
     generic_transformer = GenericTransformer()
     dict_to_model_transformer = DictToModel()
-    transformer = ChainedTransformer(transformers=[generic_transformer, dict_to_model_transformer],
-                                     is_init_transformers=True)
+    transformer = ChainedTransformer(
+        transformers=[generic_transformer, dict_to_model_transformer],
+        is_init_transformers=True
+    )
 
-    task = DefaultTask(extractor=csv_extractor,
-                       loader=csv_loader,
-                       transformer=transformer)
-    publisher = Neo4jCsvPublisher()
+    task = DefaultTask(
+        extractor=csv_extractor,
+        loader=loader,
+        transformer=transformer
+    )
 
     job_config = ConfigFactory.from_dict({
-        '{}.file_location'.format(csv_extractor.get_scope()): 'example/sample_data/sample_dashboard_table.csv',
-        '{}.{}.{}'.format(transformer.get_scope(), generic_transformer.get_scope(), FIELD_NAME): 'table_ids',
-        '{}.{}.{}'.format(transformer.get_scope(), generic_transformer.get_scope(), CALLBACK_FUNCTION): _str_to_list,
-        '{}.{}.{}'.format(transformer.get_scope(), dict_to_model_transformer.get_scope(), MODEL_CLASS):
-            'databuilder.models.dashboard.dashboard_table.DashboardTable',
-        '{}.node_dir_path'.format(csv_loader.get_scope()): node_files_folder,
-        '{}.relationship_dir_path'.format(csv_loader.get_scope()): relationship_files_folder,
-        '{}.delete_created_directories'.format(csv_loader.get_scope()): True,
-        '{}.node_files_directory'.format(publisher.get_scope()): node_files_folder,
-        '{}.relation_files_directory'.format(publisher.get_scope()): relationship_files_folder,
-        '{}.neo4j_endpoint'.format(publisher.get_scope()): neo4j_endpoint,
-        '{}.neo4j_user'.format(publisher.get_scope()): neo4j_user,
-        '{}.neo4j_password'.format(publisher.get_scope()): neo4j_password,
-        '{}.neo4j_encrypted'.format(publisher.get_scope()): False,
-        '{}.job_publish_tag'.format(publisher.get_scope()): 'unique_tag',  # should use unique tag here like {ds}
+        csv_extractor.get_scope(): {
+            CsvExtractor.FILE_LOCATION: 'example/sample_data/sample_dashboard_table.csv'
+        },
+        transformer.get_scope(): {
+            generic_transformer.get_scope(): {
+                FIELD_NAME: 'table_ids',
+                CALLBACK_FUNCTION: _str_to_list
+            },
+            dict_to_model_transformer.get_scope(): {
+                MODEL_CLASS: 'databuilder.models.dashboard.dashboard_table.DashboardTable',
+            }
+        },
+        loader.get_scope(): {
+            FSNeptuneCSVLoader.NODE_DIR_PATH: node_files_folder,
+            FSNeptuneCSVLoader.RELATION_DIR_PATH: relationship_files_folder,
+            FSNeptuneCSVLoader.SHOULD_DELETE_CREATED_DIR: True,
+            FSNeptuneCSVLoader.JOB_PUBLISHER_TAG: 'unique_tag'
+        },
+        publisher.get_scope(): {
+            NeptuneCSVPublisher.NODE_FILES_DIR: node_files_folder,
+            NeptuneCSVPublisher.RELATION_FILES_DIR: relationship_files_folder,
+            NeptuneCSVPublisher.AWS_S3_BUCKET_NAME: S3_BUCKET_NAME,
+            NeptuneCSVPublisher.AWS_BASE_S3_DATA_PATH: S3_DATA_PATH,
+            NeptuneCSVPublisher.NEPTUNE_HOST: NEPTUNE_ENDPOINT,
+            NeptuneCSVPublisher.AWS_IAM_ROLE_NAME: neptune_iam_role_name
+        }
     })
 
-    return DefaultJob(conf=job_config,
-                      task=task,
-                      publisher=publisher)
+    return DefaultJob(
+        conf=job_config,
+        task=task,
+        publisher=publisher
+    )
 
 
 def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index',
@@ -225,31 +270,48 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
     """
     # loader saves data to this location and publisher reads it from here
     extracted_search_data_path = '/var/tmp/amundsen/search_data.json'
+    loader = FSElasticsearchJSONLoader()
+    extractor = NeptuneSearchDataExtractor()
 
-    task = DefaultTask(loader=FSElasticsearchJSONLoader(),
-                       extractor=Neo4jSearchDataExtractor(),
-                       transformer=NoopTransformer())
+    task = DefaultTask(
+        loader=loader,
+        extractor=extractor,
+        transformer=NoopTransformer()
+    )
 
     # elastic search client instance
     elasticsearch_client = es
     # unique name of new index in Elasticsearch
     elasticsearch_new_index_key = '{}_'.format(elasticsearch_doc_type_key) + str(uuid.uuid4())
+    publisher = ElasticsearchPublisher()
+    session = boto3.Session()
+    aws_creds = session.get_credentials()
+    aws_access_key = aws_creds.access_key
+    aws_access_secret = aws_creds.secret_key
+    aws_token = aws_creds.token
 
     job_config = ConfigFactory.from_dict({
-        'extractor.search_data.entity_type': entity_type,
-        'extractor.search_data.extractor.neo4j.graph_url': neo4j_endpoint,
-        'extractor.search_data.extractor.neo4j.model_class': model_name,
-        'extractor.search_data.extractor.neo4j.neo4j_auth_user': neo4j_user,
-        'extractor.search_data.extractor.neo4j.neo4j_auth_pw': neo4j_password,
-        'extractor.search_data.extractor.neo4j.neo4j_encrypted': False,
+        extractor.get_scope(): {
+            NeptuneSearchDataExtractor.ENTITY_TYPE_CONFIG_KEY: entity_type,
+            NeptuneSearchDataExtractor.MODEL_CLASS_CONFIG_KEY: model_name,
+            'neptune.client': {
+                NeptuneSessionClient.NEPTUNE_HOST_NAME: NEPTUNE_ENDPOINT,
+                NeptuneSessionClient.AWS_REGION: AWS_REGION,
+                NeptuneSessionClient.AWS_ACCESS_KEY: aws_access_key,
+                NeptuneSessionClient.AWS_SECRET_ACCESS_KEY: aws_access_secret,
+                NeptuneSessionClient.AWS_SESSION_TOKEN: aws_token
+            }
+        },
         'loader.filesystem.elasticsearch.file_path': extracted_search_data_path,
         'loader.filesystem.elasticsearch.mode': 'w',
-        'publisher.elasticsearch.file_path': extracted_search_data_path,
-        'publisher.elasticsearch.mode': 'r',
-        'publisher.elasticsearch.client': elasticsearch_client,
-        'publisher.elasticsearch.new_index': elasticsearch_new_index_key,
-        'publisher.elasticsearch.doc_type': elasticsearch_doc_type_key,
-        'publisher.elasticsearch.alias': elasticsearch_index_alias,
+        publisher.get_scope(): {
+            'file_path': extracted_search_data_path,
+            'mode': 'r',
+            'client': elasticsearch_client,
+            'new_index': elasticsearch_new_index_key,
+            'doc_type': elasticsearch_doc_type_key,
+            'alias': elasticsearch_index_alias
+        }
     })
 
     # only optionally add these keys, so need to dynamically `put` them
@@ -257,15 +319,17 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
         job_config.put('publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_MAPPING_CONFIG_KEY),
                        elasticsearch_mapping)
 
-    job = DefaultJob(conf=job_config,
-                     task=task,
-                     publisher=ElasticsearchPublisher())
+    job = DefaultJob(
+        conf=job_config,
+        task=task,
+        publisher=ElasticsearchPublisher()
+    )
     return job
 
 
 if __name__ == "__main__":
     # Uncomment next line to get INFO level logging
-    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
 
     run_table_column_job('example/sample_data/sample_table.csv', 'example/sample_data/sample_col.csv')
     run_csv_job('example/sample_data/sample_table_column_stats.csv', 'test_table_column_stats',
@@ -319,7 +383,8 @@ if __name__ == "__main__":
         elasticsearch_doc_type_key='user',
         model_name='databuilder.models.user_elasticsearch_document.UserESDocument',
         entity_type='user',
-        elasticsearch_mapping=USER_ELASTICSEARCH_INDEX_MAPPING)
+        elasticsearch_mapping=USER_ELASTICSEARCH_INDEX_MAPPING
+    )
     job_es_user.launch()
 
     job_es_dashboard = create_es_publisher_sample_job(
@@ -327,5 +392,6 @@ if __name__ == "__main__":
         elasticsearch_doc_type_key='dashboard',
         model_name='databuilder.models.dashboard_elasticsearch_document.DashboardESDocument',
         entity_type='dashboard',
-        elasticsearch_mapping=DASHBOARD_ELASTICSEARCH_INDEX_MAPPING)
+        elasticsearch_mapping=DASHBOARD_ELASTICSEARCH_INDEX_MAPPING
+    )
     job_es_dashboard.launch()

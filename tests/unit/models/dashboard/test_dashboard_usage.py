@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
+from unittest.mock import ANY
 
 from typing import Any, Dict
 
@@ -9,6 +10,16 @@ from databuilder.models.dashboard.dashboard_usage import DashboardUsage
 from databuilder.models.graph_serializable import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
     RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 from databuilder.serializers import neo4_serializer
+from databuilder.serializers import neptune_serializer
+from databuilder.serializers.neptune_serializer import (
+    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
+    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
+    NEPTUNE_CREATION_TYPE_JOB,
+    NEPTUNE_HEADER_ID,
+    NEPTUNE_HEADER_LABEL,
+    NEPTUNE_RELATIONSHIP_HEADER_FROM,
+    NEPTUNE_RELATIONSHIP_HEADER_TO
+)
 
 
 class TestDashboardOwner(unittest.TestCase):
@@ -67,4 +78,45 @@ class TestDashboardOwner(unittest.TestCase):
 
         assert actual is not None
         self.assertDictEqual(expected, actual_serialized)
+        self.assertIsNone(dashboard_usage.create_next_relation())
+
+    def test_dashboard_owner_relations_neptune(self) -> None:
+        dashboard_usage = DashboardUsage(dashboard_group_id='dashboard_group_id', dashboard_id='dashboard_id',
+                                         email='foo@bar.com', view_count=123, cluster='cluster_id',
+                                         product='product_id')
+
+        actual = dashboard_usage.create_next_relation()
+        actual_serialized = neptune_serializer.convert_relationship(actual)
+
+        neptune_forward_expected = {
+            NEPTUNE_HEADER_ID: "{from_vertex_id}_{to_vertex_id}_{label}".format(
+                from_vertex_id='product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+                to_vertex_id='foo@bar.com',
+                label='READ_BY'
+            ),
+            NEPTUNE_RELATIONSHIP_HEADER_FROM: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+            NEPTUNE_RELATIONSHIP_HEADER_TO: 'foo@bar.com',
+            NEPTUNE_HEADER_LABEL: 'READ_BY',
+            NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+            NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
+            'read_count:Long(single)': 123
+        }
+
+        neptune_reversed_expected = {
+            NEPTUNE_HEADER_ID: "{from_vertex_id}_{to_vertex_id}_{label}".format(
+                from_vertex_id='foo@bar.com',
+                to_vertex_id='product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+                label='READ'
+            ),
+            NEPTUNE_RELATIONSHIP_HEADER_FROM: 'foo@bar.com',
+            NEPTUNE_RELATIONSHIP_HEADER_TO: 'product_id_dashboard://cluster_id.dashboard_group_id/dashboard_id',
+            NEPTUNE_HEADER_LABEL: 'READ',
+            NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+            NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
+            'read_count:Long(single)': 123,
+        }
+
+        assert actual is not None
+        self.assertDictEqual(neptune_forward_expected, actual_serialized[0])
+        self.assertDictEqual(neptune_reversed_expected, actual_serialized[1])
         self.assertIsNone(dashboard_usage.create_next_relation())

@@ -10,9 +10,9 @@ from pyhocon import ConfigTree
 from databuilder.extractor.generic_extractor import GenericExtractor
 
 
-class Neo4jEsLastUpdatedExtractor(GenericExtractor):
+class EsLastUpdatedExtractor(GenericExtractor):
     """
-    Extractor to extract last updated timestamp for neo4j and Es
+    Extractor to extract last updated timestamp for Datastore and Es
     """
 
     def init(self, conf: ConfigTree) -> None:

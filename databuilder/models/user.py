@@ -36,7 +36,7 @@ class User(GraphSerializable):
                  email: str,
                  first_name: str = '',
                  last_name: str = '',
-                 name: str = '',
+                 full_name: str = '',
                  github_username: str = '',
                  team_name: str = '',
                  employee_type: str = '',
@@ -70,7 +70,7 @@ class User(GraphSerializable):
         """
         self.first_name = first_name
         self.last_name = last_name
-        self.name = name
+        self.full_name = full_name
 
         self.email = email
         self.github_username = github_username
@@ -128,7 +128,7 @@ class User(GraphSerializable):
 
         node_attributes[User.USER_NODE_FIRST_NAME] = self.first_name if self.first_name else ''
         node_attributes[User.USER_NODE_LAST_NAME] = self.last_name if self.last_name else ''
-        node_attributes[User.USER_NODE_FULL_NAME] = self.name if self.name else ''
+        node_attributes[User.USER_NODE_FULL_NAME] = self.full_name if self.full_name else ''
         node_attributes[User.USER_NODE_GITHUB_NAME] = self.github_username if self.github_username else ''
         node_attributes[User.USER_NODE_TEAM] = self.team_name if self.team_name else ''
         node_attributes[User.USER_NODE_EMPLOYEE_TYPE] = self.employee_type if self.employee_type else ''
@@ -177,7 +177,7 @@ class User(GraphSerializable):
         return 'User({!r}, {!r}, {!r}, {!r}, {!r}, ' \
                '{!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.first_name,
                                                                   self.last_name,
-                                                                  self.name,
+                                                                  self.full_name,
                                                                   self.email,
                                                                   self.github_username,
                                                                   self.team_name,
