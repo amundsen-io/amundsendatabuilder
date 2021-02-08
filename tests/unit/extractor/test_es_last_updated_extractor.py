@@ -11,12 +11,12 @@ from databuilder import Scoped
 from databuilder.extractor.es_last_updated_extractor import EsLastUpdatedExtractor
 
 
-class TestNeo4jEsLastUpdatedExtractor(unittest.TestCase):
+class TestEsLastUpdatedExtractor(unittest.TestCase):
 
     def setUp(self) -> None:
         config_dict = {
-            'extractor.neo4j_es_last_updated.model_class':
-                'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
+            'extractor.es_last_updated.model_class':
+                'databuilder.models.es_last_updated.ESLastUpdated',
         }
         self.conf = ConfigFactory.from_dict(config_dict)
 

@@ -88,7 +88,7 @@ class FSNeptuneCSVLoader(Loader):
 
     def load(self, csv_serializable: GraphSerializable) -> None:
         """
-        Writes Neo4jCsvSerializable into CSV files.
+        Writes GraphSerializable into CSV files.
         There are multiple CSV files that this method writes.
         This is because there're not only node and relationship, but also it
         can also have different nodes, and relationships.

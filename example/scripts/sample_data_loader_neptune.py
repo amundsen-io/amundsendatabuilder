@@ -167,7 +167,7 @@ def create_last_updated_job():
     publisher = NeptuneCSVPublisher()
 
     job_config = ConfigFactory.from_dict({
-        'extractor.neo4j_es_last_updated.model_class': 'databuilder.models.neo4j_es_last_updated.Neo4jESLastUpdated',
+        'extractor.es_last_updated.model_class': 'databuilder.models.es_last_updated.ESLastUpdated',
         loader.get_scope(): {
             FSNeptuneCSVLoader.NODE_DIR_PATH: node_files_folder,
             FSNeptuneCSVLoader.RELATION_DIR_PATH: relationship_files_folder,

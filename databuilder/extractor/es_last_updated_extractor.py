@@ -48,4 +48,4 @@ class EsLastUpdatedExtractor(GenericExtractor):
             return None
 
     def get_scope(self) -> str:
-        return 'extractor.neo4j_es_last_updated'
+        return 'extractor.es_last_updated'
