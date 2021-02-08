@@ -1,6 +1,10 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
+"""
+Shows how to set up a job that uses the neptune neptune staleness removal task
+"""
+
 import os
 
 from pyhocon import ConfigFactory

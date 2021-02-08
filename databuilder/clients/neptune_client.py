@@ -18,7 +18,7 @@ from databuilder import Scoped
 
 class NeptuneSessionClient(Scoped):
     """
-        A convenience client for neptune gives functions to perform upserts, deletions and queries with filters. 
+        A convenience client for neptune gives functions to perform upserts, deletions and queries with filters.
     """
     # What property is used to local nodes and edges by ids
     NEPTUNE_HOST_NAME = 'neptune_host_name'

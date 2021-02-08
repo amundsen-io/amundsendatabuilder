@@ -3,7 +3,8 @@
 
 """
 This is a example script demonstrating how to load data into Neptune and
-Elasticsearch without using an Airflow DAG.
+Elasticsearch without using an Airflow DAG. This is pretty much a exact copy of the sample_data_loader.py except for
+neptune use.
 
 It contains several jobs:
 - `run_csv_job`: runs a job that extracts table data from a CSV, loads (writes)
@@ -12,9 +13,9 @@ It contains several jobs:
 - `run_table_column_job`: does the same thing as `run_csv_job`, but with a csv
   containing column data.
 - `create_last_updated_job`: creates a job that gets the current time, dumps it
-  into a predefined model schema, and publishes this to neo4j.
-- `create_es_publisher_sample_job`: creates a job that extracts data from neo4j
-  and pubishes it into elasticsearch.
+  into a predefined model schema, and publishes this to neptune.
+- `create_es_publisher_sample_job`: creates a job that extracts data from neptune
+  and publishes it into elasticsearch.
 
 For other available extractors, please take a look at
 https://github.com/amundsen-io/amundsendatabuilder#list-of-extractors
@@ -331,7 +332,7 @@ def create_es_publisher_sample_job(elasticsearch_index_alias='table_search_index
 
 if __name__ == "__main__":
     # Uncomment next line to get INFO level logging
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
 
     run_table_column_job('example/sample_data/sample_table.csv', 'example/sample_data/sample_col.csv')
     run_csv_job('example/sample_data/sample_table_column_stats.csv', 'test_table_column_stats',
