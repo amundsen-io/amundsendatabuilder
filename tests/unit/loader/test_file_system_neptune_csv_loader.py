@@ -8,14 +8,18 @@ from csv import DictReader
 from operator import itemgetter
 from os import listdir
 from os.path import isfile, join
-from typing import Dict, Iterable, Any, Callable  # noqa: F401
+from typing import (
+    Any, Callable, Dict, Iterable,
+)
 
 from freezegun import freeze_time
 from pyhocon import ConfigFactory
 
 from databuilder.job.base_job import Job
 from databuilder.loader.file_system_neptune_csv_loader import FSNeptuneCSVLoader
-from tests.unit.models.test_graph_serializable import Movie, Actor, City
+from tests.unit.models.test_graph_serializable import (
+    Actor, City, Movie,
+)
 
 
 class FileSystemNeptuneCSVLoaderTest(unittest.TestCase):

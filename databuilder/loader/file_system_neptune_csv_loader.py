@@ -6,9 +6,9 @@ import logging
 import os
 import shutil
 from csv import DictWriter
-from typing import Dict, Any
+from typing import Any, Dict
 
-from pyhocon import ConfigTree, ConfigFactory
+from pyhocon import ConfigFactory, ConfigTree
 
 from databuilder.job.base_job import Job
 from databuilder.loader.base_loader import Loader

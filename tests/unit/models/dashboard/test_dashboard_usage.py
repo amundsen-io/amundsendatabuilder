@@ -2,25 +2,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-from unittest.mock import ANY
-
 from typing import Any, Dict
+from unittest.mock import ANY
 
 from databuilder.models.dashboard.dashboard_usage import DashboardUsage
 from databuilder.models.graph_serializable import (
     RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
     RELATION_TYPE,
 )
-from databuilder.serializers import neo4_serializer
-from databuilder.serializers import neptune_serializer
+from databuilder.serializers import neo4_serializer, neptune_serializer
 from databuilder.serializers.neptune_serializer import (
-    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
-    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
-    NEPTUNE_CREATION_TYPE_JOB,
-    NEPTUNE_HEADER_ID,
-    NEPTUNE_HEADER_LABEL,
-    NEPTUNE_RELATIONSHIP_HEADER_FROM,
-    NEPTUNE_RELATIONSHIP_HEADER_TO
+    NEPTUNE_CREATION_TYPE_JOB, NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT, NEPTUNE_HEADER_ID,
+    NEPTUNE_HEADER_LABEL, NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
+    NEPTUNE_RELATIONSHIP_HEADER_FROM, NEPTUNE_RELATIONSHIP_HEADER_TO,
 )
 
 

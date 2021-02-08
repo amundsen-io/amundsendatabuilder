@@ -30,21 +30,23 @@ from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
 from databuilder.clients.neptune_client import NeptuneSessionClient
-from databuilder.extractor.csv_extractor import CsvTableColumnExtractor, CsvExtractor
+from databuilder.extractor.csv_extractor import CsvExtractor, CsvTableColumnExtractor
 from databuilder.extractor.es_last_updated_extractor import EsLastUpdatedExtractor
 from databuilder.extractor.neptune_search_data_extractor import NeptuneSearchDataExtractor
 from databuilder.job.job import DefaultJob
 from databuilder.loader.file_system_elasticsearch_json_loader import FSElasticsearchJSONLoader
 from databuilder.loader.file_system_neptune_csv_loader import FSNeptuneCSVLoader
-from databuilder.publisher.elasticsearch_constants import DASHBOARD_ELASTICSEARCH_INDEX_MAPPING, \
-    USER_ELASTICSEARCH_INDEX_MAPPING
+from databuilder.publisher.elasticsearch_constants import (
+    DASHBOARD_ELASTICSEARCH_INDEX_MAPPING, USER_ELASTICSEARCH_INDEX_MAPPING,
+)
 from databuilder.publisher.elasticsearch_publisher import ElasticsearchPublisher
 from databuilder.publisher.neptune_csv_publisher import NeptuneCSVPublisher
 from databuilder.task.task import DefaultTask
-from databuilder.transformer.base_transformer import ChainedTransformer
-from databuilder.transformer.base_transformer import NoopTransformer
-from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.generic_transformer import GenericTransformer, CALLBACK_FUNCTION, FIELD_NAME
+from databuilder.transformer.base_transformer import ChainedTransformer, NoopTransformer
+from databuilder.transformer.dict_to_model import MODEL_CLASS, DictToModel
+from databuilder.transformer.generic_transformer import (
+    CALLBACK_FUNCTION, FIELD_NAME, GenericTransformer,
+)
 
 es_host = os.getenv('CREDENTIALS_ELASTICSEARCH_PROXY_HOST', 'localhost')
 neptune_host = os.getenv('CREDENTIALS_NEPTUNE_HOST', 'localhost')

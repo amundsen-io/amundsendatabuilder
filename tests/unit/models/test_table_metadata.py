@@ -2,16 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import copy
-from typing import List, Dict
 import unittest
-
+from typing import Dict, List
 
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
-from databuilder.serializers import neo4_serializer
-from databuilder.serializers import neptune_serializer
+from databuilder.serializers import neo4_serializer, neptune_serializer
 from tests.unit.models.test_fixtures.table_metadata_fixtures import (
-    EXPECTED_NEPTUNE_NODES,
-    EXPECTED_RELATIONSHIPS_NEPTUNE
+    EXPECTED_NEPTUNE_NODES, EXPECTED_RELATIONSHIPS_NEPTUNE,
 )
 
 

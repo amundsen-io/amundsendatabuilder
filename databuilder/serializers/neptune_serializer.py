@@ -2,7 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import (
+    Any, Dict, List, Optional,
+)
 
 import six
 

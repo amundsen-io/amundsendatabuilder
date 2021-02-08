@@ -3,20 +3,20 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Iterable, Any, List, Tuple, Callable, Optional  # noqa: F401
+from typing import (
+    Any, Callable, Dict, Iterable, List, Optional, Tuple,
+)
 
 from gremlin_python.process import traversal
-from gremlin_python.process.traversal import T, Column
+from gremlin_python.process.traversal import Column, T
 from pyhocon import ConfigFactory, ConfigTree  # noqa: F401
 
 from databuilder import Scoped
 from databuilder.clients.neptune_client import NeptuneSessionClient
 from databuilder.serializers.neptune_serializer import (
-    NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME,
-    NEPTUNE_LAST_EXTRACTED_AT_NODE_PROPERTY_NAME,
-    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME,
+    NEPTUNE_CREATION_TYPE_JOB, NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME,
+    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME, NEPTUNE_LAST_EXTRACTED_AT_NODE_PROPERTY_NAME,
     NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME,
-    NEPTUNE_CREATION_TYPE_JOB
 )
 from databuilder.task.base_task import Task  # noqa: F401
 
@@ -26,9 +26,9 @@ LOGGER = logging.getLogger(__name__)
 class NeptuneStalenessRemovalTask(Task):
     """
     A Specific task that is to remove stale nodes and relations in Neptune.
-    It will use "published_tag" attribute assigned from Neo4jCsvPublisher and if "published_tag" is different from
+    It will use "last_extracted_datetime" attribute assigned from FSNeptuneCSVLoader and if "creation_type" is type job
     the one it is getting it from the config, it will regard the node/relation as stale.
-    Not all resource is being published by Neo4jCsvPublisher and you can only set specific LABEL of the node or TYPE
+    Not all resources are being published by NeptuneCSVPublisher and you can only set specific LABEL of the node or TYPE
     of relation to perform this deletion.
     """
 

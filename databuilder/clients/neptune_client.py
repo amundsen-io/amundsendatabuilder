@@ -1,15 +1,15 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Optional, List, Callable, Any, Tuple, Dict
+from typing import (
+    Any, Callable, Dict, List, Optional, Tuple,
+)
 
 from amundsen_gremlin.neptune_bulk_loader import api as neptune_bulk_loader_api
 from boto3.session import Session
 from gremlin_python.process.graph_traversal import (
-    GraphTraversalSource,
-    GraphTraversal
+    GraphTraversal, GraphTraversalSource, __,
 )
-from gremlin_python.process.graph_traversal import __
 from gremlin_python.process.traversal import T
 from pyhocon import ConfigFactory, ConfigTree
 
@@ -17,6 +17,9 @@ from databuilder import Scoped
 
 
 class NeptuneSessionClient(Scoped):
+    """
+        A convenience client for neptune gives functions to perform upserts, deletions and queries with filters. 
+    """
     # What property is used to local nodes and edges by ids
     NEPTUNE_HOST_NAME = 'neptune_host_name'
     # AWS Region the Neptune cluster is located

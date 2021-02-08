@@ -10,10 +10,7 @@ from os import listdir
 from os.path import isfile, join
 from typing import List, Tuple
 
-from amundsen_gremlin.neptune_bulk_loader.api import (
-    NeptuneBulkLoaderApi,
-    NeptuneBulkLoaderLoadStatusErrorLogEntry
-)
+from amundsen_gremlin.neptune_bulk_loader.api import NeptuneBulkLoaderApi, NeptuneBulkLoaderLoadStatusErrorLogEntry
 from boto3.session import Session
 from pyhocon import ConfigTree
 
@@ -23,6 +20,17 @@ LOGGER = logging.getLogger(__name__)
 
 
 class NeptuneCSVPublisher(Publisher):
+    """
+    This Publisher takes two folders for input and publishes to Neptune.
+    One folder will contain CSV file(s) for Node where the other folder will contain CSV file(s) for Relationship.
+
+    This publisher uses the bulk api found in
+    https://github.com/amundsen-io/amundsengremlin/blob/master/amundsen_gremlin/neptune_bulk_loader/api.py
+
+    which is a client for the the api found
+    https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html
+    https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-format-gremlin.html
+    """
 
     # A directory that contains CSV files for nodes
     NODE_FILES_DIR = 'node_files_directory'

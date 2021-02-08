@@ -10,17 +10,12 @@ from databuilder.models.graph_serializable import (
 )
 from databuilder.models.table_owner import TableOwner
 from databuilder.models.user import User
-from databuilder.serializers import neo4_serializer
-from databuilder.serializers import neptune_serializer
+from databuilder.serializers import neo4_serializer, neptune_serializer
 from databuilder.serializers.neptune_serializer import (
-    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
-    NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT,
-    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT,
-    NEPTUNE_CREATION_TYPE_JOB,
-    NEPTUNE_HEADER_ID,
-    NEPTUNE_HEADER_LABEL,
-    NEPTUNE_RELATIONSHIP_HEADER_FROM,
-    NEPTUNE_RELATIONSHIP_HEADER_TO
+    NEPTUNE_CREATION_TYPE_JOB, NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT,
+    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT, NEPTUNE_HEADER_ID, NEPTUNE_HEADER_LABEL,
+    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT, NEPTUNE_RELATIONSHIP_HEADER_FROM,
+    NEPTUNE_RELATIONSHIP_HEADER_TO,
 )
 
 db = 'hive'

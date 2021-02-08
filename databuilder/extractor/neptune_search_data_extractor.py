@@ -2,35 +2,29 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import importlib
-from typing import Any, List, Dict, Optional
+from typing import (
+    Any, Dict, List, Optional,
+)
 
-from gremlin_python.process.graph_traversal import __, GraphTraversalSource
-from gremlin_python.process.traversal import T, Order
-from gremlin_python.process.traversal import TextP
+from gremlin_python.process.graph_traversal import GraphTraversalSource, __
+from gremlin_python.process.traversal import (
+    Order, T, TextP,
+)
 from pyhocon import ConfigTree
 
 from databuilder import Scoped
 from databuilder.clients.neptune_client import NeptuneSessionClient
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.models.cluster.cluster_constants import (
-    CLUSTER_REVERSE_RELATION_TYPE
-)
+from databuilder.models.cluster.cluster_constants import CLUSTER_REVERSE_RELATION_TYPE
 from databuilder.models.column_usage_model import ColumnUsageModel
 from databuilder.models.dashboard.dashboard_chart import DashboardChart
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
-from databuilder.models.schema.schema_constant import (
-    SCHEMA_REVERSE_RELATION_TYPE
-)
-from databuilder.models.table_metadata import (
-    TableMetadata,
-    DescriptionMetadata,
-)
+from databuilder.models.schema.schema_constant import SCHEMA_REVERSE_RELATION_TYPE
+from databuilder.models.table_metadata import DescriptionMetadata, TableMetadata
 from databuilder.models.table_owner import TableOwner
 from databuilder.models.timestamp.timestamp_constants import LASTUPDATED_RELATION_TYPE, TIMESTAMP_PROPERTY
-from databuilder.models.usage.usage_constants import (
-    READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
-)
+from databuilder.models.usage.usage_constants import READ_RELATION_COUNT_PROPERTY, READ_REVERSE_RELATION_TYPE
 from databuilder.models.user import User
 
 
@@ -227,6 +221,9 @@ def _dashboard_search_query(graph: GraphTraversalSource, tag_filter: str) -> Lis
 
 
 class NeptuneSearchDataExtractor(Extractor):
+    """
+    Extractor to fetch data required to support search from Neptune's graph database
+    """
     QUERY_FUNCTION_CONFIG_KEY = 'query_function'
     QUERY_FUNCTION_KWARGS_CONFIG_KEY = 'query_function_kwargs'
     ENTITY_TYPE_CONFIG_KEY = 'entity_type'
