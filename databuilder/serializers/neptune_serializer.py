@@ -43,6 +43,9 @@ def convert_relationship(relationship: Optional[GraphRelationship]) -> List[Dict
     if relationship is None:
         return []
 
+    if relationship.start_key == '' or relationship.end_key == '':
+        return []
+
     relation_id = "{from_vertex_id}_{to_vertex_id}_{label}".format(
         from_vertex_id=relationship.start_key,
         to_vertex_id=relationship.end_key,
@@ -89,6 +92,9 @@ def convert_relationship(relationship: Optional[GraphRelationship]) -> List[Dict
 
 def convert_node(node: Optional[GraphNode]) -> Dict[str, Any]:
     if node is None:
+        return {}
+
+    if not node.key:
         return {}
 
     current_string_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')

@@ -103,34 +103,39 @@ class FSNeptuneCSVLoader(Loader):
 
         node = csv_serializable.next_node()
         while node:
+
             node.attributes[PUBLISHED_TAG_PROPERTY_NAME] = self.job_publisher_tag
             node_dict = neptune_serializer.convert_node(node)
-            key = (node.label, len(node_dict))
-            file_suffix = '{}_{}'.format(*key)
-            node_writer = self._get_writer(node_dict,
-                                           self._node_file_mapping,
-                                           key,
-                                           self._node_dir,
-                                           file_suffix)
-            node_writer.writerow(node_dict)
+            if node_dict:
+                key = (node.label, len(node_dict))
+                file_suffix = '{}_{}'.format(*key)
+                node_writer = self._get_writer(
+                    node_dict,
+                    self._node_file_mapping,
+                    key,
+                    self._node_dir,
+                    file_suffix
+                )
+                node_writer.writerow(node_dict)
             node = csv_serializable.next_node()
 
         relation = csv_serializable.next_relation()
         while relation:
             relation.attributes[PUBLISHED_TAG_PROPERTY_NAME] = self.job_publisher_tag
             relation_dicts = neptune_serializer.convert_relationship(relation)
-            key2 = (relation.start_label,
-                    relation.end_label,
-                    relation.type,
-                    len(relation_dicts[0]))
+            if relation_dicts:
+                key2 = (relation.start_label,
+                        relation.end_label,
+                        relation.type,
+                        len(relation_dicts[0]))
 
-            file_suffix = '{}_{}_{}'.format(key2[0], key2[1], key2[2])
-            relation_writer = self._get_writer(relation_dicts[0],
-                                               self._relation_file_mapping,
-                                               key2,
-                                               self._relation_dir,
-                                               file_suffix)
-            relation_writer.writerows(relation_dicts)
+                file_suffix = '{}_{}_{}'.format(key2[0], key2[1], key2[2])
+                relation_writer = self._get_writer(relation_dicts[0],
+                                                   self._relation_file_mapping,
+                                                   key2,
+                                                   self._relation_dir,
+                                                   file_suffix)
+                relation_writer.writerows(relation_dicts)
             relation = csv_serializable.next_relation()
 
     def _get_writer(self,
