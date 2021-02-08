@@ -3,9 +3,9 @@
 
 import unittest
 from unittest.mock import ANY
+from typing import no_type_check
 
 from databuilder.models.table_column_usage import ColumnReader, TableColumnUsage
-from typing import no_type_check
 from databuilder.serializers import neo4_serializer
 from databuilder.serializers import neptune_serializer
 from databuilder.serializers.neptune_serializer import (

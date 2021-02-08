@@ -4,9 +4,11 @@
 import unittest
 from unittest.mock import ANY
 
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
 from databuilder.models.table_lineage import TableLineage
-from databuilder.models.graph_serializable import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 from databuilder.serializers import neo4_serializer
 from databuilder.serializers import neptune_serializer
 from databuilder.serializers.neptune_serializer import (
@@ -18,7 +20,6 @@ from databuilder.serializers.neptune_serializer import (
     NEPTUNE_RELATIONSHIP_HEADER_FROM,
     NEPTUNE_RELATIONSHIP_HEADER_TO
 )
-
 
 DB = 'hive'
 SCHEMA = 'base'
@@ -37,18 +38,8 @@ class TestTableLineage(unittest.TestCase):
                                           downstream_deps=['hive://default.test_schema/test_table1',
                                                            'hive://default.test_schema/test_table2'])
 
-        self.start_key = '{db}://{cluster}.{schema}/{tbl}'.format(
-            db=DB,
-            schema=SCHEMA,
-            tbl=TABLE,
-            cluster=CLUSTER
-        )
-        self.end_key = '{db}://{cluster}.{schema}/{tbl}'.format(
-            db=DB,
-            schema='test_schema',
-            tbl='test_table1',
-            cluster=CLUSTER
-        )
+        self.start_key = f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}'
+        self.end_key = f'{DB}://{CLUSTER}.test_schema/test_table1'
 
     def test_get_table_model_key(self) -> None:
         metadata = self.table_lineage.get_table_model_key(db=DB,

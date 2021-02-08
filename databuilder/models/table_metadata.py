@@ -2,19 +2,29 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import copy
+from typing import (
+    Any, Dict, Iterable, Iterator, List, Optional, Set, Union,
+)
 
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Union
-
+from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.models.cluster import cluster_constants
-from databuilder.models.graph_serializable import GraphSerializable
-from databuilder.models.schema import schema_constant
-from databuilder.models.badge import BadgeMetadata, Badge
-
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.schema import schema_constant
 
 DESCRIPTION_NODE_LABEL_VAL = 'Description'
 DESCRIPTION_NODE_LABEL = DESCRIPTION_NODE_LABEL_VAL
+
+
+def _format_as_list(tags: Union[List, str, None]) -> List:
+    if tags is None:
+        tags = []
+    if isinstance(tags, str):
+        tags = list(filter(None, tags.split(',')))
+    if isinstance(tags, list):
+        tags = [tag.lower().strip() for tag in tags]
+    return tags
 
 
 class TagMetadata(GraphSerializable):
@@ -117,7 +127,7 @@ class DescriptionMetadata:
             return "_" + self._source + "_description"
 
     def __repr__(self) -> str:
-        return 'DescriptionMetadata({!r}, {!r})'.format(self._source, self._text)
+        return f'DescriptionMetadata({self._source!r}, {self._text!r})'
 
     def get_node(self, node_key: str) -> GraphNode:
         node = GraphNode(
@@ -157,7 +167,7 @@ class ColumnMetadata:
                  description: Union[str, None],
                  col_type: str,
                  sort_order: int,
-                 badges: Union[List[str], None] = None
+                 badges: Union[List[str], None] = None,
                  ) -> None:
         """
         TODO: Add stats
@@ -165,23 +175,19 @@ class ColumnMetadata:
         :param description:
         :param col_type:
         :param sort_order:
+        :param badges: Optional. Column level badges
         """
         self.name = name
         self.description = DescriptionMetadata.create_description_metadata(source=None,
                                                                            text=description)
         self.type = col_type
         self.sort_order = sort_order
-        if badges:
-            self.badges = [Badge(badge, 'column') for badge in badges]
-        else:
-            self.badges = []
+        formatted_badges = _format_as_list(badges)
+        self.badges = [Badge(badge, 'column') for badge in formatted_badges]
 
     def __repr__(self) -> str:
-        return 'ColumnMetadata({!r}, {!r}, {!r}, {!r}, {!r})'.format(self.name,
-                                                                     self.description,
-                                                                     self.type,
-                                                                     self.sort_order,
-                                                                     self.badges)
+        return f'ColumnMetadata({self.name!r}, {self.description!r}, {self.type!r}, ' \
+               f'{self.sort_order!r}, {self.badges!r})'
 
 
 class TableMetadata(GraphSerializable):
@@ -260,7 +266,7 @@ class TableMetadata(GraphSerializable):
         self.is_view = is_view
         self.attrs: Optional[Dict[str, Any]] = None
 
-        self.tags = TableMetadata.format_tags(tags)
+        self.tags = _format_as_list(tags)
 
         if kwargs:
             self.attrs = copy.deepcopy(kwargs)
@@ -269,15 +275,8 @@ class TableMetadata(GraphSerializable):
         self._relation_iterator = self._create_next_relation()
 
     def __repr__(self) -> str:
-        return 'TableMetadata({!r}, {!r}, {!r}, {!r} ' \
-               '{!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                self.cluster,
-                                                self.schema,
-                                                self.name,
-                                                self.description,
-                                                self.columns,
-                                                self.is_view,
-                                                self.tags)
+        return f'TableMetadata({self.database!r}, {self.cluster!r}, {self.schema!r}, {self.name!r} ' \
+               f'{self.description!r}, {self.columns!r}, {self.is_view!r}, {self.tags!r})'
 
     def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
@@ -324,14 +323,7 @@ class TableMetadata(GraphSerializable):
 
     @staticmethod
     def format_tags(tags: Union[List, str, None]) -> List:
-        if tags is None:
-            tags = []
-        if isinstance(tags, str):
-            tags = list(filter(None, tags.split(',')))
-        if isinstance(tags, list):
-            tags = [tag.lower().strip() for tag in tags]
-
-        return tags
+        return _format_as_list(tags)
 
     def create_next_node(self) -> Union[GraphNode, None]:
         try:
@@ -346,7 +338,7 @@ class TableMetadata(GraphSerializable):
             node_key = self._get_table_description_key(self.description)
             yield self.description.get_node(node_key)
 
-        # Create the table tag node
+        # Create the table tag nodes
         if self.tags:
             for tag in self.tags:
                 yield TagMetadata.create_tag_node(tag)
@@ -368,11 +360,11 @@ class TableMetadata(GraphSerializable):
                 yield col.description.get_node(node_key)
 
             if col.badges:
-                badge_metadata = BadgeMetadata(start_label=ColumnMetadata.COLUMN_NODE_LABEL,
-                                               start_key=self._get_col_key(col),
-                                               badges=col.badges)
-                badge_nodes = badge_metadata.create_nodes()
-                for node in badge_nodes:
+                col_badge_metadata = BadgeMetadata(
+                    start_label=ColumnMetadata.COLUMN_NODE_LABEL,
+                    start_key=self._get_col_key(col),
+                    badges=col.badges)
+                for node in col_badge_metadata.create_nodes():
                     yield node
 
         # Database, cluster, schema

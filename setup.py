@@ -1,10 +1,10 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from setuptools import setup, find_packages
 
+from setuptools import find_packages, setup
 
-__version__ = '4.0.3'
+__version__ = '4.1.0'
 
 
 requirements = [
@@ -31,7 +31,7 @@ snowflake = [
     'snowflake-sqlalchemy'
 ]
 
-athena = ['PyAthena[SQLAlchemy]>=1.0.0']
+athena = ['PyAthena[SQLAlchemy]>=1.0.0, <2.0.0']
 
 # Python API client for google
 # License: Apache Software License
@@ -70,8 +70,16 @@ neptune = [
     'overrides==2.5'
 ]
 
+feast = [
+    'feast==0.8.0'
+]
+
+atlas = [
+    'pyatlasclient==1.1.2'
+]
+
 all_deps = requirements + kafka + cassandra + glue + snowflake + athena + \
-    bigquery + jsonpath + db2 + dremio + druid + spark + neptune
+    bigquery + jsonpath + db2 + dremio + druid + spark + feast + neptune
 
 setup(
     name='amundsen-databuilder',
@@ -96,8 +104,10 @@ setup(
         'db2': db2,
         'dremio': dremio,
         'druid': druid,
-        'delta-lake': spark,
-        'neptune': neptune
+        'neptune': neptune,
+        'delta': spark,
+        'feast': feast,
+        'atlas': atlas
     },
     classifiers=[
         'Programming Language :: Python :: 3.6',

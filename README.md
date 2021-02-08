@@ -326,27 +326,28 @@ job.launch()
 #### [SnowflakeMetadataExtractor](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/snowflake_metadata_extractor.py "SnowflakeMetadataExtractor")
 An extractor that extracts table and column metadata including database, schema, table name, table description, column name and column description from a Snowflake database.
 
-By default, the Snowflake database name is used as the cluter name. To override this, set `USE_CATALOG_AS_CLUSTER_NAME`
+By default, the Snowflake database name is used as the cluster name. To override this, set `USE_CATALOG_AS_CLUSTER_NAME`
 to `False`, and `CLUSTER_KEY` to what you wish to use as the cluster name.
 
 By default, the Snowflake database is set to `PROD`. To override this, set `DATABASE_KEY`
 to `WhateverNameOfYourDb`.
 
 By default, the Snowflake schema is set to `INFORMATION_SCHEMA`. To override this, set `SCHEMA_KEY`
-to `WhateverNameOfYourSchema`. Note that `ACCOUNT_USAGE` is a separate schema
-which allows users to query a wider set of data at the cost of latency.
+to `WhateverNameOfYourSchema`. 
+
+Note that `ACCOUNT_USAGE` is a separate schema which allows users to query a wider set of data at the cost of latency.
 Differences are defined [here](https://docs.snowflake.com/en/sql-reference/account-usage.html#differences-between-account-usage-and-information-schema)
 
-The `where_clause_suffix` below should define which schemas you'd like to query (see [the sample dag](https://github.com/amundsen-io/amundsendatabuilder/blob/master/example/scripts/sample_snowflake_data_loader.py) for an example).
+The `where_clause_suffix` should define which schemas you'd like to query (see [the sample dag](https://github.com/amundsen-io/amundsendatabuilder/blob/master/example/scripts/sample_snowflake_data_loader.py) for an example).
 
 The SQL query driving the extraction is defined [here](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/snowflake_metadata_extractor.py)
 
 ```python
 job_config = ConfigFactory.from_dict({
-	'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY): 'YourDbName',
-	'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause_suffix,
-       'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME): True,
-	'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): connection_string()})
+    'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY): 'YourDbName',
+    'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause_suffix,
+    'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME): True,
+    'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): connection_string()})
 job = DefaultJob(
 	conf=job_config,
 	task=DefaultTask(
@@ -442,6 +443,15 @@ job = DefaultJob(
 		loader=AnyLoader()))
 job.launch()
 ```
+
+#### [VerticaMetadataExtractor](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/vertica_metadata_extractor.py "MysqlMetadataExtractor")
+An extractor that extracts table and column metadata including database, schema, table name, column name and column datatype from a Vertica database.
+
+A sample loading script for Vertica is provided [here](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/databuilder/example/scripts/sample_vertica_loader.py)
+
+By default, the Vertica database name is used as the cluster name. The `where_clause_suffix` in the example can be used to define which schemas you would like to query.
+
+
 
 #### [SQLAlchemyExtractor](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/sql_alchemy_extractor.py "SQLAlchemyExtractor")
 An extractor utilizes [SQLAlchemy](https://www.sqlalchemy.org/ "SQLAlchemy") to extract record from any database that support SQL Alchemy.
@@ -728,7 +738,7 @@ job.launch()
 The `RedashDashboardExtractor` extracts raw queries from each dashboard. You may optionally use these queries to parse out relations to tables in Amundsen. A table parser can be provided in the configuration for the `RedashDashboardExtractor`, as seen above. This function should have type signature `(RedashVisualizationWidget) -> Iterator[TableRelationData]`. For example:
 
 ```python
-def parse_tables(viz_widget: RedashVisualiationWidget) -> Iterator[TableRelationData]:
+def parse_tables(viz_widget: RedashVisualizationWidget) -> Iterator[TableRelationData]:
 	# Each viz_widget corresponds to one query.
 	# viz_widget.data_source_id is the ID of the target DB in Redash.
 	# viz_widget.raw_query is the raw query (e.g., SQL).
@@ -937,8 +947,15 @@ job.launch()
 
 
 ## List of transformers
+
+Transformers are implemented by subclassing [Transformer](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/transformer/base_transformer.py#L12 "Transformer") and implementing `transform(self, record)`. A transformer can:
+
+- Modify a record and return it,
+- Return `None` to filter a record out,
+- Yield multiple records. This is useful for e.g. inferring metadata (such as ownership) from table descriptions.
+
 #### [ChainedTransformer](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/transformer/base_transformer.py#L41 "ChainedTransformer")
-A chanined transformer that can take multiple transformer.
+A chanined transformer that can take multiple transformers, passing each record through the chain.
 
 #### [RegexStrReplaceTransformer](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/transformer/regex_str_replace_transformer.py "RegexStrReplaceTransformer")
 Generic string replacement transformer using REGEX. User can pass list of tuples where tuple contains regex and replacement pair.

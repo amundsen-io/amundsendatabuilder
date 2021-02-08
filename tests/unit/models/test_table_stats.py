@@ -4,11 +4,11 @@
 import unittest
 from unittest.mock import ANY
 
+from databuilder.models.graph_serializable import (
+    NODE_KEY, NODE_LABEL, RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY,
+    RELATION_START_LABEL, RELATION_TYPE,
+)
 from databuilder.models.table_stats import TableColumnStats
-
-from databuilder.models.graph_serializable import NODE_KEY, \
-    NODE_LABEL, RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 from databuilder.serializers import neo4_serializer
 from databuilder.serializers import neptune_serializer
 from databuilder.serializers.neptune_serializer import (

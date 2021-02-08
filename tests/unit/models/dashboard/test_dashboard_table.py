@@ -5,8 +5,10 @@ import unittest
 from unittest.mock import ANY
 
 from databuilder.models.dashboard.dashboard_table import DashboardTable
-from databuilder.models.graph_serializable import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
 from databuilder.serializers import neo4_serializer
 from databuilder.serializers import neptune_serializer
 from databuilder.serializers.neptune_serializer import (

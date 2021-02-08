@@ -4,9 +4,11 @@
 import unittest
 from unittest.mock import ANY
 
+from databuilder.models.graph_serializable import (
+    RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY, RELATION_START_LABEL,
+    RELATION_TYPE,
+)
 from databuilder.models.table_source import TableSource
-from databuilder.models.graph_serializable import RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
 from databuilder.serializers import neo4_serializer
 from databuilder.serializers import neptune_serializer
 from databuilder.serializers.neptune_serializer import (
@@ -18,7 +20,6 @@ from databuilder.serializers.neptune_serializer import (
     NEPTUNE_RELATIONSHIP_HEADER_FROM,
     NEPTUNE_RELATIONSHIP_HEADER_TO
 )
-
 
 DB = 'hive'
 SCHEMA = 'base'
@@ -37,26 +38,12 @@ class TestTableSource(unittest.TestCase):
                                         cluster=CLUSTER,
                                         source=SOURCE)
 
-        self.start_key = '{db}://{cluster}.{schema}/{tbl}/_source'.format(
-            db=DB,
-            schema=SCHEMA,
-            tbl=TABLE,
-            cluster=CLUSTER
-        )
-        self.end_key = '{db}://{cluster}.{schema}/{tbl}'.format(
-            db=DB,
-            schema=SCHEMA,
-            tbl=TABLE,
-            cluster=CLUSTER
-        )
+        self.start_key = f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}/_source'
+        self.end_key = f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}'
 
     def test_get_source_model_key(self) -> None:
         source = self.table_source.get_source_model_key()
-        self.assertEqual(source, '{db}://{cluster}.{schema}/{tbl}/_source'.format(db=DB,
-                                                                                  schema=SCHEMA,
-                                                                                  tbl=TABLE,
-                                                                                  cluster=CLUSTER,
-                                                                                  ))
+        self.assertEqual(source, f'{DB}://{CLUSTER}.{SCHEMA}/{TABLE}/_source')
 
     def test_get_metadata_model_key(self) -> None:
         metadata = self.table_source.get_metadata_model_key()
