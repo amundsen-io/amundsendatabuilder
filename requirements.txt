@@ -66,5 +66,5 @@ responses==0.10.6
 pyatlasclient==1.1.2
 
 # Snowflake dependencies; uncomment if using Snowflake
-snowflake-sqlalchemy==1.1.14
-snowflake-connector-python==1.9.1
+#snowflake-sqlalchemy==1.1.14
+#snowflake-connector-python==1.9.1
