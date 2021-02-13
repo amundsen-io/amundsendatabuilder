@@ -45,9 +45,9 @@ class SnowflakeMetadataExtractor(Extractor):
         t.comment AS description,
         decode(lower(t.table_type), 'view', 'true', 'false') AS is_view
     FROM
-        {database}.{schema}.COLUMNS AS c
+        "{database}"."{schema}"."COLUMNS" AS c
     LEFT JOIN
-        {database}.{schema}.TABLES t
+        "{database}"."{schema}"."TABLES" t
             ON c.TABLE_NAME = t.TABLE_NAME
             AND c.TABLE_SCHEMA = t.TABLE_SCHEMA
     {where_clause_suffix};
