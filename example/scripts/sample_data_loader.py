@@ -14,7 +14,7 @@ It contains several jobs:
 - `create_last_updated_job`: creates a job that gets the current time, dumps it
   into a predefined model schema, and publishes this to neo4j.
 - `create_es_publisher_sample_job`: creates a job that extracts data from neo4j
-  and pubishes it into elasticsearch.
+  and publishes it into elasticsearch.
 
 For other available extractors, please take a look at
 https://github.com/amundsen-io/amundsendatabuilder#list-of-extractors

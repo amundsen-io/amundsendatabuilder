@@ -340,7 +340,9 @@ Differences are defined [here](https://docs.snowflake.com/en/sql-reference/accou
 
 The `where_clause_suffix` should define which schemas you'd like to query (see [the sample dag](https://github.com/amundsen-io/amundsendatabuilder/blob/master/example/scripts/sample_snowflake_data_loader.py) for an example).
 
-The SQL query driving the extraction is defined [here](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/snowflake_metadata_extractor.py)
+The SQL query driving the extraction is defined [here](https://github.com/amundsen-io/amundsendatabuilder/blob/master/databuilder/extractor/snowflake_metadata_extractor.py).
+
+Also, note that the dependencies specifically required for Snowflake integration aren't installed by default. Edit [requirements.txt](requirements.txt), uncomment the Snowflake dependencies and install them when using the Snowflake extractor.
 
 ```python
 job_config = ConfigFactory.from_dict({
