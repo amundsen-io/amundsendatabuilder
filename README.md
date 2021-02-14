@@ -329,11 +329,11 @@ An extractor that extracts table and column metadata including database, schema,
 By default, the Snowflake database name is used as the cluster name. To override this, set `USE_CATALOG_AS_CLUSTER_NAME`
 to `False`, and `CLUSTER_KEY` to what you wish to use as the cluster name.
 
-By default, the Snowflake database is set to `PROD`. To override this, set `DATABASE_KEY`
+By default, the Snowflake database is set to `PROD`. To override this, set `SNOWFLAKE_DATABASE_KEY`
 to `WhateverNameOfYourDb`.
 
-By default, the Snowflake schema is set to `INFORMATION_SCHEMA`. To override this, set `SCHEMA_KEY`
-to `WhateverNameOfYourSchema`. 
+By default, the Snowflake schema is set to `INFORMATION_SCHEMA`. This is the schema where Amundsen gets metadata (names of tables, columns, descriptions) from. It is not the schema where your data is actually stored. To override this, set `SNOWFLAKE_SCHEMA_KEY`
+to `WhateverNameOfYourInformationSchema`. Stick to the default here, unless you know what you are doing.
 
 Note that `ACCOUNT_USAGE` is a separate schema which allows users to query a wider set of data at the cost of latency.
 Differences are defined [here](https://docs.snowflake.com/en/sql-reference/account-usage.html#differences-between-account-usage-and-information-schema)
@@ -349,6 +349,7 @@ job_config = ConfigFactory.from_dict({
     'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.SNOWFLAKE_DATABASE_KEY): 'YourDbName',
     'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY): where_clause_suffix,
     'extractor.snowflake.{}'.format(SnowflakeMetadataExtractor.USE_CATALOG_AS_CLUSTER_NAME): True,
+    # Read https://github.com/snowflakedb/snowflake-sqlalchemy#connection-parameters for formatting of connection string
     'extractor.snowflake.extractor.sqlalchemy.{}'.format(SQLAlchemyExtractor.CONN_STRING): connection_string()})
 job = DefaultJob(
 	conf=job_config,
