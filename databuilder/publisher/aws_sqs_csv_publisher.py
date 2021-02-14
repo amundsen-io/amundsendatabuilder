@@ -63,6 +63,7 @@ class AWSSQSCsvPublisher(Publisher):
     A Publisher takes two folders for input and publishes it as message to AWS SQS.
     One folder will contain CSV file(s) for Node where the other folder will contain CSV file(s) for Relationship.
     If the target AWS SQS Queue does not use content based deduplication, Message ID should be defined.
+    Single message size is limited to 250 KB. if one message size is larger than that, error logs will be printed.
     """
 
     def __init__(self) -> None:
