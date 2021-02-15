@@ -107,13 +107,17 @@ class MysqlMetadataExtractor(Extractor):
 
             for row in group:
                 last_row = row
-                columns.append(ColumnMetadata(row['col_name'], row['col_description'],
-                                              row['col_type'], row['col_sort_order']))
+                columns.append(ColumnMetadata(
+                    row['col_name'],
+                    row['col_description'] if row['col_description'] else None,
+                    row['col_type'],
+                    row['col_sort_order'])
+                )
 
             yield TableMetadata(self._database, last_row['cluster'],
                                 last_row['schema'],
                                 last_row['name'],
-                                last_row['description'],
+                                last_row['description'] if last_row['description'] else None,
                                 columns,
                                 is_view=last_row['is_view'])
 
