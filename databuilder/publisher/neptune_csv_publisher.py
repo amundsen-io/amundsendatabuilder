@@ -5,7 +5,6 @@ import datetime
 import logging
 import os
 import time
-from io import BytesIO
 from os import listdir
 from os.path import isfile, join
 from typing import List, Tuple
@@ -162,14 +161,13 @@ class NeptuneCSVPublisher(Publisher):
         file_paths = self._get_file_paths()
         for file_location in file_paths:
             with open(file_location, 'rb') as file_csv:
-                file_csv_bytes = BytesIO(file_csv.read())
                 file_name = os.path.basename(file_location)
                 s3_object_key = "{s3_folder_location}/{file_name}".format(
                     s3_folder_location=s3_folder_location,
                     file_name=file_name
                 )
                 self.neptune_api_client.upload(
-                    f=file_csv_bytes,
+                    f=file_csv,
                     s3_object_key=s3_object_key
                 )
 
