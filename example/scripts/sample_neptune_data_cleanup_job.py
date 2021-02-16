@@ -15,7 +15,7 @@ from databuilder.task.neptune_staleness_removal_task import NeptuneStalenessRemo
 
 
 def create_remove_stale_data_job():
-    # logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     access_key = os.getenv('AWS_KEY')
     access_secret = os.getenv('AWS_SECRET_KEY')
     aws_zone = os.getenv("AWS_ZONE")
