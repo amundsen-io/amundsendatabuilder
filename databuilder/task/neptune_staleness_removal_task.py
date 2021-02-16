@@ -4,7 +4,7 @@
 import logging
 from datetime import datetime, timedelta
 from typing import (
-    Any, Callable, Dict, Iterable, List, Optional, Tuple,
+    Any, Callable, Dict, List, Optional, Tuple,
 )
 
 from gremlin_python.process import traversal
@@ -42,10 +42,9 @@ class NeptuneStalenessRemovalTask(Task):
     # Config keys
     TARGET_NODES = "target_nodes"
     TARGET_RELATIONS = "target_relations"
-    BATCH_SIZE = "batch_size"
     DRY_RUN = "dry_run"
     # What is the property name that uniquely identifies each node and edge. Typically is T.id for neptune
-    GRAPH_ID_PROPERTY_NAME = "graph_id_property_name"
+    GRAPH_LABEL_ID_PROPERTY_NAME = "graph_label_id_property_name"
     # Staleness max percentage. Safety net to prevent majority of data being deleted.
     STALENESS_MAX_PCT = "staleness_max_pct"
     # Staleness max percentage per LABEL/TYPE. Safety net to prevent majority of data being deleted.
@@ -53,8 +52,7 @@ class NeptuneStalenessRemovalTask(Task):
     # Sets how old the nodes and relationships can be
     STALENESS_CUT_OFF_IN_SECONDS = "staleness_cut_off_in_seconds"
     DEFAULT_CONFIG = ConfigFactory.from_dict({
-        GRAPH_ID_PROPERTY_NAME: T.id,
-        BATCH_SIZE: 100,
+        GRAPH_LABEL_ID_PROPERTY_NAME: T.label,
         STALENESS_MAX_PCT: 5,
         TARGET_NODES: [],
         TARGET_RELATIONS: [],
@@ -69,13 +67,12 @@ class NeptuneStalenessRemovalTask(Task):
         conf = Scoped.get_scoped_conf(conf, self.get_scope()) \
             .with_fallback(conf) \
             .with_fallback(NeptuneStalenessRemovalTask.DEFAULT_CONFIG)
-        self.target_nodes = set(conf.get_list(NeptuneStalenessRemovalTask.TARGET_NODES))
-        self.target_relations = set(conf.get_list(NeptuneStalenessRemovalTask.TARGET_RELATIONS))
-        self.batch_size = conf.get_int(NeptuneStalenessRemovalTask.BATCH_SIZE)
+        self.target_nodes = list(set(conf.get_list(NeptuneStalenessRemovalTask.TARGET_NODES)))
+        self.target_relations = list(set(conf.get_list(NeptuneStalenessRemovalTask.TARGET_RELATIONS)))
         self.dry_run = conf.get_bool(NeptuneStalenessRemovalTask.DRY_RUN)
         self.staleness_pct = conf.get_int(NeptuneStalenessRemovalTask.STALENESS_MAX_PCT)
         self.staleness_pct_dict = conf.get(NeptuneStalenessRemovalTask.STALENESS_PCT_MAX_DICT)
-        self.graph_id = conf.get(NeptuneStalenessRemovalTask.GRAPH_ID_PROPERTY_NAME)
+        self.graph_label_id = conf.get(NeptuneStalenessRemovalTask.GRAPH_LABEL_ID_PROPERTY_NAME)
         self.staleness_cut_off_in_seconds = conf.get_int(NeptuneStalenessRemovalTask.STALENESS_CUT_OFF_IN_SECONDS)
         self.cutoff_datetime = datetime.utcnow() - timedelta(seconds=self.staleness_cut_off_in_seconds)
         self.gremlin_client = NeptuneSessionClient()
@@ -90,13 +87,15 @@ class NeptuneStalenessRemovalTask(Task):
         :return:
         """
         self.validate()
+        if self.dry_run:
+            return
         self._delete_stale_relations()
         self._delete_stale_nodes()
 
     def validate(self) -> None:
         """
         Validation method. Focused on limit the risk on deleting nodes and relations.
-         - Check if deleted nodes will be within 10% of total nodes.
+         - Check if deleted nodes will be within 5% of total nodes.
         """
         self._validate_node_staleness_pct()
         self._validate_relation_staleness_pct()
@@ -114,8 +113,9 @@ class NeptuneStalenessRemovalTask(Task):
     def _delete_stale_relations(self) -> None:
         filter_properties = [
             (NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME, NEPTUNE_CREATION_TYPE_JOB, traversal.eq),
-            (NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME, self.cutoff_datetime, traversal.lt)
+            (NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME, self.cutoff_datetime, traversal.lt),
         ]
+
         self.gremlin_client.delete_edges(
             filter_properties=filter_properties,
             edge_labels=list(self.target_relations)
@@ -123,9 +123,9 @@ class NeptuneStalenessRemovalTask(Task):
 
     def _validate_staleness_pct(
             self,
-            total_records: Iterable[Dict[str, Any]],
-            stale_records: Iterable[Dict[str, Any]],
-            types: Iterable[str]
+            total_records: List[Dict[str, Any]],
+            stale_records: List[Dict[str, Any]],
+            types: List[str]
     ) -> None:
         total_count_dict = {record['type']: int(record['count']) for record in total_records}
 
@@ -145,6 +145,14 @@ class NeptuneStalenessRemovalTask(Task):
             if stale_pct >= threshold:
                 raise Exception('Staleness percentage of {} is {} %. Stopping due to over threshold {} %'
                                 .format(type_str, stale_pct, threshold))
+
+            LOGGER.info(
+                'Will be dropping {stale_count} {record_type} records or {stale_pct}% of {record_type} data'.format(
+                    stale_count=stale_count,
+                    record_type=type_str,
+                    stale_pct=stale_pct
+                )
+            )
 
     def _validate_node_staleness_pct(self) -> None:
         total_records = self.get_number_of_nodes_grouped_by_label()
@@ -169,7 +177,7 @@ class NeptuneStalenessRemovalTask(Task):
             filter_properties = []
         tx = self.gremlin_client.get_graph().V()
         tx = NeptuneSessionClient.filter_traversal(tx, filter_properties)
-        tx = tx.groupCount().by(self.graph_id).unfold()
+        tx = tx.groupCount().by(self.graph_label_id).unfold()
         tx = tx.project('type', 'count')
         tx = tx.by(Column.keys)
         tx = tx.by(Column.values)
@@ -183,7 +191,7 @@ class NeptuneStalenessRemovalTask(Task):
             filter_properties = []
         tx = self.gremlin_client.get_graph().E()
         tx = NeptuneSessionClient.filter_traversal(tx, filter_properties)
-        tx = tx.groupCount().by(self.graph_id).unfold()
+        tx = tx.groupCount().by(self.graph_label_id).unfold()
         tx = tx.project('type', 'count')
         tx = tx.by(Column.keys)
         tx = tx.by(Column.values)

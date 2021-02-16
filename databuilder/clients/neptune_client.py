@@ -53,11 +53,11 @@ class NeptuneSessionClient(Scoped):
         neptune_uri = "wss://{host}/gremlin".format(
             host=self._neptune_host
         )
-        self.source_factory = neptune_bulk_loader_api.get_neptune_graph_traversal_source_factory(
+        source_factory = neptune_bulk_loader_api.get_neptune_graph_traversal_source_factory(
             neptune_url=neptune_uri,
             session=boto_session
         )
-        self._graph = self.source_factory()
+        self._graph = source_factory()
 
     def get_scope(self) -> str:
         return 'neptune.client'

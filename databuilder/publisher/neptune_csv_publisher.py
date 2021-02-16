@@ -104,10 +104,10 @@ class NeptuneCSVPublisher(Publisher):
             failOnError=self.fail_on_error
         )
 
-        if 'payload' not in bulk_upload_response:
+        try:
+            load_id = bulk_upload_response['payload']['loadId']
+        except KeyError:
             raise Exception("Failed to load csv. Response: {0}".format(str(bulk_upload_response)))
-
-        load_id = bulk_upload_response['payload']['loadId']
 
         load_status = "LOAD_NOT_STARTED"
         all_errors: List[NeptuneBulkLoaderLoadStatusErrorLogEntry] = []
@@ -134,13 +134,13 @@ class NeptuneCSVPublisher(Publisher):
             errors=True
         )
         load_status_payload = load_status_response.get('payload', {})
-        if 'status' not in load_status_payload.get('overallStatus', {}):
+        try:
+            load_status = load_status_payload['overallStatus']['status']
+        except KeyError:
             raise Exception("Failed to check status of {0} response: {1}".format(
                 str(load_id),
                 repr(load_status_response)
             ))
-        load_status = load_status_payload.get('overallStatus', {})['status']
-
         return load_status, load_status_payload.get('errors', {}).get('errorLogs', [])
 
     def _get_file_paths(self) -> List[str]:
