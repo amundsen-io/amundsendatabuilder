@@ -283,4 +283,4 @@ class NeptuneSearchDataExtractor(Extractor):
                 yield result
 
     def get_scope(self) -> str:
-        return 'extractor.search_data'
+        return 'extractor.neptune_search_data'

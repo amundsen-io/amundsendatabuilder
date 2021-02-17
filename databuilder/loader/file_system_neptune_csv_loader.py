@@ -176,4 +176,4 @@ class FSNeptuneCSVLoader(Loader):
         self._closer.close()
 
     def get_scope(self) -> str:
-        return "loader.filesystem_csv_neptune"
+        return "loader.neptune_filesystem_csv"

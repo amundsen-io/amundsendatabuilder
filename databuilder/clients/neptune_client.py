@@ -70,7 +70,7 @@ class NeptuneSessionClient(Scoped):
         node_traversal = self.get_graph().V().has(T.id, node_id). \
             fold().coalesce(__.unfold(), create_traversal)
 
-        node_traversal = NeptuneSessionClient._update_entity_properties_on_traversal(node_traversal, node_properties)
+        node_traversal = NeptuneSessionClient.update_entity_properties_on_traversal(node_traversal, node_properties)
         node_traversal.next()
 
     def upsert_edge(
@@ -88,11 +88,11 @@ class NeptuneSessionClient(Scoped):
             fold(). \
             coalesce(__.unfold(), create_traversal)
 
-        edge_traversal = NeptuneSessionClient._update_entity_properties_on_traversal(edge_traversal, edge_properties)
+        edge_traversal = NeptuneSessionClient.update_entity_properties_on_traversal(edge_traversal, edge_properties)
         edge_traversal.next()
 
     @staticmethod
-    def _update_entity_properties_on_traversal(
+    def update_entity_properties_on_traversal(
             graph_traversal: GraphTraversal,
             properties: Dict[str, Any]
     ) -> GraphTraversal:
