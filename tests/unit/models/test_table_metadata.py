@@ -180,7 +180,7 @@ class TestTableMetadata(unittest.TestCase):
             relation_row_serialized = neptune_serializer.convert_relationship(relation_row)
             neptune_actual.append(relation_row_serialized)
             relation_row = self.table_metadata.next_relation()
-
+        self.maxDiff = None
         self.assertEqual(EXPECTED_RELATIONSHIPS_NEPTUNE, neptune_actual)
 
     def test_table_attributes(self) -> None:
