@@ -119,7 +119,7 @@ class Neo4jCsvPublisher(Publisher):
     Neo4j follows Label Node properties Graph and more information about this is in:
     https://neo4j.com/docs/developer-manual/current/introduction/graphdb-concepts/
 
-    #TODO User UNWIND batch operation for better performance
+    # TODO User UNWIND batch operation for better performance
     """
 
     def __init__(self) -> None:
@@ -138,21 +138,16 @@ class Neo4jCsvPublisher(Publisher):
 
         trust = neo4j.TRUST_SYSTEM_CA_SIGNED_CERTIFICATES if conf.get_bool(NEO4J_VALIDATE_SSL) \
             else neo4j.TRUST_ALL_CERTIFICATES
-
+        driver_kwargs = {
+            "auth": (conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
+            "encrypted": conf.get_bool(NEO4J_ENCRYPTED),
+            "trust": trust,
+        }
         if int(neo4j_version[0]) >= 4:
-            self._driver = \
-                GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY),
-                                     max_connection_lifetime=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
-                                     auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
-                                     encrypted=conf.get_bool(NEO4J_ENCRYPTED),
-                                     trust=trust)
+            driver_kwargs['max_connection_lifetime'] = conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC)
         else:
-            self._driver = \
-                GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY),
-                                     max_connection_life_time=conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC),
-                                     auth=(conf.get_string(NEO4J_USER), conf.get_string(NEO4J_PASSWORD)),
-                                     encrypted=conf.get_bool(NEO4J_ENCRYPTED),
-                                     trust=trust)
+            driver_kwargs['max_connection_life_time'] = conf.get_int(NEO4J_MAX_CONN_LIFE_TIME_SEC)
+        self._driver = GraphDatabase.driver(conf.get_string(NEO4J_END_POINT_KEY), **driver_kwargs)
 
         self._transaction_size = conf.get_int(NEO4J_TRANSACTION_SIZE)
         self._session = self._driver.session()
@@ -475,10 +470,10 @@ class Neo4jCsvPublisher(Publisher):
 
         LOGGER.info(f'Trying to create index for label %s if not exist: %s', label, stmt)
 
-        if int(neo4j_version[0]) < 4:
-            session_error = CypherError
-        else:
+        if int(neo4j_version[0]) >= 4:
             session_error = Neo4jError
+        else:
+            session_error = CypherError
 
         with self._driver.session() as session:
             try:
