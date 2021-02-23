@@ -1,14 +1,18 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-
+import os
 from setuptools import find_packages, setup
 
 __version__ = '4.1.0'
 
+use_neo4j_v4 = os.getenv('DATABUILDER_USE_NEO4J_V4', None)
+neo4j_dep = "neo4j-driver>=1.7.2,<4.0"
+if use_neo4j_v4:
+    neo4j_dep = "neo4j>=4.2.1,<5.0"
 
 requirements = [
-    "neo4j-driver>=1.7.2,<4.0",
+    neo4j_dep,
     "pytz>=2018.4",
     "statsd>=3.2.1",
     "retrying>=1.3.3",
@@ -17,7 +21,8 @@ requirements = [
     "pyhocon>=0.3.42",
     "unidecode",
     "Jinja2>=2.10.0,<2.12",
-    "pandas>=0.21.0,<1.2.0"
+    "pandas>=0.21.0,<1.2.0",
+    "sqlalchemy>=1.3.0,<2.0",
 ]
 
 kafka = ['confluent-kafka==1.0.0']
