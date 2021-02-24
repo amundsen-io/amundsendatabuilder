@@ -29,23 +29,23 @@ class TestTableStats(unittest.TestCase):
                                             start_epoch='1',
                                             end_epoch='2',)
 
-        self.expected_node_result = {
+        self.expected_node_results = [{
             NODE_KEY: 'hive://gold.base/test/col/avg/',
             NODE_LABEL: 'Stat',
             'stat_val': '1',
             'stat_name': 'avg',
             'start_epoch': '1',
             'end_epoch': '2',
-        }
+        }]
 
-        self.expected_relation_result = {
+        self.expected_relation_results = [{
             RELATION_START_KEY: 'hive://gold.base/test/col/avg/',
             RELATION_START_LABEL: 'Stat',
             RELATION_END_KEY: 'hive://gold.base/test/col',
             RELATION_END_LABEL: 'Column',
             RELATION_TYPE: 'STAT_OF',
             RELATION_REVERSE_TYPE: 'STAT'
-        }
+        }]
 
     def test_get_table_stat_model_key(self) -> None:
         table_stats = self.table_stats.get_table_stat_model_key()
@@ -56,27 +56,27 @@ class TestTableStats(unittest.TestCase):
         self.assertEqual(metadata, 'hive://gold.base/test/col')
 
     def test_create_nodes(self) -> None:
-        nodes = self.table_stats.create_nodes()
-        self.assertEquals(len(nodes), 1)
-        serialized_node = neo4_serializer.serialize_node(nodes[0])
-        self.assertEquals(serialized_node, self.expected_node_result)
+        actual = []
+        node = self.table_stats.create_next_node()
+        while node:
+            serialized_node = neo4_serializer.serialize_node(node)
+            actual.append(serialized_node)
+            node = self.table_stats.create_next_node()
+
+        self.assertEquals(actual, self.expected_node_results)
 
     def test_create_relation(self) -> None:
-        relation = self.table_stats.create_relation()
+        actual = []
+        relation = self.table_stats.create_next_relation()
+        while relation:
+            serialized_relation = neo4_serializer.serialize_relationship(relation)
+            actual.append(serialized_relation)
+            relation = self.table_stats.create_next_relation()
 
-        self.assertEquals(len(relation), 1)
-        serialized_relation = neo4_serializer.serialize_relationship(relation[0])
-        self.assertEquals(serialized_relation, self.expected_relation_result)
+        self.assertEquals(actual, self.expected_relation_results)
 
-    def test_create_next_node(self) -> None:
-        next_node = self.table_stats.create_next_node()
-        serialized_node = neo4_serializer.serialize_node(next_node)
-        self.assertEquals(serialized_node, self.expected_node_result)
-
-    def test_create_next_node_neptune(self) -> None:
-        next_node = self.table_stats.create_next_node()
-        serialized_node = neptune_serializer.convert_node(next_node)
-        expected_neptune_node = {
+    def test_create_nodes_neptune(self) -> None:
+        expected_neptune_nodes = [{
             NEPTUNE_HEADER_ID: 'hive://gold.base/test/col/avg/',
             NEPTUNE_HEADER_LABEL: 'Stat',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
@@ -85,52 +85,52 @@ class TestTableStats(unittest.TestCase):
             'stat_name:String(single)': 'avg',
             'start_epoch:String(single)': '1',
             'end_epoch:String(single)': '2',
-        }
-        self.assertDictEqual(serialized_node, expected_neptune_node)
+        }]
 
-    def test_create_next_relation(self) -> None:
-        next_relation = self.table_stats.create_next_relation()
-        serialized_relation = neo4_serializer.serialize_relationship(next_relation)
-        self.assertEquals(serialized_relation, self.expected_relation_result)
+        actual = []
+        next_node = self.table_stats.create_next_node()
+        while next_node:
+            serialized_node = neptune_serializer.convert_node(next_node)
+            actual.append(serialized_node)
+            next_node = self.table_stats.create_next_node()
 
-    def test_create_next_relation_neptune(self) -> None:
-        next_relation = self.table_stats.create_next_relation()
+        self.assertEqual(actual, expected_neptune_nodes)
 
-        self.expected_relation_result = {
-            RELATION_START_KEY: 'hive://gold.base/test/col/avg/',
-            RELATION_START_LABEL: 'Stat',
-            RELATION_END_KEY: 'hive://gold.base/test/col',
-            RELATION_END_LABEL: 'Column',
-            RELATION_TYPE: 'STAT_OF',
-            RELATION_REVERSE_TYPE: 'STAT'
-        }
-
+    def test_create_relations_neptune(self) -> None:
         expected = [
-            {
-                NEPTUNE_HEADER_ID: "{from_vertex_id}_{to_vertex_id}_{label}".format(
-                    from_vertex_id='hive://gold.base/test/col/avg/',
-                    to_vertex_id='hive://gold.base/test/col',
-                    label='STAT_OF'
-                ),
-                NEPTUNE_RELATIONSHIP_HEADER_FROM: 'hive://gold.base/test/col/avg/',
-                NEPTUNE_RELATIONSHIP_HEADER_TO: 'hive://gold.base/test/col',
-                NEPTUNE_HEADER_LABEL: 'STAT_OF',
-                NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
-                NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
-            },
-            {
-                NEPTUNE_HEADER_ID: "{from_vertex_id}_{to_vertex_id}_{label}".format(
-                    from_vertex_id='hive://gold.base/test/col',
-                    to_vertex_id='hive://gold.base/test/col/avg/',
-                    label='STAT'
-                ),
-                NEPTUNE_RELATIONSHIP_HEADER_FROM: 'hive://gold.base/test/col',
-                NEPTUNE_RELATIONSHIP_HEADER_TO: 'hive://gold.base/test/col/avg/',
-                NEPTUNE_HEADER_LABEL: 'STAT',
-                NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
-                NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
-            }
+            [
+                {
+                    NEPTUNE_HEADER_ID: "{from_vertex_id}_{to_vertex_id}_{label}".format(
+                        from_vertex_id='hive://gold.base/test/col/avg/',
+                        to_vertex_id='hive://gold.base/test/col',
+                        label='STAT_OF'
+                    ),
+                    NEPTUNE_RELATIONSHIP_HEADER_FROM: 'hive://gold.base/test/col/avg/',
+                    NEPTUNE_RELATIONSHIP_HEADER_TO: 'hive://gold.base/test/col',
+                    NEPTUNE_HEADER_LABEL: 'STAT_OF',
+                    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+                    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
+                },
+                {
+                    NEPTUNE_HEADER_ID: "{from_vertex_id}_{to_vertex_id}_{label}".format(
+                        from_vertex_id='hive://gold.base/test/col',
+                        to_vertex_id='hive://gold.base/test/col/avg/',
+                        label='STAT'
+                    ),
+                    NEPTUNE_RELATIONSHIP_HEADER_FROM: 'hive://gold.base/test/col',
+                    NEPTUNE_RELATIONSHIP_HEADER_TO: 'hive://gold.base/test/col/avg/',
+                    NEPTUNE_HEADER_LABEL: 'STAT',
+                    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+                    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
+                }
+            ]
         ]
 
-        serialized_relation = neptune_serializer.convert_relationship(next_relation)
-        self.assertListEqual(serialized_relation, expected)
+        actual = []
+        next_relation = self.table_stats.create_next_relation()
+        while next_relation:
+            serialized_relation = neptune_serializer.convert_relationship(next_relation)
+            actual.append(serialized_relation)
+            next_relation = self.table_stats.create_next_relation()
+
+        self.assertListEqual(actual, expected)

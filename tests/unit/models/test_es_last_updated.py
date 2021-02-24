@@ -12,23 +12,23 @@ class TestNeo4jESLastUpdated(unittest.TestCase):
 
     def setUp(self) -> None:
         super(TestNeo4jESLastUpdated, self).setUp()
-        self.neo4j_es_last_updated = ESLastUpdated(timestamp=100)
+        self.es_last_updated = ESLastUpdated(timestamp=100)
 
-        self.expected_node_result = {
+        self.expected_node_results = [{
             NODE_KEY: 'amundsen_updated_timestamp',
             NODE_LABEL: 'Updatedtimestamp',
             'latest_timestmap:UNQUOTED': 100,
-        }
+        }]
 
     def test_create_nodes(self) -> None:
-        nodes = self.neo4j_es_last_updated.create_nodes()
-        self.assertEquals(len(nodes), 1)
-        serialized_node = neo4_serializer.serialize_node(nodes[0])
-        self.assertEquals(serialized_node, self.expected_node_result)
+        actual = []
+        node = self.es_last_updated.create_next_node()
+        while node:
+            serialized_node = neo4_serializer.serialize_node(node)
+            actual.append(serialized_node)
+            node = self.es_last_updated.create_next_node()
 
-    def test_create_next_node(self) -> None:
-        next_node = self.neo4j_es_last_updated.create_next_node()
-        self.assertEquals(neo4_serializer.serialize_node(next_node), self.expected_node_result)
+        self.assertEquals(actual, self.expected_node_results)
 
-    def test_create_next_relation(self) -> None:
-        self.assertIs(self.neo4j_es_last_updated.create_next_relation(), None)
+    def test_create_relation(self) -> None:
+        self.assertIs(self.es_last_updated.create_next_relation(), None)
