@@ -31,7 +31,7 @@ EXPECTED_NEPTUNE_NODES = [
     },
     {
         'sort_order:Long(single)': 0,
-        'type:String(single)': 'bigint',
+        'col_type:String(single)': 'bigint',
         'name:String(single)': 'test_id1',
         NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
         NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -50,7 +50,7 @@ EXPECTED_NEPTUNE_NODES = [
     },
     {
         'sort_order:Long(single)': 1,
-        'type:String(single)': 'bigint',
+        'col_type:String(single)': 'bigint',
         'name:String(single)': 'test_id2',
         NEPTUNE_HEADER_ID: 'Column:hive://gold.test_schema1/test_table1/test_id2',
         METADATA_KEY_PROPERTY_NAME: 'Column:hive://gold.test_schema1/test_table1/test_id2',
@@ -69,7 +69,7 @@ EXPECTED_NEPTUNE_NODES = [
     },
     {
         'sort_order:Long(single)': 2,
-        'type:String(single)': 'boolean',
+        'col_type:String(single)': 'boolean',
         'name:String(single)': 'is_active',
         NEPTUNE_HEADER_ID: 'Column:hive://gold.test_schema1/test_table1/is_active',
         METADATA_KEY_PROPERTY_NAME: 'Column:hive://gold.test_schema1/test_table1/is_active',
@@ -79,7 +79,7 @@ EXPECTED_NEPTUNE_NODES = [
     },
     {
         'sort_order:Long(single)': 3,
-        'type:String(single)': 'varchar',
+        'col_type:String(single)': 'varchar',
         'name:String(single)': 'source',
         NEPTUNE_HEADER_ID: 'Column:hive://gold.test_schema1/test_table1/source',
         METADATA_KEY_PROPERTY_NAME: 'Column:hive://gold.test_schema1/test_table1/source',
@@ -98,7 +98,7 @@ EXPECTED_NEPTUNE_NODES = [
     },
     {
         'sort_order:Long(single)': 4,
-        'type:String(single)': 'timestamp',
+        'col_type:String(single)': 'timestamp',
         'name:String(single)': 'etl_created_at',
         NEPTUNE_HEADER_ID: 'Column:hive://gold.test_schema1/test_table1/etl_created_at',
         METADATA_KEY_PROPERTY_NAME: 'Column:hive://gold.test_schema1/test_table1/etl_created_at',
@@ -117,7 +117,7 @@ EXPECTED_NEPTUNE_NODES = [
     },
     {
         'sort_order:Long(single)': 5,
-        'type:String(single)': 'varchar',
+        'col_type:String(single)': 'varchar',
         'name:String(single)': 'ds',
         NEPTUNE_HEADER_ID: 'Column:hive://gold.test_schema1/test_table1/ds',
         METADATA_KEY_PROPERTY_NAME: 'Column:hive://gold.test_schema1/test_table1/ds',

@@ -33,7 +33,7 @@ class TestTableStats(unittest.TestCase):
             NODE_KEY: 'hive://gold.base/test/col/avg/',
             NODE_LABEL: 'Stat',
             'stat_val': '1',
-            'stat_name': 'avg',
+            'stat_type': 'avg',
             'start_epoch': '1',
             'end_epoch': '2',
         }
@@ -83,7 +83,7 @@ class TestTableStats(unittest.TestCase):
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
             'stat_val:String(single)': '1',
-            'stat_name:String(single)': 'avg',
+            'stat_type:String(single)': 'avg',
             'start_epoch:String(single)': '1',
             'end_epoch:String(single)': '2',
         }
