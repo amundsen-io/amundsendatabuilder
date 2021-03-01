@@ -1,4 +1,7 @@
 ### Feature
+* Neptune Data builder Integration ([#438](https://github.com/amundsen-io/amundsendatabuilder/issues/438)) ([`303e8aa`](https://github.com/amundsen-io/amundsendatabuilder/commit/303e8aa2a42779070f5d6260faac010ba86a216c))
+* Add config key for connect_arg for SqlAlchemyExtractor ([#434](https://github.com/amundsen-io/amundsendatabuilder/issues/434)) ([`7f3be0f`](https://github.com/amundsen-io/amundsendatabuilder/commit/7f3be0fe58ec863679169e945441e01fcdc0e64c))
+* Vertica metadata extractor ([#433](https://github.com/amundsen-io/amundsendatabuilder/issues/433)) ([`f4bd207`](https://github.com/amundsen-io/amundsendatabuilder/commit/f4bd2071cf9c31ae6ff9a51bb5983f5c18e4a0bf))
 * Multi-yield transformers ([#396](https://github.com/amundsen-io/amundsendatabuilder/issues/396)) ([`49ae0ed`](https://github.com/amundsen-io/amundsendatabuilder/commit/49ae0ed253aabec38346d0f26479218dec62081f))
 * Atlas_search_extractor | :tada: Initial commit. ([#415](https://github.com/amundsen-io/amundsendatabuilder/issues/415)) ([`8c63307`](https://github.com/amundsen-io/amundsendatabuilder/commit/8c633072da81b7fb2e343aa31e6e7f9c3bfae07d))
 * Sample Feast job with ES publisher ([#425](https://github.com/amundsen-io/amundsendatabuilder/issues/425)) ([`453a18b`](https://github.com/amundsen-io/amundsendatabuilder/commit/453a18b9f70b94226bf01180d7e44b915ca2ddcf))
@@ -25,6 +28,7 @@
 * Add a transformer that adds tags to all tables created in a job ([#287](https://github.com/amundsen-io/amundsendatabuilder/issues/287)) ([`d2f4bd3`](https://github.com/amundsen-io/amundsendatabuilder/commit/d2f4bd308c1ef92ea2bbfb7a7443cb42113f03f9))
 
 ### Fix
+* Increase the compatibility of id structure between the Databuilder and the Metadata Library ([#445](https://github.com/amundsen-io/amundsendatabuilder/issues/445)) ([`6a13762`](https://github.com/amundsen-io/amundsendatabuilder/commit/6a13762ddaea1226f54d289f2b3011c4cb1e43c7))
 * Move 'grouped_tables' into `_retrieve_tables` ([#430](https://github.com/amundsen-io/amundsendatabuilder/issues/430)) ([`26a0d0a`](https://github.com/amundsen-io/amundsendatabuilder/commit/26a0d0a4ffe5bf004507c9d1598a5f08b30ecdf0))
 * Address PyAthena version ([#429](https://github.com/amundsen-io/amundsendatabuilder/issues/429)) ([`7157c24`](https://github.com/amundsen-io/amundsendatabuilder/commit/7157c24305a48e124ac873529f54c0eabe5d5190))
 * Add csv badges back in Quickstart ([#418](https://github.com/amundsen-io/amundsendatabuilder/issues/418)) ([`c0296b7`](https://github.com/amundsen-io/amundsendatabuilder/commit/c0296b70de8aae4116fd3869233cd9de0d08fbbc))
