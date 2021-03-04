@@ -40,7 +40,8 @@ class SQLAlchemyExtractor(Extractor):
         self._execute_query()
 
     def close(self) -> None:
-        self.connection.close()
+        if self.connection is not None:
+            self.connection.close()
 
     def _get_connection(self) -> Any:
         """

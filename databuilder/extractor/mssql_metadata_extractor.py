@@ -111,7 +111,8 @@ class MSSQLMetadataExtractor(Extractor):
         self._extract_iter: Union[None, Iterator] = None
 
     def close(self) -> None:
-        self._alchemy_extractor.close()
+        if getattr(self, '_alchemy_extractor', None) is not None:
+            self._alchemy_extractor.close()
 
     def extract(self) -> Union[TableMetadata, None]:
         if not self._extract_iter:
