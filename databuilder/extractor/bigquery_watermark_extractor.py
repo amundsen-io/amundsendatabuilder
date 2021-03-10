@@ -20,9 +20,12 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BigQueryWatermarkExtractor(BaseBigQueryExtractor):
+    
+    GCP_BILLING_PROJECT = 'billing_project'
 
     def init(self, conf: ConfigTree) -> None:
         BaseBigQueryExtractor.init(self, conf)
+        self.gcp_billing_project = conf.get_string(BaseBigQueryExtractor.GCP_BILLING_PROJECT, None)
         self.iter: Iterator[Watermark] = iter(self._iterate_over_tables())
 
     def get_scope(self) -> str:
@@ -107,7 +110,7 @@ class BigQueryWatermarkExtractor(BaseBigQueryExtractor):
                 table=tableRef['tableId']),
             'useLegacySql': True
         }
-        result = self.bigquery_service.jobs().query(projectId=self.project_id, body=body).execute()
+        result = self.bigquery_service.jobs().query(projectId=self.gcp_billing_project or self.project_id, body=body).execute()
 
         if 'rows' not in result:
             return []
