@@ -501,7 +501,6 @@ task = DefaultTask(extractor=ModeDashboardExtractor(),
                    loader=FsNeo4jCSVLoader(), )
 
 tmp_folder = '/var/tmp/amundsen/mode_dashboard_metadata'
-
 node_files_folder = '{tmp_folder}/nodes'.format(tmp_folder=tmp_folder)
 relationship_files_folder = '{tmp_folder}/relationships'.format(tmp_folder=tmp_folder)
 
@@ -559,8 +558,7 @@ You can create Databuilder job config like this. (configuration related to loade
 
 ```python
 extractor = ModeDashboardLastSuccessfulExecutionExtractor()
-task = DefaultTask(extractor=extractor,
-                   loader=FsNeo4jCSVLoader(), )
+task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
 
 job_config = ConfigFactory.from_dict({
     '{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
@@ -581,8 +579,7 @@ You can create Databuilder job config like this. (configuration related to loade
 
 ```python
 extractor = ModeDashboardExecutionsExtractor()
-task = DefaultTask(extractor=extractor,
-                   loader=FsNeo4jCSVLoader(), )
+task = DefaultTask(extractor=extractor, loader=FsNeo4jCSVLoader())
 
 job_config = ConfigFactory.from_dict({
     '{}.{}'.format(extractor.get_scope(), ORGANIZATION): organization,
@@ -1037,9 +1034,7 @@ job.launch()
 Write Elasticsearch document in JSON format which can be consumed by ElasticsearchPublisher. It assumes that the record it consumes is instance of ElasticsearchDocument.
 
 ```python
-tmp_folder = '/var/tmp/amundsen/dummy_metadata'
-node_files_folder = '{tmp_folder}/nodes/'.format(tmp_folder=tmp_folder)
-relationship_files_folder = '{tmp_folder}/relationships/'.format(tmp_folder=tmp_folder)
+data_file_path = '/var/tmp/amundsen/search_data.json'
 
 job_config = ConfigFactory.from_dict({
     'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY): data_file_path,
@@ -1060,6 +1055,9 @@ A Publisher takes two folders for input and publishes to Neo4j.
 One folder will contain CSV file(s) for Node where the other folder will contain CSV file(s) for Relationship. Neo4j follows Label Node properties Graph and refer to [here](https://neo4j.com/docs/developer-manual/current/introduction/graphdb-concepts/ "here") for more information
 
 ```python
+node_files_folder = '{tmp_folder}/nodes/'.format(tmp_folder=tmp_folder)
+relationship_files_folder = '{tmp_folder}/relationships/'.format(tmp_folder=tmp_folder)
+
 job_config = ConfigFactory.from_dict({
     'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.NODE_DIR_PATH): node_files_folder,
     'loader.filesystem_csv_neo4j.{}'.format(FsNeo4jCSVLoader.RELATION_DIR_PATH): relationship_files_folder,
@@ -1068,7 +1066,8 @@ job_config = ConfigFactory.from_dict({
     'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_END_POINT_KEY): neo4j_endpoint,
     'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_USER): neo4j_user,
     'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_PASSWORD): neo4j_password,
-    'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_ENCRYPTED): True})
+    'publisher.neo4j.{}'.format(neo4j_csv_publisher.NEO4J_ENCRYPTED): True,
+})
 
 job = DefaultJob(
     conf=job_config,
@@ -1083,9 +1082,7 @@ job.launch()
 Elasticsearch Publisher uses Bulk API to load data from JSON file. Elasticsearch publisher supports atomic operation by utilizing alias in Elasticsearch.
 A new index is created and data is uploaded into it. After the upload is complete, index alias is swapped to point to new index from old index and traffic is routed to new index.
 ```python
-tmp_folder = '/var/tmp/amundsen/dummy_metadata'
-node_files_folder = '{tmp_folder}/nodes/'.format(tmp_folder=tmp_folder)
-relationship_files_folder = '{tmp_folder}/relationships/'.format(tmp_folder=tmp_folder)
+data_file_path = '/var/tmp/amundsen/search_data.json'
 
 job_config = ConfigFactory.from_dict({
     'loader.filesystem.elasticsearch.{}'.format(FSElasticsearchJSONLoader.FILE_PATH_CONFIG_KEY): data_file_path,
@@ -1095,7 +1092,8 @@ job_config = ConfigFactory.from_dict({
     'publisher.elasticsearch{}'.format(ElasticsearchPublisher.ELASTICSEARCH_CLIENT_CONFIG_KEY): elasticsearch_client,
     'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_NEW_INDEX_CONFIG_KEY): elasticsearch_new_index,
     'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_DOC_TYPE_CONFIG_KEY): elasticsearch_doc_type,
-    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY): elasticsearch_index_alias,)
+    'publisher.elasticsearch.{}'.format(ElasticsearchPublisher.ELASTICSEARCH_ALIAS_CONFIG_KEY): elasticsearch_index_alias,
+})
 
 job = DefaultJob(
     conf=job_config,
