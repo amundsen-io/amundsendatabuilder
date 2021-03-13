@@ -9,3 +9,5 @@ SCHEMA_RELATION_TYPE = 'SCHEMA'
 SCHEMA_REVERSE_RELATION_TYPE = 'SCHEMA_OF'
 
 DATABASE_SCHEMA_KEY_FORMAT = '{db}://{cluster}.{schema}'
+
+SCHEMA_PATTERN_REGEX = '([a-z]+://[a-zA-Z0-9_-]+).[a-zA-Z0-9_.-]+'
