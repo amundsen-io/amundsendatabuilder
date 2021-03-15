@@ -53,21 +53,21 @@ class TestTableSerializable(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
-class RDSMovie(Base):
+class RDSMovie(Base):  # type: ignore
     __tablename__ = 'movie'
 
     rk = Column(String(128), primary_key=True)
     name = Column(String(128))
 
 
-class RDSActor(Base):
+class RDSActor(Base):  # type: ignore
     __tablename__ = 'actor'
 
     rk = Column(String(128), primary_key=True)
     name = Column(String(128))
 
 
-class RDSMovieActor(Base):
+class RDSMovieActor(Base):  # type: ignore
     __tablename__ = 'movie_actor'
 
     movie_rk = Column(String(128), ForeignKey('movie.rk'), primary_key=True)
