@@ -16,7 +16,7 @@ from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
 from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.schema.schema_constant import (
-    SCHEMA_NAME_ATTR, SCHEMA_NODE_LABEL, SCHEMA_PATTERN_REGEX,
+    SCHEMA_KEY_PATTERN_REGEX, SCHEMA_NAME_ATTR, SCHEMA_NODE_LABEL,
 )
 from databuilder.models.table_metadata import DescriptionMetadata
 from databuilder.models.table_serializable import TableSerializable
@@ -106,10 +106,10 @@ class SchemaModel(GraphSerializable, TableSerializable):
                                                  end_key=self._get_description_node_key())
 
     def _get_cluster_key(self, schema_key: str) -> str:
-        schema_key_pattern = re.compile(SCHEMA_PATTERN_REGEX)
-        schema_key_group = schema_key_pattern.search(schema_key)
-        if not schema_key_group:
+        schema_key_pattern = re.compile(SCHEMA_KEY_PATTERN_REGEX)
+        schema_key_match = schema_key_pattern.match(schema_key)
+        if not schema_key_match:
             raise Exception(f'{schema_key} does not match the schema key pattern')
 
-        cluster_key = schema_key_group.group(1)
+        cluster_key = schema_key_match.group(1)
         return cluster_key

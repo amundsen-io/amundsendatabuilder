@@ -180,6 +180,8 @@ class User(GraphSerializable, TableSerializable):
         }
 
         record = RDSUser(rk=User.get_user_model_key(email=self.email))
+        # set value for attributes of user record if the value is not empty
+        # or the flag allows to update empty values
         for attr, value in record_attr_map.items():
             if value or not self.do_not_update_empty_attribute:
                 record.__setattr__(attr.key, value)

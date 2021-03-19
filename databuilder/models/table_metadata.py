@@ -107,7 +107,7 @@ class TagMetadata(GraphSerializable, TableSerializable):
         node = self.get_node()
         yield node
 
-    def _create_relation_iterator(self) -> Iterator[RDSModel]:
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
         return
         yield
 
