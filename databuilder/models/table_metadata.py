@@ -179,13 +179,10 @@ class DescriptionMetadata(GraphSerializable):
         else:
             return "_" + self.source + "_description"
 
-    def get_description_default_key(self, start_key: str) -> Union[str, None]:
+    def get_description_default_key(self, start_key: Optional[str]) -> Optional[str]:
         return f'{start_key}/{self.get_description_id()}' if start_key else None
 
-    def __repr__(self) -> str:
-        return f'DescriptionMetadata({self.source!r}, {self.text!r})'
-
-    def get_node(self, node_key: str) -> GraphNode:
+    def get_node(self, node_key: Optional[str]) -> GraphNode:
         if not node_key:
             raise Exception('Required description node key cannot be None')
         node = GraphNode(
@@ -198,7 +195,11 @@ class DescriptionMetadata(GraphSerializable):
         )
         return node
 
-    def get_relation(self, start_node: str, start_key: Any, end_key: Any) -> GraphRelationship:
+    def get_relation(self,
+                     start_node: Optional[str],
+                     start_key: Optional[str],
+                     end_key: Optional[str]
+                     ) -> GraphRelationship:
         if not start_node:
             raise Exception('Required relation start node label cannot be None')
         if not start_key:
@@ -238,6 +239,9 @@ class DescriptionMetadata(GraphSerializable):
             start_key=self.start_key,
             end_key=self.description_key
         )
+
+    def __repr__(self) -> str:
+        return f'DescriptionMetadata({self.source!r}, {self.text!r})'
 
 
 class ColumnMetadata:

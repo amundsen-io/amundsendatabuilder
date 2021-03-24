@@ -30,7 +30,7 @@ class TestDescriptionMetadata(unittest.TestCase):
             DescriptionMetadata(text='test_text', description_key='test_key', start_label='Table').next_relation
         )
 
-    def test_serialize(self):
+    def test_serialize(self) -> None:
         description_metadata = DescriptionMetadata(
             text='test text 1',
             start_label='Table',
