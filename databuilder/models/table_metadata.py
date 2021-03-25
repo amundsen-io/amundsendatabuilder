@@ -182,9 +182,7 @@ class DescriptionMetadata(GraphSerializable):
     def get_description_default_key(self, start_key: Optional[str]) -> Optional[str]:
         return f'{start_key}/{self.get_description_id()}' if start_key else None
 
-    def get_node(self, node_key: Optional[str]) -> GraphNode:
-        if not node_key:
-            raise Exception('Required description node key cannot be None')
+    def get_node(self, node_key: str) -> GraphNode:
         node = GraphNode(
             key=node_key,
             label=self.label,
@@ -196,16 +194,10 @@ class DescriptionMetadata(GraphSerializable):
         return node
 
     def get_relation(self,
-                     start_node: Optional[str],
-                     start_key: Optional[str],
-                     end_key: Optional[str]
+                     start_node: str,
+                     start_key: str,
+                     end_key: str,
                      ) -> GraphRelationship:
-        if not start_node:
-            raise Exception('Required relation start node label cannot be None')
-        if not start_key:
-            raise Exception('Required relation start key cannot be None')
-        if not end_key:
-            raise Exception('Required relation end key cannot be None')
         relationship = GraphRelationship(
             start_label=start_node,
             start_key=start_key,
@@ -231,9 +223,17 @@ class DescriptionMetadata(GraphSerializable):
             return None
 
     def _create_node_iterator(self) -> Iterator[GraphNode]:
+        if not self.description_key:
+            raise Exception('Required description node key cannot be None')
         yield self.get_node(self.description_key)
 
     def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
+        if not self.start_label:
+            raise Exception('Required relation start node label cannot be None')
+        if not self.start_key:
+            raise Exception('Required relation start key cannot be None')
+        if not self.description_key:
+            raise Exception('Required relation end key cannot be None')
         yield self.get_relation(
             start_node=self.start_label,
             start_key=self.start_key,

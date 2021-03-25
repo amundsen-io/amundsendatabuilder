@@ -30,7 +30,7 @@ class TestDescriptionMetadata(unittest.TestCase):
             DescriptionMetadata(text='test_text', description_key='test_key', start_label='Table').next_relation
         )
 
-    def test_serialize(self) -> None:
+    def test_serialize_table_description_metadata(self) -> None:
         description_metadata = DescriptionMetadata(
             text='test text 1',
             start_label='Table',
@@ -60,6 +60,7 @@ class TestDescriptionMetadata(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
+    def test_serialize_column_description_metadata(self) -> None:
         description_metadata = DescriptionMetadata(
             text='test text 2',
             start_label='Column',
@@ -90,6 +91,7 @@ class TestDescriptionMetadata(unittest.TestCase):
         ]
         self.assertEqual(actual, expected)
 
+    def test_serialize_column_with_source_description_metadata(self) -> None:
         description_metadata = DescriptionMetadata(
             text='test text 3',
             start_label='Column',
