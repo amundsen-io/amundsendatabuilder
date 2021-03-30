@@ -40,9 +40,9 @@ class TableauGraphQLApiMetadataExtractor(TableauGraphQLApiExtractor):
                           if workbook['projectName'] not in
                           self._conf.get_list(TableauGraphQLApiMetadataExtractor.EXCLUDED_PROJECTS, [])]
         base_url = self._conf.get(TableauGraphQLApiMetadataExtractor.TABLEAU_BASE_URL)
-        site_name = self._conf.get_string(TableauGraphQLApiMetadataExtractor.SITE_NAME)
-        site_url_path = ""
-        if site_name != "":
+        site_name = self._conf.get_string(TableauGraphQLApiMetadataExtractor.SITE_NAME, '')
+        site_url_path = ''
+        if site_name != '':
             site_url_path = f'/site/{site_name}'
         for workbook in workbooks_data:
             if None in (workbook['projectName'], workbook['name']):
