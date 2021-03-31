@@ -251,6 +251,8 @@ class AtlasSearchDataExtractor(Extractor):
 
             return result
         except Exception:
+            LOGGER.warning(f'Error processing guids. {len(guid_list)}', exc_info=True)
+
             return []
 
     @staticmethod
