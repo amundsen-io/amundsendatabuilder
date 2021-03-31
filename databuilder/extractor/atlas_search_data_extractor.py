@@ -53,7 +53,6 @@ class AtlasSearchDataExtractorHelpers:
             [c.get('displayText') for c in meanings if c.get('entityStatus', '').lower() == 'active'])
 
 
-
 class AtlasSearchDataExtractor(Extractor):
     ATLAS_URL_CONFIG_KEY = 'atlas_url'
     ATLAS_PORT_CONFIG_KEY = 'atlas_port'
