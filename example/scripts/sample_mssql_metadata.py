@@ -8,6 +8,7 @@ without using an Airflow DAG.
 
 """
 
+import logging
 import sys
 import uuid
 

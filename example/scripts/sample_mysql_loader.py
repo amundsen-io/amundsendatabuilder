@@ -7,6 +7,7 @@ into Neo4j and Elasticsearch without using an Airflow DAG.
 
 """
 
+import logging
 import sys
 import textwrap
 import uuid
