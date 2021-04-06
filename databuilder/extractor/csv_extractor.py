@@ -13,13 +13,13 @@ from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
-def split_badge_list(badges: str, seperator: str) -> List[str]: 
+def split_badge_list(badges: str, seperator: str) -> List[str]:
     """
     Splits a string of badges into a list, removing all empty badges.
     """
     if badges is None:
         return []
-    
+
     return [badge for badge in badges.split(seperator) if badge]
 
 

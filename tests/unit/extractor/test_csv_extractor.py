@@ -7,10 +7,7 @@ from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.csv_extractor import (
-    CsvExtractor,
-    CsvTableBadgeExtractor,
-    CsvTableColumnExtractor,
-    split_badge_list
+    CsvExtractor, CsvTableBadgeExtractor, CsvTableColumnExtractor, split_badge_list,
 )
 from databuilder.models.badge import Badge
 
@@ -104,4 +101,3 @@ class TestCsvExtractor(unittest.TestCase):
         badge_list_3 = 'badge1|badge2|badge3'
         result_3 = split_badge_list(badges=badge_list_3, seperator='|')
         self.assertEqual(result_3, ['badge1', 'badge2', 'badge3'])
-
