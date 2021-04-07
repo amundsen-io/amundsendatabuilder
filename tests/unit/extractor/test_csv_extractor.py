@@ -91,13 +91,13 @@ class TestCsvExtractor(unittest.TestCase):
         Test spliting a string of badges into a list, removing all empty badges.
         """
         badge_list_1 = 'badge1'
-        result_1 = split_badge_list(badges=badge_list_1, seperator=',')
+        result_1 = split_badge_list(badges=badge_list_1, separator=',')
         self.assertEqual(result_1, ['badge1'])
 
         badge_list_2 = ''
-        result_2 = split_badge_list(badges=badge_list_2, seperator=',')
+        result_2 = split_badge_list(badges=badge_list_2, separator=',')
         self.assertEqual(result_2, [])
 
         badge_list_3 = 'badge1|badge2|badge3'
-        result_3 = split_badge_list(badges=badge_list_3, seperator='|')
+        result_3 = split_badge_list(badges=badge_list_3, separator='|')
         self.assertEqual(result_3, ['badge1', 'badge2', 'badge3'])
