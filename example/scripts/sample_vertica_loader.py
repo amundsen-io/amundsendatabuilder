@@ -56,6 +56,7 @@ neo4j_endpoint = NEO4J_ENDPOINT
 neo4j_user = 'neo4j'
 neo4j_password = 'test'
 
+LOGGER = logging.getLogger(__name__)
 
 # specify vertica access credentials, host server, port (default 5433),
 # database name (default 'vertica')
