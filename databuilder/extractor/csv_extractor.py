@@ -177,7 +177,6 @@ class CsvTableColumnExtractor(Extractor):
         """
         Create an iterator to execute sql.
         """
-
         with open(self.column_file_location, 'r') as fin:
             self.columns = [dict(i) for i in csv.DictReader(fin)]
 
@@ -239,7 +238,6 @@ class CsvTableColumnExtractor(Extractor):
 
     def get_scope(self) -> str:
         return 'extractor.csvtablecolumn'
-
 
 
 class CsvTableLineageExtractor(Extractor):
