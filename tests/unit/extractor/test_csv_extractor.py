@@ -6,7 +6,9 @@ import unittest
 from pyhocon import ConfigFactory
 
 from databuilder import Scoped
-from databuilder.extractor.csv_extractor import CsvExtractor, CsvTableColumnExtractor
+from databuilder.extractor.csv_extractor import (
+    CsvExtractor, CsvTableColumnExtractor, CsvTableLineageExtractor
+)
 from databuilder.models.badge import Badge
 
 
@@ -62,3 +64,20 @@ class TestCsvExtractor(unittest.TestCase):
         self.assertEqual(result.name, 'test_table1')
         self.assertEqual(result.columns[0].badges, [Badge('pk', 'column')])
         self.assertEqual(result.columns[1].badges, [Badge('pii', 'column')])
+
+    def test_extraction_table_lineage(self) -> None:
+        """
+        Test Extraction using model class
+        """
+        config_dict = {
+            f'extractor.csvtablelineage.{CsvTableLineageExtractor.TABLE_LINEAGE_FILE_LOCATION}': 
+                'example/sample_data/sample_table_lineage.csv'
+        }
+        self.conf = ConfigFactory.from_dict(config_dict)
+        extractor = CsvTableLineageExtractor()
+        extractor.init(Scoped.get_scoped_conf(conf=self.conf,
+                                              scope=extractor.get_scope()))
+
+        result = extractor.extract()
+        self.assertEqual(result.table_key, 'hive://gold.test_schema/test_table1')
+        self.assertEqual(result.downstream_deps, ['dynamo://gold.test_schema/test_table2'])

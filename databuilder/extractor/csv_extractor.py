@@ -11,6 +11,7 @@ from pyhocon import ConfigTree
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
+from databuilder.models.table_lineage import TableLineage
 
 
 class CsvExtractor(Extractor):
@@ -238,3 +239,56 @@ class CsvTableColumnExtractor(Extractor):
 
     def get_scope(self) -> str:
         return 'extractor.csvtablecolumn'
+
+
+
+class CsvTableLineageExtractor(Extractor):
+    # Config keys
+    TABLE_LINEAGE_FILE_LOCATION = 'table_lineage_file_location'
+
+    """
+    An Extractor that creates Table Lineage between two tables
+    """
+
+    def init(self, conf: ConfigTree) -> None:
+        """
+        :param conf:
+        """
+        self.conf = conf
+        self.table_lineage_file_location = conf.get_string(CsvTableLineageExtractor.TABLE_LINEAGE_FILE_LOCATION)
+        self._load_csv()
+
+    def _load_csv(self) -> None:
+        """
+        Create an iterator to execute sql.
+        """
+
+        with open(self.table_lineage_file_location, 'r') as fin:
+            self.table_lineage = [dict(i) for i in csv.DictReader(fin)]
+
+        results = []
+        for lineage_dict in self.table_lineage:
+            source_table_key = lineage_dict['source_table_key']
+            target_table_key = lineage_dict['target_table_key']
+            lineage = TableLineage(
+                table_key=source_table_key,
+                downstream_deps=[target_table_key]
+            )
+            results.append(lineage)
+
+        self._iter = iter(results)
+
+    def extract(self) -> Any:
+        """
+        Yield the csv result one at a time.
+        convert the result to model if a model_class is provided
+        """
+        try:
+            return next(self._iter)
+        except StopIteration:
+            return None
+        except Exception as e:
+            raise e
+
+    def get_scope(self) -> str:
+        return 'extractor.csvtablelineage'

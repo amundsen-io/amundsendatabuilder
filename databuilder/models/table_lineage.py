@@ -22,16 +22,10 @@ class TableLineage(GraphSerializable):
     DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'
 
     def __init__(self,
-                 db_name: str,
-                 schema: str,
-                 table_name: str,
-                 cluster: str,
-                 downstream_deps: List = None,
+                 table_key: str,
+                 downstream_deps: List = None, # List of table keys
                  ) -> None:
-        self.db = db_name
-        self.schema = schema
-        self.table = table_name
-        self.cluster = cluster if cluster else 'gold'
+        self.table_key = table_key
         # a list of downstream dependencies, each of which will follow
         # the same key
         self.downstream_deps = downstream_deps or []
@@ -51,14 +45,6 @@ class TableLineage(GraphSerializable):
         except StopIteration:
             return None
 
-    def get_table_model_key(self,
-                            db: str,
-                            cluster: str,
-                            schema: str,
-                            table: str
-                            ) -> str:
-        return f'{db}://{cluster}.{schema}/{table}'
-
     def _create_node_iterator(self) -> Iterator[GraphNode]:
         """
         It won't create any node for this model
@@ -72,32 +58,17 @@ class TableLineage(GraphSerializable):
         Create relations between source table and all the downstream tables
         :return:
         """
-        for downstream_tab in self.downstream_deps:
-            # every deps should follow '{db}://{cluster}.{schema}/{table}'
-            # todo: if we change the table uri, we should change here.
-            m = re.match('(\w+)://(\w+)\.(\w+)\/(\w+)', downstream_tab)
-            if m:
-                # if not match, skip those records
-                relationship = GraphRelationship(
-                    start_key=self.get_table_model_key(
-                        db=self.db,
-                        cluster=self.cluster,
-                        schema=self.schema,
-                        table=self.table
-                    ),
-                    start_label=TableMetadata.TABLE_NODE_LABEL,
-                    end_label=TableMetadata.TABLE_NODE_LABEL,
-                    end_key=self.get_table_model_key(
-                        db=m.group(1),
-                        cluster=m.group(2),
-                        schema=m.group(3),
-                        table=m.group(4)
-                    ),
-                    type=TableLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
-                    reverse_type=TableLineage.DEPENDENCY_ORIGIN_RELATION_TYPE,
-                    attributes={}
-                )
-                yield relationship
+        for downstream_key in self.downstream_deps:
+            relationship = GraphRelationship(
+                start_key=self.table_key,
+                start_label=TableMetadata.TABLE_NODE_LABEL,
+                end_label=TableMetadata.TABLE_NODE_LABEL,
+                end_key=downstream_key,
+                type=TableLineage.ORIGIN_DEPENDENCY_RELATION_TYPE,
+                reverse_type=TableLineage.DEPENDENCY_ORIGIN_RELATION_TYPE,
+                attributes={}
+            )
+            yield relationship
 
     def __repr__(self) -> str:
         return f'TableLineage({self.db!r}, {self.cluster!r}, {self.schema!r}, {self.table!r})'
