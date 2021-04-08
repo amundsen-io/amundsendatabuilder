@@ -30,8 +30,7 @@ from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
 from databuilder.extractor.csv_extractor import (
-    CsvExtractor, CsvTableBadgeExtractor, CsvTableColumnExtractor,
-    CsvColumnLineageExtractor, CsvTableLineageExtractor
+    CsvColumnLineageExtractor, CsvExtractor, CsvTableBadgeExtractor, CsvTableColumnExtractor, CsvTableLineageExtractor,
 )
 from databuilder.extractor.es_last_updated_extractor import EsLastUpdatedExtractor
 from databuilder.extractor.neo4j_search_data_extractor import Neo4jSearchDataExtractor

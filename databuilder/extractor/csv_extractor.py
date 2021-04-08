@@ -10,8 +10,8 @@ from pyhocon import ConfigTree
 
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.badge import Badge, BadgeMetadata
-from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 from databuilder.models.table_lineage import ColumnLineage, TableLineage
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
 class CsvExtractor(Extractor):

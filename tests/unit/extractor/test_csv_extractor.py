@@ -7,7 +7,7 @@ from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.csv_extractor import (
-    CsvExtractor, CsvTableColumnExtractor, CsvColumnLineageExtractor, CsvTableLineageExtractor
+    CsvColumnLineageExtractor, CsvExtractor, CsvTableColumnExtractor, CsvTableLineageExtractor,
 )
 from databuilder.models.badge import Badge
 
