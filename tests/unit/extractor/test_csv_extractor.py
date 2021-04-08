@@ -7,7 +7,7 @@ from pyhocon import ConfigFactory
 
 from databuilder import Scoped
 from databuilder.extractor.csv_extractor import (
-    CsvExtractor, CsvTableColumnExtractor, CsvTableLineageExtractor
+    CsvExtractor, CsvTableColumnExtractor, CsvColumnLineageExtractor, CsvTableLineageExtractor
 )
 from databuilder.models.badge import Badge
 
@@ -67,7 +67,7 @@ class TestCsvExtractor(unittest.TestCase):
 
     def test_extraction_table_lineage(self) -> None:
         """
-        Test Extraction using model class
+        Test table lineage extraction using model class
         """
         config_dict = {
             f'extractor.csvtablelineage.{CsvTableLineageExtractor.TABLE_LINEAGE_FILE_LOCATION}': 
@@ -81,3 +81,20 @@ class TestCsvExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertEqual(result.table_key, 'hive://gold.test_schema/test_table1')
         self.assertEqual(result.downstream_deps, ['dynamo://gold.test_schema/test_table2'])
+
+    def test_extraction_column_lineage(self) -> None:
+        """
+        Test column lineage extraction using model class
+        """
+        config_dict = {
+            f'extractor.csvcolumnlineage.{CsvColumnLineageExtractor.COLUMN_LINEAGE_FILE_LOCATION}': 
+                'example/sample_data/sample_column_lineage.csv'
+        }
+        self.conf = ConfigFactory.from_dict(config_dict)
+        extractor = CsvColumnLineageExtractor()
+        extractor.init(Scoped.get_scoped_conf(conf=self.conf,
+                                              scope=extractor.get_scope()))
+
+        result = extractor.extract()
+        self.assertEqual(result.column_key, 'hive://gold.test_schema/test_table1/col1')
+        self.assertEqual(result.downstream_deps, ['dynamo://gold.test_schema/test_table2/col1'])

@@ -11,7 +11,7 @@ from pyhocon import ConfigTree
 from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
-from databuilder.models.table_lineage import TableLineage
+from databuilder.models.table_lineage import ColumnLineage, TableLineage
 
 
 class CsvExtractor(Extractor):
@@ -290,3 +290,152 @@ class CsvTableLineageExtractor(Extractor):
 
     def get_scope(self) -> str:
         return 'extractor.csvtablelineage'
+
+
+
+class CsvTableColumnExtractor(Extractor):
+    # Config keys
+    TABLE_FILE_LOCATION = 'table_file_location'
+    COLUMN_FILE_LOCATION = 'column_file_location'
+
+    """
+    An Extractor that combines Table and Column CSVs.
+    """
+
+    def init(self, conf: ConfigTree) -> None:
+        """
+        :param conf:
+        """
+        self.conf = conf
+        self.table_file_location = conf.get_string(CsvTableColumnExtractor.TABLE_FILE_LOCATION)
+        self.column_file_location = conf.get_string(CsvTableColumnExtractor.COLUMN_FILE_LOCATION)
+        self._load_csv()
+
+    def _get_key(self,
+                 db: str,
+                 cluster: str,
+                 schema: str,
+                 tbl: str
+                 ) -> str:
+        return TableMetadata.TABLE_KEY_FORMAT.format(db=db,
+                                                     cluster=cluster,
+                                                     schema=schema,
+                                                     tbl=tbl)
+
+    def _load_csv(self) -> None:
+        """
+        Create an iterator to execute sql.
+        """
+        with open(self.column_file_location, 'r') as fin:
+            self.columns = [dict(i) for i in csv.DictReader(fin)]
+
+        parsed_columns = defaultdict(list)
+        for column_dict in self.columns:
+            db = column_dict['database']
+            cluster = column_dict['cluster']
+            schema = column_dict['schema']
+            table_name = column_dict['table_name']
+            id = self._get_key(db, cluster, schema, table_name)
+            column = ColumnMetadata(
+                name=column_dict['name'],
+                description=column_dict['description'],
+                col_type=column_dict['col_type'],
+                sort_order=int(column_dict['sort_order']),
+                badges=[column_dict['badges']]
+            )
+            parsed_columns[id].append(column)
+
+        # Create Table Dictionary
+        with open(self.table_file_location, 'r') as fin:
+            tables = [dict(i) for i in csv.DictReader(fin)]
+
+        results = []
+        for table_dict in tables:
+            db = table_dict['database']
+            cluster = table_dict['cluster']
+            schema = table_dict['schema']
+            table_name = table_dict['name']
+            id = self._get_key(db, cluster, schema, table_name)
+            columns = parsed_columns[id]
+            if columns is None:
+                columns = []
+            table = TableMetadata(database=table_dict['database'],
+                                  cluster=table_dict['cluster'],
+                                  schema=table_dict['schema'],
+                                  name=table_dict['name'],
+                                  description=table_dict['description'],
+                                  columns=columns,
+                                  # TODO: this possibly should parse stringified booleans;
+                                  # right now it only will be false for empty strings
+                                  is_view=bool(table_dict['is_view']),
+                                  tags=table_dict['tags']
+                                  )
+            results.append(table)
+        self._iter = iter(results)
+
+    def extract(self) -> Any:
+        """
+        Yield the csv result one at a time.
+        convert the result to model if a model_class is provided
+        """
+        try:
+            return next(self._iter)
+        except StopIteration:
+            return None
+        except Exception as e:
+            raise e
+
+    def get_scope(self) -> str:
+        return 'extractor.csvtablecolumn'
+
+
+class CsvColumnLineageExtractor(Extractor):
+    # Config keys
+    COLUMN_LINEAGE_FILE_LOCATION = 'column_lineage_file_location'
+
+    """
+    An Extractor that creates Column Lineage between two columns
+    """
+
+    def init(self, conf: ConfigTree) -> None:
+        """
+        :param conf:
+        """
+        self.conf = conf
+        self.column_lineage_file_location = conf.get_string(CsvColumnLineageExtractor.COLUMN_LINEAGE_FILE_LOCATION)
+        self._load_csv()
+
+    def _load_csv(self) -> None:
+        """
+        Create an iterator to execute sql.
+        """
+
+        with open(self.column_lineage_file_location, 'r') as fin:
+            self.column_lineage = [dict(i) for i in csv.DictReader(fin)]
+
+        results = []
+        for lineage_dict in self.column_lineage:
+            source_column_key = lineage_dict['source_column_key']
+            target_column_key = lineage_dict['target_column_key']
+            lineage = ColumnLineage(
+                column_key=source_column_key,
+                downstream_deps=[target_column_key]
+            )
+            results.append(lineage)
+
+        self._iter = iter(results)
+
+    def extract(self) -> Any:
+        """
+        Yield the csv result one at a time.
+        convert the result to model if a model_class is provided
+        """
+        try:
+            return next(self._iter)
+        except StopIteration:
+            return None
+        except Exception as e:
+            raise e
+
+    def get_scope(self) -> str:
+        return 'extractor.csvcolumnlineage'
