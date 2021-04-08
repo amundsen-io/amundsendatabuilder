@@ -70,7 +70,7 @@ class TestCsvExtractor(unittest.TestCase):
         Test table lineage extraction using model class
         """
         config_dict = {
-            f'extractor.csvtablelineage.{CsvTableLineageExtractor.TABLE_LINEAGE_FILE_LOCATION}': 
+            f'extractor.csvtablelineage.{CsvTableLineageExtractor.TABLE_LINEAGE_FILE_LOCATION}':
                 'example/sample_data/sample_table_lineage.csv'
         }
         self.conf = ConfigFactory.from_dict(config_dict)
@@ -87,7 +87,7 @@ class TestCsvExtractor(unittest.TestCase):
         Test column lineage extraction using model class
         """
         config_dict = {
-            f'extractor.csvcolumnlineage.{CsvColumnLineageExtractor.COLUMN_LINEAGE_FILE_LOCATION}': 
+            f'extractor.csvcolumnlineage.{CsvColumnLineageExtractor.COLUMN_LINEAGE_FILE_LOCATION}':
                 'example/sample_data/sample_column_lineage.csv'
         }
         self.conf = ConfigFactory.from_dict(config_dict)

@@ -1,7 +1,6 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-import re
 from typing import (
     Iterator, List, Union,
 )
@@ -22,7 +21,7 @@ class TableLineage(GraphSerializable):
 
     def __init__(self,
                  table_key: str,
-                 downstream_deps: List = None, # List of table keys
+                 downstream_deps: List = None,  # List of table keys
                  ) -> None:
         self.table_key = table_key
         # a list of downstream dependencies, each of which will follow
@@ -83,7 +82,7 @@ class ColumnLineage(GraphSerializable):
 
     def __init__(self,
                  column_key: str,
-                 downstream_deps: List = None, # List of column keys
+                 downstream_deps: List = None,  # List of column keys
                  ) -> None:
         self.column_key = column_key
         # a list of downstream dependencies, each of which will follow

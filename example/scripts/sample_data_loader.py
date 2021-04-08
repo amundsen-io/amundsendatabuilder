@@ -30,7 +30,7 @@ from pyhocon import ConfigFactory
 from sqlalchemy.ext.declarative import declarative_base
 
 from databuilder.extractor.csv_extractor import (
-    CsvExtractor, CsvTableBadgeExtractor, CsvTableColumnExtractor, 
+    CsvExtractor, CsvTableBadgeExtractor, CsvTableColumnExtractor,
     CsvColumnLineageExtractor, CsvTableLineageExtractor
 )
 from databuilder.extractor.es_last_updated_extractor import EsLastUpdatedExtractor
@@ -166,7 +166,6 @@ def run_table_column_job(table_path, column_path):
     job.launch()
 
 
-
 def run_table_lineage_job(table_lineage_path):
     tmp_folder = '/var/tmp/amundsen/table_column'
     node_files_folder = f'{tmp_folder}/nodes'
@@ -193,7 +192,6 @@ def run_table_lineage_job(table_lineage_path):
                      task=task,
                      publisher=Neo4jCsvPublisher())
     job.launch()
-
 
 
 def run_column_lineage_job(column_lineage_path):
