@@ -71,7 +71,7 @@ class TestTableOwner(unittest.TestCase):
     def test_create_nodes_neptune(self) -> None:
         expected_node1 = {
             NEPTUNE_HEADER_ID: "User:" + User.USER_NODE_KEY_FORMAT.format(email=owner1),
-            METADATA_KEY_PROPERTY_NAME: "User:" + User.USER_NODE_KEY_FORMAT.format(email=owner1),
+            METADATA_KEY_PROPERTY_NAME: User.USER_NODE_KEY_FORMAT.format(email=owner1),
             NEPTUNE_HEADER_LABEL: User.USER_NODE_LABEL,
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -79,7 +79,7 @@ class TestTableOwner(unittest.TestCase):
         }
         expected_node2 = {
             NEPTUNE_HEADER_ID: "User:" + User.USER_NODE_KEY_FORMAT.format(email=owner2),
-            METADATA_KEY_PROPERTY_NAME: "User:" + User.USER_NODE_KEY_FORMAT.format(email=owner2),
+            METADATA_KEY_PROPERTY_NAME: User.USER_NODE_KEY_FORMAT.format(email=owner2),
             NEPTUNE_HEADER_LABEL: User.USER_NODE_LABEL,
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

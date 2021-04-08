@@ -58,7 +58,7 @@ class TestDashboardLastModifiedTimestamp(unittest.TestCase):
         actual_neptune_serialized = neptune_serializer.convert_node(actual)
         neptune_expected = {
             NEPTUNE_HEADER_ID: 'Timestamp:' + self.expected_ts_key,
-            METADATA_KEY_PROPERTY_NAME: 'Timestamp:' + self.expected_ts_key,
+            METADATA_KEY_PROPERTY_NAME: self.expected_ts_key,
             NEPTUNE_HEADER_LABEL: 'Timestamp',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

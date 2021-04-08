@@ -43,7 +43,7 @@ class TestSchemaDescription(unittest.TestCase):
         schema_node = self.schema.create_next_node()
         expected_serialized_schema_node = {
             NEPTUNE_HEADER_ID: 'Schema:db://cluster.schema',
-            METADATA_KEY_PROPERTY_NAME: 'Schema:db://cluster.schema',
+            METADATA_KEY_PROPERTY_NAME: 'db://cluster.schema',
             NEPTUNE_HEADER_LABEL: 'Schema',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -57,7 +57,7 @@ class TestSchemaDescription(unittest.TestCase):
         schema_desc_node = self.schema.create_next_node()
         excepted_serialized_schema_desc_node = {
             NEPTUNE_HEADER_ID: 'Description:db://cluster.schema/_description',
-            METADATA_KEY_PROPERTY_NAME: 'Description:db://cluster.schema/_description',
+            METADATA_KEY_PROPERTY_NAME: 'db://cluster.schema/_description',
             NEPTUNE_HEADER_LABEL: 'Description',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

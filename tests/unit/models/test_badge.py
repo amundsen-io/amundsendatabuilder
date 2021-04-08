@@ -67,20 +67,21 @@ class TestBadge(unittest.TestCase):
             serialized_node = neptune_serializer.convert_node(node)
             actual.append(serialized_node)
             node = self.badge_metada.create_next_node()
-
-        node_id_1 = BadgeMetadata.BADGE_NODE_LABEL + ":" + BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge1.name)
+        node_key_1 = BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge1.name)
+        node_id_1 = BadgeMetadata.BADGE_NODE_LABEL + ":" + node_key_1
         expected_node1 = {
             NEPTUNE_HEADER_ID: node_id_1,
-            METADATA_KEY_PROPERTY_NAME: node_id_1,
+            METADATA_KEY_PROPERTY_NAME: node_key_1,
             NEPTUNE_HEADER_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
             BadgeMetadata.BADGE_CATEGORY + ':String(single)': badge1.category
         }
-        node_id_2 = BadgeMetadata.BADGE_NODE_LABEL + ":" + BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge2.name)
+        node_key_2 = BadgeMetadata.BADGE_KEY_FORMAT.format(badge=badge2.name)
+        node_id_2 = BadgeMetadata.BADGE_NODE_LABEL + ":" + node_key_2
         expected_node2 = {
             NEPTUNE_HEADER_ID: node_id_2,
-            METADATA_KEY_PROPERTY_NAME: node_id_2,
+            METADATA_KEY_PROPERTY_NAME: node_key_2,
             NEPTUNE_HEADER_LABEL: BadgeMetadata.BADGE_NODE_LABEL,
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

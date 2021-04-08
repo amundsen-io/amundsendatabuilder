@@ -87,7 +87,7 @@ class TestTableStats(unittest.TestCase):
 
         expected_neptune_nodes = [{
             NEPTUNE_HEADER_ID: 'Stat:hive://gold.base/test/col/avg/',
-            METADATA_KEY_PROPERTY_NAME: 'Stat:hive://gold.base/test/col/avg/',
+            METADATA_KEY_PROPERTY_NAME: 'hive://gold.base/test/col/avg/',
             NEPTUNE_HEADER_LABEL: 'Stat',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

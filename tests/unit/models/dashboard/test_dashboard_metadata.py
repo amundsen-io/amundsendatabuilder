@@ -396,7 +396,7 @@ class TestDashboardMetadata(unittest.TestCase):
         expected_neptune_nodes = [
             {
                 NEPTUNE_HEADER_ID: 'Cluster:_dashboard://gold',
-                METADATA_KEY_PROPERTY_NAME: 'Cluster:_dashboard://gold',
+                METADATA_KEY_PROPERTY_NAME: '_dashboard://gold',
                 NEPTUNE_HEADER_LABEL: 'Cluster',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -404,7 +404,7 @@ class TestDashboardMetadata(unittest.TestCase):
             },
             {
                 NEPTUNE_HEADER_ID: 'Dashboard:_dashboard://gold.Product - Jobs.cz/Agent',
-                METADATA_KEY_PROPERTY_NAME: 'Dashboard:_dashboard://gold.Product - Jobs.cz/Agent',
+                METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.Product - Jobs.cz/Agent',
                 NEPTUNE_HEADER_LABEL: 'Dashboard',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -414,7 +414,7 @@ class TestDashboardMetadata(unittest.TestCase):
             },
             {
                 NEPTUNE_HEADER_ID: 'Dashboardgroup:_dashboard://gold.Product - Jobs.cz',
-                METADATA_KEY_PROPERTY_NAME: 'Dashboardgroup:_dashboard://gold.Product - Jobs.cz',
+                METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.Product - Jobs.cz',
                 NEPTUNE_HEADER_LABEL: 'Dashboardgroup',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -423,7 +423,7 @@ class TestDashboardMetadata(unittest.TestCase):
             },
             {
                 NEPTUNE_HEADER_ID: 'Description:_dashboard://gold.Product - Jobs.cz/_description',
-                METADATA_KEY_PROPERTY_NAME: 'Description:_dashboard://gold.Product - Jobs.cz/_description',
+                METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.Product - Jobs.cz/_description',
                 NEPTUNE_HEADER_LABEL: 'Description',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -431,7 +431,7 @@ class TestDashboardMetadata(unittest.TestCase):
             },
             {
                 NEPTUNE_HEADER_ID: 'Description:_dashboard://gold.Product - Jobs.cz/Agent/_description',
-                METADATA_KEY_PROPERTY_NAME: 'Description:_dashboard://gold.Product - Jobs.cz/Agent/_description',
+                METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.Product - Jobs.cz/Agent/_description',
                 NEPTUNE_HEADER_LABEL: 'Description',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -439,7 +439,7 @@ class TestDashboardMetadata(unittest.TestCase):
             },
             {
                 NEPTUNE_HEADER_ID: 'Tag:test_tag',
-                METADATA_KEY_PROPERTY_NAME: 'Tag:test_tag',
+                METADATA_KEY_PROPERTY_NAME: 'test_tag',
                 NEPTUNE_HEADER_LABEL: 'Tag',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -447,7 +447,7 @@ class TestDashboardMetadata(unittest.TestCase):
             },
             {
                 NEPTUNE_HEADER_ID: 'Tag:tag2',
-                METADATA_KEY_PROPERTY_NAME: 'Tag:tag2',
+                METADATA_KEY_PROPERTY_NAME: 'tag2',
                 NEPTUNE_HEADER_LABEL: 'Tag',
                 NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
                 NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

@@ -69,7 +69,7 @@ class TestTableLastUpdated(unittest.TestCase):
         node_id = TableLastUpdated.LAST_UPDATED_NODE_LABEL + ":" + self.tableLastUpdated.get_last_updated_model_key()
         expected_nodes = [{
             NEPTUNE_HEADER_ID: node_id,
-            METADATA_KEY_PROPERTY_NAME: node_id,
+            METADATA_KEY_PROPERTY_NAME: self.tableLastUpdated.get_last_updated_model_key(),
             NEPTUNE_HEADER_LABEL: TableLastUpdated.LAST_UPDATED_NODE_LABEL,
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

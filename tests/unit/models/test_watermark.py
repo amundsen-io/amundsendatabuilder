@@ -103,7 +103,7 @@ class TestWatermark(unittest.TestCase):
     def test_create_nodes_neptune(self) -> None:
         expected_serialized_node_results = [{
             NEPTUNE_HEADER_ID: 'Watermark:' + self.start_key,
-            METADATA_KEY_PROPERTY_NAME: 'Watermark:' + self.start_key,
+            METADATA_KEY_PROPERTY_NAME: self.start_key,
             NEPTUNE_HEADER_LABEL: 'Watermark',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

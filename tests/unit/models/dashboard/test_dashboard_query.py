@@ -51,7 +51,7 @@ class TestDashboardQuery(unittest.TestCase):
         actual_serialized = neptune_serializer.convert_node(actual)
         neptune_expected = {
             NEPTUNE_HEADER_ID: 'Query:_dashboard://gold.dg_id/d_id/query/q_id',
-            METADATA_KEY_PROPERTY_NAME: 'Query:_dashboard://gold.dg_id/d_id/query/q_id',
+            METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.dg_id/d_id/query/q_id',
             NEPTUNE_HEADER_LABEL: DashboardQuery.DASHBOARD_QUERY_LABEL,
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

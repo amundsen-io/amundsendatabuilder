@@ -77,9 +77,10 @@ class TestApplication(unittest.TestCase):
             next_node = self.application.create_next_node()
 
         node_id = 'Application:application://gold.airflow/event_test/hive.default.test_table'
+        node_key = 'application://gold.airflow/event_test/hive.default.test_table'
         neptune_expected = [{
             NEPTUNE_HEADER_ID: node_id,
-            METADATA_KEY_PROPERTY_NAME: node_id,
+            METADATA_KEY_PROPERTY_NAME: node_key,
             NEPTUNE_HEADER_LABEL: 'Application',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,

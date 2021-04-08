@@ -123,7 +123,7 @@ def convert_node(node: Optional[GraphNode]) -> Dict[str, Any]:
     node_id = get_node_id(node)
     node_dict = {
         NEPTUNE_HEADER_ID: node_id,
-        METADATA_KEY_PROPERTY_NAME: node_id,
+        METADATA_KEY_PROPERTY_NAME: node.key,
         NEPTUNE_HEADER_LABEL: node.label,
         NEPTUNE_LAST_EXTRACTED_AT_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: current_string_time,
         NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB

@@ -46,7 +46,7 @@ class TestDashboardChart(unittest.TestCase):
         }
         neptune_expected = {
             '~id': 'Chart:_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
-            METADATA_KEY_PROPERTY_NAME: 'Chart:_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
+            METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
             '~label': 'Chart',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
             NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
@@ -80,7 +80,7 @@ class TestDashboardChart(unittest.TestCase):
         }
         neptune_expected2 = {
             '~id': 'Chart:_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
-            METADATA_KEY_PROPERTY_NAME: 'Chart:_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
+            METADATA_KEY_PROPERTY_NAME: '_dashboard://gold.dg_id/d_id/query/q_id/chart/c_id',
             '~label': 'Chart',
             'id:String(single)': 'c_id',
             NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
