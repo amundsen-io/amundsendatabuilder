@@ -1,6 +1,7 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
+from abc import abstractmethod
 from typing import (
     Iterator, List, Union,
 )
@@ -19,7 +20,7 @@ class BaseLineage(GraphSerializable):
     ORIGIN_DEPENDENCY_RELATION_TYPE = 'HAS_DOWNSTREAM'
     DEPENDENCY_ORIGIN_RELATION_TYPE = 'HAS_UPSTREAM'
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._node_iter = self._create_node_iterator()
         self._relation_iter = self._create_rel_iterator()
 
@@ -43,6 +44,10 @@ class BaseLineage(GraphSerializable):
         """
         return
         yield
+
+    @abstractmethod
+    def _create_rel_iterator(self) -> Iterator[GraphRelationship]:
+        pass
 
 
 class TableLineage(BaseLineage):
