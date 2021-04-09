@@ -11,22 +11,15 @@ from databuilder.models.graph_serializable import GraphSerializable
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 
-class TableLineage(GraphSerializable):
+class BaseLineage(GraphSerializable):
     """
-    Table Lineage Model. It won't create nodes but create upstream/downstream rels.
+    Generic Lineage Interface
     """
     LABEL = 'Lineage'
-    ORIGIN_DEPENDENCY_RELATION_TYPE = 'UPSTREAM'
-    DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'
+    ORIGIN_DEPENDENCY_RELATION_TYPE = 'HAS_DOWNSTREAM'
+    DEPENDENCY_ORIGIN_RELATION_TYPE = 'HAS_UPSTREAM'
 
-    def __init__(self,
-                 table_key: str,
-                 downstream_deps: List = None,  # List of table keys
-                 ) -> None:
-        self.table_key = table_key
-        # a list of downstream dependencies, each of which will follow
-        # the same key
-        self.downstream_deps = downstream_deps or []
+    def __init__(self):
         self._node_iter = self._create_node_iterator()
         self._relation_iter = self._create_rel_iterator()
 
@@ -50,6 +43,22 @@ class TableLineage(GraphSerializable):
         """
         return
         yield
+
+    
+class TableLineage(BaseLineage):
+    """
+    Table Lineage Model. It won't create nodes but create upstream/downstream rels.
+    """
+
+    def __init__(self,
+                 table_key: str,
+                 downstream_deps: List = None,  # List of table keys
+                 ) -> None:
+        self.table_key = table_key
+        # a list of downstream dependencies, each of which will follow
+        # the same key
+        self.downstream_deps = downstream_deps or []
+        super().__init__()
 
     def _create_rel_iterator(self) -> Iterator[GraphRelationship]:
         """
@@ -72,14 +81,10 @@ class TableLineage(GraphSerializable):
         return f'TableLineage({self.table_key!r})'
 
 
-class ColumnLineage(GraphSerializable):
+class ColumnLineage(BaseLineage):
     """
     Column Lineage Model. It won't create nodes but create upstream/downstream rels.
     """
-    LABEL = 'Lineage'
-    ORIGIN_DEPENDENCY_RELATION_TYPE = 'UPSTREAM'
-    DEPENDENCY_ORIGIN_RELATION_TYPE = 'DOWNSTREAM'
-
     def __init__(self,
                  column_key: str,
                  downstream_deps: List = None,  # List of column keys
@@ -88,33 +93,11 @@ class ColumnLineage(GraphSerializable):
         # a list of downstream dependencies, each of which will follow
         # the same key
         self.downstream_deps = downstream_deps or []
-        self._node_iter = self._create_node_iterator()
-        self._relation_iter = self._create_rel_iterator()
-
-    def create_next_node(self) -> Union[GraphNode, None]:
-        # return the string representation of the data
-        try:
-            return next(self._node_iter)
-        except StopIteration:
-            return None
-
-    def create_next_relation(self) -> Union[GraphRelationship, None]:
-        try:
-            return next(self._relation_iter)
-        except StopIteration:
-            return None
-
-    def _create_node_iterator(self) -> Iterator[GraphNode]:
-        """
-        It won't create any node for this model
-        :return:
-        """
-        return
-        yield
+        super().__init__()
 
     def _create_rel_iterator(self) -> Iterator[GraphRelationship]:
         """
-        Create relations between source table and all the downstream tables
+        Create relations between source column and all the downstream columns
         :return:
         """
         for downstream_key in self.downstream_deps:
