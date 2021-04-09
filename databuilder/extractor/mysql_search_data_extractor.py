@@ -219,9 +219,10 @@ def _dashboard_search_query(session: Session, dashboard_filter: List, offset: in
     # execution
     query = query.options(
         subqueryload(Dashboard.execution).options(
-            load_only(DashboardExecution.rk)
+            load_only(DashboardExecution.rk, DashboardExecution.timestamp)
         )
     )
+
     # usage
     query = query.options(
         subqueryload(Dashboard.usage).options(
