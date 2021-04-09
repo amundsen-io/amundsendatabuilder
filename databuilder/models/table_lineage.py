@@ -44,7 +44,7 @@ class BaseLineage(GraphSerializable):
         return
         yield
 
-    
+
 class TableLineage(BaseLineage):
     """
     Table Lineage Model. It won't create nodes but create upstream/downstream rels.
