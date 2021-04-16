@@ -4,7 +4,7 @@
 
 from setuptools import find_packages, setup
 
-__version__ = '4.2.2'
+__version__ = '4.3.0'
 
 
 requirements = [
@@ -63,7 +63,7 @@ spark = [
 ]
 
 neptune = [
-    'amundsen-gremlin>=0.0.5',
+    'amundsen-gremlin>=0.0.9',
     'Flask==1.0.2',
     'gremlinpython==3.4.3',
     'requests-aws4auth==0.9',
