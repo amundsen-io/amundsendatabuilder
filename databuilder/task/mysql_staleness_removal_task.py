@@ -56,9 +56,6 @@ class MySQLStalenessRemovalTask(Task):
                                               DRY_RUN: False,
                                               ENGINE_ECHO: False})
 
-    def __init__(self) -> None:
-        pass
-
     def get_scope(self) -> str:
         return 'task.mysql_remove_stale_data'
 
