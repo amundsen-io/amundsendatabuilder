@@ -4,7 +4,7 @@
 import csv
 import importlib
 from collections import defaultdict
-from typing import Any
+from typing import Any, List
 
 from pyhocon import ConfigTree
 
@@ -12,6 +12,16 @@ from databuilder.extractor.base_extractor import Extractor
 from databuilder.models.badge import Badge, BadgeMetadata
 from databuilder.models.table_lineage import ColumnLineage, TableLineage
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
+
+
+def split_badge_list(badges: str, separator: str) -> List[str]:
+    """
+    Splits a string of badges into a list, removing all empty badges.
+    """
+    if badges is None:
+        return []
+
+    return [badge for badge in badges.split(separator) if badge]
 
 
 class CsvExtractor(Extractor):
@@ -71,6 +81,7 @@ class CsvTableBadgeExtractor(Extractor):
     # Config keys
     TABLE_FILE_LOCATION = 'table_file_location'
     BADGE_FILE_LOCATION = 'badge_file_location'
+    BADGE_SEPARATOR = 'badge_separator'
 
     """
     An Extractor that combines Table and Badge CSVs.
@@ -79,6 +90,7 @@ class CsvTableBadgeExtractor(Extractor):
         self.conf = conf
         self.table_file_location = conf.get_string(CsvTableBadgeExtractor.TABLE_FILE_LOCATION)
         self.badge_file_location = conf.get_string(CsvTableBadgeExtractor.BADGE_FILE_LOCATION)
+        self.badge_separator = conf.get_string(CsvTableBadgeExtractor.BADGE_SEPARATOR, default=',')
         self._load_csv()
 
     def _get_key(self,
@@ -104,9 +116,11 @@ class CsvTableBadgeExtractor(Extractor):
             schema = badge_dict['schema']
             table_name = badge_dict['table_name']
             id = self._get_key(db, cluster, schema, table_name)
-            badge = Badge(name=badge_dict['name'],
-                          category=badge_dict['category'])
-            parsed_badges[id].append(badge)
+            split_badges = split_badge_list(badges=badge_dict['name'],
+                                            separator=self.badge_separator)
+            for badge_name in split_badges:
+                badge = Badge(name=badge_name, category=badge_dict['category'])
+                parsed_badges[id].append(badge)
 
         with open(self.table_file_location, 'r') as fin:
             tables = [dict(i) for i in csv.DictReader(fin)]
@@ -148,6 +162,7 @@ class CsvTableColumnExtractor(Extractor):
     # Config keys
     TABLE_FILE_LOCATION = 'table_file_location'
     COLUMN_FILE_LOCATION = 'column_file_location'
+    BADGE_SEPARATOR = 'badge_separator'
 
     """
     An Extractor that combines Table and Column CSVs.
@@ -160,6 +175,7 @@ class CsvTableColumnExtractor(Extractor):
         self.conf = conf
         self.table_file_location = conf.get_string(CsvTableColumnExtractor.TABLE_FILE_LOCATION)
         self.column_file_location = conf.get_string(CsvTableColumnExtractor.COLUMN_FILE_LOCATION)
+        self.badge_separator = conf.get_string(CsvTableBadgeExtractor.BADGE_SEPARATOR, default=',')
         self._load_csv()
 
     def _get_key(self,
@@ -187,12 +203,14 @@ class CsvTableColumnExtractor(Extractor):
             schema = column_dict['schema']
             table_name = column_dict['table_name']
             id = self._get_key(db, cluster, schema, table_name)
+            split_badges = split_badge_list(badges=column_dict['badges'],
+                                            separator=self.badge_separator)
             column = ColumnMetadata(
                 name=column_dict['name'],
                 description=column_dict['description'],
                 col_type=column_dict['col_type'],
                 sort_order=int(column_dict['sort_order']),
-                badges=[column_dict['badges']]
+                badges=split_badges
             )
             parsed_columns[id].append(column)
 
