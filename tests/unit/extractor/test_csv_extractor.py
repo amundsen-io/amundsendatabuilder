@@ -85,6 +85,7 @@ class TestCsvExtractor(unittest.TestCase):
         self.assertEqual(result.name, 'test_table1')
         self.assertEqual(result.columns[0].badges, [Badge('pk', 'column')])
         self.assertEqual(result.columns[1].badges, [Badge('pii', 'column')])
+        self.assertEqual(result.columns[2].badges, [Badge('fk', 'column'), Badge('pii', 'column')])
 
     def test_extraction_table_lineage(self) -> None:
         """
@@ -119,8 +120,6 @@ class TestCsvExtractor(unittest.TestCase):
         result = extractor.extract()
         self.assertEqual(result.column_key, 'hive://gold.test_schema/test_table1/col1')
         self.assertEqual(result.downstream_deps, ['dynamo://gold.test_schema/test_table2/col1'])
-
-        self.assertEqual(result.columns[2].badges, [Badge('fk', 'column'), Badge('pii', 'column')])
 
     def test_split_badge_list(self) -> None:
         """
