@@ -1,12 +1,18 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
 import re
+from typing import (
+    Iterator, List, Optional, Union,
+)
 
-from databuilder.models.graph_serializable import GraphSerializable
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.badge import Badge as RDSBadge
+
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_serializable import TableSerializable
 
 
 class Badge:
@@ -15,11 +21,16 @@ class Badge:
         self.category = category
 
     def __repr__(self) -> str:
-        return 'Badge({!r}, {!r})'.format(self.name,
-                                          self.category)
+        return f'Badge({self.name!r}, {self.category!r})'
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Badge):
+            return NotImplemented
+        return self.name == other.name and \
+            self.category == other.category
 
 
-class BadgeMetadata(GraphSerializable):
+class BadgeMetadata(GraphSerializable, TableSerializable):
     """
     Badge model.
     """
@@ -55,12 +66,12 @@ class BadgeMetadata(GraphSerializable):
         else:
             raise Exception(start_label + ' is not a valid start_label for a Badge relation')
 
-        self._node_iter = iter(self.create_nodes())
-        self._relation_iter = iter(self.create_relation())
+        self._node_iter = self._create_node_iterator()
+        self._relation_iter = self._create_relation_iterator()
+        self._record_iter = self._create_record_iterator()
 
     def __repr__(self) -> str:
-        return 'BadgeMetadata({!r}, {!r})'.format(self.start_label,
-                                                  self.start_key)
+        return f'BadgeMetadata({self.start_label!r}, {self.start_key!r})'
 
     def create_next_node(self) -> Optional[GraphNode]:
         # return the string representation of the data
@@ -75,6 +86,12 @@ class BadgeMetadata(GraphSerializable):
         except StopIteration:
             return None
 
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iter)
+        except StopIteration:
+            return None
+
     @staticmethod
     def get_badge_key(name: str) -> str:
         if not name:
@@ -84,12 +101,8 @@ class BadgeMetadata(GraphSerializable):
     def get_metadata_model_key(self) -> str:
         return self.start_key
 
-    def create_nodes(self) -> List[GraphNode]:
-        """
-        Create a list of Neo4j node records
-        :return:
-        """
-        results = []
+    def get_badge_nodes(self) -> List[GraphNode]:
+        nodes = []
         for badge in self.badges:
             if badge:
                 node = GraphNode(
@@ -99,11 +112,11 @@ class BadgeMetadata(GraphSerializable):
                         self.BADGE_CATEGORY: badge.category
                     }
                 )
-                results.append(node)
-        return results
+                nodes.append(node)
+        return nodes
 
-    def create_relation(self) -> List[GraphRelationship]:
-        results = []
+    def get_badge_relations(self) -> List[GraphRelationship]:
+        relations = []
         for badge in self.badges:
             relation = GraphRelationship(
                 start_label=self.start_label,
@@ -114,5 +127,36 @@ class BadgeMetadata(GraphSerializable):
                 reverse_type=self.INVERSE_BADGE_RELATION_TYPE,
                 attributes={}
             )
-            results.append(relation)
-        return results
+            relations.append(relation)
+        return relations
+
+    def get_badge_records(self) -> List[RDSModel]:
+        records = []
+        for badge in self.badges:
+            if badge:
+                record = RDSBadge(
+                    rk=self.get_badge_key(badge.name),
+                    category=badge.category
+                )
+                records.append(record)
+
+        return records
+
+    def _create_node_iterator(self) -> Iterator[GraphNode]:
+        """
+        Create badge nodes
+        :return:
+        """
+        nodes = self.get_badge_nodes()
+        for node in nodes:
+            yield node
+
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
+        relations = self.get_badge_relations()
+        for relation in relations:
+            yield relation
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        records = self.get_badge_records()
+        for record in records:
+            yield record

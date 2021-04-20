@@ -2,18 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from typing import Any, Dict, Iterator
+from typing import (
+    Any, Dict, Iterator,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
-    TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import (
+    TableauDashboardUtils, TableauGraphQLApiExtractor,
+)
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
 from databuilder.transformer.base_transformer import ChainedTransformer
-from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
+from databuilder.transformer.dict_to_model import MODEL_CLASS, DictToModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +36,7 @@ class TableauGraphQLApiQueryExtractor(TableauGraphQLApiExtractor):
         for query in response['customSQLTables']:
             for workbook in query['downstreamWorkbooks']:
                 if workbook['projectName'] not in \
-                        self._conf.get_list(TableauGraphQLApiQueryExtractor.EXCLUDED_PROJECTS):
+                        self._conf.get_list(TableauGraphQLApiQueryExtractor.EXCLUDED_PROJECTS, []):
                     data = {
                         'dashboard_group_id': workbook['projectName'],
                         'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
@@ -94,7 +97,7 @@ class TableauDashboardQueryExtractor(Extractor):
         if not record:
             return None
 
-        return self._transformer.transform(record=record)
+        return next(self._transformer.transform(record=record), None)
 
     def get_scope(self) -> str:
         return 'extractor.tableau_dashboard_query'

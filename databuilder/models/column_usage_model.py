@@ -1,20 +1,23 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Union, Iterable, List
+from typing import Iterator, Union
 
-from databuilder.models.graph_serializable import GraphSerializable
-from databuilder.models.usage.usage_constants import (
-    READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE, READ_RELATION_COUNT_PROPERTY
-)
-from databuilder.models.table_metadata import TableMetadata
-from databuilder.models.user import User
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.table import TableUsage as RDSTableUsage
+
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_metadata import TableMetadata
+from databuilder.models.table_serializable import TableSerializable
+from databuilder.models.usage.usage_constants import (
+    READ_RELATION_COUNT_PROPERTY, READ_RELATION_TYPE, READ_REVERSE_RELATION_TYPE,
+)
+from databuilder.models.user import User
 
 
-class ColumnUsageModel(GraphSerializable):
-
+class ColumnUsageModel(GraphSerializable, TableSerializable):
     """
     A model represents user <--> column graph model
     Currently it only support to serialize to table level
@@ -45,8 +48,9 @@ class ColumnUsageModel(GraphSerializable):
         self.user_email = user_email
         self.read_count = int(read_count)
 
-        self._node_iter = iter(self.create_nodes())
-        self._relation_iter = iter(self.create_relation())
+        self._node_iter = self._create_node_iterator()
+        self._relation_iter = self._create_relation_iterator()
+        self._record_iter = self._create_record_iterator()
 
     def create_next_node(self) -> Union[GraphNode, None]:
 
@@ -55,13 +59,13 @@ class ColumnUsageModel(GraphSerializable):
         except StopIteration:
             return None
 
-    def create_nodes(self) -> List[GraphNode]:
+    def _create_node_iterator(self) -> Iterator[GraphNode]:
         """
-        Create a list of Neo4j node records
+        Create an user node
         :return:
         """
-
-        return User(email=self.user_email).create_nodes()
+        user_node = User(email=self.user_email).get_user_node()
+        yield user_node
 
     def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
@@ -69,7 +73,7 @@ class ColumnUsageModel(GraphSerializable):
         except StopIteration:
             return None
 
-    def create_relation(self) -> Iterable[GraphRelationship]:
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
         relationship = GraphRelationship(
             start_key=self._get_table_key(),
             start_label=TableMetadata.TABLE_NODE_LABEL,
@@ -81,7 +85,24 @@ class ColumnUsageModel(GraphSerializable):
                 ColumnUsageModel.READ_RELATION_COUNT: self.read_count
             }
         )
-        return [relationship]
+        yield relationship
+
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iter)
+        except StopIteration:
+            return None
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        user_record = User(email=self.user_email).get_user_record()
+        yield user_record
+
+        table_usage_record = RDSTableUsage(
+            user_rk=self._get_user_key(self.user_email),
+            table_rk=self._get_table_key(),
+            read_count=self.read_count
+        )
+        yield table_usage_record
 
     def _get_table_key(self) -> str:
         return TableMetadata.TABLE_KEY_FORMAT.format(db=self.database,
@@ -93,10 +114,5 @@ class ColumnUsageModel(GraphSerializable):
         return User.get_user_model_key(email=email)
 
     def __repr__(self) -> str:
-        return 'TableColumnUsage({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(self.database,
-                                                                                   self.cluster,
-                                                                                   self.schema,
-                                                                                   self.table_name,
-                                                                                   self.column_name,
-                                                                                   self.user_email,
-                                                                                   self.read_count)
+        return f'TableColumnUsage({self.database!r}, {self.cluster!r}, {self.schema!r}, ' \
+               f'{self.table_name!r}, {self.column_name!r}, {self.user_email!r}, {self.read_count!r})'

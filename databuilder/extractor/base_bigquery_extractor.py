@@ -4,16 +4,17 @@
 import json
 import logging
 from collections import namedtuple
+from typing import (
+    Any, Dict, Iterator, List,
+)
 
 import google.oauth2.service_account
 import google_auth_httplib2
-from googleapiclient.discovery import build
 import httplib2
+from googleapiclient.discovery import build
 from pyhocon import ConfigTree
-from typing import Any, Dict, Iterator, List
 
 from databuilder.extractor.base_extractor import Extractor
-
 
 DatasetRef = namedtuple('DatasetRef', ['datasetId', 'projectId'])
 TableKey = namedtuple('TableKey', ['schema', 'table_name'])
@@ -32,7 +33,6 @@ class BaseBigQueryExtractor(Extractor):
     DEFAULT_PAGE_SIZE = 300
     NUM_RETRIES = 3
     DATE_LENGTH = 8
-    SHARDED_TABLE_KEY_FORMAT = '{dataset_id}/{table_id}'
 
     def init(self, conf: ConfigTree) -> None:
         # should use key_path, or cred_key if the former doesn't exist

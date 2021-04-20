@@ -2,15 +2,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import unittest
-from databuilder.models.user import User
+from unittest.mock import ANY
+
+from databuilder.models.graph_serializable import (
+    NODE_KEY, NODE_LABEL, RELATION_END_KEY, RELATION_END_LABEL, RELATION_REVERSE_TYPE, RELATION_START_KEY,
+    RELATION_START_LABEL, RELATION_TYPE,
+)
 from databuilder.models.table_owner import TableOwner
-
-
-from databuilder.models.graph_serializable import NODE_KEY, NODE_LABEL, \
-    RELATION_START_KEY, RELATION_START_LABEL, RELATION_END_KEY, \
-    RELATION_END_LABEL, RELATION_TYPE, RELATION_REVERSE_TYPE
-from databuilder.serializers import neo4_serializer
-
+from databuilder.models.user import User
+from databuilder.serializers import (
+    mysql_serializer, neo4_serializer, neptune_serializer,
+)
+from databuilder.serializers.neptune_serializer import (
+    METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT, NEPTUNE_CREATION_TYPE_JOB,
+    NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT,
+    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT, NEPTUNE_HEADER_ID, NEPTUNE_HEADER_LABEL,
+    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT, NEPTUNE_RELATIONSHIP_HEADER_FROM,
+    NEPTUNE_RELATIONSHIP_HEADER_TO,
+)
 
 db = 'hive'
 SCHEMA = 'BASE'
@@ -39,9 +48,6 @@ class TestTableOwner(unittest.TestCase):
         self.assertEqual(metadata, 'hive://DEFAULT.BASE/TEST')
 
     def test_create_nodes(self) -> None:
-        nodes = self.table_owner.create_nodes()
-        self.assertEqual(len(nodes), 2)
-
         expected_node1 = {
             NODE_KEY: User.USER_NODE_KEY_FORMAT.format(email=owner1),
             NODE_LABEL: User.USER_NODE_LABEL,
@@ -52,18 +58,46 @@ class TestTableOwner(unittest.TestCase):
             NODE_LABEL: User.USER_NODE_LABEL,
             User.USER_NODE_EMAIL: owner2
         }
-        actual_nodes = [
-            neo4_serializer.serialize_node(node)
-            for node in nodes
-        ]
+        expected = [expected_node1, expected_node2]
 
-        self.assertTrue(expected_node1 in actual_nodes)
-        self.assertTrue(expected_node2 in actual_nodes)
+        actual = []
+        node = self.table_owner.create_next_node()
+        while node:
+            serialized_node = neo4_serializer.serialize_node(node)
+            actual.append(serialized_node)
+            node = self.table_owner.create_next_node()
+
+        self.assertEqual(actual, expected)
+
+    def test_create_nodes_neptune(self) -> None:
+        expected_node1 = {
+            NEPTUNE_HEADER_ID: "User:" + User.USER_NODE_KEY_FORMAT.format(email=owner1),
+            METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT: User.USER_NODE_KEY_FORMAT.format(email=owner1),
+            NEPTUNE_HEADER_LABEL: User.USER_NODE_LABEL,
+            NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+            NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
+            User.USER_NODE_EMAIL + ":String(single)": owner1
+        }
+        expected_node2 = {
+            NEPTUNE_HEADER_ID: "User:" + User.USER_NODE_KEY_FORMAT.format(email=owner2),
+            METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT: User.USER_NODE_KEY_FORMAT.format(email=owner2),
+            NEPTUNE_HEADER_LABEL: User.USER_NODE_LABEL,
+            NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+            NEPTUNE_CREATION_TYPE_NODE_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB,
+            User.USER_NODE_EMAIL + ":String(single)": owner2
+        }
+        expected = [expected_node1, expected_node2]
+
+        actual = []
+        node = self.table_owner.create_next_node()
+        while node:
+            serialized_node = neptune_serializer.convert_node(node)
+            actual.append(serialized_node)
+            node = self.table_owner.create_next_node()
+
+        self.assertEqual(actual, expected)
 
     def test_create_relation(self) -> None:
-        relations = self.table_owner.create_relation()
-        self.assertEqual(len(relations), 2)
-
         expected_relation1 = {
             RELATION_START_KEY: owner1,
             RELATION_START_LABEL: User.USER_NODE_LABEL,
@@ -80,14 +114,130 @@ class TestTableOwner(unittest.TestCase):
             RELATION_TYPE: TableOwner.OWNER_TABLE_RELATION_TYPE,
             RELATION_REVERSE_TYPE: TableOwner.TABLE_OWNER_RELATION_TYPE
         }
+        expected = [expected_relation1, expected_relation2]
 
-        actual_relations = [
-            neo4_serializer.serialize_relationship(relation)
-            for relation in relations
+        actual = []
+        relation = self.table_owner.create_next_relation()
+        while relation:
+            serialized_relation = neo4_serializer.serialize_relationship(relation)
+            actual.append(serialized_relation)
+            relation = self.table_owner.create_next_relation()
+
+        self.assertEqual(actual, expected)
+
+    def test_create_relation_neptune(self) -> None:
+        expected = [
+            [
+                {
+                    NEPTUNE_HEADER_ID: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="User:" + owner1,
+                        to_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        label=TableOwner.OWNER_TABLE_RELATION_TYPE
+                    ),
+                    METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="User:" + owner1,
+                        to_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        label=TableOwner.OWNER_TABLE_RELATION_TYPE
+                    ),
+                    NEPTUNE_RELATIONSHIP_HEADER_FROM: "User:" + owner1,
+                    NEPTUNE_RELATIONSHIP_HEADER_TO: "Table:" + self.table_owner.get_metadata_model_key(),
+                    NEPTUNE_HEADER_LABEL: TableOwner.OWNER_TABLE_RELATION_TYPE,
+                    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+                    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
+                },
+                {
+                    NEPTUNE_HEADER_ID: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        to_vertex_id="User:" + owner1,
+                        label=TableOwner.TABLE_OWNER_RELATION_TYPE
+                    ),
+                    METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        to_vertex_id="User:" + owner1,
+                        label=TableOwner.TABLE_OWNER_RELATION_TYPE
+                    ),
+                    NEPTUNE_RELATIONSHIP_HEADER_FROM: "Table:" + self.table_owner.get_metadata_model_key(),
+                    NEPTUNE_RELATIONSHIP_HEADER_TO: "User:" + owner1,
+                    NEPTUNE_HEADER_LABEL: TableOwner.TABLE_OWNER_RELATION_TYPE,
+                    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+                    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
+                }
+            ],
+            [
+                {
+                    NEPTUNE_HEADER_ID: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="User:" + owner2,
+                        to_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        label=TableOwner.OWNER_TABLE_RELATION_TYPE
+                    ),
+                    METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="User:" + owner2,
+                        to_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        label=TableOwner.OWNER_TABLE_RELATION_TYPE
+                    ),
+                    NEPTUNE_RELATIONSHIP_HEADER_FROM: "User:" + owner2,
+                    NEPTUNE_RELATIONSHIP_HEADER_TO: "Table:" + self.table_owner.get_metadata_model_key(),
+                    NEPTUNE_HEADER_LABEL: TableOwner.OWNER_TABLE_RELATION_TYPE,
+                    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+                    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
+                },
+                {
+                    NEPTUNE_HEADER_ID: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        to_vertex_id="User:" + owner2,
+                        label=TableOwner.TABLE_OWNER_RELATION_TYPE
+                    ),
+                    METADATA_KEY_PROPERTY_NAME_BULK_LOADER_FORMAT: "{label}:{from_vertex_id}_{to_vertex_id}".format(
+                        from_vertex_id="Table:" + self.table_owner.get_metadata_model_key(),
+                        to_vertex_id="User:" + owner2,
+                        label=TableOwner.TABLE_OWNER_RELATION_TYPE
+                    ),
+                    NEPTUNE_RELATIONSHIP_HEADER_FROM: "Table:" + self.table_owner.get_metadata_model_key(),
+                    NEPTUNE_RELATIONSHIP_HEADER_TO: "User:" + owner2,
+                    NEPTUNE_HEADER_LABEL: TableOwner.TABLE_OWNER_RELATION_TYPE,
+                    NEPTUNE_LAST_EXTRACTED_AT_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: ANY,
+                    NEPTUNE_CREATION_TYPE_RELATIONSHIP_PROPERTY_NAME_BULK_LOADER_FORMAT: NEPTUNE_CREATION_TYPE_JOB
+                }
+            ]
         ]
 
-        self.assertTrue(expected_relation1 in actual_relations)
-        self.assertTrue(expected_relation2 in actual_relations)
+        actual = []
+        relation = self.table_owner.create_next_relation()
+        while relation:
+            serialized_relation = neptune_serializer.convert_relationship(relation)
+            actual.append(serialized_relation)
+            relation = self.table_owner.create_next_relation()
+
+        self.assertEqual(expected, actual)
+
+    def test_create_records(self) -> None:
+        expected = [
+            {
+                'rk': User.USER_NODE_KEY_FORMAT.format(email=owner1),
+                'email': owner1
+            },
+            {
+                'table_rk': self.table_owner.get_metadata_model_key(),
+                'user_rk': owner1
+            },
+            {
+                'rk': User.USER_NODE_KEY_FORMAT.format(email=owner2),
+                'email': owner2
+            },
+            {
+                'table_rk': self.table_owner.get_metadata_model_key(),
+                'user_rk': owner2
+            }
+        ]
+
+        actual = []
+        record = self.table_owner.create_next_record()
+        while record:
+            serialized_record = mysql_serializer.serialize_record(record)
+            actual.append(serialized_record)
+            record = self.table_owner.create_next_record()
+
+        self.assertEqual(actual, expected)
 
     def test_create_nodes_with_owners_list(self) -> None:
         self.table_owner_list = TableOwner(db_name='hive',
@@ -95,9 +245,6 @@ class TestTableOwner(unittest.TestCase):
                                            table_name=TABLE,
                                            cluster=CLUSTER,
                                            owners=['user1@1', ' user2@2 '])
-        nodes = self.table_owner_list.create_nodes()
-        self.assertEqual(len(nodes), 2)
-
         expected_node1 = {
             NODE_KEY: User.USER_NODE_KEY_FORMAT.format(email=owner1),
             NODE_LABEL: User.USER_NODE_LABEL,
@@ -108,10 +255,13 @@ class TestTableOwner(unittest.TestCase):
             NODE_LABEL: User.USER_NODE_LABEL,
             User.USER_NODE_EMAIL: owner2
         }
-        actual_nodes = [
-            neo4_serializer.serialize_node(node)
-            for node in nodes
-        ]
+        expected = [expected_node1, expected_node2]
 
-        self.assertTrue(expected_node1 in actual_nodes)
-        self.assertTrue(expected_node2 in actual_nodes)
+        actual = []
+        node = self.table_owner_list.create_next_node()
+        while node:
+            serialized_node = neo4_serializer.serialize_node(node)
+            actual.append(serialized_node)
+            node = self.table_owner_list.create_next_node()
+
+        self.assertEqual(actual, expected)

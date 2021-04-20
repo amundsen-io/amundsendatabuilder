@@ -2,18 +2,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from collections import namedtuple
 import textwrap
+from collections import namedtuple
+from itertools import groupby
+from typing import (
+    Any, Dict, Iterator, Union,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
-from typing import Iterator, Union, Dict, Any
 
-from databuilder import Scoped
+from databuilder.extractor import sql_alchemy_extractor
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.sql_alchemy_extractor import SQLAlchemyExtractor
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-from itertools import groupby
-
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
 
 TableKey = namedtuple('TableKey', ['schema', 'table_name'])
 
@@ -45,18 +45,18 @@ class DruidMetadataExtractor(Extractor):
 
     def init(self, conf: ConfigTree) -> None:
         conf = conf.with_fallback(DruidMetadataExtractor.DEFAULT_CONFIG)
-        self._cluster = '{}'.format(conf.get_string(DruidMetadataExtractor.CLUSTER_KEY))
+        self._cluster = conf.get_string(DruidMetadataExtractor.CLUSTER_KEY)
 
         self.sql_stmt = DruidMetadataExtractor.SQL_STATEMENT.format(
             where_clause_suffix=conf.get_string(DruidMetadataExtractor.WHERE_CLAUSE_SUFFIX_KEY,
                                                 default=''))
 
-        self._alchemy_extractor = SQLAlchemyExtractor()
-        sql_alch_conf = Scoped.get_scoped_conf(conf, self._alchemy_extractor.get_scope())\
-            .with_fallback(ConfigFactory.from_dict({SQLAlchemyExtractor.EXTRACT_SQL: self.sql_stmt}))
-
-        self._alchemy_extractor.init(sql_alch_conf)
+        self._alchemy_extractor = sql_alchemy_extractor.from_surrounding_config(conf, self.sql_stmt)
         self._extract_iter: Union[None, Iterator] = None
+
+    def close(self) -> None:
+        if getattr(self, '_alchemy_extractor', None) is not None:
+            self._alchemy_extractor.close()
 
     def extract(self) -> Union[TableMetadata, None]:
         if not self._extract_iter:

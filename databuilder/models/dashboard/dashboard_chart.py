@@ -2,20 +2,23 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from typing import Optional, Any, Union, Iterator
+from typing import (
+    Any, Iterator, Optional, Union,
+)
 
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.dashboard import DashboardChart as RDSDashboardChart
 
 from databuilder.models.dashboard.dashboard_query import DashboardQuery
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
-
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_serializable import TableSerializable
 
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardChart(GraphSerializable):
+class DashboardChart(GraphSerializable, TableSerializable):
     """
     A model that encapsulate Dashboard's charts
     """
@@ -48,6 +51,7 @@ class DashboardChart(GraphSerializable):
         self._cluster = cluster
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
+        self._record_iterator = self._create_record_iterator()
 
     def create_next_node(self) -> Union[GraphNode, None]:
         try:
@@ -110,15 +114,34 @@ class DashboardChart(GraphSerializable):
             chart_id=self._chart_id
         )
 
-    def __repr__(self) -> str:
-        return 'DashboardChart({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
-            self._dashboard_group_id,
-            self._dashboard_id,
-            self._query_id,
-            self._chart_id,
-            self._chart_name,
-            self._chart_type,
-            self._chart_url,
-            self._product,
-            self._cluster
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iterator)
+        except StopIteration:
+            return None
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        record = RDSDashboardChart(
+            rk=self._get_chart_node_key(),
+            id=self._chart_id,
+            query_rk=DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(
+                product=self._product,
+                cluster=self._cluster,
+                dashboard_group_id=self._dashboard_group_id,
+                dashboard_id=self._dashboard_id,
+                query_id=self._query_id
+            )
         )
+        if self._chart_name:
+            record.name = self._chart_name
+        if self._chart_type:
+            record.type = self._chart_type
+        if self._chart_url:
+            record.url = self._chart_url
+
+        yield record
+
+    def __repr__(self) -> str:
+        return f'DashboardChart({self._dashboard_group_id!r}, {self._dashboard_id!r}, ' \
+               f'{self._query_id!r}, {self._chart_id!r}, {self._chart_name!r}, {self._chart_type!r}, ' \
+               f'{self._chart_url!r}, {self._product!r}, {self._cluster!r})'

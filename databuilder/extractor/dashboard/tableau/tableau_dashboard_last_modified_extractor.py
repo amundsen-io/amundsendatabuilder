@@ -2,21 +2,22 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-from typing import Any, Dict, Iterator, List
+from typing import (
+    Any, Dict, Iterator, List,
+)
 
 from pyhocon import ConfigFactory, ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
 from databuilder import Scoped
 from databuilder.extractor.base_extractor import Extractor
-from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import TableauGraphQLApiExtractor,\
-    TableauDashboardUtils
+from databuilder.extractor.dashboard.tableau.tableau_dashboard_utils import (
+    TableauDashboardUtils, TableauGraphQLApiExtractor,
+)
 from databuilder.extractor.restapi.rest_api_extractor import STATIC_RECORD_DICT
-from databuilder.transformer.base_transformer import ChainedTransformer
-from databuilder.transformer.base_transformer import Transformer
-from databuilder.transformer.dict_to_model import DictToModel, MODEL_CLASS
-from databuilder.transformer.timestamp_string_to_epoch import TimestampStringToEpoch, FIELD_NAME
-
+from databuilder.transformer.base_transformer import ChainedTransformer, Transformer
+from databuilder.transformer.dict_to_model import MODEL_CLASS, DictToModel
+from databuilder.transformer.timestamp_string_to_epoch import FIELD_NAME, TimestampStringToEpoch
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,9 +36,13 @@ class TableauGraphQLApiLastModifiedExtractor(TableauGraphQLApiExtractor):
 
         workbooks_data = [workbook for workbook in response['workbooks']
                           if workbook['projectName'] not in
-                          self._conf.get_list(TableauGraphQLApiLastModifiedExtractor.EXCLUDED_PROJECTS)]
+                          self._conf.get_list(TableauGraphQLApiLastModifiedExtractor.EXCLUDED_PROJECTS, [])]
 
         for workbook in workbooks_data:
+            if None in (workbook['projectName'], workbook['name']):
+                LOGGER.warning(f'Ignoring workbook (ID:{workbook["vizportalUrlId"]}) ' +
+                               f'in project (ID:{workbook["projectVizportalUrlId"]}) because of a lack of permission')
+                continue
             data = {
                 'dashboard_group_id': workbook['projectName'],
                 'dashboard_id': TableauDashboardUtils.sanitize_workbook_name(workbook['name']),
@@ -72,6 +77,8 @@ class TableauDashboardLastModifiedExtractor(Extractor):
                 name
                 projectName
                 updatedAt
+                projectVizportalUrlId
+                vizportalUrlId
             }
         }"""
 
@@ -99,7 +106,7 @@ class TableauDashboardLastModifiedExtractor(Extractor):
         if not record:
             return None
 
-        return self._transformer.transform(record=record)
+        return next(self._transformer.transform(record=record), None)
 
     def get_scope(self) -> str:
         return 'extractor.tableau_dashboard_last_modified'

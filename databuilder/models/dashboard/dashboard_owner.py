@@ -2,22 +2,25 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import (
+    Any, Iterator, Optional, Union,
+)
 
-from typing import Optional, Any, Union, Iterator
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.dashboard import DashboardOwner as RDSDashboardOwner
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
-from databuilder.models.owner_constants import OWNER_OF_OBJECT_RELATION_TYPE, OWNER_RELATION_TYPE
-from databuilder.models.user import User
-
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.owner_constants import OWNER_OF_OBJECT_RELATION_TYPE, OWNER_RELATION_TYPE
+from databuilder.models.table_serializable import TableSerializable
+from databuilder.models.user import User
 
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardOwner(GraphSerializable):
+class DashboardOwner(GraphSerializable, TableSerializable):
     """
     A model that encapsulate Dashboard's owner.
     Note that it does not create new user as it has insufficient information about user but it builds relation
@@ -42,6 +45,7 @@ class DashboardOwner(GraphSerializable):
         self._cluster = cluster
 
         self._relation_iterator = self._create_relation_iterator()
+        self._record_iterator = self._create_record_iterator()
 
     def create_next_node(self) -> Union[GraphNode, None]:
         return None
@@ -69,11 +73,23 @@ class DashboardOwner(GraphSerializable):
         )
         yield relationship
 
-    def __repr__(self) -> str:
-        return 'DashboardOwner({!r}, {!r}, {!r}, {!r}, {!r})'.format(
-            self._dashboard_group_id,
-            self._dashboard_id,
-            self._email,
-            self._product,
-            self._cluster
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iterator)
+        except StopIteration:
+            return None
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        yield RDSDashboardOwner(
+            user_rk=User.get_user_model_key(email=self._email),
+            dashboard_rk=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+                product=self._product,
+                cluster=self._cluster,
+                dashboard_group=self._dashboard_group_id,
+                dashboard_name=self._dashboard_id
+            )
         )
+
+    def __repr__(self) -> str:
+        return f'DashboardOwner({self._dashboard_group_id!r}, {self._dashboard_id!r}, ' \
+               f'{self._email!r}, {self._product!r}, {self._cluster!r})'

@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-import requests
 import re
-from typing import Any, Dict, Iterator, Optional
+from typing import (
+    Any, Dict, Iterator, Optional,
+)
 
+import requests
 from pyhocon import ConfigTree
 
 import databuilder.extractor.dashboard.tableau.tableau_dashboard_constants as const
@@ -152,7 +154,7 @@ class TableauDashboardAuth:
         self._access_token_name = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_NAME)
         self._access_token_secret = self._conf.get_string(TableauDashboardAuth.TABLEAU_ACCESS_TOKEN_SECRET)
         self._api_version = self._conf.get_string(TableauDashboardAuth.API_VERSION)
-        self._site_name = self._conf.get_string(TableauDashboardAuth.SITE_NAME)
+        self._site_name = self._conf.get_string(TableauDashboardAuth.SITE_NAME, '')
         self._api_base_url = self._conf.get_string(TableauDashboardAuth.API_BASE_URL)
         self._verify_request = self._conf.get(TableauDashboardAuth.VERIFY_REQUEST, None)
 
@@ -169,10 +171,7 @@ class TableauDashboardAuth:
         See https://help.tableau.com/current/api/rest_api/en-us/REST/rest_api_concepts_versions.htm
         for details or ask your Tableau server administrator.
         """
-        self._auth_url = "{api_base_url}/api/{api_version}/auth/signin".format(
-            api_base_url=self._api_base_url,
-            api_version=self._api_version
-        )
+        self._auth_url = f"{self._api_base_url}/api/{self._api_version}/auth/signin"
 
         payload = json.dumps({
             'credentials': {

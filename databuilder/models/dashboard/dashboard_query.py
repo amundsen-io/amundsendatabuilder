@@ -2,20 +2,23 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import (
+    Any, Iterator, Optional, Union,
+)
 
-from typing import Optional, Any, Union, Iterator
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.dashboard import DashboardQuery as RDSDashboardQuery
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (
-    GraphSerializable)
-
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_serializable import TableSerializable
 
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardQuery(GraphSerializable):
+class DashboardQuery(GraphSerializable, TableSerializable):
     """
     A model that encapsulate Dashboard's query name
     """
@@ -46,6 +49,7 @@ class DashboardQuery(GraphSerializable):
         self._cluster = cluster
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
+        self._record_iterator = self._create_record_iterator()
 
     def create_next_node(self) -> Union[GraphNode, None]:
         try:
@@ -96,6 +100,31 @@ class DashboardQuery(GraphSerializable):
         )
         yield relationship
 
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iterator)
+        except StopIteration:
+            return None
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        record = RDSDashboardQuery(
+            rk=self._get_query_node_key(),
+            id=self._query_id,
+            name=self._query_name,
+            dashboard_rk=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+                product=self._product,
+                cluster=self._cluster,
+                dashboard_group=self._dashboard_group_id,
+                dashboard_name=self._dashboard_id
+            )
+        )
+        if self._url:
+            record.url = self._url
+        if self._query_text:
+            record.query_text = self._query_text
+
+        yield record
+
     def _get_query_node_key(self) -> str:
         return DashboardQuery.DASHBOARD_QUERY_KEY_FORMAT.format(
             product=self._product,
@@ -106,13 +135,5 @@ class DashboardQuery(GraphSerializable):
         )
 
     def __repr__(self) -> str:
-        return 'DashboardQuery({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
-            self._dashboard_group_id,
-            self._dashboard_id,
-            self._query_name,
-            self._query_id,
-            self._url,
-            self._query_text,
-            self._product,
-            self._cluster
-        )
+        return f'DashboardQuery({self._dashboard_group_id!r}, {self._dashboard_id!r}, {self._query_name!r}, ' \
+               f'{self._query_id!r}, {self._url!r}, {self._query_text!r}, {self._product!r}, {self._cluster!r})'

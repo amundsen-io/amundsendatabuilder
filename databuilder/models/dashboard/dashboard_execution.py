@@ -2,19 +2,23 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import (
+    Any, Iterator, Optional, Union,
+)
 
-from typing import Optional, Any, Union, Iterator
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.dashboard import DashboardExecution as RDSDashboardExecution
 
 from databuilder.models.dashboard.dashboard_metadata import DashboardMetadata
-from databuilder.models.graph_serializable import (GraphSerializable)
-
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_serializable import TableSerializable
 
 LOGGER = logging.getLogger(__name__)
 
 
-class DashboardExecution(GraphSerializable):
+class DashboardExecution(GraphSerializable, TableSerializable):
     """
     A model that encapsulate Dashboard's execution timestamp in epoch and execution state
     """
@@ -46,6 +50,7 @@ class DashboardExecution(GraphSerializable):
         self._cluster = cluster
         self._node_iterator = self._create_node_iterator()
         self._relation_iterator = self._create_relation_iterator()
+        self._record_iterator = self._create_record_iterator()
 
     def create_next_node(self) -> Union[GraphNode, None]:
         try:
@@ -87,6 +92,25 @@ class DashboardExecution(GraphSerializable):
         )
         yield relationship
 
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iterator)
+        except StopIteration:
+            return None
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        yield RDSDashboardExecution(
+            rk=self._get_last_execution_node_key(),
+            timestamp=self._execution_timestamp,
+            state=self._execution_state,
+            dashboard_rk=DashboardMetadata.DASHBOARD_KEY_FORMAT.format(
+                product=self._product,
+                cluster=self._cluster,
+                dashboard_group=self._dashboard_group_id,
+                dashboard_name=self._dashboard_id
+            )
+        )
+
     def _get_last_execution_node_key(self) -> str:
         return DashboardExecution.DASHBOARD_EXECUTION_KEY_FORMAT.format(
             product=self._product,
@@ -97,12 +121,6 @@ class DashboardExecution(GraphSerializable):
         )
 
     def __repr__(self) -> str:
-        return 'DashboardExecution({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, {!r})'.format(
-            self._dashboard_group_id,
-            self._dashboard_id,
-            self._execution_timestamp,
-            self._execution_state,
-            self._execution_id,
-            self._product,
-            self._cluster
-        )
+        return f'DashboardExecution({self._dashboard_group_id!r}, {self._dashboard_id!r}, ' \
+               f'{self._execution_timestamp!r}, {self._execution_state!r}, ' \
+               f'{self._execution_id!r}, {self._product!r}, {self._cluster!r})'

@@ -1,16 +1,19 @@
 # Copyright Contributors to the Amundsen project.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Union
+from typing import Iterator, Union
 
-from databuilder.models.graph_serializable import GraphSerializable
+from amundsen_rds.models import RDSModel
+from amundsen_rds.models.application import Application as RDSApplication, ApplicationTable as RDSApplicationTable
 
-from databuilder.models.table_metadata import TableMetadata
 from databuilder.models.graph_node import GraphNode
 from databuilder.models.graph_relationship import GraphRelationship
+from databuilder.models.graph_serializable import GraphSerializable
+from databuilder.models.table_metadata import TableMetadata
+from databuilder.models.table_serializable import TableSerializable
 
 
-class Application(GraphSerializable):
+class Application(GraphSerializable, TableSerializable):
     """
     Application-table matching model (Airflow task and table)
     """
@@ -45,8 +48,9 @@ class Application(GraphSerializable):
 
         self.dag = dag_id
 
-        self._node_iter = iter(self.create_nodes())
-        self._relation_iter = iter(self.create_relation())
+        self._node_iter = self._create_node_iterator()
+        self._relation_iter = self._create_relation_iterator()
+        self._record_iter = self._create_record_iterator()
 
     def create_next_node(self) -> Union[GraphNode, None]:
         # creates new node
@@ -58,6 +62,12 @@ class Application(GraphSerializable):
     def create_next_relation(self) -> Union[GraphRelationship, None]:
         try:
             return next(self._relation_iter)
+        except StopIteration:
+            return None
+
+    def create_next_record(self) -> Union[RDSModel, None]:
+        try:
+            return next(self._record_iter)
         except StopIteration:
             return None
 
@@ -74,12 +84,11 @@ class Application(GraphSerializable):
                                                          dag=self.dag,
                                                          task=self.task)
 
-    def create_nodes(self) -> List[GraphNode]:
+    def _create_node_iterator(self) -> Iterator[GraphNode]:
         """
-        Create a list of Neo4j node records
+        Create an application node
         :return:
         """
-        results = []
         application_description = '{app_type} with id {id}'.format(
             app_type=Application.APPLICATION_TYPE,
             id=Application.APPLICATION_ID_FORMAT.format(dag_id=self.dag, task_id=self.task)
@@ -98,13 +107,11 @@ class Application(GraphSerializable):
                 Application.APPLICATION_ID: application_id
             }
         )
-        results.append(application_node)
+        yield application_node
 
-        return results
-
-    def create_relation(self) -> List[GraphRelationship]:
+    def _create_relation_iterator(self) -> Iterator[GraphRelationship]:
         """
-        Create a list of relations between application and table nodes
+        Create relations between application and table nodes
         :return:
         """
         graph_relationship = GraphRelationship(
@@ -116,5 +123,28 @@ class Application(GraphSerializable):
             reverse_type=Application.APPLICATION_TABLE_RELATION_TYPE,
             attributes={}
         )
-        results = [graph_relationship]
-        return results
+        yield graph_relationship
+
+    def _create_record_iterator(self) -> Iterator[RDSModel]:
+        application_description = '{app_type} with id {id}'.format(
+            app_type=Application.APPLICATION_TYPE,
+            id=Application.APPLICATION_ID_FORMAT.format(dag_id=self.dag, task_id=self.task)
+        )
+        application_id = Application.APPLICATION_ID_FORMAT.format(
+            dag_id=self.dag,
+            task_id=self.task
+        )
+        application_record = RDSApplication(
+            rk=self.get_application_model_key(),
+            application_url=self.application_url,
+            name=Application.APPLICATION_TYPE,
+            id=application_id,
+            description=application_description
+        )
+        yield application_record
+
+        application_table_record = RDSApplicationTable(
+            rk=self.get_table_model_key(),
+            application_rk=self.get_application_model_key(),
+        )
+        yield application_table_record

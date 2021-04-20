@@ -3,9 +3,15 @@
 
 import copy
 import unittest
+from typing import Dict, List
 
 from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
-from databuilder.serializers import neo4_serializer
+from databuilder.serializers import (
+    mysql_serializer, neo4_serializer, neptune_serializer,
+)
+from tests.unit.models.test_fixtures.table_metadata_fixtures import (
+    EXPECTED_NEPTUNE_NODES, EXPECTED_RECORDS_MYSQL, EXPECTED_RELATIONSHIPS_NEPTUNE,
+)
 
 
 class TestTableMetadata(unittest.TestCase):
@@ -13,51 +19,66 @@ class TestTableMetadata(unittest.TestCase):
         super(TestTableMetadata, self).setUp()
         TableMetadata.serialized_nodes_keys = set()
         TableMetadata.serialized_rels_keys = set()
+        self.table_metadata = TableMetadata(
+            'hive',
+            'gold',
+            'test_schema1',
+            'test_table1',
+            'test_table1',
+            [
+                ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0),
+                ColumnMetadata('test_id2', 'description of test_id2', 'bigint', 1),
+                ColumnMetadata('is_active', None, 'boolean', 2),
+                ColumnMetadata('source', 'description of source', 'varchar', 3),
+                ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
+                ColumnMetadata('ds', None, 'varchar', 5)
+            ]
+        )
+
+        self.table_metadata2 = TableMetadata(
+            'hive',
+            'gold',
+            'test_schema1',
+            'test_table1',
+            'test_table1',
+            [
+                ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0),
+                ColumnMetadata('test_id2', 'description of test_id2', 'bigint', 1),
+                ColumnMetadata('is_active', None, 'boolean', 2),
+                ColumnMetadata('source', 'description of source', 'varchar', 3),
+                ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
+                ColumnMetadata('ds', None, 'varchar', 5)
+            ]
+        )
 
     def test_serialize(self) -> None:
-        self.table_metadata = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test_table1', [
-            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0),
-            ColumnMetadata('test_id2', 'description of test_id2', 'bigint', 1),
-            ColumnMetadata('is_active', None, 'boolean', 2),
-            ColumnMetadata('source', 'description of source', 'varchar', 3),
-            ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
-            ColumnMetadata('ds', None, 'varchar', 5)])
-
-        self.table_metadata2 = TableMetadata('hive', 'gold', 'test_schema1', 'test_table1', 'test_table1', [
-            ColumnMetadata('test_id1', 'description of test_table1', 'bigint', 0),
-            ColumnMetadata('test_id2', 'description of test_id2', 'bigint', 1),
-            ColumnMetadata('is_active', None, 'boolean', 2),
-            ColumnMetadata('source', 'description of source', 'varchar', 3),
-            ColumnMetadata('etl_created_at', 'description of etl_created_at', 'timestamp', 4),
-            ColumnMetadata('ds', None, 'varchar', 5)])
-
         self.expected_nodes_deduped = [
             {'name': 'test_table1', 'KEY': 'hive://gold.test_schema1/test_table1', 'LABEL': 'Table',
              'is_view:UNQUOTED': False},
             {'description': 'test_table1', 'KEY': 'hive://gold.test_schema1/test_table1/_description',
              'LABEL': 'Description', 'description_source': 'description'},
-            {'sort_order:UNQUOTED': 0, 'type': 'bigint', 'name': 'test_id1',
+            {'sort_order:UNQUOTED': 0, 'col_type': 'bigint', 'name': 'test_id1',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id1', 'LABEL': 'Column'},
             {'description': 'description of test_table1',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id1/_description', 'LABEL': 'Description',
              'description_source': 'description'},
-            {'sort_order:UNQUOTED': 1, 'type': 'bigint', 'name': 'test_id2',
+            {'sort_order:UNQUOTED': 1, 'col_type': 'bigint', 'name': 'test_id2',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id2', 'LABEL': 'Column'},
             {'description': 'description of test_id2',
              'KEY': 'hive://gold.test_schema1/test_table1/test_id2/_description',
              'LABEL': 'Description', 'description_source': 'description'},
-            {'sort_order:UNQUOTED': 2, 'type': 'boolean', 'name': 'is_active',
+            {'sort_order:UNQUOTED': 2, 'col_type': 'boolean', 'name': 'is_active',
              'KEY': 'hive://gold.test_schema1/test_table1/is_active', 'LABEL': 'Column'},
-            {'sort_order:UNQUOTED': 3, 'type': 'varchar', 'name': 'source',
+            {'sort_order:UNQUOTED': 3, 'col_type': 'varchar', 'name': 'source',
              'KEY': 'hive://gold.test_schema1/test_table1/source', 'LABEL': 'Column'},
             {'description': 'description of source', 'KEY': 'hive://gold.test_schema1/test_table1/source/_description',
              'LABEL': 'Description', 'description_source': 'description'},
-            {'sort_order:UNQUOTED': 4, 'type': 'timestamp', 'name': 'etl_created_at',
+            {'sort_order:UNQUOTED': 4, 'col_type': 'timestamp', 'name': 'etl_created_at',
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at', 'LABEL': 'Column'},
             {'description': 'description of etl_created_at',
              'KEY': 'hive://gold.test_schema1/test_table1/etl_created_at/_description', 'LABEL': 'Description',
              'description_source': 'description'},
-            {'sort_order:UNQUOTED': 5, 'type': 'varchar', 'name': 'ds',
+            {'sort_order:UNQUOTED': 5, 'col_type': 'varchar', 'name': 'ds',
              'KEY': 'hive://gold.test_schema1/test_table1/ds', 'LABEL': 'Column'}
         ]
 
@@ -144,6 +165,35 @@ class TestTableMetadata(unittest.TestCase):
             relation_row = self.table_metadata2.next_relation()
 
         self.assertEqual(self.expected_rels_deduped, actual)
+
+    def test_serialize_neptune(self) -> None:
+        node_row = self.table_metadata.next_node()
+        actual = []
+        while node_row:
+            node_row_serialized = neptune_serializer.convert_node(node_row)
+            actual.append(node_row_serialized)
+            node_row = self.table_metadata.next_node()
+
+        self.assertEqual(EXPECTED_NEPTUNE_NODES, actual)
+
+        relation_row = self.table_metadata.next_relation()
+        neptune_actual: List[List[Dict]] = []
+        while relation_row:
+            relation_row_serialized = neptune_serializer.convert_relationship(relation_row)
+            neptune_actual.append(relation_row_serialized)
+            relation_row = self.table_metadata.next_relation()
+        self.maxDiff = None
+        self.assertEqual(EXPECTED_RELATIONSHIPS_NEPTUNE, neptune_actual)
+
+    def test_serialize_mysql(self) -> None:
+        actual = []
+        record = self.table_metadata.next_record()
+        while record:
+            serialized_record = mysql_serializer.serialize_record(record)
+            actual.append(serialized_record)
+            record = self.table_metadata.next_record()
+
+        self.assertEqual(EXPECTED_RECORDS_MYSQL, actual)
 
     def test_table_attributes(self) -> None:
         self.table_metadata3 = TableMetadata('hive', 'gold', 'test_schema3', 'test_table3', 'test_table3', [

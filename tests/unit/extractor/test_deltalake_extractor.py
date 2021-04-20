@@ -4,37 +4,41 @@
 import logging
 import tempfile
 import unittest
+from typing import Dict
 
-from databuilder import Scoped
-from databuilder.extractor.delta_lake_metadata_extractor import DeltaLakeMetadataExtractor, \
-    ScrapedTableMetadata, ScrapedColumnMetadata
-from databuilder.models.table_metadata import TableMetadata, ColumnMetadata
-from databuilder.models.watermark import Watermark
 from pyhocon import ConfigFactory
 # patch whole class to avoid actually calling for boto3.client during tests
 from pyspark.sql import SparkSession
 from pyspark.sql.catalog import Table
-from typing import Dict
+
+from databuilder import Scoped
+from databuilder.extractor.delta_lake_metadata_extractor import (
+    DeltaLakeMetadataExtractor, ScrapedColumnMetadata, ScrapedTableMetadata,
+)
+from databuilder.models.table_metadata import ColumnMetadata, TableMetadata
+from databuilder.models.watermark import Watermark
 
 
 class TestDeltaLakeExtractor(unittest.TestCase):
 
     def setUp(self) -> None:
         logging.basicConfig(level=logging.INFO)
-        self.spark = SparkSession.builder\
-            .appName("Amundsen Delta Lake Metadata Extraction")\
-            .master("local")\
+        self.spark = SparkSession.builder \
+            .appName("Amundsen Delta Lake Metadata Extraction") \
+            .master("local") \
             .config("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0") \
             .config("spark.sql.warehouse.dir", tempfile.TemporaryDirectory()) \
             .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+            .config("spark.driver.host", "127.0.0.1") \
+            .config("spark.driver.bindAddress", "127.0.0.1") \
             .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
             .getOrCreate()
         self.config_dict = {
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.CLUSTER_KEY): 'test_cluster',
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.SCHEMA_LIST_KEY): [],
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.EXCLUDE_LIST_SCHEMAS_KEY): [],
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.DATABASE_KEY): 'test_database',
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.DELTA_TABLES_ONLY): False
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.CLUSTER_KEY}': 'test_cluster',
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.SCHEMA_LIST_KEY}': [],
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.EXCLUDE_LIST_SCHEMAS_KEY}': [],
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.DATABASE_KEY}': 'test_database',
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.DELTA_TABLES_ONLY}': False
         }
         conf = ConfigFactory.from_dict(self.config_dict)
         self.dExtractor = DeltaLakeMetadataExtractor()
@@ -259,11 +263,10 @@ class TestDeltaLakeExtractor(unittest.TestCase):
 
     def test_extract_with_only_specific_schemas(self) -> None:
         self.config_dict = {
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.CLUSTER_KEY): 'test_cluster',
-            'extractor.delta_lake_table_metadata.{}'
-            .format(DeltaLakeMetadataExtractor.SCHEMA_LIST_KEY): ['test_schema2'],
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.EXCLUDE_LIST_SCHEMAS_KEY): [],
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.DATABASE_KEY): 'test_database'
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.CLUSTER_KEY}': 'test_cluster',
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.SCHEMA_LIST_KEY}': ['test_schema2'],
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.EXCLUDE_LIST_SCHEMAS_KEY}': [],
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.DATABASE_KEY}': 'test_database'
         }
         conf = ConfigFactory.from_dict(self.config_dict)
         self.dExtractor.init(Scoped.get_scoped_conf(conf=conf,
@@ -277,12 +280,11 @@ class TestDeltaLakeExtractor(unittest.TestCase):
 
     def test_extract_when_excluding(self) -> None:
         self.config_dict = {
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.CLUSTER_KEY): 'test_cluster',
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.SCHEMA_LIST_KEY): [],
-            'extractor.delta_lake_table_metadata.{}'
-            .format(DeltaLakeMetadataExtractor.EXCLUDE_LIST_SCHEMAS_KEY): ['test_schema2'],
-            'extractor.delta_lake_table_metadata.{}'.format(DeltaLakeMetadataExtractor.DATABASE_KEY): 'test_database'
-
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.CLUSTER_KEY}': 'test_cluster',
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.SCHEMA_LIST_KEY}': [],
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.EXCLUDE_LIST_SCHEMAS_KEY}':
+                ['test_schema2'],
+            f'extractor.delta_lake_table_metadata.{DeltaLakeMetadataExtractor.DATABASE_KEY}': 'test_database'
         }
         conf = ConfigFactory.from_dict(self.config_dict)
         self.dExtractor.init(Scoped.get_scoped_conf(conf=conf,
