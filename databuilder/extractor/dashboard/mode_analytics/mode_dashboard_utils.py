@@ -14,7 +14,7 @@ from databuilder.extractor.restapi.rest_api_extractor import (
     REST_API_QUERY, STATIC_RECORD_DICT, RestAPIExtractor,
 )
 from databuilder.rest_api.base_rest_api_query import BaseRestApiQuery, RestApiQuerySeed
-from databuilder.rest_api.rest_api_query import RestApiQuery
+from databuilder.rest_api.mode_analytics.mode_paginated_rest_api_query import ModePaginatedRestApiQuery
 
 
 class ModeDashboardUtils(object):
@@ -36,13 +36,13 @@ class ModeDashboardUtils(object):
         seed_query = RestApiQuerySeed(seed_record=seed_record)
 
         # Spaces
-        params = {'auth': HTTPBasicAuth(conf.get_string(MODE_ACCESS_TOKEN),
-                                        conf.get_string(MODE_PASSWORD_TOKEN))}
+        params = ModeDashboardUtils.get_auth_params(conf=conf, discover_auth=True)
 
-        json_path = '_embedded.spaces[*].[token,name,description]'
+        json_path = 'spaces[*].[token,name,description]'
         field_names = ['dashboard_group_id', 'dashboard_group', 'dashboard_group_description']
-        spaces_query = RestApiQuery(query_to_join=seed_query, url=spaces_url_template, params=params,
-                                    json_path=json_path, field_names=field_names)
+        spaces_query = ModePaginatedRestApiQuery(pagination_json_path='spaces[*]', max_record_size=1000,
+                                                 query_to_join=seed_query, url=spaces_url_template, params=params,
+                                                 json_path=json_path, field_names=field_names)
 
         return spaces_query
 
