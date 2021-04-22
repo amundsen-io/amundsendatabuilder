@@ -35,7 +35,9 @@ class ModeDashboardUtils(object):
         seed_record = [{'organization': conf.get_string(ORGANIZATION)}]
         seed_query = RestApiQuerySeed(seed_record=seed_record)
 
-        # Spaces
+        # mode_bearer_token must be provided in the conf
+        # the token is required to access discovery endpoint
+        # https://mode.com/developer/discovery-api/introduction/
         params = ModeDashboardUtils.get_auth_params(conf=conf, discover_auth=True)
 
         json_path = 'spaces[*].[token,name,description]'
