@@ -28,8 +28,8 @@ class ModeDashboardUtils(object):
         :return:
         """
 
-        # https://mode.com/developer/api-reference/management/spaces/#listSpaces
-        spaces_url_template = 'https://app.mode.com/api/{organization}/spaces?filter=all'
+        # https://mode.com/developer/discovery-api/analytics/spaces
+        spaces_url_template = 'https://app.mode.com/batch/{organization}/spaces'
 
         # Seed query record for next query api to join with
         seed_record = [{'organization': conf.get_string(ORGANIZATION)}]
@@ -40,9 +40,14 @@ class ModeDashboardUtils(object):
 
         json_path = 'spaces[*].[token,name,description]'
         field_names = ['dashboard_group_id', 'dashboard_group', 'dashboard_group_description']
-        spaces_query = ModePaginatedRestApiQuery(pagination_json_path='spaces[*]', max_record_size=1000,
-                                                 query_to_join=seed_query, url=spaces_url_template, params=params,
-                                                 json_path=json_path, field_names=field_names)
+
+        # based on https://mode.com/developer/discovery-api/analytics/spaces/#listSpacesForAccount
+        pagination_json_path = 'spaces[*]'
+        max_per_page = 1000
+        spaces_query = ModePaginatedRestApiQuery(pagination_json_path=pagination_json_path,
+                                                 max_record_size=max_per_page, query_to_join=seed_query,
+                                                 url=spaces_url_template, params=params, json_path=json_path,
+                                                 field_names=field_names)
 
         return spaces_query
 
