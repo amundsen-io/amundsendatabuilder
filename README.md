@@ -1,3 +1,7 @@
+# Deprecated: please visit https://github.com/amundsen-io/amundsen/tree/main/databuilder
+
+The Amundsen project [moved to a monorepo](https://github.com/amundsen-io/rfcs/pull/31). This repository will be kept up temporarily to allow users to transition gracefully, but new PRs won't be accepted.
+
 # Amundsen Databuilder
 
 [![PyPI version](https://badge.fury.io/py/amundsen-databuilder.svg)](https://badge.fury.io/py/amundsen-databuilder)
