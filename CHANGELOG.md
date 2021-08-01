@@ -1,4 +1,8 @@
 ### Feature
+* Column lineage implementation & sample ingest scripts ([#470](https://github.com/amundsen-io/amundsendatabuilder/issues/470)) ([`f5e6ba4`](https://github.com/amundsen-io/amundsendatabuilder/commit/f5e6ba43410ebad06ffae537c799e56ed9b0a5e8))
+* Add mysql staleness removal task ([#474](https://github.com/amundsen-io/amundsendatabuilder/issues/474)) ([`e73ff23`](https://github.com/amundsen-io/amundsendatabuilder/commit/e73ff2380bcdda7e1c85f4e299459a737b6e6dfc))
+* Add mysql as backend store ([#471](https://github.com/amundsen-io/amundsendatabuilder/issues/471)) ([`a91dc13`](https://github.com/amundsen-io/amundsendatabuilder/commit/a91dc138289d21bbfee5b5e5f4832ae05b1731ac))
+* Allow multiple badges on a single record for csv extracts ([#469](https://github.com/amundsen-io/amundsendatabuilder/issues/469)) ([`e241c20`](https://github.com/amundsen-io/amundsendatabuilder/commit/e241c20b099218bb9113c22a2cb36a15f071304d))
 * Add support for tags based on atlas terms ([#466](https://github.com/amundsen-io/amundsendatabuilder/issues/466)) ([`cc1caf3`](https://github.com/amundsen-io/amundsendatabuilder/commit/cc1caf37f87b140a393aedfd0a07fd17c58e8ac4))
 * Make DescriptionMetadata inherit from GraphSerializable ([#461](https://github.com/amundsen-io/amundsendatabuilder/issues/461)) ([`7f095fb`](https://github.com/amundsen-io/amundsendatabuilder/commit/7f095fb368dc8b6fba5f65f3870c1dd2444b0413))
 * Add TableSerializable and mysql_serializer ([#459](https://github.com/amundsen-io/amundsendatabuilder/issues/459)) ([`4bb4452`](https://github.com/amundsen-io/amundsendatabuilder/commit/4bb44528d6e17a4a2fed32bb449a21c35591ecbf))
@@ -31,6 +35,10 @@
 * Add a transformer that adds tags to all tables created in a job ([#287](https://github.com/amundsen-io/amundsendatabuilder/issues/287)) ([`d2f4bd3`](https://github.com/amundsen-io/amundsendatabuilder/commit/d2f4bd308c1ef92ea2bbfb7a7443cb42113f03f9))
 
 ### Fix
+* Switch to discovery api for mode spaces ([#481](https://github.com/amundsen-io/amundsendatabuilder/issues/481)) ([`c0557a5`](https://github.com/amundsen-io/amundsendatabuilder/commit/c0557a5c768a647032bccfa24f2218bbc13b8c04))
+* Fix delta lake unit test ([#476](https://github.com/amundsen-io/amundsendatabuilder/issues/476)) ([`883ffdf`](https://github.com/amundsen-io/amundsendatabuilder/commit/883ffdf82d94db72cc7ec1ba94b829cad07b9bd1))
+* Add import logging to some example scripts ([#468](https://github.com/amundsen-io/amundsendatabuilder/issues/468)) ([`a7d2471`](https://github.com/amundsen-io/amundsendatabuilder/commit/a7d2471327eb46a2dfe532e31238838aee3f78f4))
+* Use Amundsen id's for the Neptune key ([#472](https://github.com/amundsen-io/amundsendatabuilder/issues/472)) ([`7a4d0cd`](https://github.com/amundsen-io/amundsendatabuilder/commit/7a4d0cd70dbd1775e3366929203af4d16289eb1e))
 * Add support for Tableau multi-site deployment ([#463](https://github.com/amundsen-io/amundsendatabuilder/issues/463)) ([`e35af58`](https://github.com/amundsen-io/amundsendatabuilder/commit/e35af5808a40512aac09735711c3ab75c578d018))
 * Avoid error by checking for existence before close. ([#454](https://github.com/amundsen-io/amundsendatabuilder/issues/454)) ([`5cd0dc8`](https://github.com/amundsen-io/amundsendatabuilder/commit/5cd0dc83d31409de1d81e38a087a1347392e6f16))
 * Correct config getter ([#455](https://github.com/amundsen-io/amundsendatabuilder/issues/455)) ([`4b37746`](https://github.com/amundsen-io/amundsendatabuilder/commit/4b377465b5ee195c39a0c23b746c2ad9ebd7619f))
