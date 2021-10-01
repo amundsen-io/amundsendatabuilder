@@ -1,4 +1,8 @@
 ### Feature
+* Column lineage implementation & sample ingest scripts ([#470](https://github.com/amundsen-io/amundsendatabuilder/issues/470)) ([`f5e6ba4`](https://github.com/amundsen-io/amundsendatabuilder/commit/f5e6ba43410ebad06ffae537c799e56ed9b0a5e8))
+* Add mysql staleness removal task ([#474](https://github.com/amundsen-io/amundsendatabuilder/issues/474)) ([`e73ff23`](https://github.com/amundsen-io/amundsendatabuilder/commit/e73ff2380bcdda7e1c85f4e299459a737b6e6dfc))
+* Add mysql as backend store ([#471](https://github.com/amundsen-io/amundsendatabuilder/issues/471)) ([`a91dc13`](https://github.com/amundsen-io/amundsendatabuilder/commit/a91dc138289d21bbfee5b5e5f4832ae05b1731ac))
+* Allow multiple badges on a single record for csv extracts ([#469](https://github.com/amundsen-io/amundsendatabuilder/issues/469)) ([`e241c20`](https://github.com/amundsen-io/amundsendatabuilder/commit/e241c20b099218bb9113c22a2cb36a15f071304d))
 * Add support for tags based on atlas terms ([#466](https://github.com/amundsen-io/amundsendatabuilder/issues/466)) ([`cc1caf3`](https://github.com/amundsen-io/amundsendatabuilder/commit/cc1caf37f87b140a393aedfd0a07fd17c58e8ac4))
 * Make DescriptionMetadata inherit from GraphSerializable ([#461](https://github.com/amundsen-io/amundsendatabuilder/issues/461)) ([`7f095fb`](https://github.com/amundsen-io/amundsendatabuilder/commit/7f095fb368dc8b6fba5f65f3870c1dd2444b0413))
 * Add TableSerializable and mysql_serializer ([#459](https://github.com/amundsen-io/amundsendatabuilder/issues/459)) ([`4bb4452`](https://github.com/amundsen-io/amundsendatabuilder/commit/4bb44528d6e17a4a2fed32bb449a21c35591ecbf))
@@ -29,8 +33,16 @@
 * Enhance glue extractor ([#306](https://github.com/amundsen-io/amundsendatabuilder/issues/306)) ([`faa795c`](https://github.com/amundsen-io/amundsendatabuilder/commit/faa795ce335e12323fb69b1041435df38034b158))
 * Add RedashDashboardExtractor for extracting dashboards from redash.io ([#300](https://github.com/amundsen-io/amundsendatabuilder/issues/300)) ([`f1b0dfa`](https://github.com/amundsen-io/amundsendatabuilder/commit/f1b0dfa399295124484242a666ddf2f20791aff7))
 * Add a transformer that adds tags to all tables created in a job ([#287](https://github.com/amundsen-io/amundsendatabuilder/issues/287)) ([`d2f4bd3`](https://github.com/amundsen-io/amundsendatabuilder/commit/d2f4bd308c1ef92ea2bbfb7a7443cb42113f03f9))
+* Added tags and badges into Dashboard Elasticsearch index ([#288](https://github.com/amundsen-io/amundsendatabuilder/issues/288)) ([`928e090`](https://github.com/amundsen-io/amundsendatabuilder/commit/928e090c6fece1a547227218f0cc6a67453cb279))
+* Ingest Mode Analytics user ([#282](https://github.com/amundsen-io/amundsendatabuilder/issues/282)) ([`b8db162`](https://github.com/amundsen-io/amundsendatabuilder/commit/b8db1626f6bba548b63a24ab5112b78374f66e35))
+* Add Query text to Dashboard Query model ([#273](https://github.com/amundsen-io/amundsendatabuilder/issues/273)) ([`a8440b1`](https://github.com/amundsen-io/amundsendatabuilder/commit/a8440b1353793a5cc5287ba6cceeab28736ade79))
+* **users:** Add a `user_search_index` Neo4j to ES quickstart sample sync job ([#130](https://github.com/amundsen-io/amundsendatabuilder/issues/130)) ([`2fc8bc6`](https://github.com/amundsen-io/amundsendatabuilder/commit/2fc8bc6c2612302506984bad43b36d333a6ff201))
 
 ### Fix
+* Switch to discovery api for mode spaces ([#481](https://github.com/amundsen-io/amundsendatabuilder/issues/481)) ([`c0557a5`](https://github.com/amundsen-io/amundsendatabuilder/commit/c0557a5c768a647032bccfa24f2218bbc13b8c04))
+* Fix delta lake unit test ([#476](https://github.com/amundsen-io/amundsendatabuilder/issues/476)) ([`883ffdf`](https://github.com/amundsen-io/amundsendatabuilder/commit/883ffdf82d94db72cc7ec1ba94b829cad07b9bd1))
+* Add import logging to some example scripts ([#468](https://github.com/amundsen-io/amundsendatabuilder/issues/468)) ([`a7d2471`](https://github.com/amundsen-io/amundsendatabuilder/commit/a7d2471327eb46a2dfe532e31238838aee3f78f4))
+* Use Amundsen id's for the Neptune key ([#472](https://github.com/amundsen-io/amundsendatabuilder/issues/472)) ([`7a4d0cd`](https://github.com/amundsen-io/amundsendatabuilder/commit/7a4d0cd70dbd1775e3366929203af4d16289eb1e))
 * Add support for Tableau multi-site deployment ([#463](https://github.com/amundsen-io/amundsendatabuilder/issues/463)) ([`e35af58`](https://github.com/amundsen-io/amundsendatabuilder/commit/e35af5808a40512aac09735711c3ab75c578d018))
 * Avoid error by checking for existence before close. ([#454](https://github.com/amundsen-io/amundsendatabuilder/issues/454)) ([`5cd0dc8`](https://github.com/amundsen-io/amundsendatabuilder/commit/5cd0dc83d31409de1d81e38a087a1347392e6f16))
 * Correct config getter ([#455](https://github.com/amundsen-io/amundsendatabuilder/issues/455)) ([`4b37746`](https://github.com/amundsen-io/amundsendatabuilder/commit/4b377465b5ee195c39a0c23b746c2ad9ebd7619f))
@@ -65,9 +77,15 @@
 * Fix sql for missing columns and mysql based dialects (#550) ([#305](https://github.com/amundsen-io/amundsendatabuilder/issues/305)) ([`4b7b147`](https://github.com/amundsen-io/amundsendatabuilder/commit/4b7b147b1d32cd8fce6aa7c24fa1db8d823b8038))
 * Escape backslashes in Neo4jCsvPublisher  ([`1faa713`](https://github.com/amundsen-io/amundsendatabuilder/commit/1faa713374c88cf0eb04f744908756c1ef70206e))
 * Variable organization in Model URL ([#293](https://github.com/amundsen-io/amundsendatabuilder/issues/293)) ([`b4c24ef`](https://github.com/amundsen-io/amundsendatabuilder/commit/b4c24ef891ba13fc4678faef0faaa5c7bf4c5cb6))
+* Added role_name to default user query in Neo4jSearchDataExtractor ([#285](https://github.com/amundsen-io/amundsendatabuilder/issues/285)) ([`9e17b75`](https://github.com/amundsen-io/amundsendatabuilder/commit/9e17b75bb0391c6abb3add06227ab13c61a2d62d))
+* Set snowflake extractor database to be consistent with other extractors ([#283](https://github.com/amundsen-io/amundsendatabuilder/issues/283)) ([`bb53d88`](https://github.com/amundsen-io/amundsendatabuilder/commit/bb53d88ab5d8650d43890e8310b954f85219a70e))
+* Revert "ci: remove py2 ci" ([#284](https://github.com/amundsen-io/amundsendatabuilder/issues/284)) ([`55aeaac`](https://github.com/amundsen-io/amundsendatabuilder/commit/55aeaac8aba04f9dea64de6f6924ec5d7ee51226))
+* Revert default search mapping change ([#276](https://github.com/amundsen-io/amundsendatabuilder/issues/276)) ([`0fc85e7`](https://github.com/amundsen-io/amundsendatabuilder/commit/0fc85e76f16882cc4607d0c3b76d1e8c545b9e8b))
+* Use the right scope when getting the bigquery table usage ([#181](https://github.com/amundsen-io/amundsendatabuilder/issues/181)) ([`28e1b55`](https://github.com/amundsen-io/amundsendatabuilder/commit/28e1b55b5302db4d5721feb281cb523eed028ecf))
 
 ### Documentation
 * Minor fixes to README ([#457](https://github.com/amundsen-io/amundsendatabuilder/issues/457)) ([`54e89ce`](https://github.com/amundsen-io/amundsendatabuilder/commit/54e89ce74b70ade742edc77d4e76b9fc8241d8ab))
 * Update DashboardMetadata docs ([#402](https://github.com/amundsen-io/amundsendatabuilder/issues/402)) ([`093b3d6`](https://github.com/amundsen-io/amundsendatabuilder/commit/093b3d6fbe40040b6f720c030aa6d8504178b0ea))
 * Fix broken doc link to dashboard_execution model ([#296](https://github.com/amundsen-io/amundsendatabuilder/issues/296)) ([`24b3b0a`](https://github.com/amundsen-io/amundsendatabuilder/commit/24b3b0afdf4ad3c6b13f9677d9f805ff43f42de7))
 * Fix README.md ([#301](https://github.com/amundsen-io/amundsendatabuilder/issues/301)) ([`ad5765a`](https://github.com/amundsen-io/amundsendatabuilder/commit/ad5765a1cb0ae5fceffb1168876031801b44a79f))
+* MS SQL Server example ([#278](https://github.com/amundsen-io/amundsendatabuilder/issues/278)) ([`80162a2`](https://github.com/amundsen-io/amundsendatabuilder/commit/80162a283c64c01adbe2031afc41b6f82169c723))
