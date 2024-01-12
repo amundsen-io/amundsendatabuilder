@@ -22,7 +22,7 @@ jobs:
         id: vers
         run: |
           pip install python-semantic-release
-          echo ::set-output name=version::$(semantic-release print-version --current)
+          echo "version=$(semantic-release print-version --current)" >> $GITHUB_OUTPUT
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
